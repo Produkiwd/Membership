@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "Member": {
+      "title": "Member",
+      "description": "Represents a registered participant in the AIF Community program.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "admin",
+            "member"
+          ]
+        },
+        "status": {
+          "enum": [
+            "active",
+            "suspended"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "userId",
+        "email",
+        "name",
+        "role",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "members/{memberId}": {
+      "schema": "Member",
+      "description": "Store participant profiles."
+    }
+  }
+}
