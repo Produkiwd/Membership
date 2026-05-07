@@ -1,8 +1,8 @@
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, secondaryAuth, auth, signOut, handleFirestoreError, OperationType } from './lib/firebase';
-import { BookOpen, Calendar, ChevronRight, FileText, Lock, LogOut, Video } from 'lucide-react';
+import { BookOpen, Calendar, ChevronRight, FileText, Lock, LogOut, Video, Key } from 'lucide-react';
 import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent } from 'react';
 import { cn } from './lib/utils';
-import { onAuthStateChanged, type User } from 'firebase/auth';
+import { onAuthStateChanged, type User, updatePassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, updateDoc, Timestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from './lib/firebase';
 
@@ -435,6 +435,36 @@ function DashboardView({ user }: { user: User }) {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'admin'>('dashboard');
   const [isAdmin, setIsAdmin] = useState(user.email === 'stephen.tssgroup@gmail.com');
   const [selectedModule, setSelectedModule] = useState<any>(null);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [passwordMsg, setPasswordMsg] = useState({ text: '', type: '' });
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  const handleChangePassword = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!newPassword || newPassword.length < 6) {
+      setPasswordMsg({ text: 'Password minimal 6 karakter.', type: 'error' });
+      return;
+    }
+    setIsUpdatingPassword(true);
+    try {
+      await updatePassword(user, newPassword);
+      setPasswordMsg({ text: 'Password berhasil diubah.', type: 'success' });
+      setTimeout(() => {
+        setIsPasswordModalOpen(false);
+        setNewPassword('');
+        setPasswordMsg({ text: '', type: '' });
+      }, 2000);
+    } catch (err: any) {
+      if (err.code === 'auth/requires-recent-login') {
+        setPasswordMsg({ text: 'Sesi Anda telah kedaluwarsa. Silakan logout dan login kembali untuk mengubah password.', type: 'error' });
+      } else {
+        setPasswordMsg({ text: err.message, type: 'error' });
+      }
+    } finally {
+      setIsUpdatingPassword(false);
+    }
+  };
 
   useEffect(() => {
     const fetchRole = async () => {
@@ -476,6 +506,9 @@ function DashboardView({ user }: { user: User }) {
             </button>
           )}
           <span className="hidden md:inline-block font-body text-sm font-semibold text-light-md">{user.displayName || user.email}</span>
+          <button onClick={() => setIsPasswordModalOpen(true)} className="text-light-lo hover:text-light-hi transition-colors p-2 cursor-pointer" title="Ganti Password">
+            <Key className="w-5 h-5" />
+          </button>
           <button onClick={handleLogout} className="text-light-lo hover:text-light-hi transition-colors p-2 -mr-2 cursor-pointer" title="Keluar">
             <LogOut className="w-5 h-5" />
           </button>
@@ -663,6 +696,48 @@ function DashboardView({ user }: { user: User }) {
               >
                 TUTUP
               </button>
+            </div>
+          </div>
+        )}
+        {/* Password Modal */}
+        {isPasswordModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0a0a09]/80 backdrop-blur-sm">
+            <div className="bg-[#161412] border border-border-dark-subtle/30 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden p-8 transform transition-all relative z-10">
+              <h3 className="text-2xl font-bold font-sans text-dark-hi mb-6">Ganti Password</h3>
+              <form onSubmit={handleChangePassword} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium font-sans text-dark-md mb-2">Password Baru</label>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full px-4 py-3 bg-bg-dark border border-border-dark-subtle text-dark-hi rounded-lg focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted transition-colors font-body"
+                    placeholder="Minimal 6 karakter"
+                    required
+                  />
+                </div>
+                {passwordMsg.text && (
+                  <div className={cn("p-4 rounded-lg text-sm font-sans font-medium", passwordMsg.type === 'error' ? "bg-red-500/10 text-red-400 border border-red-500/20" : "bg-green-500/10 text-green-400 border border-green-500/20")}>
+                    {passwordMsg.text}
+                  </div>
+                )}
+                <div className="flex gap-4">
+                  <button 
+                    type="button"
+                    onClick={() => { setIsPasswordModalOpen(false); setPasswordMsg({text:'', type:''}); setNewPassword(''); }} 
+                    className="flex-1 py-3 bg-bg-dark border border-border-dark-subtle/30 text-dark-hi rounded-lg font-bold font-mono tracking-wider hover:bg-border-dark-subtle/20 transition-colors"
+                  >
+                    BATAL
+                  </button>
+                  <button 
+                    type="submit"
+                    disabled={isUpdatingPassword}
+                    className="flex-1 py-3 bg-gold-muted text-[#111] rounded-lg font-bold font-mono tracking-wider hover:bg-gold transition-colors disabled:opacity-50"
+                  >
+                    {isUpdatingPassword ? '...' : 'SIMPAN'}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
