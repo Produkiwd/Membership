@@ -5,10 +5,10 @@ import { cn } from './lib/utils';
 import { onAuthStateChanged, type User, updatePassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, updateDoc, Timestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from './lib/firebase';
-import aifPromptingHtml from '../materi/Prompt day1/aif prompting level2 day1.html?raw';
-import aifReadingHtml from '../materi/Prompt day1/aif reading level2 day1.html?raw';
-import aifPkmHtml from '../materi/Prompt day2/aif pkm level2 day2.html?raw';
-import aifWritingHtml from '../materi/Prompt day2/aif writing level2-day2.html?raw';
+import aifPromptingHtml from '../materi/Prompt day1/aif-prompting-level2-day1.html?raw';
+import aifReadingHtml from '../materi/Prompt day1/aif-reading-level2-day1.html?raw';
+import aifPkmHtml from '../materi/Prompt day2/aif-pkm-level2-day2.html?raw';
+import aifWritingHtml from '../materi/Prompt day2/aif-writing-level2-day2.html?raw';
 
 function Eyebrow({ children, variant = 'light' }: { children: ReactNode, variant?: 'light' | 'dark' | 'flat' }) {
   return (
