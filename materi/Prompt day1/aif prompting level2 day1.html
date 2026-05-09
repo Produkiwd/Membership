@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="author" content="Tjitra &amp; Associates — IWDemy">
+<meta name="description" content="AIF L2D1M2 — Chatting: Ngobrol dengan AI. Prompt Engineering &amp; Deep Research untuk Leaders.">
+<title>Chatting: Ngobrol dengan AI — AI First L2D1M2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+
+:root{
+  /* Brand tokens */
+  --gold:#E2B84E; --gold-m:#A08B55;
+  --gold-dim:rgba(226,184,78,0.12); --gold-bdr:rgba(226,184,78,0.32);
+  --gold-glow:rgba(226,184,78,0.08);
+  /* Backgrounds */
+  --dk:#080808; --dk2:#0e0e0e; --lt:#F8F6F2;
+  /* Text (dark bg) */
+  --thi:#F0EDE6; --tmd:rgba(240,237,230,0.82);
+  --tlo:rgba(240,237,230,0.55); --txs:rgba(240,237,230,0.22);
+  /* Text (light bg) */
+  --dt:rgba(14,14,14,0.92); --db:rgba(14,14,14,0.60);
+  --ds:rgba(14,14,14,0.38); --dm:rgba(14,14,14,0.18);
+  /* Borders */
+  --bdr:rgba(240,237,230,0.11); --bdr-s:rgba(240,237,230,0.07);
+  --bdr-lt:rgba(14,14,14,0.10);
+  /* Cards */
+  --bg-card:rgba(255,255,255,0.045);
+  --bg-card-hover:rgba(255,255,255,0.08);
+  /* Sidebar */
+  --sb-bg:#050505; --sb-w:clamp(208px,18vw,252px);
+  /* Layout */
+  --nav-h:46px; --px:clamp(36px,5.5vw,72px); --py:clamp(24px,4vh,56px);
+  /* Radius */
+  --r:10px; --r-sm:7px; --r-lg:14px;
+}
+
+/* ── LAYOUT ─────────────────────────────────────── */
+#deck{display:grid;grid-template-columns:var(--sb-w) 1fr;width:100vw;height:100vh;font-family:'Inter',sans-serif;background:var(--dk)}
+
+/* ── SIDEBAR ─────────────────────────────────────── */
+#sidebar{
+  height:100vh;background:var(--sb-bg);
+  border-right:1px solid var(--bdr-s);
+  display:flex;flex-direction:column;overflow:hidden;z-index:10;
+  position:relative;
+}
+#sidebar::after{
+  content:'';position:absolute;top:0;right:0;width:1px;height:100%;
+  background:linear-gradient(to bottom,transparent,rgba(212,168,75,0.07) 30%,rgba(212,168,75,0.07) 70%,transparent);
+  pointer-events:none;
+}
+
+/* Header */
+#sb-header{padding:16px 14px 11px;border-bottom:1px solid var(--bdr-s)}
+.sb-program-name{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:11px;font-weight:800;color:var(--gold);
+  letter-spacing:.05em;text-transform:uppercase;
+  line-height:1;margin-bottom:7px;
+}
+.sb-meta-row{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.sb-meta-tag{
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  color:rgba(212,168,75,0.75);
+  background:rgba(212,168,75,0.1);border:1px solid rgba(212,168,75,0.2);
+  border-radius:4px;padding:2px 6px;letter-spacing:.04em;
+}
+.sb-meta-sep{color:rgba(212,168,75,0.25);font-size:10px}
+.sb-meta-label{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:rgba(240,237,230,0.22);letter-spacing:.04em;
+}
+
+/* Progress */
+#sb-progress-wrap{height:1.5px;background:var(--bdr-s);margin:0 14px;border-radius:2px;margin-top:10px;margin-bottom:2px}
+#sb-progress-bar{height:100%;background:linear-gradient(to right,var(--gold-m),var(--gold));border-radius:2px;transition:width .35s cubic-bezier(.4,0,.2,1);width:10%}
+
+/* Nav */
+#sb-nav{flex:1;overflow-y:auto;padding:4px 0 10px}
+#sb-nav::-webkit-scrollbar{display:none}
+.sb-section-label{
+  padding:10px 14px 3px;
+  font-size:8.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--txs);font-family:'JetBrains Mono',monospace;
+}
+.sb-item{
+  display:flex;align-items:center;gap:8px;
+  padding:5px 14px 5px 12px;cursor:pointer;
+  border-left:2px solid transparent;
+  transition:all .15s ease;
+}
+.sb-item:hover{background:rgba(255,255,255,0.02)}
+.sb-item:hover .sb-item-title{color:var(--tmd)}
+.sb-item.active{border-left-color:var(--gold);background:rgba(212,168,75,0.05)}
+.sb-item.active .sb-item-title{color:var(--thi);font-weight:600}
+.sb-item.active .sb-num{color:var(--gold)}
+.sb-num{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  font-weight:700;letter-spacing:.04em;color:rgba(240,237,230,0.2);
+  flex-shrink:0;min-width:18px;text-align:right;
+}
+.sb-item-title{font-size:11px;color:rgba(240,237,230,0.45);line-height:1.3;letter-spacing:.005em}
+
+/* Footer */
+#sb-footer{padding:10px 14px 13px;border-top:1px solid var(--bdr-s)}
+.brand-lockup{display:flex;align-items:center;gap:4px;margin-bottom:8px}
+.logo-shape{border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.92);display:flex;align-items:center;justify-content:center;}
+.logo-circle{width:32px;height:32px;border-radius:50%;padding:4px}
+.logo-pill{border-radius:100px;padding:5px 9px;height:32px}
+.logo-pill img{height:16px;width:auto;display:block}
+.sb-copyright{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--txs);letter-spacing:.04em}
+
+/* ── MAIN ─────────────────────────────────────── */
+#main{position:relative;height:100vh;overflow:hidden;background:var(--dk)}
+
+.slide{
+  position:absolute;inset:0;padding:var(--py) var(--px);
+  display:flex;flex-direction:column;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s ease;overflow:hidden;
+  box-sizing:border-box;
+}
+/* Flex children shrink to fit — prevents overflow */
+.slide > *{min-height:0;flex-shrink:1;}
+.slide .two-col{min-height:0;}
+.why-panel{overflow:hidden;}
+.why-panel.active{min-height:0;}
+.slide.active{opacity:1;pointer-events:all}
+/* ── Proportional vertical margin for content slides ─── */
+.slide:not(#s01){
+  padding-top:clamp(32px,5vh,72px);
+  padding-bottom:calc(var(--nav-h) + clamp(20px,3vh,44px));
+}
+
+.slide-dk{background:var(--dk);color:var(--thi)}
+.slide-dk2{background:var(--dk2);color:var(--thi)}
+.slide-lt{background:var(--lt);color:var(--dt)}
+
+/* Tech background dots */
+.tech-bg{position:absolute;inset:0;pointer-events:none;opacity:.05}
+
+/* ── NAV BAR ─────────────────────────────────────── */
+#nav-bar{
+  position:absolute;bottom:0;left:0;right:0;height:var(--nav-h);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--px);
+  border-top:1px solid var(--bdr-s);
+  background:rgba(5,5,5,0.7);backdrop-filter:blur(12px);
+  z-index:5;
+}
+#nav-bar.nav-lt{border-top-color:var(--bdr-lt);background:rgba(248,246,242,0.85)}
+.nav-copy{font-size:11px;color:var(--tlo);font-family:'JetBrains Mono',monospace;letter-spacing:.03em}
+.nav-lt .nav-copy{color:var(--ds)}
+.nav-controls{display:flex;align-items:center;gap:10px}
+.nav-btn{
+  width:30px;height:30px;border:1px solid var(--bdr);border-radius:var(--r-sm);
+  background:rgba(255,255,255,0.03);color:var(--tmd);
+  cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;
+  transition:all .15s ease;
+}
+.nav-lt .nav-btn{border-color:var(--bdr-lt);background:rgba(14,14,14,0.04);color:var(--db)}
+.nav-btn:hover{background:var(--gold-dim);border-color:var(--gold-bdr);color:var(--gold)}
+.nav-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#slide-counter{
+  font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--tlo);
+  min-width:38px;text-align:center;letter-spacing:.03em;
+}
+.nav-lt #slide-counter{color:var(--ds)}
+
+/* ── TYPOGRAPHY ─────────────────────────────────── */
+.eyebrow{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:clamp(11px,1vw,12.5px);font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;
+}
+.slide-lt .eyebrow{color:var(--gold-m)}
+
+h1.slide-title{
+  font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+  font-size:clamp(30px,4.5vw,54px);line-height:1.05;letter-spacing:-.025em;margin-bottom:16px;
+}
+h2.slide-title{
+  font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;
+  font-size:clamp(22px,3vw,36px);line-height:1.12;letter-spacing:-.02em;margin-bottom:12px;
+}
+.slide-sub{font-size:clamp(14px,1.5vw,17px);color:var(--tmd);line-height:1.55}
+.slide-lt .slide-sub{color:var(--db)}
+.slide-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:calc(var(--nav-h) + 6px)}
+
+/* ── CARDS ─────────────────────────────────────── */
+.card{
+  background:var(--bg-card);border:1px solid var(--bdr);
+  border-radius:var(--r);padding:14px 16px;
+  transition:background .15s,transform .15s,box-shadow .15s;
+}
+.card:hover{background:var(--bg-card-hover);transform:translateY(-1px);box-shadow:0 3px 14px rgba(0,0,0,.18)}
+.card-gold{background:var(--gold-dim);border-color:var(--gold-bdr)}
+.card-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.card-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
+.card-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--gold);margin-bottom:5px}
+.card-verb{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(14px,1.7vw,18px);font-weight:700;color:var(--gold);margin-bottom:5px}
+.card-body{font-size:clamp(13px,1.15vw,15px);color:var(--tmd);line-height:1.5}
+.card-label{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(12px,1.2vw,14px);font-weight:700;color:var(--thi);margin-bottom:4px}
+
+/* Callout */
+.callout{
+  border-left:2px solid var(--gold);background:var(--gold-glow);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  padding:10px 16px;margin-top:8px;
+}
+.callout-text{font-size:clamp(13px,1.15vw,15px);color:var(--tmd);line-height:1.55}
+
+/* Formula */
+.formula{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:clamp(13px,1.6vw,20px);font-weight:700;color:var(--thi);
+  text-align:center;padding:16px 20px;
+  background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r);
+  margin:12px 0;letter-spacing:-.01em;
+}
+.formula span{color:var(--gold)}
+
+/* 2-col */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:12px}
+.icon-wrap{width:34px;height:34px;margin-bottom:8px}
+
+/* ── COVER ELEMENTS ─────────────────────────────── */
+.cover-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.cover-meta-item{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:rgba(14,14,14,0.52);background:rgba(14,14,14,0.05);
+  padding:3px 11px;border-radius:100px;border:1px solid rgba(14,14,14,0.09);
+}
+.cover-lockup{display:flex;align-items:center;gap:4px;margin-top:20px}
+.cover-logo-circle{
+  width:32px;height:32px;border-radius:50%;
+  border:1px solid rgba(212,168,75,0.28);background:rgba(212,168,75,0.07);
+  display:flex;align-items:center;justify-content:center;padding:4px;
+}
+.cover-logo-pill{
+  border-radius:100px;height:32px;
+  border:1px solid rgba(212,168,75,0.28);background:rgba(212,168,75,0.07);
+  display:flex;align-items:center;padding:5px 10px;
+}
+
+/* ── LEVEL MAP ─────────────────────────────────── */
+.level-map{display:flex;align-items:center;gap:0;margin:14px 0}
+.level-node{
+  flex:1;text-align:center;padding:13px 8px;
+  border-radius:var(--r);border:1px solid var(--bdr-s);
+  background:rgba(255,255,255,0.02);
+}
+.level-node.past{opacity:.45}
+.level-node.current{background:var(--gold-dim);border-color:var(--gold-bdr)}
+.level-node.upcoming{opacity:.30}
+.level-connector{width:18px;flex-shrink:0;height:1px;background:var(--bdr)}
+.lv-num{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--gold);margin-bottom:3px;display:flex;align-items:center;justify-content:center;gap:4px}
+.lv-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);display:inline-block}
+.lv-name{font-size:11px;color:var(--tmd);letter-spacing:.07em;font-weight:700;text-transform:uppercase;font-family:'Plus Jakarta Sans',sans-serif}
+.lv-title{font-size:11px;color:var(--tlo);margin-top:3px;line-height:1.35}
+.lv-badge{font-size:11px;color:var(--thi);margin-top:5px}
+
+.day-bar{display:flex;gap:8px;margin-top:10px}
+.day-badge{flex:1;padding:10px 13px;border-radius:var(--r-sm);border:1px solid var(--bdr);background:rgba(255,255,255,0.02)}
+.day-badge.now{background:var(--gold-dim);border-color:var(--gold-bdr)}
+.day-badge-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);font-weight:700;margin-bottom:4px}
+.day-badge:not(.now) .day-badge-label{color:var(--tlo)}
+.day-badge-desc{font-size:13px;color:var(--tmd);line-height:1.4}
+
+/* ── PROPERTIES GRID ────────────────────────────── */
+.prop-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px;flex:1}
+.prop-card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 12px;display:flex;flex-direction:column}
+.prop-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(11px,1.1vw,13px);font-weight:700;color:var(--thi);margin-bottom:5px}
+.prop-desc{font-size:clamp(12px,1.1vw,13px);color:var(--tlo);line-height:1.45;flex:1}
+.prop-tag{margin-top:8px;padding:3px 8px;border-radius:4px;background:rgba(212,168,75,0.07);font-size:9px;color:var(--gold-m);font-family:'JetBrains Mono',monospace;letter-spacing:.04em;display:inline-block}
+
+/* ── CIS ─────────────────────────────────────────── */
+.cis-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.cis-col{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px}
+.cis-letter{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(22px,2.8vw,34px);font-weight:800;color:var(--gold);line-height:1;margin-bottom:4px}
+.cis-name{font-size:clamp(11px,1.1vw,13px);font-weight:700;color:var(--thi);font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:8px}
+.cis-item{font-size:clamp(12px,1.1vw,13px);color:var(--tlo);line-height:1.6;margin-bottom:1px}
+.cis-item::before{content:"· ";color:var(--gold-m)}
+
+/* ── FLOW (TCREI) ────────────────────────────────── */
+.flow-row{display:flex;align-items:stretch;gap:0;margin-top:14px}
+.flow-step{flex:1;background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:13px 10px;text-align:center}
+.flow-arrow{width:20px;flex-shrink:0;text-align:center;color:var(--gold);font-size:11px;display:flex;align-items:center;justify-content:center;opacity:.7}
+.flow-step-num{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--gold);margin-bottom:5px}
+.flow-step-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(10px,1.1vw,13px);font-weight:700;color:var(--thi);margin-bottom:4px}
+.flow-step-desc{font-size:13px;color:var(--tlo);line-height:1.4}
+
+/* Code block */
+.code-block{
+  background:rgba(0,0,0,.35);border:1px solid var(--bdr-s);
+  border-radius:var(--r-sm);padding:12px 16px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(9.5px,0.95vw,11px);color:var(--tmd);line-height:1.75;margin-top:10px;
+}
+.code-block .cm{color:var(--gold);font-weight:700}
+.code-block .cl{color:var(--tlo)}
+
+/* ── PRINSIP ─────────────────────────────────────── */
+.prinsip-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.prinsip-card{background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r);padding:13px 15px;display:flex;gap:11px;align-items:flex-start}
+.prinsip-card.full{grid-column:1/-1}
+.prinsip-num{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--gold);flex-shrink:0;padding-top:1px}
+.prinsip-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(13px,1.3vw,15px);font-weight:700;color:var(--thi);margin-bottom:3px}
+.prinsip-desc{font-size:clamp(12px,1.1vw,13.5px);color:var(--tlo);line-height:1.45}
+
+/* ── EXERCISE ────────────────────────────────────── */
+.exercise-box{
+  background:rgba(0,0,0,.15);border:1px solid var(--gold-bdr);
+  border-radius:var(--r-lg);padding:20px 24px;flex:1;
+}
+.exercise-step{display:flex;gap:11px;align-items:flex-start;margin-bottom:11px}
+.exercise-step-num{
+  width:22px;height:22px;border-radius:50%;
+  background:var(--gold-dim);border:1px solid var(--gold-bdr);
+  color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.exercise-step-text{font-size:clamp(13px,1.2vw,15px);color:var(--tmd);line-height:1.45;padding-top:3px}
+.exercise-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);font-weight:700;margin-top:13px;letter-spacing:.05em}
+
+/* ── TAKEAWAY ────────────────────────────────────── */
+.takeaway-list{display:flex;flex-direction:column;gap:7px;margin-top:12px}
+.takeaway-item{
+  display:flex;gap:13px;align-items:flex-start;
+  background:var(--bg-card);border:1px solid var(--bdr);
+  border-radius:var(--r-sm);padding:11px 14px;
+}
+.takeaway-item:first-child{border-left:2px solid var(--gold)}
+.takeaway-num{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--gold);flex-shrink:0;padding-top:1px}
+.takeaway-text{font-size:clamp(13px,1.2vw,15px);color:var(--tmd);line-height:1.5}
+.takeaway-text strong{color:var(--thi);font-weight:600}
+
+/* ── WHAT'S NEXT ─────────────────────────────────── */
+.next-box{background:var(--gold-dim);border:1px solid var(--gold-bdr);border-radius:var(--r);padding:12px 16px;margin:8px 0}
+.next-label{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}
+.next-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(14px,1.7vw,18px);font-weight:700;color:var(--thi);margin-bottom:4px}
+.next-desc{font-size:clamp(13px,1.2vw,15px);color:var(--tmd);line-height:1.5}
+.action-item{display:flex;gap:11px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--bdr-s)}
+.action-arrow{color:var(--gold);font-size:13px;flex-shrink:0;margin-top:2px}
+.action-text{font-size:clamp(13px,1.25vw,15px);color:var(--tmd);line-height:1.5}
+
+/* ── CLOSING FOOTER ──────────────────────────────── */
+.closing-footer{margin-top:auto;padding-top:10px;border-top:1px solid var(--bdr-s)}
+.closing-lockup{display:flex;align-items:center;gap:4px;margin-bottom:8px}
+.closing-logo-circle{width:32px;height:32px;border-radius:50%;border:1px solid var(--gold-bdr);background:var(--gold-dim);display:flex;align-items:center;justify-content:center;padding:4px}
+.closing-logo-pill{border-radius:100px;height:32px;border:1px solid var(--gold-bdr);background:var(--gold-dim);display:flex;align-items:center;padding:5px 10px}
+.closing-tagline{font-size:10px;color:var(--txs);font-family:'JetBrains Mono',monospace;letter-spacing:.04em}
+
+  /* ─── IC & FS System ─────────────────────────────── */
+  .ic{border:1px solid var(--bdr);border-radius:var(--r);padding:12px 15px;background:var(--bg-card);cursor:default;transition:background .2s,border-color .2s,transform .18s;}
+  .ic:hover{background:rgba(212,168,75,0.07);border-color:var(--gold-bdr);transform:translateY(-2px);}
+  .ic.ic-gold{background:var(--gold-dim);border-color:var(--gold-bdr);}
+  .ic-num{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:var(--gold);margin-bottom:3px;}
+  .ic-verb{font-size:clamp(14px,1.45vw,18px);font-weight:700;color:var(--gold);line-height:1.1;margin-bottom:3px;}
+  .ic-label{font-size:clamp(11px,1.05vw,13px);font-weight:600;color:var(--thi);line-height:1.3;}
+  .ic-tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-m);margin-top:3px;}
+  .ic-reveal{font-size:clamp(11.5px,1.05vw,13px);color:var(--tmd);line-height:1.5;max-height:0;overflow:hidden;opacity:0;margin-top:0;transition:max-height .32s ease,opacity .26s ease,margin-top .24s ease;}
+  .ic:hover .ic-reveal{max-height:90px;opacity:1;margin-top:6px;}
+  .ic-icon{margin-bottom:7px;}
+  .fs{flex:1;background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r-sm);padding:10px 8px;text-align:center;transition:background .2s,border-color .2s,transform .18s;cursor:default;min-width:0;}
+  .fs:hover{background:rgba(212,168,75,0.07);border-color:var(--gold-bdr);transform:translateY(-2px);}
+  .fs.fs-gold{background:var(--gold-dim);border-color:var(--gold-bdr);}
+  .fs-letter{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:700;color:var(--gold);margin-bottom:3px;}
+  .fs-name{font-size:clamp(10.5px,1vw,12.5px);font-weight:700;color:var(--thi);}
+  .fs-reveal{font-size:11.5px;color:var(--tlo);line-height:1.4;max-height:0;overflow:hidden;opacity:0;margin-top:0;transition:max-height .3s ease,opacity .25s ease,margin-top .22s ease;}
+  .fs:hover .fs-reveal{max-height:50px;opacity:1;margin-top:5px;}
+
+  /* WHY slide — 4-tab system */
+  .why-tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);margin-bottom:10px;flex-shrink:0}
+  .why-tab{padding:8px 16px;font-size:clamp(10px,0.95vw,12px);font-weight:600;color:var(--tlo);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s,border-color .2s;white-space:nowrap;font-family:'Plus Jakarta Sans',sans-serif;background:none;border-top:none;border-left:none;border-right:none;}
+  .why-tab:hover{color:var(--tmd);}
+  .why-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+  .why-panel{display:none;flex-direction:column;gap:6px;flex:1;min-height:0;overflow:hidden;}
+  .why-panel.active{display:flex;min-height:0;}
+  .why-bullet{display:flex;gap:10px;align-items:flex-start;padding:9px 14px;border-radius:var(--r-sm);border:1px solid var(--bdr);background:var(--bg-card);}
+  .why-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:7px;}
+  .why-text{font-size:clamp(13px,1.2vw,15px);color:#F0EDE6;line-height:1.55;}
+  .why-insight{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;}
+  .why-insight-text{font-size:clamp(18px,2vw,26px);font-weight:700;color:#F5F2EB;line-height:1.45;max-width:560px;}
+
+/* ── TCREI NEW LAYOUT ─────────────────────────── */
+.tcrei-row{display:flex;align-items:stretch;gap:6px;flex:1;min-height:0;margin-top:10px}
+.tcrei-card{flex:1;display:flex;flex-direction:column;gap:5px;background:var(--bg-card);border:1px solid var(--bdr);border-radius:var(--r);padding:13px 10px;min-width:0;transition:border-color .2s,background .2s;cursor:default}
+.tcrei-card:hover{border-color:var(--gold-bdr);background:rgba(226,184,78,0.06)}
+.tcrei-card-gold{background:var(--gold-dim);border-color:var(--gold-bdr)}
+.tcrei-card-gold:hover{background:rgba(226,184,78,0.15)}
+.tcrei-letter{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(26px,3vw,40px);font-weight:800;color:var(--gold);line-height:1;margin-bottom:2px}
+.tcrei-word{font-size:14px;font-weight:700;color:var(--thi);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.tcrei-divider{height:1px;background:var(--bdr);margin:4px 0}
+.tcrei-def{font-size:14px;color:rgba(240,237,230,0.82);line-height:1.45;flex:1}
+.tcrei-ex{font-size:11px;color:rgba(240,237,230,0.5);font-family:'JetBrains Mono',monospace;border-left:2px solid var(--gold-bdr);padding-left:7px;line-height:1.38;margin-top:5px}
+.tcrei-sep{width:14px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--gold-m);font-size:14px;opacity:.7}
+/* ── TCREI GOALS ─────────────────────────────── */
+.tcrei-goals{margin-top:9px;background:rgba(255,255,255,0.03);border:1px solid var(--bdr);border-radius:var(--r);padding:9px 13px;flex-shrink:0}
+.tcrei-goals-hdr{display:flex;align-items:center;gap:12px;margin-bottom:7px}
+.tcrei-goals-lbl{font-size:11px;color:rgba(240,237,230,0.45);font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.tcrei-goal-tabs{display:flex;gap:5px}
+.tcrei-gtab{font-size:11.5px;padding:3px 10px;border-radius:4px;border:1px solid var(--bdr);background:transparent;color:rgba(240,237,230,0.45);cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;letter-spacing:.01em}
+.tcrei-gtab:hover{color:rgba(240,237,230,0.7);border-color:rgba(240,237,230,0.2)}
+.tcrei-gtab.active{border-color:var(--gold-bdr);background:var(--gold-dim);color:rgba(240,237,230,0.92)}
+.tcrei-gpanel{display:none;flex-direction:row;align-items:stretch;gap:5px}
+.tcrei-gpanel.active{display:flex}
+.tcrei-eg{flex:1;display:flex;flex-direction:column;gap:4px;padding:7px 8px;background:rgba(255,255,255,0.025);border:1px solid rgba(240,237,230,0.07);border-radius:var(--r-sm);min-width:0}
+.tcrei-eg-gold{background:rgba(226,184,78,0.07);border-color:rgba(226,184,78,0.2)}
+.tcrei-eg-l{font-size:15px;font-weight:800;color:var(--gold);font-family:'Plus Jakarta Sans',sans-serif;line-height:1}
+.tcrei-eg-v{font-size:12px;color:rgba(240,237,230,0.78);line-height:1.35}
+.tcrei-eg-sep{width:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--gold-m);font-size:12px;opacity:.6}
+
+/* ── EXAMPLE TABS (slide 6) ──────────────── */
+.ex-tab{font-size:13px;padding:5px 14px;border-radius:6px;border:1px solid var(--bdr);background:transparent;color:rgba(240,237,230,0.5);cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s;display:flex;align-items:center;gap:6px}
+.ex-tab:hover{color:rgba(240,237,230,0.8);border-color:rgba(240,237,230,0.2)}
+.ex-tab.active{border-color:var(--gold-bdr);background:var(--gold-dim);color:rgba(240,237,230,0.95)}
+.ex-panel{display:none;flex-direction:column;gap:6px;margin-top:10px;flex:1;min-height:0;overflow:hidden}
+.ex-panel.active{display:flex}
+.ex-row{display:flex;gap:10px;align-items:flex-start;padding:8px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(240,237,230,0.07);border-radius:7px;min-height:0}
+.ex-row-gold{background:rgba(226,184,78,0.07);border-color:rgba(226,184,78,0.2)}
+.ex-badge{width:26px;height:26px;min-width:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:800;flex-shrink:0}
+.ex-badge-gold{background:var(--gold);color:#080808}
+.ex-badge-dim{background:rgba(240,237,230,0.09);border:1px solid var(--bdr);color:rgba(240,237,230,0.8)}
+.ex-label{font-size:13px;font-weight:700;color:rgba(240,237,230,0.6);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;font-family:'Inter',sans-serif}
+.ex-val{font-size:14px;color:rgba(240,237,230,0.88);line-height:1.4}
+
+/* ── TCREI CARD HOVER / BIG PICTURE ─────────────────── */
+.contoh-tab{font-size:10px;font-weight:700;font-family:'JetBrains Mono',monospace;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border-radius:5px;border:1px solid rgba(212,168,75,0.2);color:rgba(212,168,75,0.5);background:transparent;cursor:pointer;transition:background .18s ease,color .18s ease,border-color .18s ease}
+.contoh-tab.active{background:rgba(212,168,75,0.12);color:var(--gold);border-color:rgba(212,168,75,0.45)}
+.contoh-tab:hover:not(.active){background:rgba(212,168,75,0.05);color:rgba(212,168,75,0.75)}
+.contoh-panel{display:none}
+.contoh-panel.active{display:flex}
+.tcrei-card{
+  cursor:default;
+  transition:border-color .22s ease, background .22s ease, transform .18s ease;
+}
+.tcrei-card:hover{
+  border-color:var(--gold-bdr);
+  background:rgba(226,184,78,0.07);
+  transform:translateY(-2px);
+}
+.tcrei-card-gold:hover{
+  background:rgba(226,184,78,0.14);
+}
+.tcrei-def{
+  transition:opacity .18s ease;
+}
+.tcrei-card:hover .tcrei-def{
+  opacity:0.72;
+}
+.tcrei-insight{
+  font-size:11.5px;
+  color:var(--gold);
+  line-height:1.52;
+  max-height:0;
+  overflow:hidden;
+  opacity:0;
+  padding-top:0;
+  border-top:0px solid var(--gold-bdr);
+  transition:max-height .28s ease, opacity .22s ease, padding-top .22s ease, border-top-width .2s;
+  font-family:'Inter',sans-serif;
+  letter-spacing:.01em;
+}
+.tcrei-card:hover .tcrei-insight{
+  max-height:80px;
+  opacity:1;
+  padding-top:7px;
+  border-top-width:1px;
+  margin-top:5px;
+}
+
+/* ── TIP CARD HOVER (slide 7) ────────────────────────── */
+.tip-card{
+  transition:border-color .2s ease, background .2s ease, transform .18s ease;
+}
+.actions-col{cursor:default;transition:border-color .22s ease}
+.actions-col:hover{border-color:rgba(212,168,75,0.28) !important}
+.actions-body-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s ease;overflow:hidden}
+.actions-col:hover .actions-body-wrap{grid-template-rows:1fr}
+.actions-body{min-height:0;display:flex;flex-direction:column}
+.comp-body{max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .28s ease;padding-top:0}
+.comp-open .comp-body{max-height:400px;opacity:1;padding-top:9px}
+.comp-toggle{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+.comp-toggle:hover .comp-arrow{color:var(--gold)}
+.comp-arrow{font-size:9px;color:rgba(212,168,75,0.4);transition:transform .25s ease,color .2s ease}
+.comp-open .comp-arrow{transform:rotate(90deg)}
+.tip-box{position:relative;overflow:hidden;cursor:default;border:1px solid var(--bdr);border-radius:var(--r);background:rgba(255,255,255,0.03);transition:border-color .22s ease,background .22s ease;flex:1}
+.tip-box:hover{border-color:var(--gold-bdr);background:var(--gold-dim)}
+.tip-box-front{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:opacity .22s ease,transform .22s ease;padding:10px}
+.tip-box:hover .tip-box-front{opacity:0;transform:translateY(-10px);pointer-events:none}
+.tip-box-detail{position:absolute;inset:0;padding:15px 16px;display:flex;flex-direction:column;justify-content:center;gap:6px;opacity:0;transform:translateY(10px);transition:opacity .22s ease,transform .22s ease}
+.tip-box:hover .tip-box-detail{opacity:1;transform:translateY(0)}
+.tip-box-num{font-family:'JetBrains Mono',monospace;font-size:48px;font-weight:800;color:var(--gold);line-height:1;letter-spacing:-.02em}
+.tip-box-kw{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(240,237,230,0.3);text-align:center}
+.tip-box-idx{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:rgba(212,168,75,0.5);letter-spacing:.06em;margin-bottom:2px}
+.tip-box-title{font-size:13px;font-weight:700;color:#F0EDE6;line-height:1.3}
+.tip-box-body{font-size:11.5px;color:rgba(240,237,230,0.62);line-height:1.5}
+.tip-card:hover{
+  border-color:rgba(212,168,75,0.35) !important;
+  background:rgba(255,255,255,0.045) !important;
+  transform:translateX(3px);
+}
+.tip-card-top:hover{
+  background:rgba(226,184,78,0.1) !important;
+}
+
+/* ── CHECKLIST ITEM HOVER (slides 5,6) ───────────────── */
+.chk-item{
+  transition:background .18s ease, border-color .18s ease;
+}
+.chk-item:hover{
+  background:rgba(255,255,255,0.04) !important;
+  border-color:rgba(212,168,75,0.3) !important;
+}
+
+</style>
+</head>
+<body>
+<div id="deck">
+
+<!-- ═══════════════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════════════ -->
+<nav id="sidebar" aria-label="Navigasi slide">
+  <div id="sb-header">
+    <div class="sb-program-name">AI First Leaders</div>
+    <div class="sb-meta-row">
+      <span class="sb-meta-tag">L2</span>
+      <span class="sb-meta-sep">·</span>
+      <span class="sb-meta-tag">D1</span>
+      <span class="sb-meta-sep">·</span>
+      <span class="sb-meta-tag">M2</span>
+      <span class="sb-meta-label">Prompting</span>
+    </div>
+  </div>
+  <div id="sb-progress-wrap"><div id="sb-progress-bar"></div></div>
+
+  <nav id="sb-nav" aria-label="Daftar slide">
+    <div class="sb-section-label">Pengantar</div>
+    <div class="sb-item" onclick="goTo(0)"><span class="sb-num">01</span><span class="sb-item-title">Cover</span></div>
+    <div class="sb-item" onclick="goTo(1)"><span class="sb-num">02</span><span class="sb-item-title">Learning Journey</span></div>
+    <div class="sb-item" onclick="goTo(2)"><span class="sb-num">03</span><span class="sb-item-title">Learning Outcomes</span></div>
+    <div class="sb-section-label">Framework</div>
+    <div class="sb-item" onclick="goTo(3)"><span class="sb-num">04</span><span class="sb-item-title">TCREI</span></div>
+    <div class="sb-item" onclick="goTo(4)"><span class="sb-num">05</span><span class="sb-item-title">ACT &amp; ACTIONS</span></div>
+    <div class="sb-section-label">Praktik</div>
+    <div class="sb-item" onclick="goTo(5)"><span class="sb-num">06</span><span class="sb-item-title">Tiga Framework, Satu Skenario</span></div>
+    <div class="sb-item" onclick="goTo(6)"><span class="sb-num">07</span><span class="sb-item-title">7 Tips Prompting</span></div>
+    <div class="sb-item" onclick="goTo(7)"><span class="sb-num">08</span><span class="sb-item-title">Coba Sekarang</span></div>
+    <div class="sb-section-label">Penutup</div>
+    <div class="sb-item" onclick="goTo(8)"><span class="sb-num">09</span><span class="sb-item-title">Takeaway</span></div>
+    <div class="sb-item" onclick="goTo(9)"><span class="sb-num">10</span><span class="sb-item-title">What's Next</span></div>
+  </nav>
+
+  <div id="sb-footer">
+    <div class="brand-lockup">
+      <div class="logo-shape logo-circle">
+        <img src="data:image/png;base64,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" alt="IWDemy" style="width:24px;height:24px;object-fit:contain">
+      </div>
+      <div class="logo-shape logo-pill">
+        <img src="data:image/png;base64,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" alt="Tjitra &amp; Associates" style="height:16px;width:auto">
+      </div>
+    </div>
+    <div class="sb-copyright">© 2026 Tjitra &amp; Associates</div>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     MAIN
+════════════════════════════════════════════════ -->
+<main id="main">
+
+<!-- ─── S01: COVER ─────────────────────────────── -->
+<article class="slide slide-dk active" id="s01" aria-label="Slide 1: Cover">
+  <!-- Top bar -->
+  <div style="display:flex;align-items:center;gap:10px;align-self:flex-start;
+    padding:5px 14px 5px 10px;border:1px solid var(--gold-bdr);border-radius:100px;
+    background:var(--gold-dim);flex-shrink:0;margin-bottom:0">
+    <span style="font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:700;
+      letter-spacing:.12em;color:var(--gold);text-transform:uppercase;padding:0 4px">AI First Program</span>
+    <div style="width:1px;height:14px;background:rgba(226,184,78,0.3)"></div>
+    <div style="display:flex;gap:4px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold-m);
+        border:1px solid rgba(226,184,78,0.25);border-radius:100px;padding:2px 8px;
+        background:transparent">L2</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold-m);
+        border:1px solid rgba(226,184,78,0.25);border-radius:100px;padding:2px 8px;
+        background:transparent">D1</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold-m);
+        border:1px solid rgba(226,184,78,0.25);border-radius:100px;padding:2px 8px;
+        background:transparent">M2</span>
+    </div>
+  </div>
+
+  <!-- Main: 2-col asymmetric -->
+  <div style="flex:1;display:grid;grid-template-columns:1.1fr 0.9fr;gap:36px;
+    align-items:center;padding:10px 0;min-height:0">
+
+    <!-- Left: title + narrative -->
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <div class="eyebrow">Chatting</div>
+      <h1 style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+        font-size:clamp(36px,4.4vw,60px);line-height:1.05;letter-spacing:-.03em;
+        color:#F5F2EB;margin:0">
+        Ngobrol<br>dengan AI
+      </h1>
+      <div style="border-left:2px solid var(--gold);padding-left:14px;
+        display:flex;flex-direction:column;gap:6px;max-width:400px">
+        <p style="font-size:clamp(15px,1.55vw,19px);color:#F0EDE6;
+          line-height:1.6;margin:0;font-weight:500">
+          Setiap hari Anda memberi instruksi ke AI —<br>
+          dan setiap hari hasilnya harus diedit ulang.
+        </p>
+        <p style="font-size:clamp(13px,1.3vw,16px);color:rgba(240,237,230,0.60);
+          line-height:1.55;margin:0">
+          Bukan karena AI-nya kurang.<br>
+          Karena mengarahkan AI itu ada caranya.
+        </p>
+      </div>
+    </div>
+
+    <!-- Right: 3 compact info cards -->
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="padding:16px 18px;border-radius:var(--r-sm);
+        border:1px solid var(--gold-bdr);background:rgba(226,184,78,0.08)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+          letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:5px">Framework</div>
+        <div style="font-size:clamp(15px,1.4vw,18px);color:#F0EDE6;font-weight:600;letter-spacing:.01em">
+          A.C.T.I.O.N.S.</div>
+      </div>
+      <div style="padding:16px 18px;border-radius:var(--r-sm);
+        border:1px solid var(--bdr);background:var(--bg-card)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+          letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,0.40);margin-bottom:5px">Durasi</div>
+        <div style="font-size:clamp(15px,1.4vw,18px);color:#F0EDE6;font-weight:600">3 Jam · Hands-on</div>
+      </div>
+      <div style="padding:16px 18px;border-radius:var(--r-sm);
+        border:1px solid var(--bdr);background:var(--bg-card)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+          letter-spacing:.14em;text-transform:uppercase;color:rgba(240,237,230,0.40);margin-bottom:5px">Bawa Pulang</div>
+        <div style="font-size:clamp(15px,1.4vw,18px);color:#F0EDE6;font-weight:600">Personal Prompt Template</div>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<!-- ─── S02: LEARNING JOURNEY ──────────────────── -->
+<article class="slide slide-dk" id="s02" aria-label="Slide 2: Di Mana Kita Sekarang">
+<style>
+.s02{display:flex;flex-direction:column;flex:1;gap:9px;min-height:0;padding-bottom:calc(var(--nav-h) + 4px)}
+
+/* Header compact */
+.s02-eyebrow{font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(8px,0.75vw,9.5px);
+  font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.s02-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+  font-size:clamp(16px,1.9vw,24px);line-height:1.1;color:#F5F2EB;margin:0 0 0}
+.s02-sub{font-size:clamp(10.5px,0.95vw,12px);color:rgba(240,237,230,0.60);
+  line-height:1.45;margin:0}
+
+/* Reflection question — compact single line */
+.s02-q{display:flex;align-items:center;gap:10px;padding:8px 14px;
+  border-left:2px solid var(--gold);background:rgba(226,184,78,0.06);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;flex-shrink:0}
+.s02-q-tag{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--gold);white-space:nowrap;flex-shrink:0}
+.s02-q-text{font-size:clamp(11px,1.05vw,13px);font-weight:500;color:#F0EDE6;line-height:1.4}
+
+/* Cards grid — align-items:start so cards don't stretch */
+.s02-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;align-items:stretch;flex:1;min-height:0}
+
+/* Base card */
+.s02-card{border:1px solid var(--bdr);border-radius:var(--r);
+  padding:14px 16px;background:var(--bg-card);display:flex;flex-direction:column;gap:7px}
+.s02-card-now{border-color:var(--gold-bdr);background:rgba(226,184,78,0.07)}
+.s02-card-next{opacity:0.60}
+
+/* Card label */
+.s02-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:rgba(240,237,230,0.38);
+  display:flex;align-items:center;gap:4px}
+.s02-card-now .s02-lbl{color:var(--gold)}
+
+/* Card title */
+.s02-ctitle{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;
+  font-size:clamp(14px,1.4vw,17px);color:#F0EDE6;line-height:1.2}
+.s02-card-next .s02-ctitle{color:rgba(240,237,230,0.60)}
+
+/* Card desc */
+.s02-cdesc{font-size:clamp(10px,0.95vw,12px);color:rgba(240,237,230,0.65);line-height:1.5}
+.s02-card-next .s02-cdesc{color:rgba(240,237,230,0.38)}
+
+/* Outcomes */
+.s02-oc-hd{font-family:'JetBrains Mono',monospace;font-size:7.5px;font-weight:700;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--gold);
+  padding-top:4px;border-top:1px solid var(--bdr)}
+.s02-oc-list{display:flex;flex-direction:column;gap:4px}
+.s02-oc{display:flex;gap:7px;font-size:clamp(10px,0.92vw,11.5px);
+  color:rgba(240,237,230,0.80);line-height:1.4}
+.s02-dot{color:var(--gold);flex-shrink:0;font-size:10px;margin-top:1px}
+
+
+/* Bottom bar */
+.s02-bp{display:flex;align-items:center;gap:12px;padding:10px 16px;
+  border:1px solid var(--gold-bdr);border-radius:var(--r-sm);
+  background:rgba(226,184,78,0.06);flex-shrink:0}
+.s02-bp-tag{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--gold);
+  white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:5px}
+.s02-bp-text{font-size:clamp(11px,1vw,12.5px);color:#F0EDE6;line-height:1.4}
+/* Level journey bar */
+.s02-journey{display:flex;align-items:center;padding:8px 14px;gap:0;
+  background:rgba(255,255,255,0.025);border-radius:var(--r-sm);
+  border:1px solid var(--bdr);flex-shrink:0}
+.s02-jstep{display:flex;align-items:center;gap:6px;flex:1;
+  font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;color:rgba(240,237,230,0.28);white-space:nowrap}
+.s02-jstep.done{color:rgba(240,237,230,0.45)}
+.s02-jstep.now{color:var(--gold)}
+.s02-jdot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.s02-jstep.done .s02-jdot{background:rgba(240,237,230,0.35)}
+.s02-jstep.now .s02-jdot{background:var(--gold);box-shadow:0 0 7px rgba(226,184,78,0.55)}
+.s02-jarrow{color:rgba(240,237,230,0.15);margin:0 8px;font-size:10px;flex-shrink:0}
+</style>
+
+<div class="s02">
+  <!-- Header -->
+  <div>
+    <div class="s02-eyebrow">Level 2 · Prompt</div>
+    <h2 class="s02-title">Di Mana Kita Sekarang</h2>
+  </div>
+
+  <!-- Level journey bar -->
+  <div class="s02-journey">
+    <div class="s02-jstep done"><div class="s02-jdot"></div>&nbsp; L1 · Strategize</div>
+    <span class="s02-jarrow">›</span>
+    <div class="s02-jstep now"><div class="s02-jdot"></div>&nbsp; L2 · Prompt</div>
+    <span class="s02-jarrow">›</span>
+    <div class="s02-jstep"><div class="s02-jdot"></div>&nbsp; L3 · Create</div>
+    <span class="s02-jarrow">›</span>
+    <div class="s02-jstep"><div class="s02-jdot"></div>&nbsp; L4 · Build</div>
+  </div>
+
+  <!-- Reflection question — single compact line -->
+  <div class="s02-q">
+    <span class="s02-q-tag">Pertanyaan</span>
+    <span class="s02-q-text">Seberapa sering Anda mengulang prompt karena hasilnya meleset dari yang Anda butuhkan?</span>
+  </div>
+
+  <!-- 3-col cards — align-items:start prevents card stretch -->
+  <div class="s02-grid">
+
+    <!-- Card 1: Level 2 context + outcomes -->
+    <div class="s02-card">
+      <div class="s02-lbl">Level 2</div>
+      <div class="s02-ctitle">Chat Mastery<br>— Prompt</div>
+      <div class="s02-cdesc">AI Skills × Thinking Framework untuk prompting yang lebih efektif.</div>
+      <div class="s02-oc-hd">Learning Outcomes</div>
+      <div class="s02-oc-list">
+        <div class="s02-oc"><span class="s02-dot">→</span>
+          <span>Prompt presisi dengan <strong style="color:#F0EDE6">thinking framework</strong> yang tepat</span></div>
+        <div class="s02-oc"><span class="s02-dot">→</span>
+          <span>AI sebagai <strong style="color:#F0EDE6">sounding board</strong> — analisis &amp; brainstorming</span></div>
+        <div class="s02-oc"><span class="s02-dot">→</span>
+          <span><strong style="color:#F0EDE6">Evaluasi kritis</strong> output agar sesuai intent</span></div>
+      </div>
+    </div>
+
+    <!-- Card 2: SEKARANG — current session (gold highlight) -->
+    <div class="s02-card s02-card-now">
+      <div class="s02-lbl"><span style="font-size:7px">▶</span> Day 1 · Sekarang</div>
+      <div class="s02-ctitle">Chatting<br>dengan AI</div>
+      <div class="s02-cdesc">Ngobrol, mengarahkan, dan mengevaluasi output AI dalam konteks kerja nyata.</div>
+      <div class="s02-cdesc" style="padding-top:4px;border-top:1px solid var(--gold-bdr);
+        color:rgba(226,184,78,0.70);font-family:'JetBrains Mono',monospace;
+        font-size:9px;letter-spacing:.04em">
+        A.C.T.I.O.N.S.</div>
+    </div>
+
+    <!-- Card 3: BERIKUTNYA — muted -->
+    <div class="s02-card s02-card-next">
+      <div class="s02-lbl">Day 1 · Berikutnya</div>
+      <div class="s02-ctitle">Reading &amp;<br>Deep Research</div>
+      <div class="s02-cdesc">NotebookLM + 5 Learning Modes. AI sebagai research partner saat membaca dan meneliti sumber.</div>
+    </div>
+
+  </div><!-- /s02-grid -->
+
+  <!-- Spacer -->
+  <!-- Bottom bar -->
+  <div class="s02-bp">
+    <div class="s02-bp-tag"><span style="font-size:8px">◆</span> Bawa Pulang</div>
+    <div class="s02-bp-text">
+      <strong>Personal Prompt Template</strong> — untuk tiga pilar kerja harian: analisis data, ekstraksi insight, dan drafting komunikasi bisnis.
+    </div>
+  </div>
+
+</div>
+</article>
+
+<article class="slide slide-dk2" id="s20" aria-label="Slide: Kenapa Prompt Itu Penting">
+  <svg class="tech-bg" viewBox="0 0 900 580" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <circle cx="100" cy="100" r="2.5" fill="#E2B84E"/><circle cx="800" cy="200" r="2" fill="#E2B84E"/>
+    <circle cx="400" cy="500" r="3" fill="#E2B84E"/><circle cx="700" cy="80" r="2.5" fill="#E2B84E"/>
+    <line x1="100" y1="100" x2="800" y2="200" stroke="#E2B84E" stroke-width=".5"/>
+    <line x1="400" y1="500" x2="700" y2="80" stroke="#E2B84E" stroke-width=".5"/>
+  </svg>
+
+  <style>
+  /* ── S20 layout ── */
+  .s20-wrap{display:grid;grid-template-columns:1fr 1fr;gap:24px;flex:1;min-height:0;align-items:stretch;padding-bottom:calc(var(--nav-h) + 2px)}
+  
+  /* Left col: eyebrow + title + 4 click cards */
+  .s20-left{display:flex;flex-direction:column;gap:10px;min-height:0}
+  .s20-cards{display:flex;flex-direction:column;gap:6px;flex:1}
+
+  /* Clickable card */
+  .s20-card{
+    display:flex;align-items:center;gap:12px;
+    padding:11px 14px;border-radius:var(--r-sm);
+    border:1px solid var(--bdr);background:var(--bg-card);
+    cursor:pointer;transition:background .18s,border-color .18s,transform .15s;
+    user-select:none;
+  }
+  .s20-card:hover{background:rgba(226,184,78,0.06);border-color:var(--gold-bdr);transform:translateX(2px)}
+  .s20-card.active{background:rgba(226,184,78,0.10);border-color:var(--gold-bdr)}
+  .s20-num{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:800;
+    color:rgba(240,237,230,0.25);min-width:18px;transition:color .18s;flex-shrink:0;
+  }
+  .s20-card.active .s20-num{color:var(--gold)}
+  .s20-card-title{font-size:clamp(12px,1.1vw,13.5px);font-weight:600;color:rgba(240,237,230,0.75);line-height:1.3;transition:color .18s}
+  .s20-card.active .s20-card-title{color:#F0EDE6}
+  .s20-arrow{margin-left:auto;color:rgba(240,237,230,0.20);font-size:11px;transition:color .18s,transform .18s;flex-shrink:0}
+  .s20-card.active .s20-arrow{color:var(--gold);transform:translateX(2px)}
+
+  /* Right col: detail panel */
+  .s20-right{display:flex;flex-direction:column;gap:0;min-height:0;
+    border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden}
+  
+  /* Panel header */
+  .s20-panel-header{padding:16px 20px 14px;border-bottom:1px solid var(--bdr);background:rgba(226,184,78,0.05)}
+  .s20-panel-label{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+  .s20-panel-title{font-size:clamp(14px,1.4vw,17px);font-weight:700;color:#F0EDE6;line-height:1.25}
+
+  /* Panel bullets */
+  .s20-panel-body{padding:16px 20px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .s20-bullet{display:flex;gap:10px;align-items:flex-start;
+    padding:10px 14px;border-radius:var(--r-sm);
+    border:1px solid var(--bdr);background:rgba(255,255,255,0.02)}
+  .s20-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);flex-shrink:0;margin-top:6px}
+  .s20-btext{font-size:clamp(11.5px,1.05vw,13px);color:rgba(240,237,230,0.82);line-height:1.55}
+
+  /* Insight panel special */
+  .s20-insight{flex:1;display:flex;align-items:center;padding:20px}
+  .s20-insight-quote{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;
+    font-size:clamp(16px,1.8vw,22px);color:#F0EDE6;line-height:1.45;letter-spacing:-.01em}
+
+  /* Panel visibility */
+  .s20-panel{display:none;flex-direction:column;flex:1}
+  .s20-panel.active{display:flex}
+  </style>
+
+  <div class="eyebrow" style="margin-bottom:4px">Fondasi Prompting</div>
+  <h2 class="slide-title" style="margin-bottom:12px">Kenapa Prompt Itu Penting?</h2>
+
+  <div class="s20-wrap">
+    <!-- Left: 4 clickable topic cards -->
+    <div class="s20-left">
+      <div class="s20-cards">
+        <div class="s20-card active" onclick="s20Switch(this,'s20-p1')" tabindex="0">
+          <span class="s20-num">01</span>
+          <span class="s20-card-title">Sifat Dasar LLM</span>
+          <span class="s20-arrow">→</span>
+        </div>
+        <div class="s20-card" onclick="s20Switch(this,'s20-p2')" tabindex="0">
+          <span class="s20-num">02</span>
+          <span class="s20-card-title">Prompt Adalah Kunci</span>
+          <span class="s20-arrow">→</span>
+        </div>
+        <div class="s20-card" onclick="s20Switch(this,'s20-p3')" tabindex="0">
+          <span class="s20-num">03</span>
+          <span class="s20-card-title">Kenapa Butuh Framework</span>
+          <span class="s20-arrow">→</span>
+        </div>
+        <div class="s20-card" onclick="s20Switch(this,'s20-p4')" tabindex="0">
+          <span class="s20-num">04</span>
+          <span class="s20-card-title">Insight Utama</span>
+          <span class="s20-arrow">→</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: detail panel -->
+    <div class="s20-right">
+
+      <!-- Panel 1: Sifat Dasar LLM -->
+      <div id="s20-p1" class="s20-panel active">
+        <div class="s20-panel-header">
+          <div class="s20-panel-label">01 · Sifat Dasar LLM</div>
+          <div class="s20-panel-title">Model bekerja dengan pola —<br>bukan dengan niat.</div>
+        </div>
+        <div class="s20-panel-body">
+          <div class="s20-bullet"><div class="s20-dot"></div>
+            <div class="s20-btext">LLM <strong style="color:var(--gold)">melanjutkan pola</strong> teks — bukan memahami maksud Anda.</div></div>
+          <div class="s20-bullet"><div class="s20-dot"></div>
+            <div class="s20-btext">Setiap sesi <strong style="color:var(--gold)">dimulai dari nol</strong> — tidak ada memori konteks Anda.</div></div>
+          <div class="s20-bullet"><div class="s20-dot"></div>
+            <div class="s20-btext">Respons bersifat <strong style="color:var(--gold)">probabilistik</strong> — model menyampling distribusi kemungkinan.</div></div>
+          <div class="s20-bullet"><div class="s20-dot"></div>
+            <div class="s20-btext">Semua yang model "tahu" tentang tugas Anda <strong style="color:var(--gold)">hanya dari teks yang Anda kirim.</strong></div></div>
+        </div>
+      </div>
+
+      <!-- Panel 2: Prompt Adalah Kunci -->
+      <div id="s20-p2" class="s20-panel">
+        <div class="s20-panel-header">
+          <div class="s20-panel-label">02 · Prompt Adalah Kunci</div>
+          <div class="s20-panel-title">Satu-satunya jembatan<br>antara niat dan hasil.</div>
+        </div>
+        <div class="s20-panel-body">
+          <div class="s20-bullet"><div class="s20-dot"></div>
+            <div class="s20-btext">Prompt adalah <strong style="color:var(--gold)">satu-satunya kanal</strong> antara intensi Anda dan komputasi model.</div></div>
+          <div class="s20-bullet"><div class="s20-dot"></div>
+            <div class="s20-btext">Prompt ambigu → model mengisi celah dengan pola training — <strong style="color:var(--gold)">bukan dari maksud Anda.</strong></div></div>
+          <div class="s20-bullet"><div class="s20-dot"></div>
+            <div class="s20-btext">Model dilatih menyenangkan manusia — memberi jawaban yang <strong style="color:var(--gold)">terdengar baik, bukan yang akurat.</strong></div></div>
+        </div>
+      </div>
+
+      <!-- Panel 3: Kenapa Butuh Framework -->
+      <div id="s20-p3" class="s20-panel">
+        <div class="s20-panel-header">
+          <div class="s20-panel-label">03 · Kenapa Butuh Framework</div>
+          <div class="s20-panel-title">Kejelasan tidak bisa<br>didelegasikan ke model.</div>
+        </div>
+        <div class="s20-panel-body">
+          <div class="s20-bullet"><div class="s20-dot"></div>
+            <div class="s20-btext"><strong style="color:var(--gold)">Kejelasan harus datang dari Anda dulu</strong> — baru model bisa membantu.</div></div>
+          <div class="s20-bullet"><div class="s20-dot"></div>
+            <div class="s20-btext">Framework memaksa Anda menjawab <strong style="color:var(--gold)">tiga hal sebelum bertanya:</strong> konteks, tujuan, bentuk hasil.</div></div>
+          <div class="s20-bullet"><div class="s20-dot"></div>
+            <div class="s20-btext">Prompt spesifik = ruang kemungkinan sempit = <strong style="color:var(--gold)">hasil lebih tepat dan konsisten.</strong></div></div>
+        </div>
+      </div>
+
+      <!-- Panel 4: Insight Utama -->
+      <div id="s20-p4" class="s20-panel">
+        <div class="s20-panel-header">
+          <div class="s20-panel-label">04 · Insight Utama</div>
+          <div class="s20-panel-title">Inti dari prompting yang baik.</div>
+        </div>
+        <div class="s20-insight">
+          <div class="s20-insight-quote">
+            Belajar prompting bukan belajar<br>
+            <span style="color:var(--gold)">"syntax rahasia"</span> —<br><br>
+            tapi belajar <span style="color:var(--gold)">berpikir lebih jernih</span><br>
+            sebelum berbicara.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /s20-right -->
+  </div><!-- /s20-wrap -->
+
+  <script>
+  function s20Switch(btn, panelId) {
+    var wrap = btn.closest('article');
+    wrap.querySelectorAll('.s20-card').forEach(function(c){ c.classList.remove('active'); });
+    wrap.querySelectorAll('.s20-panel').forEach(function(p){ p.classList.remove('active'); });
+    btn.classList.add('active');
+    wrap.querySelector('#' + panelId).classList.add('active');
+  }
+  // Keyboard support
+  document.querySelectorAll('.s20-card').forEach(function(card) {
+    card.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); }
+    });
+  });
+  
+function toggleComparison(){document.getElementById('comp-card').classList.toggle('comp-open');}
+function switchContoh(n){
+  document.querySelectorAll('.contoh-tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  document.querySelectorAll('.contoh-panel').forEach((p,i)=>p.classList.toggle('active',i===n));
+}
+function switchGoal(btn, panelId) {
+  var goals = btn.closest('.tcrei-goals');
+  goals.querySelectorAll('.tcrei-gtab').forEach(function(t){ t.classList.remove('active'); });
+  goals.querySelectorAll('.tcrei-gpanel').forEach(function(p){ p.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+function switchEx(btn, panelId) {
+  var slide = btn.closest('article');
+  slide.querySelectorAll('.ex-tab').forEach(function(t){ t.classList.remove('active'); });
+  slide.querySelectorAll('.ex-panel').forEach(function(p){ p.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+</script>
+</article>
+
+<!-- ─── S03: LEARNING OUTCOMES ─────────────────── -->
+
+
+<!-- ─── S04: LLM = MESIN PROBABILITAS ──────────── -->
+
+
+<!-- ─── S05: 5 SIFAT PSIKOLOGIS LLM ────────────── -->
+
+
+<!-- ─── S06: APT MODEL ──────────────────────────── -->
+
+
+<!-- ─── S07: CIS FRAMEWORK ──────────────────────── -->
+
+
+<!-- ─── S08: TCREI ───────────────────────────────── -->
+<article class="slide slide-dk" id="s08" aria-label="Slide 8: TCREI — 5 Langkah">
+  <svg class="tech-bg" viewBox="0 0 900 580" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="150" cy="80" r="2" fill="#D4A84B"/><circle cx="750" cy="80" r="2" fill="#D4A84B"/><circle cx="450" cy="500" r="2.5" fill="#D4A84B"/><line x1="150" y1="80" x2="750" y2="80" stroke="#D4A84B" stroke-width=".5"/></svg>
+  <div class="eyebrow">Google TCREI · Framework Prompting Resmi</div>
+  <h2 class="slide-title">Task · Context · References · Evaluate · Iterate</h2>
+  <div style="font-size:12px;color:rgba(212,168,75,0.65);letter-spacing:.1em;text-transform:uppercase;margin-top:-6px;margin-bottom:2px;font-family:'JetBrains Mono',monospace;">
+    Thoughtfully Created, Really Excellent Input
+  </div>
+
+  <div class="tcrei-row">
+    <div class="tcrei-card">
+      <div class="tcrei-letter">T</div>
+      <div class="tcrei-word">Task</div>
+      <div class="tcrei-divider"></div>
+      <div class="tcrei-def">Apa yang ingin Anda capai — gunakan kata kerja yang spesifik dan terukur</div>
+      <div class="tcrei-insight">Task kabur → AI menebak → output generik. Spesifik dari awal.</div>
+    </div>
+    <div class="tcrei-sep">→</div>
+    <div class="tcrei-card">
+      <div class="tcrei-letter">C</div>
+      <div class="tcrei-word">Context</div>
+      <div class="tcrei-divider"></div>
+      <div class="tcrei-def">Siapa Anda, situasinya apa, untuk siapa output ini dibuat</div>
+      <div class="tcrei-insight">Tanpa konteks nyata, AI menjawab untuk semua orang — bukan untuk Anda.</div>
+    </div>
+    <div class="tcrei-sep">→</div>
+    <div class="tcrei-card tcrei-card-gold">
+      <div class="tcrei-letter">R</div>
+      <div class="tcrei-word">References</div>
+      <div class="tcrei-divider"></div>
+      <div class="tcrei-def">Contoh, dokumen, atau format yang menjadi acuan output Anda</div>
+      <div class="tcrei-insight">Referensi menghilangkan tebakan soal nada dan format. Ini pembeda terbesar.</div>
+    </div>
+    <div class="tcrei-sep">→</div>
+    <div class="tcrei-card">
+      <div class="tcrei-letter">E</div>
+      <div class="tcrei-word">Evaluate</div>
+      <div class="tcrei-divider"></div>
+      <div class="tcrei-def">Apakah output sudah menjawab tujuan awal? Apa yang kurang?</div>
+      <div class="tcrei-insight">Output kurang tepat? Itu sinyal — perbaiki prompt-nya, bukan terima saja.</div>
+    </div>
+    <div class="tcrei-sep">→</div>
+    <div class="tcrei-card">
+      <div class="tcrei-letter">I</div>
+      <div class="tcrei-word">Iterate</div>
+      <div class="tcrei-divider"></div>
+      <div class="tcrei-def">Refinasi prompt berdasarkan evaluasi — prompt terbaik lahir dari iterasi</div>
+      <div class="tcrei-insight">Prompt terbaik lahir dari iterasi sadar — bukan dari keberuntungan.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:9px;flex-shrink:0;background:rgba(255,255,255,0.03);border:1px solid rgba(212,168,75,0.18);border-radius:var(--r);overflow:hidden">
+    <div style="display:flex;gap:6px;padding:8px 11px 7px;border-bottom:1px solid rgba(212,168,75,0.12)">
+      <button class="contoh-tab active" onclick="switchContoh(0)">⚡ Sederhana</button>
+      <button class="contoh-tab" onclick="switchContoh(1)">✈ Personal</button>
+      <button class="contoh-tab" onclick="switchContoh(2)">💼 Pekerjaan</button>
+    </div>
+    <div style="padding:10px 11px">
+<div class="contoh-panel active" style="align-items:flex-start;gap:0">
+        <div style="flex:1;padding-right:9px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">T</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.82);line-height:1.42">Rekomendasikan 3 film komedi Indonesia</div>
+        </div>
+        <div style="width:1px;background:rgba(212,168,75,0.18);align-self:stretch;flex-shrink:0"></div>
+        <div style="flex:1;padding:0 9px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">C</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.82);line-height:1.42">Untuk ditonton bersama keluarga malam ini, ada anak usia 10 tahun</div>
+        </div>
+        <div style="width:1px;background:rgba(212,168,75,0.18);align-self:stretch;flex-shrink:0"></div>
+        <div style="flex:1;padding:0 9px;background:rgba(212,168,75,0.06);border-radius:5px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">R</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.88);line-height:1.42">Format: judul | platform | alasan — 1 kalimat per film</div>
+        </div>
+        <div style="width:1px;background:rgba(212,168,75,0.18);align-self:stretch;flex-shrink:0"></div>
+        <div style="flex:1;padding:0 9px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">E</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.82);line-height:1.42">Rekomendasinya oke, tapi alasannya terlalu panjang</div>
+        </div>
+        <div style="width:1px;background:rgba(212,168,75,0.18);align-self:stretch;flex-shrink:0"></div>
+        <div style="flex:1;padding-left:9px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">I</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.82);line-height:1.42">Persingkat alasan menjadi 1 kalimat per film</div>
+        </div>
+      </div>
+<div class="contoh-panel" style="align-items:flex-start;gap:0">
+        <div style="flex:1;padding-right:9px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">T</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.82);line-height:1.42">Buatkan itinerary liburan keluarga ke Bali, 4 hari 3 malam</div>
+        </div>
+        <div style="width:1px;background:rgba(212,168,75,0.18);align-self:stretch;flex-shrink:0"></div>
+        <div style="flex:1;padding:0 9px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">C</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.82);line-height:1.42">2 dewasa + 2 anak (8 &amp; 12 tahun), wisata budaya &amp; pantai</div>
+        </div>
+        <div style="width:1px;background:rgba(212,168,75,0.18);align-self:stretch;flex-shrink:0"></div>
+        <div style="flex:1;padding:0 9px;background:rgba(212,168,75,0.06);border-radius:5px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">R</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.88);line-height:1.42">Format tabel: hari | pagi | siang | malam</div>
+        </div>
+        <div style="width:1px;background:rgba(212,168,75,0.18);align-self:stretch;flex-shrink:0"></div>
+        <div style="flex:1;padding:0 9px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">E</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.82);line-height:1.42">Jadwal terlalu padat, tidak ada waktu istirahat anak</div>
+        </div>
+        <div style="width:1px;background:rgba(212,168,75,0.18);align-self:stretch;flex-shrink:0"></div>
+        <div style="flex:1;padding-left:9px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">I</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.82);line-height:1.42">Tambah jeda 2 jam tiap siang untuk istirahat</div>
+        </div>
+      </div>
+<div class="contoh-panel" style="align-items:flex-start;gap:0">
+        <div style="flex:1;padding-right:9px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">T</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.82);line-height:1.42">Tulis ringkasan hasil rapat dalam poin singkat</div>
+        </div>
+        <div style="width:1px;background:rgba(212,168,75,0.18);align-self:stretch;flex-shrink:0"></div>
+        <div style="flex:1;padding:0 9px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">C</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.82);line-height:1.42">HR Manager, rapat 12 orang, topik kebijakan WFH mulai Juli</div>
+        </div>
+        <div style="width:1px;background:rgba(212,168,75,0.18);align-self:stretch;flex-shrink:0"></div>
+        <div style="flex:1;padding:0 9px;background:rgba(212,168,75,0.06);border-radius:5px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">R</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.88);line-height:1.42">Format: keputusan | PIC | deadline — seperti notulen bulan lalu</div>
+        </div>
+        <div style="width:1px;background:rgba(212,168,75,0.18);align-self:stretch;flex-shrink:0"></div>
+        <div style="flex:1;padding:0 9px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">E</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.82);line-height:1.42">Ringkasan ada — tapi tidak ada nama PIC dan deadline</div>
+        </div>
+        <div style="width:1px;background:rgba(212,168,75,0.18);align-self:stretch;flex-shrink:0"></div>
+        <div style="flex:1;padding-left:9px">
+          <div style="font-size:11px;font-weight:800;color:var(--gold);font-family:'JetBrains Mono',monospace;margin-bottom:4px">I</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.82);line-height:1.42">Tambahkan kolom PIC + deadline di tiap poin keputusan</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<article class="slide slide-dk" id="s14" aria-label="Slide: ACT dan ACTIONS">
+  <svg class="tech-bg" viewBox="0 0 900 580" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="200" cy="100" r="2" fill="#D4A84B"/><circle cx="700" cy="100" r="2" fill="#D4A84B"/><line x1="200" y1="100" x2="700" y2="100" stroke="#D4A84B" stroke-width=".5"/><circle cx="450" cy="480" r="2.5" fill="#D4A84B"/></svg>
+  <div class="eyebrow">Framework IWDemy · Checklist Sebelum Menulis Prompt</div>
+  <h2 class="slide-title">ACT untuk Harian &nbsp;·&nbsp; ACTIONS untuk Kritis</h2>
+
+  <!-- Two-column comparison -->
+  <div style="display:flex;flex:1;gap:14px;margin-top:14px;min-height:0;align-items:stretch">
+
+    <!-- LEFT: ACT -->
+    <div style="flex:1;display:flex;flex-direction:column;gap:0;border:1px solid var(--gold-bdr);border-radius:var(--r);background:var(--gold-dim);overflow:hidden">
+      <!-- Header -->
+      <div style="padding:11px 14px 9px;border-bottom:1px solid rgba(212,168,75,0.2)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:800;color:var(--gold);letter-spacing:.04em">A.C.T.</span>
+          <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;background:var(--gold);color:#080808;padding:3px 9px;border-radius:100px;font-family:'Inter',sans-serif">3 elemen</span>
+        </div>
+        <div style="font-size:11px;color:rgba(240,237,230,0.6);margin-top:3px">Output cepat · risiko rendah · di bawah 5 menit</div>
+      </div>
+      <!-- Items -->
+      <div style="display:flex;flex-direction:column;gap:8px;padding:12px 16px;flex:1">
+        <div style="display:flex;gap:9px;align-items:flex-start">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="flex-shrink:0;margin-top:1px"><rect width="17" height="17" rx="4" fill="#D4A84B"/><path d="M3.5 8.5L7 12L13.5 5" stroke="#080808" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#F0EDE6;margin-bottom:2px">Aktor &amp; Audiens</div>
+            <div style="font-size:11px;color:rgba(240,237,230,0.6);line-height:1.4">AI berperan sebagai siapa, output untuk siapa</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:9px;align-items:flex-start">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="flex-shrink:0;margin-top:1px"><rect width="17" height="17" rx="4" fill="#D4A84B"/><path d="M3.5 8.5L7 12L13.5 5" stroke="#080808" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#F0EDE6;margin-bottom:2px">Konteks &amp; Kondisi</div>
+            <div style="font-size:11px;color:rgba(240,237,230,0.6);line-height:1.4">Latar situasi, data penting, batasan relevan</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:9px;align-items:flex-start">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="flex-shrink:0;margin-top:1px"><rect width="17" height="17" rx="4" fill="#D4A84B"/><path d="M3.5 8.5L7 12L13.5 5" stroke="#080808" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#F0EDE6;margin-bottom:2px">Target &amp; Tugas</div>
+            <div style="font-size:11px;color:rgba(240,237,230,0.6);line-height:1.4">Deliverable konkret yang Anda butuhkan</div>
+          </div>
+        </div>
+      </div>
+      <!-- Footer tag -->
+      <div style="padding:8px 14px;border-top:1px solid rgba(212,168,75,0.2);font-size:9px;color:rgba(212,168,75,0.5);font-family:'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase">Rapat · Email · Brainstorm · Ringkasan</div>
+    </div>
+
+    <!-- CENTER divider arrow -->
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;flex-shrink:0;width:28px">
+      <div style="font-size:10px;color:rgba(212,168,75,0.35);letter-spacing:.06em;text-transform:uppercase;font-family:'JetBrains Mono',monospace;writing-mode:vertical-lr;transform:rotate(180deg)">extends</div>
+      <div style="color:rgba(212,168,75,0.4);font-size:16px">→</div>
+    </div>
+
+    <!-- RIGHT: ACTIONS -->
+    <div class="actions-col" style="flex:1;display:flex;flex-direction:column;gap:0;border:1px solid var(--bdr);border-radius:var(--r);background:rgba(255,255,255,0.03);overflow:hidden">
+      <!-- Header -->
+      <div style="padding:11px 14px 9px;border-bottom:1px solid var(--bdr)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:800;color:#F0EDE6;letter-spacing:.03em">A.C.T.I.O.N.S.</span>
+          <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;background:rgba(240,237,230,0.08);color:rgba(240,237,230,0.5);padding:3px 9px;border-radius:100px;border:1px solid var(--bdr);font-family:'Inter',sans-serif">7 elemen</span>
+        </div>
+        <div style="font-size:11px;color:rgba(240,237,230,0.4);margin-top:3px">Keputusan kritis · komunikasi berdampak · presisi penuh</div>
+      </div>
+      <div class="actions-body-wrap"><div class="actions-body">
+      <!-- Items: inherited ACT -->
+      <div style="display:flex;flex-direction:column;gap:5px;padding:9px 14px 7px;border-bottom:1px dashed rgba(240,237,230,0.1)">
+        <div style="font-size:8.5px;color:rgba(212,168,75,0.45);font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px">Diwarisi dari ACT</div>
+        <div style="display:flex;gap:9px;align-items:center">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style="flex-shrink:0"><rect width="15" height="15" rx="3.5" fill="rgba(212,168,75,0.35)"/><path d="M3 7.5L6 10.5L12 4.5" stroke="rgba(212,168,75,0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-size:12px;font-weight:600;color:rgba(240,237,230,0.65)">Aktor &amp; Audiens</span>
+        </div>
+        <div style="display:flex;gap:9px;align-items:center">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style="flex-shrink:0"><rect width="15" height="15" rx="3.5" fill="rgba(212,168,75,0.35)"/><path d="M3 7.5L6 10.5L12 4.5" stroke="rgba(212,168,75,0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-size:12px;font-weight:600;color:rgba(240,237,230,0.65)">Konteks &amp; Kondisi</span>
+        </div>
+        <div style="display:flex;gap:9px;align-items:center">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style="flex-shrink:0"><rect width="15" height="15" rx="3.5" fill="rgba(212,168,75,0.35)"/><path d="M3 7.5L6 10.5L12 4.5" stroke="rgba(212,168,75,0.9)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-size:12px;font-weight:600;color:rgba(240,237,230,0.65)">Target &amp; Tugas</span>
+        </div>
+      </div>
+      <!-- Items: ACTIONS extensions -->
+      <div style="display:flex;flex-direction:column;gap:5px;padding:9px 14px;flex:1">
+        <div style="font-size:8.5px;color:rgba(240,237,230,0.28);font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px">+ 4 elemen strategis</div>
+        <div style="display:flex;gap:9px;align-items:flex-start">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="flex-shrink:0;margin-top:1px"><rect width="17" height="17" rx="4" stroke="rgba(240,237,230,0.2)" fill="none"/><path d="M3.5 8.5L7 12L13.5 5" stroke="rgba(240,237,230,0.2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><span style="font-size:13px;font-weight:700;color:rgba(240,237,230,0.85)">Impact</span><span style="font-size:11px;color:rgba(240,237,230,0.4);margin-left:8px">Outcome strategis jangka panjang</span></div>
+        </div>
+        <div style="display:flex;gap:9px;align-items:flex-start">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="flex-shrink:0;margin-top:1px"><rect width="17" height="17" rx="4" stroke="rgba(240,237,230,0.2)" fill="none"/><path d="M3.5 8.5L7 12L13.5 5" stroke="rgba(240,237,230,0.2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><span style="font-size:13px;font-weight:700;color:rgba(240,237,230,0.85)">Output</span><span style="font-size:11px;color:rgba(240,237,230,0.4);margin-left:8px">Format, panjang, dan gaya yang diharapkan</span></div>
+        </div>
+        <div style="display:flex;gap:9px;align-items:flex-start">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="flex-shrink:0;margin-top:1px"><rect width="17" height="17" rx="4" stroke="rgba(240,237,230,0.2)" fill="none"/><path d="M3.5 8.5L7 12L13.5 5" stroke="rgba(240,237,230,0.2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><span style="font-size:13px;font-weight:700;color:rgba(240,237,230,0.85)">No-Nos</span><span style="font-size:11px;color:rgba(240,237,230,0.4);margin-left:8px">Apa yang tidak boleh dilakukan AI</span></div>
+        </div>
+        <div style="display:flex;gap:9px;align-items:flex-start">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" style="flex-shrink:0;margin-top:1px"><rect width="17" height="17" rx="4" stroke="rgba(240,237,230,0.2)" fill="none"/><path d="M3.5 8.5L7 12L13.5 5" stroke="rgba(240,237,230,0.2)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><span style="font-size:13px;font-weight:700;color:rgba(240,237,230,0.85)">Sequencing</span><span style="font-size:11px;color:rgba(240,237,230,0.4);margin-left:8px">Urutan langkah dan strategi berpikir</span></div>
+        </div>
+      </div>
+      <div style="padding:8px 14px;border-top:1px solid var(--bdr);font-size:9px;color:rgba(240,237,230,0.25);font-family:'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase">Proposal · Keputusan · Email Kritis · Komunikasi Strategis</div>
+      </div></div><!-- /actions-body-wrap -->
+    </div>
+  </div>
+
+  <!-- Framework note -->
+  <div style="margin-top:9px;flex-shrink:0;display:flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(255,255,255,0.02);border:1px solid rgba(240,237,230,0.07);border-radius:6px">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><circle cx="7" cy="7" r="6" stroke="rgba(212,168,75,0.4)" stroke-width="1.2"/><path d="M7 6v4M7 4.5v.5" stroke="rgba(212,168,75,0.7)" stroke-width="1.2" stroke-linecap="round"/></svg>
+    <span style="font-size:11px;color:rgba(240,237,230,0.38);line-height:1.5">Gunakan sebagai <span style="color:rgba(212,168,75,0.6);font-weight:600">checklist framework berpikir</span> — tidak harus urut, tapi pastikan setiap elemen sudah Anda pertimbangkan sebelum menulis prompt.</span>
+  </div>
+
+</article>
+
+<article class="slide slide-dk2" id="s16" aria-label="Slide: Satu Contoh Tiga Framework">
+  <svg class="tech-bg" viewBox="0 0 900 580" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="100" cy="120" r="2" fill="#D4A84B"/><circle cx="800" cy="120" r="2" fill="#D4A84B"/><line x1="100" y1="120" x2="800" y2="120" stroke="#D4A84B" stroke-width=".5"/><circle cx="450" cy="490" r="2.5" fill="#D4A84B"/></svg>
+  <div class="eyebrow">Latihan Terapan · Satu Skenario, Tiga Cara Membingkai</div>
+  <h2 class="slide-title">Bagaimana TCREI, ACT, dan ACTIONS Bekerja Bersama</h2>
+
+  <!-- Scenario bar -->
+  <div style="margin-top:16px;padding:13px 20px;background:rgba(226,184,78,0.09);border:1px solid rgba(226,184,78,0.28);border-radius:var(--r);display:flex;align-items:center;gap:16px;flex-shrink:0">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:rgba(226,184,78,0.65);white-space:nowrap">Skenario</div>
+    <div style="width:1px;height:24px;background:rgba(226,184,78,0.28);flex-shrink:0"></div>
+    <div style="font-size:clamp(12px,1.15vw,14px);font-weight:600;color:#F0EDE6;line-height:1.45">Minta persetujuan direksi untuk anggaran program AI training — 50 juta, 20 peserta, 3 bulan</div>
+  </div>
+
+  <!-- Tab buttons -->
+  <div style="margin-top:14px;display:flex;gap:8px;flex-shrink:0">
+    <button class="ex-tab active" onclick="switchEx(this,'ex-tcrei')">
+      <span style="font-family:'JetBrains Mono',monospace;font-weight:800;font-size:12px">TCREI</span>
+      <span style="font-size:10px;opacity:.6">· Proses Berpikir</span>
+    </button>
+    <button class="ex-tab" onclick="switchEx(this,'ex-act')">
+      <span style="font-family:'JetBrains Mono',monospace;font-weight:800;font-size:12px">A.C.T.</span>
+      <span style="font-size:10px;opacity:.6">· Prompt Cepat</span>
+    </button>
+    <button class="ex-tab" onclick="switchEx(this,'ex-actions')">
+      <span style="font-family:'JetBrains Mono',monospace;font-weight:800;font-size:12px">A.C.T.I.O.N.S.</span>
+      <span style="font-size:10px;opacity:.6">· Prompt Strategis</span>
+    </button>
+  </div>
+
+  <!-- TCREI Panel -->
+  <div id="ex-tcrei" class="ex-panel active">
+    <div class="ex-row ex-row-gold">
+      <div class="ex-badge ex-badge-gold">T</div>
+      <div><div class="ex-label">Task</div><div class="ex-val">Draft email ke direksi minta persetujuan anggaran program AI training 50 juta</div></div>
+    </div>
+    <div class="ex-row ex-row-gold">
+      <div class="ex-badge ex-badge-gold">C</div>
+      <div><div class="ex-label">Context</div><div class="ex-val">Saya HR Manager. Penerima: Direktur yang fokus pada ROI dan efisiensi, bukan detail teknologi</div></div>
+    </div>
+    <div class="ex-row ex-row-gold">
+      <div class="ex-badge ex-badge-gold">R</div>
+      <div><div class="ex-label">References</div><div class="ex-val">Gunakan format dan nada email proposal anggaran marketing Q1 yang disetujui Februari lalu</div></div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-badge ex-badge-dim">E</div>
+      <div><div class="ex-label">Evaluate</div><div class="ex-val">Draft pertama terlalu teknis — menyebut nama tools dan spesifikasi, direksi tidak tertarik</div></div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-badge ex-badge-dim">I</div>
+      <div><div class="ex-label">Iterate</div><div class="ex-val">Fokus pada ROI dan competitive advantage. Hapus jargon, tambahkan angka dampak bisnis yang konkret</div></div>
+    </div>
+  </div>
+
+  <!-- ACT Panel -->
+  <div id="ex-act" class="ex-panel">
+    <div class="ex-row ex-row-gold">
+      <div class="ex-badge ex-badge-gold">A</div>
+      <div><div class="ex-label">Aktor &amp; Audiens</div><div class="ex-val">Konsultan strategi yang presentasi kepada eksekutif senior yang berorientasi pada hasil bisnis</div></div>
+    </div>
+    <div class="ex-row ex-row-gold">
+      <div class="ex-badge ex-badge-gold">C</div>
+      <div><div class="ex-label">Konteks &amp; Kondisi</div><div class="ex-val">Program AI training 50 juta, 20 orang, 3 bulan. Kompetitor utama sudah implement 6 bulan lalu</div></div>
+    </div>
+    <div class="ex-row ex-row-gold">
+      <div class="ex-badge ex-badge-gold">T</div>
+      <div><div class="ex-label">Target &amp; Tugas</div><div class="ex-val">Draft email persuasif ke direksi yang meminta persetujuan anggaran dengan argumen ROI yang kuat</div></div>
+    </div>
+    <div style="padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(240,237,230,0.08);border-radius:7px;border-left:3px solid rgba(226,184,78,0.4)">
+      <div style="font-size:9px;color:rgba(226,184,78,0.6);font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Prompt yang dihasilkan</div>
+      <div style="font-size:12px;color:rgba(240,237,230,0.72);line-height:1.55">"Kamu adalah konsultan strategi yang presentasi ke eksekutif senior. Tim kami butuh program AI training 50 juta untuk 20 orang. Kompetitor sudah implement 6 bulan lalu. Draft email persuasif ke direksi minta persetujuan anggaran."</div>
+    </div>
+  </div>
+
+  <!-- ACTIONS Panel -->
+  <div id="ex-actions" class="ex-panel">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;flex:1;min-height:0">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="ex-row ex-row-gold" style="margin:0">
+          <div class="ex-badge ex-badge-gold">A</div>
+          <div><div class="ex-label">Aktor</div><div class="ex-val">Konsultan strategi senior → Direktur berorientasi ROI</div></div>
+        </div>
+        <div class="ex-row ex-row-gold" style="margin:0">
+          <div class="ex-badge ex-badge-gold">C</div>
+          <div><div class="ex-label">Konteks</div><div class="ex-val">AI training 50 juta, 20 orang — kompetitor sudah 6 bulan</div></div>
+        </div>
+        <div class="ex-row ex-row-gold" style="margin:0">
+          <div class="ex-badge ex-badge-gold">T</div>
+          <div><div class="ex-label">Target</div><div class="ex-val">Email yang mendapat persetujuan anggaran hari ini</div></div>
+        </div>
+        <div class="ex-row" style="margin:0">
+          <div class="ex-badge ex-badge-dim">I</div>
+          <div><div class="ex-label">Dampak</div><div class="ex-val">Direksi approve dan melihat ini sebagai investasi strategis, bukan cost</div></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="ex-row" style="margin:0">
+          <div class="ex-badge ex-badge-dim">O</div>
+          <div><div class="ex-label">Output</div><div class="ex-val">Email formal, max 200 kata, tanpa jargon teknis apapun</div></div>
+        </div>
+        <div class="ex-row" style="margin:0">
+          <div class="ex-badge ex-badge-dim">N</div>
+          <div><div class="ex-label">Pantangan</div><div class="ex-val">Jangan sebut tools spesifik. Jangan terlalu teknis. Jangan apologetik.</div></div>
+        </div>
+        <div class="ex-row" style="margin:0">
+          <div class="ex-badge ex-badge-dim">S</div>
+          <div><div class="ex-label">Sequencing</div><div class="ex-val">Pancing urgensi → ROI konkret → risiko jika tidak bertindak → CTA jelas</div></div>
+        </div>
+        <div style="padding:9px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(240,237,230,0.08);border-radius:7px;border-left:3px solid rgba(226,184,78,0.4)">
+          <div style="font-size:9px;color:rgba(226,184,78,0.6);font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px">Hasil</div>
+          <div style="font-size:12px;color:rgba(240,237,230,0.7);line-height:1.5">Prompt 7 elemen ini menghasilkan email yang jauh lebih tepat sasaran dibanding versi A.C.T.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Evaluasi Komparatif (always visible) ──────────────────── -->
+  <div id="comp-card" style="margin-top:12px;flex-shrink:0;border:1px solid rgba(240,237,230,0.08);border-radius:var(--r);padding:11px 16px;background:rgba(255,255,255,0.02)" onclick="toggleComparison()">
+    <div class="comp-toggle">
+      <div style="font-size:9px;color:rgba(212,168,75,0.5);font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase">Persamaan &amp; Perbedaan · Klik untuk lihat analisis</div>
+      <span class="comp-arrow">▶</span>
+    </div>
+    <div class="comp-body">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 20px">
+      <!-- Persamaan -->
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span style="color:rgba(212,168,75,0.7);font-size:12px;flex-shrink:0;margin-top:1px">=</span>
+        <span style="font-size:11.5px;color:rgba(240,237,230,0.65);line-height:1.45">Ketiganya mensyaratkan role AI, konteks situasi, dan tujuan yang jelas — <span style="color:rgba(240,237,230,0.85);font-weight:600">fondasi yang sama</span></span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span style="color:rgba(240,100,100,0.6);font-size:12px;flex-shrink:0;margin-top:1px">≠</span>
+        <span style="font-size:11.5px;color:rgba(240,237,230,0.65);line-height:1.45"><span style="color:rgba(240,237,230,0.85);font-weight:600">TCREI = framework iterasi</span>; ACT/ACTIONS = framework struktur — berbeda dimensi, tidak berkompetisi</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span style="color:rgba(240,100,100,0.6);font-size:12px;flex-shrink:0;margin-top:1px">≠</span>
+        <span style="font-size:11.5px;color:rgba(240,237,230,0.65);line-height:1.45">Hanya TCREI yang punya <span style="color:rgba(240,237,230,0.85);font-weight:600">loop E+I</span> — ACT/ACTIONS tidak mengajarkan cara mengevaluasi dan mengulang</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span style="color:rgba(240,100,100,0.6);font-size:12px;flex-shrink:0;margin-top:1px">≠</span>
+        <span style="font-size:11.5px;color:rgba(240,237,230,0.65);line-height:1.45">Hanya ACTIONS yang punya <span style="color:rgba(240,237,230,0.85);font-weight:600">I, O, N, S</span> — lapisan presisi output dan constraints yang TCREI tidak miliki</span>
+      </div>
+    </div>
+    <div style="margin-top:9px;padding-top:9px;border-top:1px solid rgba(240,237,230,0.07);display:flex;gap:8px;align-items:center">
+      <span style="color:rgba(212,168,75,0.8);font-size:12px;flex-shrink:0">→</span>
+      <span style="font-size:11.5px;color:rgba(212,168,75,0.75);font-weight:600">Cara terbaik: pakai ACT atau ACTIONS untuk <em style="font-style:normal;color:rgba(240,237,230,0.8)">menyusun prompt</em>, lalu TCREI E+I untuk <em style="font-style:normal;color:rgba(240,237,230,0.8)">menyempurnakannya</em></span>
+    </div>
+    </div><!-- /comp-body -->
+  </div>
+</article>
+
+<article class="slide slide-dk" id="s10" aria-label="Slide: 7 Tips Penggunaan AI Efektif">
+  <svg class="tech-bg" viewBox="0 0 900 580" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="250" cy="120" r="3" fill="#D4A84B"/><circle cx="650" cy="200" r="2" fill="#D4A84B"/><circle cx="450" cy="420" r="2.5" fill="#D4A84B"/><circle cx="80" cy="450" r="2" fill="#D4A84B"/><line x1="250" y1="120" x2="650" y2="200" stroke="#D4A84B" stroke-width=".6"/><line x1="80" y1="450" x2="450" y2="420" stroke="#D4A84B" stroke-width=".6"/></svg>
+  <div class="eyebrow">Praktik Prompting · Diurutkan Berdasarkan Dampak</div>
+  <h2 class="slide-title">7 Cara Mengarahkan Prompt ke AI secara Efektif</h2>
+
+  <div style="flex:1;display:flex;flex-direction:column;gap:10px;margin-top:12px;min-height:0">
+    <div style="display:flex;gap:12px;flex:1">
+<div class="tip-box" style="">
+        <div class="tip-box-front">
+          <div class="tip-box-num" style="color:var(--gold)">1</div>
+          <div class="tip-box-kw">Tujuan<br>Dulu</div>
+        </div>
+        <div class="tip-box-detail">
+          <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;background:var(--gold);color:#080808;padding:2px 7px;border-radius:100px;font-family:'Inter',sans-serif;white-space:nowrap">Dampak Tertinggi</div>
+          <div class="tip-box-idx">#01</div>
+          <div class="tip-box-title">Sampaikan Tujuan,<br>Bukan Cara</div>
+          <div class="tip-box-body">Katakan "saya butuh strategi retensi" — bukan "tulis 5 poin". AI memberi opsi terbaik ketika diberi ruang, bukan instruksi.</div>
+        </div>
+      </div>
+<div class="tip-box" style="">
+        <div class="tip-box-front">
+          <div class="tip-box-num" style="color:rgba(212,168,75,0.5)">2</div>
+          <div class="tip-box-kw">Kerangka<br>Dulu</div>
+        </div>
+        <div class="tip-box-detail">
+          
+          <div class="tip-box-idx">#02</div>
+          <div class="tip-box-title">Validasi Kerangka Dulu,<br>Detail Kemudian</div>
+          <div class="tip-box-body">Minta outline, sepakati struktur — baru isi detail. Mencegah revisi besar dan menghemat waktu signifikan.</div>
+        </div>
+      </div>
+<div class="tip-box" style="">
+        <div class="tip-box-front">
+          <div class="tip-box-num" style="color:rgba(212,168,75,0.5)">3</div>
+          <div class="tip-box-kw">Minta 3<br>Opsi</div>
+        </div>
+        <div class="tip-box-detail">
+          
+          <div class="tip-box-idx">#03</div>
+          <div class="tip-box-title">Minta 3 Opsi,<br>Bukan 1 Jawaban</div>
+          <div class="tip-box-body">Pilihan mencegah anchoring. Dari 3 opsi, Anda pilih, mix, atau perbaiki — bukan terima saja.</div>
+        </div>
+      </div>
+<div class="tip-box" style="">
+        <div class="tip-box-front">
+          <div class="tip-box-num" style="color:rgba(212,168,75,0.5)">4</div>
+          <div class="tip-box-kw">Satu<br>Topik</div>
+        </div>
+        <div class="tip-box-detail">
+          
+          <div class="tip-box-idx">#04</div>
+          <div class="tip-box-title">Satu Topik<br>per Percakapan</div>
+          <div class="tip-box-body">Konteks bercampur = output generik. Mulai chat baru untuk topik berbeda agar AI tetap fokus.</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;flex:1;justify-content:center">
+<div class="tip-box" style="flex:0 0 calc(25% - 7.5px)">
+        <div class="tip-box-front">
+          <div class="tip-box-num" style="color:rgba(212,168,75,0.5)">5</div>
+          <div class="tip-box-kw">Reset<br>Konteks</div>
+        </div>
+        <div class="tip-box-detail">
+          
+          <div class="tip-box-idx">#05</div>
+          <div class="tip-box-title">Reset Konteks<br>di Sesi Baru</div>
+          <div class="tip-box-body">AI tidak ingat sesi lalu. Buka chat baru dengan brief singkat di setiap sesi.</div>
+        </div>
+      </div>
+<div class="tip-box" style="flex:0 0 calc(25% - 7.5px)">
+        <div class="tip-box-front">
+          <div class="tip-box-num" style="color:rgba(212,168,75,0.5)">6</div>
+          <div class="tip-box-kw">Koreksi<br>Lokal</div>
+        </div>
+        <div class="tip-box-detail">
+          
+          <div class="tip-box-idx">#06</div>
+          <div class="tip-box-title">Koreksi Langsung<br>dalam Chat</div>
+          <div class="tip-box-body">Jangan mulai ulang. Koreksi output di dalam chat — AI menyesuaikan dari titik itu.</div>
+        </div>
+      </div>
+<div class="tip-box" style="flex:0 0 calc(25% - 7.5px)">
+        <div class="tip-box-front">
+          <div class="tip-box-num" style="color:rgba(212,168,75,0.5)">7</div>
+          <div class="tip-box-kw">Simpan<br>Prompt</div>
+        </div>
+        <div class="tip-box-detail">
+          
+          <div class="tip-box-idx">#07</div>
+          <div class="tip-box-title">Simpan Prompt<br>yang Berhasil</div>
+          <div class="tip-box-body">Bangun library pribadi prompt. Prompt bagus adalah aset — bukan sekali pakai, buang, lupa.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
+
+
+    <!-- Tools + Chat vs Deep Research -->
+    <div style="width:100%;max-width:620px;display:flex;gap:10px">
+
+      <!-- Gemini card -->
+      <div style="flex:1;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(240,237,230,0.07);border-radius:var(--r)">
+        <div style="font-size:9px;color:rgba(212,168,75,0.55);font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Coba Sekarang</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:26px;height:26px;border-radius:6px;background:rgba(66,133,244,0.12);border:1px solid rgba(66,133,244,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1.5A5 5 0 1 1 1.5 6.5" stroke="rgba(66,133,244,0.8)" stroke-width="1.3" stroke-linecap="round"/><circle cx="6.5" cy="6.5" r="1.5" fill="rgba(66,133,244,0.8)"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#F0EDE6">Buka Gemini</div>
+              <div style="font-size:11px;color:rgba(240,237,230,0.4)">gemini.google.com</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:26px;height:26px;border-radius:6px;background:rgba(16,163,127,0.12);border:1px solid rgba(16,163,127,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="1" width="10" height="10" rx="2.5" stroke="rgba(16,163,127,0.8)" stroke-width="1.2"/><path d="M3.5 6h5M6 3.5v5" stroke="rgba(16,163,127,0.8)" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#F0EDE6">Tools Lain di Program</div>
+              <div style="font-size:11px;color:rgba(240,237,230,0.4)">Claude · ChatGPT — sesuai instruksi fasilitator</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat vs Deep Research -->
+      <div style="flex:1;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(240,237,230,0.07);border-radius:var(--r)">
+        <div style="font-size:9px;color:rgba(212,168,75,0.55);font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Bedakan Fungsinya</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div style="padding:8px 10px;background:rgba(212,168,75,0.06);border:1px solid rgba(212,168,75,0.15);border-radius:6px">
+            <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:3px">Chat</div>
+            <div style="font-size:11.5px;color:rgba(240,237,230,0.55);line-height:1.42">Percakapan langsung, task harian, output cepat — satu sesi, satu tujuan</div>
+          </div>
+          <div style="padding:8px 10px;background:rgba(255,255,255,0.02);border:1px solid rgba(240,237,230,0.07);border-radius:6px">
+            <div style="font-size:12px;font-weight:700;color:rgba(240,237,230,0.75);margin-bottom:3px">Deep Research</div>
+            <div style="font-size:11.5px;color:rgba(240,237,230,0.45);line-height:1.42">Riset mendalam, multi-sumber, output terstruktur — butuh waktu, hasilnya jauh lebih kaya</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+<article class="slide slide-dk2" id="s11" aria-label="Slide: Prompt Database">
+  <svg class="tech-bg" viewBox="0 0 900 580" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="200" cy="200" r="2.5" fill="#D4A84B"/><circle cx="700" cy="100" r="2" fill="#D4A84B"/><circle cx="500" cy="450" r="3" fill="#D4A84B"/><circle cx="850" cy="400" r="2" fill="#D4A84B"/><line x1="200" y1="200" x2="700" y2="100" stroke="#D4A84B" stroke-width=".6"/><line x1="500" y1="450" x2="850" y2="400" stroke="#D4A84B" stroke-width=".6"/></svg>
+  <div class="eyebrow">Sumber Daya · AI First Leaders Program</div>
+  <h2 class="slide-title">Coba Sekarang</h2>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:0">
+
+    <!-- Section 1: Prompt Database — hero -->
+    <div style="width:100%;max-width:660px;background:var(--gold-dim);border:1px solid var(--gold-bdr);border-radius:var(--r);padding:22px 28px;display:flex;gap:20px;align-items:center">
+      <div style="width:52px;height:52px;min-width:52px;border-radius:12px;background:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="4" y="6" width="24" height="20" rx="3" stroke="#080808" stroke-width="1.8" fill="none"/><path d="M9 12h14M9 17h10M9 22h7" stroke="#080808" stroke-width="1.8" stroke-linecap="round"/><circle cx="24" cy="24" r="5" fill="#080808"/><path d="M22 24l1.5 1.5L26.5 22" stroke="var(--gold)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:10px;color:rgba(212,168,75,0.6);font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px">Prompt Database</div>
+        <div style="font-size:17px;font-weight:700;color:#F0EDE6;margin-bottom:8px;line-height:1.2">Koleksi prompt siap pakai, sudah dikurasi untuk leader</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <span style="font-size:10px;font-weight:700;color:rgba(212,168,75,0.8);background:rgba(212,168,75,0.1);border:1px solid rgba(212,168,75,0.2);border-radius:100px;padding:2px 9px;font-family:'Inter',sans-serif">Siap Pakai</span>
+          <span style="font-size:10px;font-weight:700;color:rgba(212,168,75,0.8);background:rgba(212,168,75,0.1);border:1px solid rgba(212,168,75,0.2);border-radius:100px;padding:2px 9px;font-family:'Inter',sans-serif">Bisa Dikustomisasi</span>
+          <span style="font-size:10px;font-weight:700;color:rgba(212,168,75,0.8);background:rgba(212,168,75,0.1);border:1px solid rgba(212,168,75,0.2);border-radius:100px;padding:2px 9px;font-family:'Inter',sans-serif">Terus Diperbarui</span>
+        </div>
+      </div>
+      <div style="flex-shrink:0;padding:10px 16px;background:rgba(212,168,75,0.08);border:1px solid rgba(212,168,75,0.2);border-radius:8px;text-align:center">
+        <div style="font-size:10px;color:rgba(212,168,75,0.55);font-family:'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px">Akses</div>
+        <div style="font-size:11.5px;color:rgba(240,237,230,0.65);line-height:1.4;max-width:130px">Cek pesan yang<br>sudah dikirimkan</div>
+      </div>
+    </div>
+
+    <!-- Section 2: Tools (2-col) -->
+    <div style="width:100%;max-width:660px;display:flex;gap:12px">
+
+      <!-- Gemini + Tools -->
+      <div style="flex:1;padding:16px 18px;background:rgba(255,255,255,0.03);border:1px solid rgba(240,237,230,0.08);border-radius:var(--r)">
+        <div style="font-size:9px;color:rgba(212,168,75,0.5);font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Tools yang Digunakan</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:30px;height:30px;border-radius:8px;background:rgba(66,133,244,0.12);border:1px solid rgba(66,133,244,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="15" height="15" viewBox="0 0 14 14" fill="none"><path d="M7 1.5A5.5 5.5 0 1 1 1.5 7" stroke="rgba(66,133,244,0.85)" stroke-width="1.4" stroke-linecap="round"/><circle cx="7" cy="7" r="1.8" fill="rgba(66,133,244,0.85)"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#F0EDE6">Buka Gemini</div>
+              <div style="font-size:11px;color:rgba(240,237,230,0.38)">gemini.google.com</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:30px;height:30px;border-radius:8px;background:rgba(16,163,127,0.12);border:1px solid rgba(16,163,127,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="1.5" width="10" height="10" rx="2.5" stroke="rgba(16,163,127,0.85)" stroke-width="1.3"/><path d="M4 6.5h5M6.5 4v5" stroke="rgba(16,163,127,0.85)" stroke-width="1.3" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#F0EDE6">Tools Lain di Program</div>
+              <div style="font-size:11px;color:rgba(240,237,230,0.38)">Claude · ChatGPT — sesuai instruksi fasilitator</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat vs Deep Research -->
+      <div style="flex:1;padding:16px 18px;background:rgba(255,255,255,0.03);border:1px solid rgba(240,237,230,0.08);border-radius:var(--r)">
+        <div style="font-size:9px;color:rgba(212,168,75,0.5);font-family:'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Bedakan Fungsinya</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="padding:9px 12px;background:rgba(212,168,75,0.06);border:1px solid rgba(212,168,75,0.16);border-radius:7px">
+            <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:3px">Chat</div>
+            <div style="font-size:11.5px;color:rgba(240,237,230,0.55);line-height:1.42">Task harian · output cepat · satu sesi, satu tujuan</div>
+          </div>
+          <div style="padding:9px 12px;background:rgba(255,255,255,0.02);border:1px solid rgba(240,237,230,0.07);border-radius:7px">
+            <div style="font-size:12px;font-weight:700;color:rgba(240,237,230,0.7);margin-bottom:3px">Deep Research</div>
+            <div style="font-size:11.5px;color:rgba(240,237,230,0.45);line-height:1.42">Riset mendalam · multi-sumber · output jauh lebih kaya</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</article>
+
+<!-- ─── S12: TAKEAWAY ──────────────────────────────── -->
+<article class="slide slide-dk" id="s12" aria-label="Slide: Takeaway">
+  <svg class="tech-bg" viewBox="0 0 900 580" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="150" cy="100" r="2" fill="#D4A84B"/><circle cx="750" cy="100" r="2" fill="#D4A84B"/><line x1="150" y1="100" x2="750" y2="100" stroke="#D4A84B" stroke-width=".5"/><circle cx="450" cy="480" r="2.5" fill="#D4A84B"/></svg>
+  <div class="eyebrow">Takeaway · L2 D1 M2 · Prompting</div>
+  <h2 class="slide-title">Yang Anda Bawa Pulang Hari Ini</h2>
+
+  <div style="flex:1;display:flex;flex-direction:column;gap:13px;margin-top:16px;min-height:0">
+
+    <!-- Row 1: TCREI -->
+    <div style="display:flex;gap:0;align-items:stretch;border:1px solid var(--gold-bdr);border-radius:var(--r);background:var(--gold-dim);overflow:hidden;flex:1">
+      <div style="width:4px;background:var(--gold);flex-shrink:0"></div>
+      <div style="padding:14px 18px;flex:1">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:800;color:var(--gold);letter-spacing:.06em">TCREI</span>
+          <div style="flex:1;height:1px;background:rgba(212,168,75,0.25)"></div>
+        </div>
+        <div style="font-size:14px;font-weight:700;color:#F0EDE6;margin-bottom:6px">Prompting adalah proses, bukan sekali ketik</div>
+        <div style="font-size:12.5px;color:rgba(240,237,230,0.62);line-height:1.55">T+C+R menyusun prompt — E+I menyempurnakannya. References adalah pembeda terbesar antara output biasa dan output presisi. Prompt terbaik lahir dari iterasi yang sadar, bukan dari keberuntungan.</div>
+      </div>
+    </div>
+
+    <!-- Row 2: ACT / ACTIONS -->
+    <div style="display:flex;gap:0;align-items:stretch;border:1px solid var(--bdr);border-radius:var(--r);background:rgba(255,255,255,0.03);overflow:hidden;flex:1">
+      <div style="width:4px;background:rgba(212,168,75,0.45);flex-shrink:0"></div>
+      <div style="padding:14px 18px;flex:1">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:800;color:rgba(212,168,75,0.8);letter-spacing:.04em">ACT &amp; ACTIONS</span>
+          <div style="flex:1;height:1px;background:rgba(240,237,230,0.1)"></div>
+        </div>
+        <div style="font-size:14px;font-weight:700;color:#F0EDE6;margin-bottom:6px">Pilih kedalaman sesuai dampak — bukan sesuai kebiasaan</div>
+        <div style="font-size:12.5px;color:rgba(240,237,230,0.55);line-height:1.55">ACT (3 elemen) cukup untuk task harian. ACTIONS (7 elemen) wajib saat output berdampak — proposal, keputusan, komunikasi kritis. Bedanya bukan panjang prompt, tapi seberapa dalam Anda berpikir sebelum menulis.</div>
+      </div>
+    </div>
+
+    <!-- Row 3: Tips + synthesis -->
+    <div style="display:flex;gap:0;align-items:stretch;border:1px solid var(--bdr);border-radius:var(--r);background:rgba(255,255,255,0.03);overflow:hidden;flex:1">
+      <div style="width:4px;background:rgba(212,168,75,0.25);flex-shrink:0"></div>
+      <div style="padding:14px 18px;flex:1">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:800;color:rgba(212,168,75,0.55);letter-spacing:.04em">TIPS &amp; PRAKTEK</span>
+          <div style="flex:1;height:1px;background:rgba(240,237,230,0.07)"></div>
+        </div>
+        <div style="font-size:14px;font-weight:700;color:#F0EDE6;margin-bottom:6px">Arahkan tujuan, bukan cara — lalu iterasi dengan sadar</div>
+        <div style="font-size:12.5px;color:rgba(240,237,230,0.48);line-height:1.55">Mulai dengan tujuan, bukan instruksi. Validasi kerangka sebelum detail. Simpan prompt yang berhasil. Satu topik per chat. Reset konteks di sesi baru. Kebiasaan kecil ini yang membedakan pengguna biasa dari pengguna yang efektif.</div>
+      </div>
+    </div>
+
+  </div>
+</article>
+
+<article class="slide slide-dk2" id="s13" aria-label="Slide: What's Next">
+  <svg class="tech-bg" viewBox="0 0 900 580" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="700" cy="150" r="2.5" fill="#D4A84B"/><circle cx="200" cy="400" r="2" fill="#D4A84B"/><line x1="200" y1="400" x2="700" y2="150" stroke="#D4A84B" stroke-width=".5"/></svg>
+  <div class="eyebrow">Penutup · Sampai Jumpa di Sesi Berikutnya</div>
+  <h2 class="slide-title">Sebelum Sesi Berikutnya</h2>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px">
+
+    <!-- Video homework card -->
+    <div style="width:100%;max-width:580px;background:var(--gold-dim);border:1px solid var(--gold-bdr);border-radius:var(--r);padding:22px 26px;display:flex;gap:18px;align-items:flex-start">
+      <!-- Play icon -->
+      <div style="width:52px;height:52px;min-width:52px;border-radius:12px;background:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M7 5l12 6-12 6V5z" fill="#080808"/></svg>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:10px;color:rgba(212,168,75,0.6);font-family:'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px">Homework · Video</div>
+        <div style="font-size:15px;font-weight:700;color:#F0EDE6;margin-bottom:6px">Tonton video yang sudah dikirim ke Anda</div>
+        <div style="font-size:12px;color:rgba(240,237,230,0.62);line-height:1.55">Cek pesan yang sudah dikirimkan — ada video yang perlu Anda tonton sebelum sesi berikutnya. Durasi singkat, tapi penting untuk membangun konteks sesi selanjutnya.</div>
+      </div>
+    </div>
+
+    <!-- 3 Steps -->
+    <div style="width:100%;max-width:580px;display:flex;gap:10px">
+      <div style="flex:1;padding:13px 15px;background:rgba(255,255,255,0.03);border:1px solid rgba(240,237,230,0.07);border-radius:var(--r);display:flex;gap:11px;align-items:flex-start">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800;color:rgba(212,168,75,0.3);line-height:1;flex-shrink:0">1</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#F0EDE6;margin-bottom:3px">Buka pesan yang dikirim</div>
+          <div style="font-size:11.5px;color:rgba(240,237,230,0.45);line-height:1.45">Cari link video di WA atau email yang sudah Anda terima</div>
+        </div>
+      </div>
+      <div style="flex:1;padding:13px 15px;background:rgba(255,255,255,0.03);border:1px solid rgba(240,237,230,0.07);border-radius:var(--r);display:flex;gap:11px;align-items:flex-start">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800;color:rgba(212,168,75,0.3);line-height:1;flex-shrink:0">2</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#F0EDE6;margin-bottom:3px">Tonton videonya</div>
+          <div style="font-size:11.5px;color:rgba(240,237,230,0.45);line-height:1.45">Catat satu insight paling relevan untuk konteks kerja Anda</div>
+        </div>
+      </div>
+      <div style="flex:1;padding:13px 15px;background:rgba(255,255,255,0.03);border:1px solid rgba(240,237,230,0.07);border-radius:var(--r);display:flex;gap:11px;align-items:flex-start">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:800;color:rgba(212,168,75,0.3);line-height:1;flex-shrink:0">3</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#F0EDE6;margin-bottom:3px">Bawa ke sesi berikutnya</div>
+          <div style="font-size:11.5px;color:rgba(240,237,230,0.45);line-height:1.45">Insight dari video jadi titik awal diskusi kita bersama</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub-note -->
+    <div style="display:flex;align-items:center;gap:10px;padding:11px 20px;background:rgba(255,255,255,0.03);border:1px solid rgba(240,237,230,0.07);border-radius:8px;max-width:580px;width:100%">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" style="flex-shrink:0"><circle cx="7.5" cy="7.5" r="6.5" stroke="rgba(240,237,230,0.25)" stroke-width="1.1"/><path d="M7.5 5.5v4M7.5 4v.5" stroke="rgba(240,237,230,0.35)" stroke-width="1.1" stroke-linecap="round"/></svg>
+      <span style="font-size:11.5px;color:rgba(240,237,230,0.38);line-height:1.45">Jika ada pertanyaan setelah menonton, simpan — kita bahas di awal sesi berikutnya.</span>
+    </div>
+
+    <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(212,168,75,0.4);letter-spacing:.1em;text-transform:uppercase;margin-top:8px">AI First Leaders Program · L2 D1 · IWDemy</div>
+
+  </div>
+</article>
+
+
+
+
+
+<!-- ─── NAV BAR ──────────────────────────────────── -->
+<div id="nav-bar" role="navigation" aria-label="Navigasi slide">
+  <div class="nav-copy">© 2026 Tjitra &amp; Associates</div>
+  <div class="nav-controls">
+    <button class="nav-btn" onclick="go(-1)" aria-label="Slide sebelumnya">←</button>
+    <span id="slide-counter" aria-live="polite" aria-atomic="true">1 / 10</span>
+    <button class="nav-btn" onclick="go(+1)" aria-label="Slide berikutnya">→</button>
+  </div>
+</div>
+
+</main>
+</div><!-- #deck -->
+
+<script>
+const TOTAL = 10;
+const lightSlides = new Set([]); // slide-lt indices
+let cur = 0;
+
+const slides   = document.querySelectorAll('.slide');
+const sbItems  = document.querySelectorAll('.sb-item');
+const progress = document.getElementById('sb-progress-bar');
+const counter  = document.getElementById('slide-counter');
+const navBar   = document.getElementById('nav-bar');
+
+function goTo(n) {
+  n = Math.max(0, Math.min(n, TOTAL - 1));
+  if (n === cur) return;
+  slides[cur].classList.remove('active');
+  sbItems[cur].classList.remove('active');
+  cur = n;
+  slides[cur].classList.add('active');
+  sbItems[cur].classList.add('active');
+  sbItems[cur].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  progress.style.width = ((cur + 1) / TOTAL * 100) + '%';
+  counter.textContent  = (cur + 1) + ' / ' + TOTAL;
+  navBar.classList.toggle('nav-lt', lightSlides.has(cur));
+}
+
+
+function switchWhyTab(btn, panelId) {
+  var art = btn.closest('article');
+  art.querySelectorAll('.why-tab').forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+  art.querySelectorAll('.why-panel').forEach(function(p){ p.classList.remove('active'); });
+  btn.classList.add('active');
+  btn.setAttribute('aria-selected','true');
+  art.querySelector('#' + panelId).classList.add('active');
+}
+
+function go(d) { goTo(cur + d); }
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); go(+1); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); go(-1); }
+  if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  if (e.key === 'End')  { e.preventDefault(); goTo(TOTAL - 1); }
+});
+
+// Sidebar keyboard
+sbItems.forEach((item, i) => {
+  item.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goTo(i); }
+  });
+});
+
+// Init
+progress.style.width = (1 / TOTAL * 100) + '%';
+</script>
+</body>
+</html>

@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Membaca dengan AI — L2 D1 | AI First Program</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Color system */
+  --gold:#D4A84B;
+  --gold-dim:rgba(212,168,75,0.08);
+  --gold-bdr:rgba(212,168,75,0.25);
+  --gold-text:rgba(212,168,75,0.92);
+  --bg:#0C0C0C;
+  --sb-bg:#111;
+  --card:#171717;
+  --card-2:#1C1C1C;
+  --bdr:rgba(255,255,255,0.07);
+  --bdr-s:rgba(255,255,255,0.11);
+  --txt-hi:rgba(252,250,246,0.95);
+  --txt-md:rgba(220,216,206,0.68);
+  --txt-lo:rgba(180,175,165,0.38);
+  /* Layout */
+  --sb-w:248px;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt-hi);
+  font-family:'Inter',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* ─── DECK LAYOUT ─── */
+#deck{display:grid;grid-template-columns:var(--sb-w) 1fr;height:100vh;width:100vw;overflow:hidden}
+
+/* ─── SIDEBAR ─── */
+#sb{display:flex;flex-direction:column;background:var(--sb-bg);
+  border-right:1px solid var(--bdr);height:100vh;overflow:hidden;flex-shrink:0}
+
+/* Logo bar */
+.logo-bar{
+  margin:14px 12px 0;
+  background:#fff;border-radius:9px;
+  padding:9px 16px;
+  display:flex;align-items:center;justify-content:center;
+  gap:0;flex-shrink:0;
+}
+.logo-bar-inner{display:flex;align-items:center;justify-content:center;gap:12px;width:100%}
+.logo-sep{width:1px;height:24px;background:rgba(0,0,0,0.10);flex-shrink:0}
+
+/* Program identity */
+.sb-identity{padding:10px 14px 0;flex-shrink:0}
+.aif-pill--sm{
+  display:inline-flex;align-items:center;padding:3px 10px;
+  border:1px solid var(--gold-bdr);border-radius:100px;
+  background:var(--gold-dim);
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.08em;color:var(--gold-text);text-transform:uppercase;
+}
+.sub-badges{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.sub-badge{
+  display:inline-flex;align-items:center;padding:2px 8px;
+  border:1px solid var(--bdr-s);border-radius:100px;
+  background:rgba(255,255,255,.03);
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;
+  letter-spacing:.04em;color:var(--txt-lo);
+}
+
+/* Progress */
+#prog-wrap{height:2px;background:rgba(255,255,255,0.05);flex-shrink:0;margin-top:10px}
+#prog-fill{height:100%;background:var(--gold);transition:width .35s var(--ease);width:0%}
+
+/* Navigation */
+#nav{flex:1;overflow-y:auto;padding:8px 0 12px;margin-top:2px}
+#nav::-webkit-scrollbar{width:3px}
+#nav::-webkit-scrollbar-thumb{background:var(--bdr-s);border-radius:2px}
+.nav-section{margin-top:16px}
+.nav-section:first-child{margin-top:8px}
+.nav-section-label{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;
+  letter-spacing:.12em;color:var(--txt-lo);text-transform:uppercase;
+  padding:0 18px 5px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 18px;cursor:pointer;
+  border-left:2px solid transparent;
+  transition:background .15s,border-color .15s;
+  margin:0;
+}
+.nav-item:hover{background:rgba(255,255,255,.03)}
+.nav-item.on{
+  background:rgba(212,168,75,0.06);
+  border-left-color:var(--gold);
+}
+.nav-num{
+  font-family:'JetBrains Mono',monospace;font-size:9px;
+  color:var(--txt-lo);min-width:18px;flex-shrink:0;
+}
+.nav-item.on .nav-num{color:var(--gold-text)}
+.nav-label{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:11.5px;font-weight:500;
+  color:var(--txt-md);line-height:1.3;
+}
+.nav-item.on .nav-label{color:var(--txt-hi);font-weight:600}
+
+/* Sidebar footer */
+#sb-foot{
+  padding:12px 14px;flex-shrink:0;
+  border-top:1px solid var(--bdr);
+}
+.sb-copy{
+  font-family:'JetBrains Mono',monospace;font-size:8px;
+  color:var(--txt-lo);line-height:1.7;
+}
+
+/* ─── SLIDE AREA ─── */
+#slides{position:relative;overflow:hidden;background:var(--bg)}
+.slide{
+  position:absolute;inset:0;
+  overflow:hidden;
+  padding:22px 44px 20px;
+  opacity:0;pointer-events:none;
+  transition:opacity .3s var(--ease),transform .3s var(--ease);
+  transform:translateY(12px);
+}
+.slide.on{opacity:1;pointer-events:auto;transform:none}
+.slide.out{opacity:0;transform:translateY(-8px)}
+
+
+/* ─── TYPOGRAPHY ─── */
+.s-eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.14em;color:var(--gold-text);text-transform:uppercase;
+  margin-bottom:9px;
+}
+.s-title{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:24px;font-weight:800;
+  color:var(--txt-hi);line-height:1.18;letter-spacing:-.02em;
+  margin-bottom:13px;
+}
+.s-lead{
+  font-size:13px;color:var(--txt-md);line-height:1.55;
+  margin-bottom:20px;max-width:72ch;line-height:1.62;
+}
+/* Cover title larger */
+.s-title--xl{font-size:30px;letter-spacing:-.02em}
+
+/* ─── COMPONENTS ─── */
+
+/* Card */
+.card{
+  background:var(--card);border:1px solid var(--bdr);
+  border-radius:12px;padding:14px 18px;
+}
+.card--gold{background:var(--gold-dim);border-color:var(--gold-bdr)}
+.card--accent{background:var(--card-2);border-color:var(--bdr-s)}
+.card-label{
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.11em;color:var(--gold-text);text-transform:uppercase;margin-bottom:8px;
+}
+.card-h{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;
+  color:var(--txt-hi);margin-bottom:4px;line-height:1.3;
+}
+.card-body{font-size:12.5px;color:var(--txt-md);line-height:1.55}
+
+/* Grid helpers */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.g2x2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Divider */
+.hr{height:1px;background:var(--bdr);margin:14px 0}
+
+/* Callout */
+.callout{
+  border-left:2px solid var(--gold-bdr);
+  background:rgba(212,168,75,0.05);
+  border-radius:0 10px 10px 0;
+  padding:10px 16px;margin:14px 0;
+}
+.callout p{font-size:12.5px;color:var(--txt-md);line-height:1.55}
+.callout strong{color:var(--txt-hi)}
+
+/* AIF pill (cover only) */
+.aif-pill{
+  display:inline-flex;align-items:center;padding:3px 12px;
+  border:1px solid var(--gold-bdr);border-radius:100px;
+  background:var(--gold-dim);
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.08em;color:var(--gold-text);text-transform:uppercase;
+  margin-bottom:8px;
+}
+.badges-row{display:flex;gap:5px;margin-bottom:14px}
+.badge{
+  display:inline-flex;align-items:center;padding:3px 10px;
+  border:1px solid var(--bdr-s);border-radius:100px;
+  background:rgba(255,255,255,.04);
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;
+  letter-spacing:.04em;color:var(--txt-md);
+}
+
+/* ─── JOURNEY ─── */
+.journey{display:flex;align-items:flex-start;gap:0;margin:14px 0}
+.j-item{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.j-item:not(:last-child)::after{
+  content:'';position:absolute;top:16px;left:60%;
+  width:80%;height:1px;background:var(--bdr);
+}
+.j-dot{
+  width:32px;height:32px;border-radius:50%;
+  border:1.5px solid var(--bdr);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;position:relative;z-index:1;
+  background:var(--bg);color:var(--txt-lo);
+}
+.j-item.past .j-dot{color:rgba(100,160,248,.6);border-color:rgba(100,160,248,.2);background:rgba(100,160,248,.05)}
+.j-item.curr .j-dot{
+  color:var(--gold);border-color:var(--gold);
+  background:var(--gold-dim);
+  box-shadow:0 0 0 4px rgba(212,168,75,0.1);
+}
+.j-item.next .j-dot{opacity:.3}
+.j-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:600;
+  color:var(--txt-md);margin-top:8px;text-align:center}
+.j-item.curr .j-name{color:var(--txt-hi)}
+.j-sub{font-size:10px;color:var(--txt-lo);text-align:center;margin-top:2px;font-style:italic}
+.j-you{
+  font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;
+  color:var(--gold-text);letter-spacing:.08em;text-transform:uppercase;
+  margin-top:4px;
+}
+
+/* ─── STAT ─── */
+.stat-row{display:flex;gap:12px;margin:14px 0}
+.stat-box{
+  flex:1;background:var(--card);border:1px solid var(--bdr);
+  border-radius:12px;padding:16px 14px;text-align:center;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:90px;
+}
+.stat-n{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:36px;font-weight:800;
+  color:var(--gold-text);line-height:1;letter-spacing:-.02em;
+}
+.stat-l{font-size:11px;color:var(--txt-md);margin-top:6px;line-height:1.4}
+
+/* ─── MODE LIST ─── */
+.mode-row{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:10px 16px;background:var(--card);border:1px solid var(--bdr);
+  border-radius:10px;
+}
+.mode-row + .mode-row{margin-top:7px}
+.mode-icon{font-size:20px;flex-shrink:0;width:28px;text-align:center;margin-top:1px}
+.mode-pill{
+  display:inline-flex;padding:2px 9px;border-radius:100px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.06em;margin-bottom:5px;
+}
+.mode-h{font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;font-weight:700;color:var(--txt-hi);margin-bottom:2px}
+.mode-p{font-size:12px;color:var(--txt-md);line-height:1.5}
+
+/* ─── BEFORE / AFTER ─── */
+.ba-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.ba-col{padding:14px 16px;border-radius:10px;background:var(--card);border:1px solid var(--bdr)}
+.ba-col-lbl{
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;padding-bottom:7px;
+  border-bottom:1px solid var(--bdr);
+}
+.ba-before .ba-col-lbl{color:rgba(248,100,100,.65)}
+.ba-after .ba-col-lbl{color:rgba(100,210,150,.7)}
+.ba-item{font-size:12px;color:var(--txt-md);line-height:1.45;padding:5px 0;border-bottom:1px solid var(--bdr)}
+.ba-item:last-child{border-bottom:none}
+
+/* ─── EXERCISE ─── */
+.ex-box{
+  background:var(--card);border:1px solid var(--gold-bdr);
+  border-radius:12px;padding:16px 20px;
+}
+.ex-title{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;
+  color:var(--txt-hi);margin-bottom:5px;
+}
+.ex-context{font-size:12px;color:var(--txt-md);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--bdr)}
+.ex-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.ex-step{display:flex;gap:14px;align-items:flex-start}
+.ex-step-n{
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+  color:var(--gold-text);background:var(--gold-dim);border:1px solid var(--gold-bdr);
+  border-radius:50%;width:22px;height:22px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.ex-step p{font-size:12.5px;color:var(--txt-hi);line-height:1.45;padding-top:2px}
+.ex-step p em{color:var(--txt-md);font-style:normal}
+.ex-time{
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold-text);
+  padding-top:16px;border-top:1px solid var(--bdr);
+}
+
+/* ─── PROMPT BOX ─── */
+.p-label{
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.1em;color:var(--txt-lo);text-transform:uppercase;margin-bottom:8px;
+}
+.p-box{
+  background:#121212;border:1px solid rgba(255,255,255,0.09);border-radius:10px;
+  padding:10px 14px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:rgba(160,210,170,.82);line-height:1.6;
+}
+
+/* ─── TAKEAWAY ─── */
+/* ── S11 TAKEAWAY ROWS ── */
+.s11-row{position:relative;padding:16px 0 16px 60px;border-top:1px solid var(--bdr)}
+.s11-row:last-child{border-bottom:1px solid var(--bdr)}
+.s11-ghost{position:absolute;left:0;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:800;color:var(--gold);opacity:.11;line-height:1;user-select:none;pointer-events:none}
+.s11-kw{font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:700;color:var(--txt-hi);line-height:1.3;margin-bottom:5px}
+.s11-kw em{color:var(--gold-text);font-style:normal}
+.s11-desc{font-size:12px;color:var(--txt-lo);line-height:1.6}
+
+/* ─── WHAT'S NEXT ─── */
+.wn{display:flex;gap:12px;padding:12px 16px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;margin-bottom:8px}
+.wn--gold{background:rgba(212,168,75,0.05);border-color:var(--gold-bdr)}
+.wn-icon{font-size:22px;flex-shrink:0;width:30px;padding-top:1px}
+.wn-h{font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;font-weight:700;color:var(--txt-hi);margin-bottom:3px}
+.wn-p{font-size:12px;color:var(--txt-md);line-height:1.5}
+
+/* ─── RATIO HERO ─── */
+.ratio-hero{display:flex;align-items:baseline;gap:10px;margin:4px 0 14px;line-height:1}
+.rn{font-family:'Plus Jakarta Sans',sans-serif;font-size:52px;font-weight:800;
+  color:var(--gold-text);letter-spacing:-.03em;line-height:1}
+.rn2{font-family:'Plus Jakarta Sans',sans-serif;font-size:36px;font-weight:800;
+  color:var(--txt-hi);letter-spacing:-.02em;line-height:1}
+.rarr{font-size:22px;color:var(--gold-bdr);align-self:center;padding:0 2px}
+.rdesc{font-size:11px;color:var(--txt-lo);align-self:flex-end;padding-bottom:5px;
+  font-family:'JetBrains Mono',monospace;letter-spacing:.03em}
+
+/* ─── NAV ARROWS ─── */
+#arrows{position:fixed;bottom:22px;right:24px;display:flex;gap:8px;z-index:200}
+.arr{
+  width:36px;height:36px;border-radius:50%;
+  background:var(--card);border:1px solid var(--bdr);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--txt-md);
+  transition:all .15s;user-select:none;
+}
+.arr:hover{background:var(--gold-dim);border-color:var(--gold-bdr);color:var(--gold-text)}
+
+/* ─── UTILITIES ─── */
+ul.ul{padding-left:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+ul.ul li{font-size:12.5px;color:var(--txt-md);line-height:1.5;padding-left:14px;position:relative}
+ul.ul li::before{content:'–';position:absolute;left:0;color:var(--txt-lo)}
+.tag-row{display:flex;gap:6px;flex-wrap:wrap}
+
+/* ── DAY CARDS S02 ── */
+.day-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 14px}
+.day-card{border:1px solid var(--bdr);border-radius:10px;padding:13px 16px;background:var(--card);transition:all .2s;cursor:default}
+.day-card:hover{border-color:var(--gold-bdr)}
+.day-card.active-day{border-color:var(--gold-bdr);background:var(--gold-dim)}
+.day-num{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--gold-text);text-transform:uppercase;margin-bottom:6px}
+.day-desc{font-size:13px;color:var(--txt-md);line-height:1.55}
+
+/* ── SLIDE TABS ── */
+.tab-strip{display:flex;gap:5px;margin-bottom:12px}
+.ts-btn{padding:5px 12px;border-radius:5px;border:1px solid var(--bdr);background:none;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:1.5px;color:var(--txt-lo);cursor:pointer;transition:all .2s}
+.ts-btn.on{background:var(--gold-dim);border-color:var(--gold-bdr);color:var(--gold-text)}
+.tab-pane{display:none}
+.tab-pane.on{display:block;animation:fdin .25s ease}
+@keyframes fdin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── TIMELINE GRID S03 ── */
+.tl-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.tl-item{border:1px solid var(--bdr);border-radius:7px;padding:8px 11px;transition:border-color .2s;cursor:default}
+.tl-item:hover{border-color:var(--gold-bdr)}
+.tl-year{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;color:var(--gold-text);letter-spacing:.06em;margin-bottom:2px}
+.tl-title{font-size:11.5px;font-weight:700;color:var(--txt-hi);margin-bottom:2px;line-height:1.3}
+.tl-desc{font-size:10.5px;color:var(--txt-md);line-height:1.4}
+
+/* ── LEAP CARDS S03 ── */
+.leap-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.leap-card{border:1px solid var(--bdr);border-radius:8px;padding:11px 13px;transition:all .2s;cursor:default}
+.leap-card:hover{border-color:var(--gold-bdr);background:rgba(212,168,75,.03)}
+.leap-num{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:var(--gold-text);letter-spacing:.06em;margin-bottom:3px}
+.leap-title{font-size:12.5px;font-weight:700;color:var(--txt-hi);margin-bottom:2px;line-height:1.3}
+.leap-sub{font-size:8.5px;color:var(--gold-text);margin-bottom:7px;font-family:'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase}
+.leap-before{font-size:11px;color:var(--txt-lo);line-height:1.4;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid var(--bdr)}
+.leap-after{font-size:11px;color:var(--txt-md);line-height:1.4}
+
+/* ── QVIY SELECTOR S09 ── */
+.qviy-nav{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.qb{width:44px;height:44px;border-radius:9px;border:1px solid var(--bdr);background:none;font-family:'Plus Jakarta Sans',sans-serif;font-size:22px;font-weight:800;color:var(--txt-lo);cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.qb.on{background:var(--gold-dim);border-color:var(--gold);color:var(--gold-text);transform:scale(1.06)}
+.qviy-hint{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--txt-lo);letter-spacing:.08em;flex:1}
+.qviy-panel{display:none}
+.qviy-panel.on{display:block;animation:fdin .2s ease}
+
+/* ── CHECKLIST S10 ── */
+.chk-list{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.chk{display:flex;gap:10px;align-items:flex-start;padding:9px 12px;border-radius:8px;cursor:pointer;transition:all .2s;border:1px solid transparent}
+.chk:hover{background:rgba(255,255,255,.025);border-color:var(--bdr)}
+.chk.done{background:var(--gold-dim);border-color:var(--gold-bdr)}
+.chk-box{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--txt-lo);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;transition:all .2s;color:transparent}
+.chk.done .chk-box{background:var(--gold);border-color:var(--gold);color:#000}
+.chk-text{font-size:13px;color:var(--txt-md);line-height:1.5}
+.chk.done .chk-text{color:var(--txt-hi)}
+#chk-prog{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--txt-lo);margin-top:8px;text-align:right}
+
+/* ── MODE ROWS S05 ── */
+#s05 .mode-row{cursor:pointer;border:1px solid transparent;border-radius:8px;padding:4px 7px;transition:all .2s}
+#s05 .mode-row:hover{background:rgba(255,255,255,.025);border-color:var(--bdr)}
+#s05 .mode-row.on{background:var(--gold-dim);border-color:var(--gold-bdr)}
+
+/* ── TAKEAWAY S11 ── */
+
+/* ── WN CARDS S12 ── */
+.wn{cursor:pointer;transition:all .2s;border-radius:8px;padding:3px 8px;margin-left:-8px}
+.wn:hover{background:rgba(255,255,255,.02)}
+
+/* ── MODE CARD (S06, S07) ── */
+.mode-card{border:1px solid var(--bdr);border-radius:12px;padding:13px 16px;cursor:pointer;transition:all .25s;background:var(--card)}
+.mode-card:hover{border-color:rgba(212,168,75,.2)}
+.mode-card.on{border-color:var(--gold-bdr);background:rgba(212,168,75,.04)}
+.mode-card-hd{display:flex;gap:13px;align-items:center}
+.mode-card-detail{max-height:0;overflow:hidden;transition:max-height .38s cubic-bezier(.4,0,.2,1),opacity .25s;opacity:0}
+.mode-card.on .mode-card-detail{max-height:350px;opacity:1;margin-top:12px}
+.mc-wf{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.mc-step{display:flex;gap:8px;font-size:11.5px;color:var(--txt-md);line-height:1.5;align-items:flex-start}
+.mc-sn{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;color:var(--gold-text);flex-shrink:0;margin-top:1px;min-width:18px}
+.mc-qw-wrap{background:var(--gold-dim);border:1px solid var(--gold-bdr);border-radius:7px;padding:9px 12px}
+.mc-qw-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.12em;color:var(--gold-text);text-transform:uppercase;margin-bottom:4px}
+.mc-qw{font-size:11.5px;color:var(--txt-hi);font-style:italic;line-height:1.5}
+
+/* ── Hover-first: mode-card detail on hover ── */
+.mode-card:hover .mode-card-detail{max-height:350px;opacity:1;margin-top:12px}
+
+/* ── Transformation tag hero in card ── */
+.mc-tag-hero{
+  font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:800;
+  color:var(--gold-text);letter-spacing:.02em;flex-shrink:0;min-width:86px;
+  padding-top:1px;
+}
+.mc-sub{font-size:11px;color:var(--txt-lo);margin-top:3px;font-family:'Plus Jakarta Sans',sans-serif}
+.mc-theory{
+  display:inline-block;font-family:'JetBrains Mono',monospace;font-size:8.5px;
+  font-weight:700;letter-spacing:.1em;color:var(--gold-text);text-transform:uppercase;
+  background:var(--gold-dim);border:1px solid var(--gold-bdr);
+  border-radius:4px;padding:2px 7px;margin-bottom:7px;
+}
+.mc-tactic{font-size:12px;color:var(--txt-md);line-height:1.55;margin-bottom:10px}
+
+/* ── S05 mode rows with hover ── */
+.m5row{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:10px 14px;border-radius:10px;border:1px solid var(--bdr);
+  background:var(--card);cursor:default;transition:all .25s;
+}
+.m5row:hover{border-color:var(--gold-bdr);background:rgba(212,168,75,.04)}
+.m5-tag{
+  font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:800;
+  color:var(--gold-text);letter-spacing:.02em;min-width:88px;
+  flex-shrink:0;padding-top:2px;
+}
+.m5-num{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;
+  color:var(--txt-lo);letter-spacing:.1em;flex-shrink:0;padding-top:4px;min-width:20px;
+}
+.m5-name{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;
+  font-weight:700;color:var(--txt-hi);
+}
+.m5-detail{
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height .3s cubic-bezier(.4,0,.2,1),opacity .22s;
+}
+.m5row:hover .m5-detail{max-height:60px;opacity:1;margin-top:5px}
+.m5-prob{font-size:11.5px;color:var(--txt-md);line-height:1.45}
+.m5-qw{font-size:10.5px;color:var(--gold-text);font-family:'JetBrains Mono',monospace;font-weight:600;margin-top:4px}
+
+/* ──────────────────────────────────────────
+   FLIP CARD SYSTEM
+   ────────────────────────────────────────── */
+.fc{perspective:1100px;cursor:pointer;border-radius:12px}
+.fc-inner{
+  position:relative;width:100%;height:100%;
+  transform-style:preserve-3d;
+  transition:transform .55s cubic-bezier(.4,0,.2,1);
+}
+.fc.on .fc-inner{transform:rotateY(180deg)}
+.fc-front,.fc-back{
+  position:absolute;inset:0;
+  backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  border-radius:12px;border:1px solid var(--bdr);
+  background:var(--card);padding:18px 22px;overflow:hidden;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.fc-back{
+  transform:rotateY(180deg);
+  border-color:var(--gold-bdr);
+  background:rgba(212,168,75,.03);
+}
+.fc:hover .fc-front{border-color:rgba(212,168,75,.3)}
+.fc-tag{
+  font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:800;
+  color:var(--gold-text);letter-spacing:.02em;margin-bottom:7px;
+}
+.fc-name{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;
+  color:var(--txt-hi);margin-bottom:4px;line-height:1.2;
+}
+.fc-sub{font-size:10.5px;color:var(--txt-lo);margin-bottom:10px;font-family:'Plus Jakarta Sans',sans-serif}
+.fc-prob{font-size:12px;color:var(--txt-md);line-height:1.5;margin-bottom:10px;font-style:italic}
+.fc-qw{font-size:11px;color:var(--gold-text);font-family:'JetBrains Mono',monospace;font-weight:700}
+.fc-tap{
+  position:absolute;bottom:13px;right:17px;
+  font-size:8px;color:var(--txt-lo);font-family:'JetBrains Mono',monospace;
+  letter-spacing:.1em;text-transform:uppercase;opacity:.5;
+}
+.fc-back-hd{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;
+  letter-spacing:.12em;color:var(--gold-text);text-transform:uppercase;margin-bottom:7px;
+}
+.fc-tactic{font-size:11.5px;color:var(--txt-md);line-height:1.55;margin-bottom:10px}
+.fc-close{
+  position:absolute;bottom:13px;right:17px;
+  font-size:8px;color:var(--txt-lo);font-family:'JetBrains Mono',monospace;
+  letter-spacing:.1em;text-transform:uppercase;opacity:.5;
+}
+
+/* ──────────────────────────────────────────
+   COLLAPSIBLE ROWS (S08)
+   ────────────────────────────────────────── */
+.col-item{margin-bottom:5px}
+.col-row{
+  display:flex;align-items:center;gap:14px;
+  padding:11px 16px;border-radius:10px;border:1px solid var(--bdr);
+  background:var(--card);cursor:pointer;transition:all .22s;
+}
+.col-row:hover{border-color:rgba(212,168,75,.3);background:rgba(212,168,75,.02)}
+.col-item.on .col-row{border-color:var(--gold-bdr);background:rgba(212,168,75,.04)}
+.col-num{
+  font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+  color:var(--gold-text);flex-shrink:0;width:22px;
+}
+.col-title{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;
+  color:var(--txt-hi);flex:1;
+}
+.col-arr{
+  font-size:12px;color:var(--txt-lo);flex-shrink:0;
+  transition:transform .22s;font-family:'JetBrains Mono',monospace;
+}
+.col-item.on .col-arr{transform:rotate(90deg);color:var(--gold-text)}
+.col-detail{
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height .32s cubic-bezier(.4,0,.2,1),opacity .22s;
+  font-size:12px;color:var(--txt-md);line-height:1.6;
+  padding:0 16px 0 52px;
+}
+.col-item.on .col-detail{max-height:80px;opacity:1;padding:7px 16px 9px 52px;margin-top:-3px}
+
+/* ── HOV CARD ── */
+.hov-card{
+  border:1px solid var(--bdr);border-radius:12px;
+  padding:18px 20px;background:var(--card);
+  cursor:default;transition:all .25s;
+}
+.hov-card:hover{border-color:var(--gold-bdr);background:rgba(212,168,75,.05)}
+.hov-card.card--gold:hover{background:rgba(212,168,75,.1)}
+.hov-detail{
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height .32s cubic-bezier(.4,0,.2,1),opacity .22s;
+}
+.hov-card:hover .hov-detail{max-height:200px;opacity:1;margin-top:10px}
+
+/* ── S03 TIMELINE hover ── */
+.tl-item{cursor:default;transition:border-color .2s,background .2s}
+.tl-item:hover{border-color:var(--gold-bdr) !important;background:var(--gold-dim) !important}
+.tl-desc{
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height .28s ease,opacity .2s;
+}
+.tl-item:hover .tl-desc{max-height:60px;opacity:1;margin-top:5px}
+
+/* ── S03 LEAP hover ── */
+.leap-card{cursor:default;transition:all .25s}
+.leap-card:hover{
+  border-color:var(--gold-bdr) !important;
+  background:rgba(212,168,75,.06) !important;
+  transform:translateY(-2px);
+}
+.leap-before,.leap-after{
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height .28s ease,opacity .2s;
+}
+.leap-card:hover .leap-before,.leap-card:hover .leap-after{
+  max-height:70px;opacity:1;margin-top:6px;
+}
+</style>
+</head>
+<body>
+<div id="deck">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<aside id="sb">
+
+  <div class="logo-bar">
+    <div class="logo-bar-inner">
+      <img style="height:26px;width:auto;display:block" src="data:image/png;base64,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" alt="IWDemy — Insight Web Academy">
+      <div class="logo-sep"></div>
+      <img style="height:26px;width:auto;display:block" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAPIAAAAwCAIAAACkKrBMAAAqGUlEQVR42qV9eXhURdZ3Vd3ba7qTTjr7JiQiuywBBtDoIELmFVTAx2UEBJ9XRgUV5gEmjhsoKm7IKK+ooI4K6sAHwxqQRWUiEAgiAbKwGCALkH3t7nTfper7o5LL5S7VjdN/5On0rVvrqVPn/M5SkBBCCAE9Hwih8p3+DiFUf6EFlC9KSfW/6g/jEeNj+JbSjUhejLxdxisYYwihegYMO6NMoGHJ3926pozy16x+/aKoV03fSfVH3Qd9Q4aNhi3w3y+6uj+GU6F5qvQE0d4oH4XKNaX1RKwUU74oT9W/KHUqH8ao1F801Sr9ZLyuIZGwbem7qmkRIaShPHVhpTPK7OnnynA4mkFp+qmZB/139Rrrh4YxVsaloQb1FmVQIf1dQ68a2tATn+FA9FRhttYa2tX3X70Qyl/NOl4bAmVIhptAs9c1P+qfmm0v/WIYbnEzlhDhsfBf8gkNx4q8rbDFwg6B3SKjfIQ9YXA79iEc+WnA3idhq2W/braHGUcK0m9TTWX6U0zZnZp9Y8h19OeAWXNKnXpmb8jbzJgZ+0dDVqG0q4zUkEPruS+b/eiHoKcMfSf1NYTdVxo+yj4b9aPWH7aGozZcL0O2ZTZpZoeDeukZ/dFIFvoz81pX1YO8Rr49RQgggFxrnrJ2/RY3ZLqaA0K9Dcwo22wi1Gcom93qOdPv5rJmjDYS5mrIYg1luRs9QyLRQPRszPCANeQaZiRouL6M+pWSGGMqyzH4cUdHhyRJcXFxYUfX0NBgsVg8Hg99GggEOjo6kpKSNMSNVOPvqYX+002OEABMACEQku4nGF773lO8m8NphTNCCEKI4ziO4xBCCCG9HE8IwRhTiVC9I5HqQ18328HqXUv/0gr1hKVhomZ7yYy1sIVaM4HBTDEwOw30egJDXdN03lCt1MjKCuVpzluNqqB5pJ83ff36hoLB0LFjvwiCoOm/LMtNTU0tLS319fU+n2/FihVr1qzp7OxsbGxsbW1tbm4WBEGzXp2dnW1tba+//vrq1asJIZIkQQgLCwvnzZun0JVSP98zI7R/hABIAIYAgmsPUHdHaY+JASuCmJDuvQDVa48QamlpuXDhQnJyMs/ztp4Px3GKQma4iWVZFgQhFAoFg0FJkpqamtLT071er0ZpMOSgtF0NnwiLHqhXWv27Aoaw1Wi9tGd4gOjZsP70M6vckJTNFDi92KOu3+xoNRxLJCgZYx2bmpr13evo6HjppZcCgUBsbKwoit9++63L5bpy5QqEsL293Wq1vvLKK+np6WpR4sSJE4WFhfHx8dHR0QihV1991Wq1nj17try8/NVXX/X7/VlZWX/5y1+ukTXpIV5CCIAAAgSUucCYHiQAAAABABAQ0l0eQQABIRBAyq/p3lD6gTDGHMd98803+fn5KSkplJQlSeI4zm638zzP83xUVJTNZuN5XhCEYDDY1dUly7IoiqFQSBAEjuN4npckqaGhYe3atX/+85/p6/T0aW5uTk9PV5+q9AtCqK6uzm6306PKTFtlQCVq5qQ5JdRPzeR+jZ6uFzwMdVN1eWN5UVfhDSnQZjq9oVQZVpzTvG4mekEI6bprtnF0dPQnn3wCAPjtt9+WLFkye/ZsCGEwGFy4cGF2djaEUJZlpTZZlhFCzc3NW7ZscbvdkiRZrdY5c+bwPP/DDz+0trY+8cQToVAoNjZW4WI8lSgQvH4BIMQYAwIQh1RrQim7m5NjggEGEAIC9HNEFGZcWFgYDAYvXLgAAEhOTh41alR2djbP8wAAn8+3bt06n89H3+3du/cDDzygTHFdXd3x48crKiro03PnzinTd/78+ZkzZ/76669PPPHEe++953A41FP5/vvvL1u2LCEh4dNPPx03bhzGWM8O9celIZ6lORk0eB8DydaLGXq6UQsDmrPCED4zG0UkWLihqG0o6DNQLLbaYHY0qYpRsRDSmVyzZs3Fixdra2vHjRv3xBNPAADWr1+/fPlyr9eblpY2Z84cp9Opru3QoUOTJk26cOECz/OhUGjdunUJCQnHjx+/cOHCzp07IYSdnZ333HNP//79McY8AAQCCMB1jAdjmeN4AIC/qqb21Onq0lMdLS1iSOB5PsoTk9qvX/qtt3r79QUQyLIEEUcAgdfDJxhjjkONjY3FxcWEkL59+y5evHjq1KkatYDn+dWrV1ssFlEUV65cef/996ufdnV17dmzJz8//9y5c1euXFF+X7t27dGjR61W68cffzxt2rS7775blmUAAMdxlZWVS5Ys8fl8VA774x//qLBbM5jM7Og3U+/YcG8kRz/jixlBs0Ups54Y9kEjn7AlZv1A9CycLTsBoBD9tT2wdu3aV199NSsra8SIEa2trS+//DLG2OVyxcbGlpWVrVu3rqmp6eWXX7ZarYQQSsetra1Lly5duXJlUlLS7bffvm3bNlmWhw0bdscdd+zdu7ekpGTu3Ln0ZIAQ8gAQ0s1wexg+RBzH+y+c/8/6b87v2d9+8aJFFAEgCCKICQGkmENRqWm9b7/99sdmJI0c1XNMwGvwSffGQIWFhdXV1dOmTVu9enVSUhIdFSVBWZZ5nrfb7bIs00PH6XRKkiTLsiJ5OxyOKVOmZGdnjxs37uTJk6IoUn4ZHR0NABAEASHkdDrVs2m1Wt1uNz0B3G73jQIOvw+fNuPThrBu5JIDA/uPpKuMdvVcnCFTaeA2hqYbiZGVFrjpppvefvtthFBbW1swGIyPj7dYLBaLJSoqqqCg4MUXX8zIyFDjbxaL5fPPP5dluba29rvvvjt27NjUqVNdLpff74+KisrKympqasrOzrZarbQJHgBEAO7ZSRgiArF85J/f7H7/vUBlpdNic1qtEEBCEOXIEMg2AnxVVUfP/XZs586xjz9+99y5Tq8Xdx8x3donpb9du3YNHTp03bp1TqdTEASe5xVhi36hEoJiHlMXoP0TBGHw4MGLFy9+7bXX6uvr09PTMcZPPvlkdXV1aWnpI488MnbsWEVskGU5IyPjo48++sc//hEbG7t8+XI1KKleV7qXwlp/zKRhQzZsRq8RbioGuYc1URluqgjZvBmtM+pkQJxGrWh3C8Y4Ly8PAPDiiy/yPO/xeGRZPnXq1Ntvvx0fH7958+YZM2Z4PB5KG1SN4Tjus88++/77748dO3bffffdd999BQUFMTExsbGxAIDKysqGhoYTJ04kJyd3SwGEENgthxBCCMTklx07fty5zZt9c2bf/jLB9FeAe4YEAQAQAYQgCmLpxK/FaGNs3vRZfIwbYwkAiCCHCeY4rra2tqCg4Ntvv3U6naIo0gOFgZEZLp7FYiGEzJ49e+XKlSUlJVQ7TkhIWLNmTTAYtNvt16GVCBFCpk6dOmnSJLpxNXiLwpOUnRMJm2GTEZsLMjYDe8MwFLjIid7wLcbONNQvGaOOzFCgRXgQQhjjlpaWAwcOfPDBB4MGDZIkKS8vr6SkZMyYMYIgtLa2ut1uTd969eq1bNmyTz/9NDMzc8KECQkJCW+99dZHH33k9Xq3b9++devW/Px8ZcUpwIcIAQQShLi9H/6fNzP9hc2bgSgCgAAEgGAAuxEOAFE3NwYIAAIIBlZrx7kzm99a/siLLxCnA1y/p1944YXbb7+dikcaSS7sdCuwNyEkKSnp7bffpmKMAkTY7XZD9E2WZbqFKBSjWW8q5JSXl69cufKtt97SgIZmxK1ZRTWurNH8zL4zzHJh+aKZrhnWZ8HMasZgt2xkUL8VIzGeq1RGpKiMFotFEITVq1dnZmaKotjW1paSkuJ0Onmep4YOtSkDY3z33XfTF0VRxBgPGTJk7Nixs2bN2rlzJ8ZYEARJkqi2dg3gw1jmeUvl/v0F//jwiY8+wADKECKOEjECkKMoyDUMBEB6tnAA2lzuks2b0pIScxcskGQJIgoCgoyMjOeee04BIsKOnOEHRwiZNWuWBo5QBAn9GlB4iOM4DUOihO73+x9//PHz58+/8cYbeluxuh5q1qF7kraoEBD9UUOstADdirQtTR8YPnRso6ZGfTRD0/QSiB7S0Q9WrwIyBCoGlhdOVeAIAfCaRYQMHTp0ypQp6enpkiRNmzYNAFBcXNzR0WHYeVEUOY6j2hdCSBCE5557buTIkSdPnjx79mwwGKRYsMocQzCEUG5p2ffBh/ZAwAYhosgzwQQQABCkcAnpxvhQD34NAUCEIJl4OK7wsy8GT8yL6d+PYIwowteDODI2tNpcYggjqA2HCgHRrUI5cSgUUhQF+pQqoxBCinwrhEX5tCzLTz/9dHFxcU5ODj3pNBxd+UIxcp7nRVGkTVNOYNhhSsT6AooGbEY6hp4FGkZoSIiGEKQZuKEG2tlicVhwg9Hi9ZZaaspQa5ZqKzZwu92rVq1SxEiM8euvv3769Ol77703MTFR3xC1N0dHR7tcLqWhlJSUpUuXdnZ2Pvjgg+rWeQIBwZDjuIr9PzQe+9Vlt8jdrInICBCAIeS47vnoEUIIIVimQglBRJaxzWJtr6o+unFj3pIlGAICMYQ8IYCSFAMsU6uMZviUegNQwyEllMuXLy9atOiRRx65//776e/0Ly25du3aoqKiTz75hJpvKNm1trY+9dRTGzdupJtNluVQKKT4MNpsNjWjpfV8+eWXO3bs+Oqrr1wu165du7Zt29ba2jp69OgFCxYo9EG7FAqFtm7dunfv3ra2NqfTmZGRMXv27FtuucXMKUJPQIbsmeFVbIYiGwp4YR33DOFnM0OjocfB9b3Vv4UBgLRiOmkKDkZff+WVVxgHOF2a/Px8SlQWi4UK3F9++aVSmK41JSwJYxmLwvon5iyPjV+enn5p3/caD2l6FktYlgmWZKL9XL36/qCBy+Pi/jHurlBdAyFElgXFzUNdifKX8kJCyKJFixR5aM+ePcrv6pIavxFJkoqKip5//vn09HQAwMaNG9Vv1dTUfP311xMmTAAA5OTkUKmAvrh79+6+ffsqzVmt1uTk5JSUlJSUlIyMjMTExJkzZ2KM6StNTU0bN26cPHkyAGDgwIGXLl2aPn26esY//vhjQkgoFCKEiKL42WefZWVlJSQk9O/f3+v10jIJCQkFBQWasajnQT1Lml80w2eX0RdmTL5Z/eynSrv6DjNq8/n8u3btDgaD3ZySGK+punI6/4YDMWxF/ZbSGZ4AgiAnNTZcPP6ry2LBBBz8eG1JwR4sSRCBkCjH3dznrqfnIIcTYkIA5iBX/O2/zv5cGG2zE4wBBMTvh/6g0+ZsuVjdWF6elnQnJAgiyBAWI/RX1AgkCKEPP/zwrbfeamhoUOwv1L7DcVxdXd3MmTOPHj3a2dlJX4+Pj6dbHELo9/tXrVolCILH42lvb1dEbVEUZVmmbLu6uhoAEAgEnnzyyV27drW1tdFigiDk5eWdPXs2KSmpvr5ebfW0Wq0XL16cO3fu999//+CDD65YsSIxMdHn8y1cuHDdunWNjY3z5s07dOhQSkoK5dlmYR2GNm02csdwxohEwDCzFjEU1kiEFia6H8a0pIAEZmX0yLpZ53lACICgvbYW+PyQ4xAANT8fwriQEIIQ6AiGMm+//a7/nQ0dkABA7ey1xcUnvl6X5HTJMiaAAA45LVaEEAwFm2tq0xSDkon8d0O++ZplHjZs2KOPPvrtt982NjZSAYYK1hhjh8Px0EMPAQB++OEHKhDTc4p+nE5nQUEBAOCxxx5bt24dAGDMmDGbN2/2+/3Up8rv91P/Ro7jJk2aJMvy5s2bKUs4f/78hAkTvvvuO6/X+8UXX2zatCk+Pv6pp54CANTU1EyePLm8vNzj8SxZsiQjI0OSJK/X++KLL27fvr29vf3SpUsHDx586KGHKCNhyK9mtMi2dZs5BpsJNmwDquEeizAm7YYMRmbKaNjRRWhn4CkQ3dzQKAoCghwhcpTVCiFABCAIEeKiHPbu4QFAAAQAOKx8jMPpcThkjHG3JIMhIEgUm69cAQBgQjhz1/4Izb+GgGhubm5ubm5qaurChQupRKvQbkxMzJw5c6ZMmTJy5MiqqipKyurXqQytOJBYLJa4uDiNMR8AYLfbH3300UcfffSOO+74+eefAQC33nrrtm3b6ItLly5dvHgx9UYEAHzxxRfl5eW09bS0NCopYoyTkpKSk5NbW1shhAqDZy9J2OghM4u6GVRqxon1mmtY7JVhUv0d4UtmkJeZgxejUU38h9J5RGV7GUsQdIcMUN9T6qlH0Q8CVIJyD5pIAACAoG5rDgAEIAJkSVY8f82cgcKKHwyXOkEQZFmmIrIafKASlSRJHo8nKyuLvhUVFaVRaCCEXV1dau9kChhR4UzRX6nE3L9/f2XDWCwWKqtIkkS9DkVRBABkZWW53e7o6OhFixZ5PB6FLBQYVX+q3tBiG8Y1GYa6MPyt9cEmSm2CIOj9qtUMW7+O+k3F9k1VrzmlGjMXRUM3enWjygIpgFgwGKTiKMUAlJF2/+P2xHA8TzCBAARF0SeEfKLgFwW/EAoJIsdbEEKI4zmOhwjJGAeEkF8M+UTBFwoFQgIBAEOAOc4THweoFVLnfh6524DeO1SpjQJ2ahxNvWu5ng99pHaJNLOwKDEK6kgFig8q54CCgtNitFe0DzNnzjxw4MDhw4efeeYZxdcFQmiz2ZQ1UDAsQ2NHWCGSjXkb+vvrY9gMnQpra2u/+uqry5cvMxAPRnhbWBheb2JU454Qwg0bNqxbt47q3KIo5ufnnz17FkIoSZIeIqPKyaZNm9asWSOKIh3dvHnzSkpKAACNjY21tbVKN3gaMZCYkQkcNuLzywQ609I5V5RMMISQkyRXcnLzxSrodBJJAgAijrc4o+IH9I+y27FMEARAlLouX0aSJFp5b0Ya5fcAQIb4FZZVGwYzG0YxRuKHFEkUEzsCzUxaIIQMHz6c+l1ZLBa68fx+/48//tje3q7ghuzW1Y7dGsuLwsDU3EgTqKIPwNHThAYCp784HI6bbrpJLappZluxfJkx77Bze71DyHWOorIsr1+//rHHHqOYrCRJhYWF1Cijgf/VrW/evLl///4zZ85ctmxZnz59ysrK/H4/hPDNN990uVzLli2jY+dptKIlKTEuK6vraoNst/7PwgXZE/OkYAhCgqy2+vKKf859BnZ28hxHCOgiOG/BswvmPycHQwhCyHHi1atrZz4mNTQ6UlLjb+mj+CDeqLLI8BNiuCNH4sqjNugohijNU0bApZn3iNr6ZbVaRVEsKipau3btoUOH2tvb29raqFVMrbleLy9iQq6dnoo5VrPfFBmGFlDKq39RW4XoEaRmcsrxrXk3Pj5+4sSJ3S8Swl3/FCFUU1MDIaRAKv1FVYBQTqxu3WjqDA4laqL64YcfbDbbgw8+uHv37qampunTpzudTrq3S0tLd+/evWjRIuX8pK2XlpbW1dWtX7/+hRdeWLFixerVq61Wq8vlqqys/PHHHzdt2qT0gQcQYhlzDufQu8f/ePAwjxBJ8PIJ8VzP/uIuXw5dvepsaUU8RwiRCIZWqyU+gesJW0cAAM4SCIb6jhrp7p1FvcXNTrEb9ck01CDNoq0ioXsNWev1pLDx3upWqM+kKIrffffdypUrjx8/npubO3/+/EGDBs2aNYue7wpZ6/UehLjOzo6amlqvNz4pKVHDZWnASFVVVSAQyMzM9Hq9ABAakyGKUny8NzU1DUJQXV3d0tISFRWVkZFhs9kghFevXm1oaIAQJicnJSYmUb6LCamqqW5raeF5S0ZGBnXuraurQwglJCRwCDW3tFyuqbVYrdnZWTzP19Ze3rdv/4ABA+x2O4TQ6/UGAoGLFy+JopCYmJSamgIAFATh0qVLgUAgLi4uPT3dSIuAen9rjuMEQZg/f/6TTz4JANiyZUtWVhZCKBQK0QjF1atXUxau2Gjp4i5fvrxv374cx82fP//DDz9ECFmt1ujo6H//+99//etf+/TpI0kS5fQIdFvC8eB77rH16tUlhKCECSZYFIkoEYyJLHEWC2exIIuVs1h4q7VbXBdDWJIIIVgSZYDlaPfIKfcDnqdhYspZqQl/ZyiL+qMzklQKEfor36jLMkPQVPgHnfRz585NmjRpxowZ9fX1e/fuLSwsnD9/fnZ2NtXGlCNVH5CPEBcIBA4ePBQT4zl16nR9fb2GMV++fJmaqOrrG7Zu3dbe3h4MCnv27JUk2el0HDt2TJbl4uLiioqK+Pj4ysrKqqoqGrVaVFQUHR3jdEYdOPCfI0eOQghFSdq3d9/5s78lJCQ2NjZu2LDh0qVLhYU/b9mytbW1FQBw+HBRyYkTnIUrKjpSWFgYCHQdOVLs83Vdvny5qKiorKy8rq5+585doZCQlJR06tTpEydKZFn+8cef2traPB7PyZMnW1pawi1Nt/2ks7MzPz+/qqrK5XLJsnz27NlRo0YJgtDe3m6320tLS4uKihYtWqQOJ0UI7d69e8OGDampqaWlpfn5+e3t7XPnzq2oqFi8ePHJkycPHjy4YMECqt4QQniIAURQxnJ0dnbunP/99uVXAOAINZFDwgFEAMBYphgIAAQTItOFgdTbiRCOawwGB0+e1Hv8eCJjxFFohBgm8tJIzGxGznD0uVFsAZgkxNA7AOqlHfUranETIXT69OnJkydXV1enpaUdOHAgOzubngYdHR0KWVNurQncoo/8fn99fQPPW+x2KyGERj9gjKOiojDGhYWFcXFx/fr183oTzpw5197eIQjNl6qqx48f73JFORyOrq7A6dOnBw8enJ6eHh0dLQjC2bNnT5w4+dBDD6akdHse7yzYnZKaVldXd+HipVmPzXQ6HQkJCS6XKybG4/H4gsFQdIynvr7xxImSKVPuT0tLbWps+e23c+PHj8/JGV5fv2vkyJGZmRmSJG3evAUTkpWdBSGI8XiKjhzleMulqupBg29NT0txOByKG/31lH1Ny6LoGsdxJSUlNptt1qxZwWCwra3tlltuGTt27OnTp8+cOdPU1NTa2vr000/37t2bcg26Ls3NzZs2bZo1a1ZXV1dcXNzdd99ttVoRQgcOHBg+fPjAgQN9Pp/L5VKEcp5QdyUCMcajZ8woOVrcKYsIIYS6/ZXtVgtP/fUggQRAAOwWK0TI0lNAJjh+wIB7Fy7EPEdJHwKMADKzTjFywTDskb8P4df/SIE5tU+fmsrVAblmBj81383Pz6+urkYITZw4kXJoipYEg0GlIcVgpKdsrzfBYrHu3LnzgQcesFr5gwcPBgKBIUOGUGhy4sSJHk+MLMsNDfWI5zABsXFxCKH/t2nTmNF/6NevHyEkPj7+8OHDgiAMHz48Ojq6sPDn2NjYhIQEjGUIQVpaqssVVVZW3trampyU5HQ6ZFm2WCwjRowAAPj9Po7nZCwlxif8+c8Px8XFBQIBGvjdg6DJhGAAQEtLS1NzY+/e2TU1NYIY4nlu9JhRcd5Yu8O2s2D7mNG3DRrYXyHB69nZdUIIDdweNWpUbm7us88+S2n0o48+slqtBw8eHDRo0L59+959913FSU6ZK4fDsWrVqn/+859lZWUpKSmKO+dnn312//3333rrrQoyS91CeAgBAQhxkBACXM5Zb71xYt+efSvei+FtHIIIwfbaKi4YhAARwEFCbABf+v57sb5BFEXEc23BgD0hYcabr7v73HwdWUAAiamZgNrx6fIrTyl7o9SgDOmG2DONWlfqpI65amcaCGF0dDT9t7q6mh6g1FNPrfrQoAe/36/UQ2U+CnTQzUA1quPHj1MXK7fbrTgnUHxQkiT6iDp/U56tuFXRNTh0qGjYsKGnT5cVFxePHz8uNtY7YsSIuLg4utm8Xm9paVl7e1swKFAXHm+cZ/Kk/zly5Mju3d9XVJzNy5tw1113FRUdOXGi5MyZc3fckRsKihzHK2eDxWKx2qzBYEiWMW+xku6dTDCWOY4TRUyz1VmtVo63HDp0mOOQ3+/vdlAjEFJHfEJEUcQSyMzIHDSov3rC8yZOPHzo8E8//lReUTpxwgRvnJcZjdHdKzohdEpp4c7Ozq1bt65ateq99947ceLEsGHD6KopBWgSDkJIMBh86aWXjh8/7nA4CCEnT5589tlnExISqP3h+eefv+222zDGfPcsEwAhJLLsTEwePH78+qWvnd60xSPKLrsdIhJlsSDEAwIJBBbEle3cdXz79qAkt0ly5m25M15fktR/AJZl1HMMAQLMTK+U9CkNNTY2HjlyRPEd3bFjx7333qtGeSP/KLhyS0vLpUuXaIVVVVVKW4pMnJOT8/XXX9tstsrKys8//3zhwoX05Dp58qTNZuvXrx9CiEJyZ86coQdrVVVVTU3NLbfcommU53ll+x06dIi6pNH9Sf1PbDZbKBSqrKzMzc09fvy43W4fMGCAwtJ++eVXn883YMAfk5OTd+4s2L694I477oiL81BGRQjZvXtPMNg1adI9TU1N5eUVlOv37t37ppsyS0vLDhwoPHGi5Lbbxk6cOGHo0CH79u07erQ4JsbT0tJMCIaQoz3xd/rS0zIAwS0tLVjGHIcAADR8BCEEALRabC2tbTu27xw2bMittw72dXY1NNZBKmECwHEWCKHb7eY4vqGhAYD+ipdvKBRKSU5+4IFpv/1WuWfv3l9++TVv4oQee7Sal2khdsXRUgmAevbZZwcOHJibm1tdXT1//vwdO3bExMRodC3KDW0229/+9je/309X7YEHHsjPzx81ahRVFpXA1h6VERBAAEScjOXolPS5H69++qMPM8b8IWS1AEyCoWBQ6BKFoCAGA6EAlmTCWeL69Z2xbNnz//omPWcEkQSozqcBAcO+VVlZuWHDhtdee23s2LHHjx+nEyTL8tq1aydMmPDBBx/s2LGjsbHxhiQNCGFVVdW//vWv2bNn19bWUpPhTz/9NGfOnG3btjU2Nioy/UMPPTRkyBDqj/r3v/998uTJ8+bNGzNmDHVIBwDU19dv2bLl8ccfP3LkCLUs1tfXT506ddWqVUePHqVKCV3XlJSU3NxcCoacOnVq5syZX3311RtvvDF48ODi4uL4+PhQKGSxWF566aXp06ePHTu2oqJCLfbQpCgAgLi42AEDBlZXV1dVXaRnDgCgs7OzoqIiMTHJarXW1dXRPConT54sLS1FiKN+gpKEi4t/CYWExMTEjIx0lysqJ2dYIOA/c+YMBYnLysoggMOHDRk6dHBrc9ORI0eDwWAwGLpw4aLf7xclsasrGAyGfvvtYnNLS1p6eldXsKm5WRTFzs5OhIAsy1euXA4GgxDCfv1vKSsrq6g409UVuHr16qlTp8+dO0dNITffnB0fn+BwOK+3KXZHxFBjlt7sQHdvU1PTrFmzqqurly9fLori9OnT//CHP+Tl5f366696eZWeljExMampqYmJiYmJiXa7PSEhIT4+Pjk5OT4+XiFrqGAEVC8jgABZAoAgzhpqab5Q+J/zBw9fOVUq+DokUYQcZ3FGJd/cp8+Y0Vnj/uju1YsQiWCCOEskLgRUCXj++efXr18vy3JsbKzX63W73RzHiaLY3t5eX1/f1dXlcDiWL1/+8MMPa9IyKTXs2bPnT3/6EwDA4XD8/PPPOTk5AICVK1e+9957TqczNTXV7XYTQtra2ijE9s477yjORhzHnT17dsGCBQcOHFDElcGDBy9dunTKlCnUjrVw4UKK18bExCCEfD5fQ0NDQ0PDiBEj1q9f7/V6FSGqpqZmxowZ1HVEMW3Onj17xYoVBQUFzz33XHNzMwDA5XK9+eabTz/9tGL7hBA2NDTu2bMvPj7O5YpKSkrhef7AgZ8yMjIyMtKol/b+/T/V19elp6e63THV1dUAwPT01CtXrvbq1cvn80MIRo8evX//frvd6vHE1tc3DB8+LDExsbKysry8nDqoXLlyZdiw4ZmZGYSQsrLykpISh8NptVpSU1OTkhLLyso7fQG3OyohIbGiotxi4VOSUwgBly5dSE1NHT16dEnJqQsXLsTFefr27durV6+fCw9VVVdHRdmioqKGDRvucrn27duXmZmJMej0+8aOHeu02zQ+3H6//9ixY2PGjOmxSREq9iCEnnnmmaysrKtXr7a0tFAEmi4Qz/NvvPFGUVHR119/HRcXpw4BeeeddyoqKr744gtFlhs5cuT7779/55130gLXpFbck7EJAggwIT3gIsEyx/PdB4o/EGhtEUWR4/ioGDeM8dCXJVlCAACOg0QlOqsOIY1SSHsTCARo+gTDYJNQKBQIBBwOh6E0oiFrp9NZWFiYk5ND3QNorgnNpurs7LTZbFQNUmoghBw5cuT8+fM8z/fp0ycnJ4fKwdSdIxQKqUNE6ScYDAqCoPyuqJh+v3/79u005WFcXNxtt92mJAM4d+5cUVGR0+m88847ExMT1YnU6Mx0dXU1Nja63W4aQd3R0dHW1pacnGi1WglBhOD29naO46Kjo2mmK5fLFQwGfT4fDdimMLzP5xNFMTY2juc5JQKIetXGxMTwPK/EKAmC0NHRYbPZ3G63JEsEE4vFIooCREgQxa5Al9sVZbXa/H6/xWKhMo/P54MQRUU5e6CbQCgU9Hg8VIQQRdHn6wQAeuJiaZQ3BERJw0s5moIl08yNCnVUVlba7fbo6Gia90IRvShXDgQCdrtdY+s5d+6cz+fLycmhxSRJ2r9//9ChQ5OTk7WJ6TT5aq9zKsCY9ERUqlcYyxjA64EwmoXSJLKQYeVWy09h7YgKURYUFFAH/5iYGKpBq2Or1HVqmL3alU8Dwijzora0maF+7KSpVN3RxLer4SoQWW5vdnNmYUeaBTbOctada6Dnac+/7Dh5Rof1MK5JyKPWq0JjK1WB+oiRMQKESyHL99iCjFzIe6iZEv61NUY6+lMy3xhZufVxspr0Xwz7i+FKKxgFDW9RHCrU+ijDW5cWVmQ+JTurRsHV1GOWKUZJ6KNoruoNpoRdKrIHMM/IwbjKIxIKU0an/1HjE6J1WAXqXkGGp4Dhv4xYB93yaY9uvUOfgqfpcTD1BlCn59MTCa9uztgU1xN9ps7/G9YNyNApVj3vkdjzzCJrmpqaaOHMzEwqfjGSNOgTQyqkHEniBMNF1RCHYkfU8DmlCTPjv1laEmCSxtcsSkU/RrMMmowIRVVSLlZEjGGUfiQJUgyDU/WBC2apLg0pR50p6brKzZzZ1WkmFTAd6O4Y0DjLMvyq2ZZzxrrqCZ065hNC8vLyNOyfjZmYOeKZNapnS/rfw7mwRXp3hGFqerOMYWa+h4Zj1KT7Z7ie3lAitbAprDTf2Q5kgJn0MEKyuQYiM1bazL5tdlkRIz3ADa0x40XaxKlTpyhS8fDDD7N5nuF2MvRVZ3g/s43wZlefMZ4aNhQ2w2WEzD7ysCPNhRURxm6xk7mB//q+LzNft8i3GaQZQfSMVu+eC5hJcs2S+Jvd1xSh05LGx5dKXeXl5T/99BNNGUUzp7BvZDPb8Yx7W9j+fYaX5pgplOBGrlYyYyhmd6lFEmpkdmWPft0ZATiGU6e/nos9Lra7vNlfxqU8jAoR47BgOBiZJcViR1Uw0s6aCQZqb2nqbL548eL29vYFCxY89dRTCgBi6KwX9hqAsKdbJKEGhrl6NdnMzPxe2AexmVyr98lmkKOhBs++QUpPUgwVJexeYtxdZHgUG179oT9hgEla2m6yjiTfq36bslUQQ/nbDCljz4Vaa75y5cq0adN27969ZMmSd999Vx0zYnjUGF4TYRYaaHY1oF430q+3mVSmfqTRqyK5n9KsG4Yd1q+R/uY0s/tfDD0rDcX0sEmhDNV3w1w5kURIMfgLOy8Pz0hvxRYM9NuIIV+aBcCZBTwbeSejlStX1tbWHjhw4M4774zw6I8km6jhj/qqwiY6YsOaZv1kHxEMsJw9ELN4OX10qebQ1wfqGjJpzcywYUqzlFFsIwAjQzEIe9WYSaYpyLg4lAEqM/KBM7ISMu7JVP/b1tYWFRVltVoV9y7G7PyO+6rDdoNxmR1784S9rSISjhA2J6qZQy/jOll2hFHYKTWMlg87XWYGI0YOWPYdeQajUN+iy7JLmWRRYViAGIcII5NLWNJUBwIBZh46xn2EwDwVSSSJZgztKew5jPC6+Eisd2xgOPKbKQ1fjPxuXBDuBkeGoZSN4UZy8xPbko3YaoeZHKMHSvWXpZsJWJryZjiJfs3UPhXA6CJAs92vD0sx7Il+B+pvTDW7jwJcf7s7W09iKyeRXEWulyjCirNmqqEZVB82WlmvwDHAacM8Y4yLlTVDYyBdhsohMsPCzMBIBrKjWXK9/sfeNlD3Ya8rI1WKYffU9g72HfeG5j2z4B0z06YGimJfyWzIosxaZ6Alhvgj4+puMzyXIX9rVGcGIhzJtowwm4CZSmBmEjK4HTXC08pQxDRLJnujtwExRN4IxdmwVUVyxzNj7GEleMMF+G9mIGyyPMZxD35verEbHWDk8x95E2x01XDg/x8LwL5nrG/FMAAAAABJRU5ErkJggg==" alt="Tjitra & Associates">
+    </div>
+  </div>
+  
+
+  <div class="sb-identity">
+    <div class="aif-pill--sm">AI First Program</div>
+    <div class="sub-badges">
+      <span class="sub-badge">L2</span>
+      <span class="sub-badge">Day 1</span>
+      <span class="sub-badge">M4</span>
+    </div>
+  </div>
+
+  <div id="prog-wrap"><div id="prog-fill"></div></div>
+
+  <nav id="nav">
+    <div class="nav-section">
+      <div class="nav-section-label">Pengantar</div>
+      <div class="nav-item on" data-s="1" onclick="go(1)"><span class="nav-num">01</span><span class="nav-label">Cover</span></div>
+      <div class="nav-item" data-s="2" onclick="go(2)"><span class="nav-num">02</span><span class="nav-label">Learning Journey</span></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Konteks</div>
+      <div class="nav-item" data-s="3" onclick="go(3)"><span class="nav-num">03</span><span class="nav-label">Reading &amp; Learning dengan AI</span></div>
+      <div class="nav-item" data-s="4" onclick="go(4)"><span class="nav-num">04</span><span class="nav-label">NotebookLM vs LLM</span></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Framework</div>
+      <div class="nav-item" data-s="5" onclick="go(5)"><span class="nav-num">05</span><span class="nav-label">5 Mode Membaca</span></div>
+      <div class="nav-item" data-s="6" onclick="go(6)"><span class="nav-num">06</span><span class="nav-label">Mode 01–02 · Dari Banyak ke Fokus</span></div>
+      <div class="nav-item" data-s="7" onclick="go(7)"><span class="nav-num">07</span><span class="nav-label">Mode 03–05 · Dari Nol ke Lebih</span></div>
+      <div class="nav-item" data-s="8" onclick="go(8)"><span class="nav-num">08</span><span class="nav-label">7 Kekuatan NotebookLM</span></div>
+      <div class="nav-item" data-s="9" onclick="go(9)"><span class="nav-num">09</span><span class="nav-label">QVIY — Aturan Bertanya</span></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Praktik</div>
+      <div class="nav-item" data-s="10" onclick="go(10)"><span class="nav-num">10</span><span class="nav-label">Coba Sekarang</span></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-label">Penutup</div>
+      <div class="nav-item" data-s="11" onclick="go(11)"><span class="nav-num">11</span><span class="nav-label">Takeaway &amp; What's Next</span></div>
+    </div>
+  </nav>
+
+  <div id="sb-foot">
+    <div class="sb-copy">
+      © 2026 Tjitra &amp; Associates<br>
+      Powered by IWDemy · v1.0 · Mei 2026
+    </div>
+  </div>
+
+</aside>
+
+<!-- ═══════════════ SLIDES ═══════════════ -->
+<main id="slides">
+
+<!-- ── S01 COVER ── -->
+<section class="slide on" id="s01" style="display:flex;flex-direction:column">
+  <div class="aif-pill" style="margin-bottom:10px">AI First Program</div>
+  <div class="badges-row">
+    <span class="badge">Level 2</span>
+    <span class="badge">Day 1</span>
+    <span class="badge">Modul 4</span>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding-bottom:48px">
+    <div class="s-eyebrow" style="font-size:11px;letter-spacing:.18em;margin-bottom:16px">Reading &amp; Learning</div>
+    <h1 class="s-title" style="font-size:52px;font-weight:800;line-height:1.06;letter-spacing:-.03em;margin-bottom:22px">Membaca dan Mensintesis<br>dengan AI</h1>
+    <p class="s-lead" style="font-size:15px;line-height:1.6;max-width:56ch;margin-bottom:0">Kita tidak kekurangan informasi — yang langka adalah kemampuan mengolahnya menjadi sesuatu yang bisa digunakan.</p>
+  </div>
+</section>
+
+<!-- ── S02 LEARNING JOURNEY ── -->
+<section class="slide" id="s02">
+  <div class="s-eyebrow">Level 2 · Prompt</div>
+  <h2 class="s-title" style="margin-bottom:6px">Di Mana Kita Sekarang</h2>
+  <p class="s-lead" style="margin-bottom:20px">Level 2 adalah di mana Anda belajar memberikan <strong style="color:var(--txt-hi)">arahan yang tepat</strong> kepada AI — agar memproduksi hasil yang Anda perlukan dengan efektif.</p>
+
+  <!-- 3 hover cards -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+
+    <!-- Card: Level 2 Context -->
+    <div class="hov-card">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.12em;color:var(--txt-lo);text-transform:uppercase;margin-bottom:8px">Level 2</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:var(--txt-hi);line-height:1.2;margin-bottom:6px">Chat Mastery<br>— Prompt</div>
+      <div style="font-size:12px;color:var(--txt-md);line-height:1.5">AI Skills × Thinking Framework untuk prompting yang lebih efektif.</div>
+      <div class="hov-detail">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--gold-text);text-transform:uppercase;margin-bottom:8px">Learning Outcomes</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:11.5px;color:var(--txt-md);line-height:1.5">→ Prompt presisi dengan <strong style="color:var(--txt-hi)">thinking framework</strong> yang tepat</div>
+          <div style="font-size:11.5px;color:var(--txt-md);line-height:1.5">→ AI sebagai <strong style="color:var(--txt-hi)">sounding board</strong> — analisis & brainstorming</div>
+          <div style="font-size:11.5px;color:var(--txt-md);line-height:1.5">→ <strong style="color:var(--txt-hi)">Evaluasi kritis</strong> output agar sesuai intent</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card: Day 1 (active) -->
+    <div class="hov-card card--gold" style="border-color:var(--gold-bdr);background:rgba(212,168,75,.04)">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.12em;color:var(--gold-text);text-transform:uppercase;margin-bottom:8px">▶ Day 1 · Sekarang</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:var(--txt-hi);line-height:1.2;margin-bottom:6px">Reading &<br>Deep Research</div>
+      <div style="font-size:12px;color:var(--txt-md);line-height:1.5">AI sebagai partner berpikir saat membaca dan meneliti sumber.</div>
+      <div class="hov-detail">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--gold-text);text-transform:uppercase;margin-bottom:8px">Hari Ini</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:11.5px;color:var(--txt-md);line-height:1.5">→ <strong style="color:var(--txt-hi)">NotebookLM</strong> — 5 mode membaca dengan AI</div>
+          <div style="font-size:11.5px;color:var(--txt-md);line-height:1.5">→ <strong style="color:var(--txt-hi)">QVIY</strong> — framework dialog yang terarah</div>
+          <div style="font-size:11.5px;color:var(--txt-md);line-height:1.5">→ <strong style="color:var(--txt-hi)">Deep Research</strong> — dari Google & Perplexity</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card: Day 2 -->
+    <div class="hov-card">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.12em;color:var(--txt-lo);text-transform:uppercase;margin-bottom:8px">Day 2 · Berikutnya</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;font-weight:800;color:var(--txt-hi);line-height:1.2;margin-bottom:6px">Writing &<br>Multimodal</div>
+      <div style="font-size:12px;color:var(--txt-md);line-height:1.5">PKM, writing dengan AI, dan eksplorasi multimodal.</div>
+
+    </div>
+
+  </div>
+
+  <!-- Bawa Pulang row -->
+  <div style="border:1px solid var(--bdr);border-radius:10px;padding:14px 20px;background:var(--card);margin-bottom:16px;display:flex;align-items:center;gap:20px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.12em;color:var(--gold-text);text-transform:uppercase;flex-shrink:0">◆ Bawa Pulang</div>
+    <div style="width:1px;height:28px;background:var(--bdr);flex-shrink:0"></div>
+    <div style="font-size:12.5px;color:var(--txt-md);line-height:1.5"><strong style="color:var(--txt-hi)">Personal Prompt Template</strong> — untuk tiga pilar kerja harian: analisis data, ekstraksi insight, dan drafting komunikasi bisnis.</div>
+  </div>
+
+  <!-- Refleksi -->
+  <div style="border:1px solid var(--gold-bdr);border-left:3px solid var(--gold);border-radius:0 12px 12px 0;background:rgba(212,168,75,.04);padding:18px 24px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--gold-text);text-transform:uppercase;margin-bottom:8px">Refleksi</div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:700;color:var(--txt-hi);line-height:1.4;letter-spacing:-.01em">
+      Bagaimana cara Anda saat ini<br>untuk belajar dengan AI?
+    </div>
+  </div>
+</section>
+
+<!-- ── S03 READING & LEARNING dengan AI ── -->
+<section class="slide" id="s03">
+  <div class="s-eyebrow">Konteks</div>
+  <h2 class="s-title">Membaca dan Belajar dengan AI — Sebuah Pergeseran</h2>
+  <div class="tab-strip">
+    <button class="ts-btn on" onclick="setTab('s03',0)">PERGESERAN</button>
+    <button class="ts-btn" onclick="setTab('s03',1)">TIMELINE</button>
+    <button class="ts-btn" onclick="setTab('s03',2)">4 LEAPS</button>
+  </div>
+
+  <!-- ── TAB 0: PERGESERAN ── -->
+  <div class="tab-pane on">
+    <p style="font-size:12.5px;color:var(--txt-md);line-height:1.6;margin-bottom:10px">Cara kita membaca dan belajar sedang berubah. Bukan pada volume — tapi pada cara kita memproses, menghubungkan, dan mengubah apa yang dibaca menjadi pemahaman yang bisa digunakan.</p>
+    <div class="ba-wrap" style="margin-bottom:10px">
+      <div class="ba-col ba-before">
+        <div class="ba-col-lbl">Pola yang kita kenali</div>
+        <div class="ba-item">Membaca linear dari awal hingga akhir</div>
+        <div class="ba-item">Highlight dan catatan manual</div>
+        <div class="ba-item">Insight tenggelam di tumpukan dokumen</div>
+        <div class="ba-item">Sulit menghubungkan antar sumber berbeda</div>
+        <div class="ba-item">Waktu baca = waktu paham</div>
+      </div>
+      <div class="ba-col ba-after">
+        <div class="ba-col-lbl">Yang berubah dengan AI</div>
+        <div class="ba-item">Orientasi dalam hitungan menit: gambaran besar dulu</div>
+        <div class="ba-item">Dialog langsung dengan isi dokumen</div>
+        <div class="ba-item">Sintesis lintas beberapa sumber sekaligus</div>
+        <div class="ba-item">Koneksi antar sumber muncul dalam satu sesi</div>
+        <div class="ba-item">Waktu baca terpisah dari waktu memahami</div>
+      </div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-n" style="font-size:28px">&lt; 5 mnt</div>
+        <div class="stat-l">orientasi dokumen baru<br>dengan Mode 1</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-n">50+</div>
+        <div class="stat-l">sumber per Notebook<br><span style="font-size:10px;font-weight:400">(free; Plus: 300, Ultra: 600)</span></div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-n" style="font-size:22px;letter-spacing:-.01em">~0</div>
+        <div class="stat-l">halusinasi — terikat kutipan<br>sumber yang terverifikasi</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 1: TIMELINE ── -->
+  <div class="tab-pane">
+    <p style="font-size:11.5px;color:var(--txt-md);margin-bottom:8px;line-height:1.5">Kapasitas AI dalam memproses dokumen tumbuh dari hitungan halaman menjadi perpustakaan penuh — dalam waktu tiga tahun.</p>
+    <div class="tl-grid">
+      <div class="tl-item">
+        <div class="tl-year">Late 2022</div>
+        <div class="tl-title">The Starting Line</div>
+        <div class="tl-desc">ChatGPT (GPT-3.5) launch. Context window kecil — memotong dan melupakan dokumen panjang.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">Mar 2023</div>
+        <div class="tl-title">The 100K Leap</div>
+        <div class="tl-desc">Claude 2: 100K tokens. Pertama kali satu prompt memproses ratusan halaman sekaligus.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">Late 2023</div>
+        <div class="tl-title">Expanding Limits + Vision</div>
+        <div class="tl-desc">GPT-4 Turbo 128K. Gemini 1.0 — dokumen diproses sebagai gambar (native multimodal).</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">Feb 2024</div>
+        <div class="tl-title">Million-Token Breakthrough</div>
+        <div class="tl-desc">Gemini 1.5 Pro: hingga 1 juta token. Satu prompt, satu perpustakaan penuh.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">May 2024</div>
+        <div class="tl-title">Scaling to 2M + MoE</div>
+        <div class="tl-desc">Gemini 1.5 Pro: 2 juta token. Mixture-of-Experts untuk ekstraksi presisi di skala besar.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">Mid–Late 2024</div>
+        <div class="tl-title">Source-Grounded Reading</div>
+        <div class="tl-desc">NotebookLM makin populer. Fokus enterprise: upload dokumen proprietary, nol hallucination.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">Jan 2025</div>
+        <div class="tl-title">Deep Reasoning Democratized</div>
+        <div class="tl-desc">DeepSeek-R1 (MIT license) — reasoning kompleks setara model proprietary terkemuka.</div>
+      </div>
+      <div class="tl-item" style="border-color:var(--gold-bdr);background:var(--gold-dim)">
+        <div class="tl-year" style="color:var(--gold)">2025–2026 ◀ Sekarang</div>
+        <div class="tl-title">Local Sovereignty Era</div>
+        <div class="tl-desc">Open-weight models + hardware lokal. Membaca dokumen sepenuhnya offline, tanpa cloud.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TAB 2: 4 LEAPS ── -->
+  <div class="tab-pane">
+    <p style="font-size:11.5px;color:var(--txt-md);margin-bottom:8px;line-height:1.5">Empat lompatan yang mengubah cara AI membaca, belajar, dan mengekstrak informasi dari dokumen.</p>
+    <div class="leap-grid">
+      <div class="leap-card">
+        <div class="leap-num">01</div>
+        <div class="leap-title">Context Window Explosion</div>
+        <div class="leap-sub">From Pages to Libraries</div>
+        <div class="leap-before">GPT-3.5: 4K–8K tokens — satu esai. Terlalu panjang, model melupakan bagian awal.</div>
+        <div class="leap-after">Model 2026: 1M–2M+ token. Feed satu perpustakaan dalam satu prompt.</div>
+      </div>
+      <div class="leap-card">
+        <div class="leap-num">02</div>
+        <div class="leap-title">Native Multimodal Vision</div>
+        <div class="leap-sub">Beyond OCR</div>
+        <div class="leap-before">LLM awal hanya teks. Tabel dan chart? OCR sering merusak struktur layout.</div>
+        <div class="leap-after">Model modern "melihat" PDF sebagai gambar — memahami layout spasial mendekati manusia.</div>
+      </div>
+      <div class="leap-card">
+        <div class="leap-num">03</div>
+        <div class="leap-title">Structured Extraction</div>
+        <div class="leap-sub">Programmatic Reliability</div>
+        <div class="leap-before">Meminta LLM ekstrak data ke format tertentu adalah spekulasi. Format sering rusak.</div>
+        <div class="leap-after">Function calling + structured output: ekstraksi data dengan reliabilitas terprogram.</div>
+      </div>
+      <div class="leap-card" style="border-color:var(--gold-bdr);background:var(--gold-dim)">
+        <div class="leap-num">04</div>
+        <div class="leap-title">Agentic Retrieval</div>
+        <div class="leap-sub">Offline Autonomy</div>
+        <div class="leap-before">Membaca butuh upload ke cloud API pihak ketiga — masalah compliance dan privasi.</div>
+        <div class="leap-after">Open-weight models lokal (Qwen, DeepSeek): membaca offline, nol cloud dependency.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- ── S04 NOTEBOOKLM vs LLM ── -->
+<section class="slide" id="s04">
+  <div class="s-eyebrow">Konteks</div>
+  <h2 class="s-title" style="margin-bottom:6px">NotebookLM vs LLM Biasa</h2>
+  <p class="s-lead" style="margin-bottom:20px">Dua tool berbeda untuk kebutuhan yang berbeda. Hover untuk melihat kapan menggunakan masing-masing.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+
+    <!-- Card: LLM Generik -->
+    <div class="hov-card" style="height:100%">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.12em;color:rgba(100,160,248,.7);text-transform:uppercase;margin-bottom:10px">Claude · GPT · Gemini</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800;color:var(--txt-hi);line-height:1.2;margin-bottom:8px">LLM Generik</div>
+      <div style="font-size:13px;color:var(--txt-md);line-height:1.5;margin-bottom:4px">Pengetahuan luas dari training data global. Fleksibel untuk hampir semua jenis pertanyaan.</div>
+      <div style="font-size:11.5px;color:var(--txt-lo);font-family:'JetBrains Mono',monospace">hover untuk detail →</div>
+      <div class="hov-detail">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.1em;color:rgba(100,160,248,.7);text-transform:uppercase;margin-bottom:9px">Karakteristik</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px">
+          <div style="font-size:12px;color:var(--txt-md);line-height:1.5">→ Menjawab dari pengetahuan luas, bukan dokumen Anda</div>
+          <div style="font-size:12px;color:var(--txt-md);line-height:1.5">→ Tidak bisa verifikasi klaim dengan kutipan</div>
+          <div style="font-size:12px;color:var(--txt-md);line-height:1.5">→ Ideal untuk brainstorming, drafting, eksplorasi ide</div>
+        </div>
+        <div style="font-size:11px;color:rgba(100,160,248,.8);font-weight:600">Gunakan saat: menciptakan dari awal, ideasi bebas</div>
+      </div>
+    </div>
+
+    <!-- Card: NotebookLM -->
+    <div class="hov-card card--gold" style="border-color:var(--gold-bdr);background:rgba(212,168,75,.04);height:100%">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.12em;color:var(--gold-text);text-transform:uppercase;margin-bottom:10px">Google · Spesialis Dokumen</div>
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800;color:var(--txt-hi);line-height:1.2;margin-bottom:8px">NotebookLM</div>
+      <div style="font-size:13px;color:var(--txt-md);line-height:1.5;margin-bottom:4px">Hanya menjawab dari sumber yang Anda berikan. Setiap klaim dilengkapi kutipan langsung.</div>
+      <div style="font-size:11.5px;color:var(--txt-lo);font-family:'JetBrains Mono',monospace">hover untuk detail →</div>
+      <div class="hov-detail">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.1em;color:var(--gold-text);text-transform:uppercase;margin-bottom:9px">Karakteristik</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px">
+          <div style="font-size:12px;color:var(--txt-md);line-height:1.5">→ Setiap jawaban terikat ke sumber yang Anda pilih</div>
+          <div style="font-size:12px;color:var(--txt-md);line-height:1.5">→ Kutipan langsung tersedia untuk setiap klaim</div>
+          <div style="font-size:12px;color:var(--txt-md);line-height:1.5">→ Mensintesis beberapa dokumen dalam satu sesi</div>
+        </div>
+        <div style="font-size:11px;color:var(--gold-text);font-weight:600">Gunakan saat: memahami sumber, riset, due diligence</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Decision rule -->
+  <div style="border:1px solid var(--bdr);border-radius:10px;padding:15px 20px;background:var(--card);display:flex;align-items:center;gap:16px">
+    <div style="font-size:13px;color:var(--txt-md);line-height:1.6;flex:1">
+      <strong style="color:var(--txt-hi)">LLM</strong> untuk menciptakan dari awal &nbsp;·&nbsp; <strong style="color:var(--gold-text)">NotebookLM</strong> untuk memahami sumber yang sudah ada.
+    </div>
+    <div style="font-size:12px;color:var(--txt-lo);border-left:1px solid var(--bdr);padding-left:16px;line-height:1.6;flex-shrink:0;max-width:220px">Keduanya bisa dipakai dalam satu alur kerja yang sama.</div>
+  </div>
+</section>
+
+<!-- ── S05 5 MODE OVERVIEW ── -->
+<section class="slide" id="s05">
+  <div class="s-eyebrow">Framework</div>
+  <h2 class="s-title">5 Mode Membaca dengan AI</h2>
+  <p class="s-lead" style="margin-bottom:14px">Tiap mode mengubah volume informasi menjadi sesuatu yang berbeda. Pilih berdasarkan kondisi Anda sekarang — tidak harus urut. <em style="color:var(--txt-lo)">Hover untuk detail.</em></p>
+  <div style="display:flex;flex-direction:column;gap:7px">
+
+    <div class="m5row">
+      <div class="m5-num">01</div>
+      <div class="m5-tag">100 → 1</div>
+      <div style="flex:1">
+        <div class="m5-name">Tangkap Inti Seketika <span style="font-weight:400;color:var(--txt-lo);font-size:11px">· Big Picture First</span></div>
+        <div class="m5-detail">
+          <div class="m5-prob">"Terlalu banyak materi — tidak tahu dari mana memulai" → satu pemahaman inti</div>
+          <div class="m5-qw">⚡ 5 menit → peta lengkap, tanpa baca semuanya</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--txt-lo);font-family:'JetBrains Mono',monospace;flex-shrink:0;padding-top:3px;opacity:.45">Sweller</div>
+    </div>
+
+    <div class="m5row">
+      <div class="m5-num">02</div>
+      <div class="m5-tag">100 → 10</div>
+      <div style="flex:1">
+        <div class="m5-name">Bangun Outline Terstruktur <span style="font-weight:400;color:var(--txt-lo);font-size:11px">· Organize &amp; Chunk</span></div>
+        <div class="m5-detail">
+          <div class="m5-prob">"Informasi sudah diserap tapi masih berserakan" → poin-poin utama terorganisir</div>
+          <div class="m5-qw">⚡ 10 menit → outline bersih, siap dipresentasikan</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--txt-lo);font-family:'JetBrains Mono',monospace;flex-shrink:0;padding-top:3px;opacity:.45">Siemens</div>
+    </div>
+
+    <div class="m5row">
+      <div class="m5-num">03</div>
+      <div class="m5-tag">0 → 1</div>
+      <div style="flex:1">
+        <div class="m5-name">Pancing Ide Pertama <span style="font-weight:400;color:var(--txt-lo);font-size:11px">· Beat the Blank Page</span></div>
+        <div class="m5-detail">
+          <div class="m5-prob">"Buntu atau blank saat memulai tugas kreatif" → inspirasi dan titik mulai</div>
+          <div class="m5-qw">⚡ 5 menit brainstorm → 3–5 ide untuk memulai</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--txt-lo);font-family:'JetBrains Mono',monospace;flex-shrink:0;padding-top:3px;opacity:.45">Piaget</div>
+    </div>
+
+    <div class="m5row">
+      <div class="m5-num">04</div>
+      <div class="m5-tag">100 → 100+</div>
+      <div style="flex:1">
+        <div class="m5-name">Dari Pelajar ke Ahli <span style="font-weight:400;color:var(--txt-lo);font-size:11px">· Deep Mastery</span></div>
+        <div class="m5-detail">
+          <div class="m5-prob">"Pemahaman di permukaan — sulit menjawab 'mengapa'" → penguasaan mendalam</div>
+          <div class="m5-qw">⚡ 3–4 pertanyaan → celah pemahaman terisi</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--txt-lo);font-family:'JetBrains Mono',monospace;flex-shrink:0;padding-top:3px;opacity:.45">Feynman</div>
+    </div>
+
+    <div class="m5row">
+      <div class="m5-num">05</div>
+      <div class="m5-tag">10 → 10+</div>
+      <div style="flex:1">
+        <div class="m5-name">Percepat Riset Anda <span style="font-weight:400;color:var(--txt-lo);font-size:11px">· Synthesize &amp; Discover</span></div>
+        <div class="m5-detail">
+          <div class="m5-prob">"Kesulitan mensintesis banyak sumber sekaligus" → pola dan celah teridentifikasi</div>
+          <div class="m5-qw">⚡ 15 menit → peta literatur yang biasanya berhari-hari</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--txt-lo);font-family:'JetBrains Mono',monospace;flex-shrink:0;padding-top:3px;opacity:.45">Paivio</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── S06 MODE 1-2 ── -->
+<section class="slide" id="s06">
+  <div class="s-eyebrow">Framework · Mode 01–02</div>
+  <h2 class="s-title">Dari Banyak ke Fokus</h2>
+  <p class="s-lead" style="margin-bottom:16px">Dua mode ini bekerja ketika volume materi terasa <strong style="color:var(--txt-hi)">overwhelming</strong> — terlalu banyak untuk diproses tanpa arah. <em style="color:var(--txt-lo);font-size:12px">Tap kartu untuk detail.</em></p>
+  <div style="display:flex;flex-direction:column;gap:14px">
+
+    <!-- Mode 01: 100→1 -->
+    <div class="fc" style="height:218px" onclick="this.classList.toggle('on')">
+      <div class="fc-inner">
+        <div class="fc-front">
+          <div class="fc-tag">100 → 1</div>
+          <div class="fc-name">Tangkap Inti Seketika</div>
+          <div class="fc-sub">Big Picture First &nbsp;·&nbsp; Cognitive Load Theory (Sweller)</div>
+          <div class="fc-prob">"Terlalu banyak materi — tidak tahu dari mana memulai"</div>
+          <div class="fc-qw">⚡ 5 menit → peta lengkap, tanpa baca semuanya</div>
+          <div class="fc-tap">tap untuk detail →</div>
+        </div>
+        <div class="fc-back">
+          <div class="fc-back-hd">Cognitive Load Theory · John Sweller</div>
+          <div class="fc-tactic">Memori kerja punya kapasitas terbatas. Gunakan <strong>Briefing Docs</strong> dan <strong>Study Guide</strong> otomatis — peta struktural yang membebaskan mental bandwidth untuk menganalisis.</div>
+          <div class="mc-wf">
+            <div class="mc-step"><span class="mc-sn">01</span>Upload semua materi ke satu <strong>Notebook</strong></div>
+            <div class="mc-step"><span class="mc-sn">02</span>Minta AI identifikasi <strong>konsep inti</strong> yang menyatukan semua sumber</div>
+            <div class="mc-step"><span class="mc-sn">03</span>Simpan sebagai <strong>Note</strong> — jadikan peta belajar Anda</div>
+            <div class="mc-step"><span class="mc-sn">04</span>Dengarkan <strong>Audio Overview</strong> sambil bergerak</div>
+          </div>
+          <div class="fc-close">← tap untuk kembali</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode 02: 100→10 -->
+    <div class="fc" style="height:218px" onclick="this.classList.toggle('on')">
+      <div class="fc-inner">
+        <div class="fc-front">
+          <div class="fc-tag">100 → 10</div>
+          <div class="fc-name">Bangun Outline Terstruktur</div>
+          <div class="fc-sub">Organize &amp; Chunk &nbsp;·&nbsp; Connectivism (Siemens)</div>
+          <div class="fc-prob">"Informasi sudah diserap tapi masih berserakan"</div>
+          <div class="fc-qw">⚡ 10 menit → outline bersih, siap dipresentasikan</div>
+          <div class="fc-tap">tap untuk detail →</div>
+        </div>
+        <div class="fc-back">
+          <div class="fc-back-hd">Connectivism · George Siemens</div>
+          <div class="fc-tactic">Belajar adalah mengenali pola dan koneksi antar node yang tersebar. Minta AI memetakan <strong>hubungan lintas domain</strong> yang butuh berjam-jam jika dikerjakan manual.</div>
+          <div class="mc-wf">
+            <div class="mc-step"><span class="mc-sn">01</span>Gunakan materi yang sudah ada di <strong>Notebook</strong></div>
+            <div class="mc-step"><span class="mc-sn">02</span>Minta AI susun <strong>10 poin kunci</strong> atau outline terstruktur</div>
+            <div class="mc-step"><span class="mc-sn">03</span>Simpan sebagai <strong>Note</strong> terstruktur</div>
+            <div class="mc-step"><span class="mc-sn">04</span>Generate <strong>Mind Map</strong> untuk visualisasi koneksi</div>
+          </div>
+          <div class="fc-close">← tap untuk kembali</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── S07 MODE 3-5 ── -->
+<section class="slide" id="s07">
+  <div class="s-eyebrow">Framework · Mode 03–05</div>
+  <h2 class="s-title">Ide, Penguasaan &amp; Sintesis</h2>
+  <p class="s-lead" style="margin-bottom:10px">Dari blank page ke expert insight — tiga mode untuk menciptakan, mendalami, dan mensintesis. <em style="color:var(--txt-lo);font-size:12px">Tap kartu untuk detail.</em></p>
+  <div style="display:flex;flex-direction:column;gap:7px">
+
+    <!-- Mode 03: 0→1 -->
+    <div class="fc" style="height:158px" onclick="this.classList.toggle('on')">
+      <div class="fc-inner">
+        <div class="fc-front">
+          <div class="fc-tag">0 → 1</div>
+          <div class="fc-name">Pancing Ide Pertama</div>
+          <div class="fc-sub">Beat the Blank Page &nbsp;·&nbsp; Constructivism (Piaget &amp; Vygotsky)</div>
+          <div class="fc-prob">"Buntu atau blank saat memulai tugas kreatif"</div>
+          <div class="fc-qw">⚡ 5 menit brainstorm → 3–5 ide untuk memulai</div>
+          <div class="fc-tap">tap untuk detail →</div>
+        </div>
+        <div class="fc-back">
+          <div class="fc-back-hd">Constructivism · Piaget &amp; Vygotsky</div>
+          <div class="fc-tactic">Tulis refleksi di chat, minta AI cek interpretasi Anda terhadap sumber — pengetahuan dibangun <strong>secara aktif</strong>.</div>
+          <div class="mc-wf">
+            <div class="mc-step"><span class="mc-sn">01</span>Upload satu <strong>dokumen anchor</strong> — silabus, brief, atau artikel</div>
+            <div class="mc-step"><span class="mc-sn">02</span><strong>Brainstorm</strong> angle dan perspektif bersama AI</div>
+            <div class="mc-step"><span class="mc-sn">03</span>Simpan ide menarik sebagai <strong>Notes</strong></div>
+            <div class="mc-step"><span class="mc-sn">04</span>Kembangkan via <strong>Briefing Doc</strong> atau FAQ</div>
+          </div>
+          <div class="fc-close">← tap untuk kembali</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode 04: 100→100+ -->
+    <div class="fc" style="height:158px" onclick="this.classList.toggle('on')">
+      <div class="fc-inner">
+        <div class="fc-front">
+          <div class="fc-tag" style="font-size:18px">100 → 100+</div>
+          <div class="fc-name">Dari Pelajar ke Ahli</div>
+          <div class="fc-sub">Deep Mastery &nbsp;·&nbsp; Elaborative Interrogation (Feynman)</div>
+          <div class="fc-prob">"Pemahaman di permukaan — sulit menjawab 'mengapa'"</div>
+          <div class="fc-qw">⚡ 3–4 pertanyaan → celah pemahaman terisi</div>
+          <div class="fc-tap">tap untuk detail →</div>
+        </div>
+        <div class="fc-back">
+          <div class="fc-back-hd">Elaborative Interrogation · Feynman Technique</div>
+          <div class="fc-tactic">Gunakan NotebookLM sebagai <strong>sparring partner Socratic</strong> — AI menantang asumsi, Anda mengelaborasi dan justifikasi, mempersolid penguasaan.</div>
+          <div class="mc-wf">
+            <div class="mc-step"><span class="mc-sn">01</span>Pastikan semua materi topik ada di <strong>Notebook</strong></div>
+            <div class="mc-step"><span class="mc-sn">02</span>Ajukan <strong>"mengapa?"</strong> dan <strong>"bagaimana jika?"</strong> secara bertahap</div>
+            <div class="mc-step"><span class="mc-sn">03</span>Simpan analogi dan jawaban kritis sebagai <strong>Notes</strong></div>
+            <div class="mc-step"><span class="mc-sn">04</span>Generate <strong>Study Guide</strong> dengan flashcard</div>
+          </div>
+          <div class="fc-close">← tap untuk kembali</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode 05: 10→10+ -->
+    <div class="fc" style="height:158px" onclick="this.classList.toggle('on')">
+      <div class="fc-inner">
+        <div class="fc-front">
+          <div class="fc-tag">10 → 10+</div>
+          <div class="fc-name">Percepat Riset Anda</div>
+          <div class="fc-sub">Synthesize &amp; Discover &nbsp;·&nbsp; Dual Coding Theory (Paivio)</div>
+          <div class="fc-prob">"Kesulitan mensintesis banyak sumber sekaligus"</div>
+          <div class="fc-qw">⚡ 15 menit → peta literatur yang biasanya berhari-hari</div>
+          <div class="fc-tap">tap untuk detail →</div>
+        </div>
+        <div class="fc-back">
+          <div class="fc-back-hd">Dual Coding Theory · Allan Paivio</div>
+          <div class="fc-tactic">Proses lewat dua kanal sekaligus — baca sumber sambil dengarkan <strong>Audio Overview</strong>. Dual-coding meningkatkan retensi secara signifikan.</div>
+          <div class="mc-wf">
+            <div class="mc-step"><span class="mc-sn">01</span>Upload artikel dan sumber yang dikurasi ke <strong>Notebook</strong></div>
+            <div class="mc-step"><span class="mc-sn">02</span>Minta <strong>sintesis lintas sumber</strong> + analisis celah</div>
+            <div class="mc-step"><span class="mc-sn">03</span>Simpan <strong>pemetaan celah</strong> sebagai Notes</div>
+            <div class="mc-step"><span class="mc-sn">04</span>Bangun literature review via <strong>Briefing Doc</strong> + Timeline</div>
+          </div>
+          <div class="fc-close">← tap untuk kembali</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── S08 7 KEKUATAN ── -->
+<section class="slide" id="s08">
+  <div class="s-eyebrow">Framework</div>
+  <h2 class="s-title">7 Kekuatan NotebookLM</h2>
+  <p class="s-lead" style="margin-bottom:16px">Yang membuat NotebookLM bekerja berbeda dari AI tool pada umumnya. <em style="color:var(--txt-lo);font-size:12px">Tap untuk detail.</em></p>
+
+  <div id="s08-list">
+    <div class="col-item" onclick="selCol(this)">
+      <div class="col-row"><div class="col-num">01</div><div class="col-title">Kutipan Terverifikasi</div><div class="col-arr">›</div></div>
+      <div class="col-detail">Setiap jawaban menautkan sumber aslinya — Anda tahu persis dari mana setiap insight berasal.</div>
+    </div>
+    <div class="col-item" onclick="selCol(this)">
+      <div class="col-row"><div class="col-num">02</div><div class="col-title">Sintesis Multi-Sumber</div><div class="col-arr">›</div></div>
+      <div class="col-detail">Hingga <strong>50 sumber</strong> (free) atau <strong>300+</strong> (Plus) dalam satu konteks — laporan, artikel, transkrip, slide.</div>
+    </div>
+    <div class="col-item" onclick="selCol(this)">
+      <div class="col-row"><div class="col-num">03</div><div class="col-title">Audio Overview</div><div class="col-arr">›</div></div>
+      <div class="col-detail">Ubah dokumen menjadi podcast dua narasumber. Dengarkan saat commute atau olahraga — belajar tanpa layar.</div>
+    </div>
+    <div class="col-item" onclick="selCol(this)">
+      <div class="col-row"><div class="col-num">04</div><div class="col-title">Study Guide Otomatis</div><div class="col-arr">›</div></div>
+      <div class="col-detail">Generate <strong>FAQ, Timeline,</strong> atau <strong>Briefing Doc</strong> dari sumber Anda dalam satu klik.</div>
+    </div>
+    <div class="col-item" onclick="selCol(this)">
+      <div class="col-row"><div class="col-num">05</div><div class="col-title">Notebook per Proyek</div><div class="col-arr">›</div></div>
+      <div class="col-detail">Satu Notebook per topik. Konteks terjaga — tidak perlu menjelaskan ulang setiap sesi.</div>
+    </div>
+    <div class="col-item" onclick="selCol(this)">
+      <div class="col-row"><div class="col-num">06</div><div class="col-title">Privasi Dokumen</div><div class="col-arr">›</div></div>
+      <div class="col-detail">Berdasarkan kebijakan Google, dokumen tidak digunakan untuk training model AI. Verifikasi dengan tim IT untuk kebutuhan compliance spesifik.</div>
+    </div>
+    <div class="col-item" onclick="selCol(this)">
+      <div class="col-row">
+        <div class="col-num" style="color:var(--gold)">07</div>
+        <div class="col-title" style="color:var(--gold-text)">Grounding — Minimal Hallucination</div>
+        <div style="font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--gold-text);opacity:.7;flex-shrink:0;letter-spacing:.08em">PEMBEDA UTAMA</div>
+        <div class="col-arr" style="margin-left:8px">›</div>
+      </div>
+      <div class="col-detail">Menjawab <strong style="color:var(--txt-hi)">hanya dari sumber yang Anda berikan</strong>, disertai kutipan untuk setiap klaim. Risiko informasi yang dikarang berkurang drastis.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--txt-lo);line-height:1.6;border-top:1px solid var(--bdr);padding-top:10px">
+    Sumber: Google NotebookLM Help · Source limits: free 50, Plus 300, Ultra 600 (2026)
+  </div>
+</section>
+
+<!-- ── S09 QVIY ── -->
+<section class="slide" id="s09">
+  <div class="s-eyebrow">Framework</div>
+  <div class="ratio-hero">
+    <span class="rn">1</span><span class="rarr">→</span>
+    <span class="rn2" style="font-family:'JetBrains Mono',monospace;letter-spacing:.04em">Q·V·I·Y</span>
+    <span class="rdesc">pertanyaan &nbsp;·&nbsp; empat langkah ke output</span>
+  </div>
+  <h2 class="s-title">QVIY — Cara Bertanya yang Lebih Produktif</h2>
+  <p class="s-lead">Dialog dengan AI berkembang seiring kualitas pertanyaannya. QVIY adalah pola empat langkah yang membantu proses itu berjalan lebih terarah. <span style="color:var(--txt-lo);font-size:12px;font-style:italic">Framework AI First Program</span></p>
+  <div class="qviy-nav">
+    <button class="qb on" data-l="Q" onclick="selQ('Q')">Q</button>
+    <button class="qb" data-l="V" onclick="selQ('V')">V</button>
+    <button class="qb" data-l="I" onclick="selQ('I')">I</button>
+    <button class="qb" data-l="Y" onclick="selQ('Y')">Y</button>
+    <span class="qviy-hint">— pilih huruf untuk menjelajahi setiap langkah</span>
+  </div>
+
+  <!-- Q Panel -->
+  <div class="qviy-panel on" data-l="Q">
+    <div class="card card--gold" style="padding:18px 22px">
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:36px;font-weight:800;color:var(--gold-text);letter-spacing:-.02em;line-height:1;margin-bottom:10px">Q</div>
+      <div class="card-h">Quality — Mulai dari Pertanyaan yang Tepat</div>
+      <div class="card-body" style="margin-bottom:12px"><strong style="color:var(--txt-hi)">Kualitas pertanyaan menentukan kualitas jawaban.</strong> Pertanyaan yang spesifik membuka dialog yang lebih dalam.</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:12px">
+          <div style="font-size:11px;color:var(--txt-lo);margin-bottom:5px;font-style:italic">Pertanyaan luas:</div>
+          <div style="font-size:13px;color:var(--txt-md)">"Apa isi buku ini?"</div>
+        </div>
+        <div style="background:var(--gold-dim);border:1px solid var(--gold-bdr);border-radius:8px;padding:12px">
+          <div style="font-size:11px;color:var(--gold-text);margin-bottom:5px;font-style:italic">Versi terfokus:</div>
+          <div style="font-size:13px;color:var(--txt-hi)">"Apa argumen utama penulis tentang kepemimpinan di era VUCA?"</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- V Panel -->
+  <div class="qviy-panel" data-l="V">
+    <div class="card" style="padding:18px 22px">
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:36px;font-weight:800;color:var(--gold-text);letter-spacing:-.02em;line-height:1;margin-bottom:10px">V</div>
+      <div class="card-h">Verify — Telusuri ke Sumbernya</div>
+      <div class="card-body" style="margin-bottom:14px">Setiap jawaban NotebookLM disertai kutipan yang bisa diklik langsung ke sumber aslinya. Langkah ini membantu memastikan konteks tidak hilang dalam proses sintesis.</div>
+      <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:14px">
+        <div style="font-size:11.5px;color:var(--txt-md);line-height:1.6">Setelah jawaban muncul, coba minta:<br>
+        <span style="display:inline-block;margin-top:6px;font-size:13px;color:var(--txt-hi);font-style:italic">"Tunjukkan kutipan lengkap untuk poin pertama."</span></div>
+      </div>
+      <div style="margin-top:10px;font-size:11.5px;color:var(--txt-lo);line-height:1.5">Verifikasi adalah bagian dari cara kerja yang <strong>solid dan bisa dipertanggungjawabkan.</strong></div>
+    </div>
+  </div>
+
+  <!-- I Panel -->
+  <div class="qviy-panel" data-l="I">
+    <div class="card" style="padding:18px 22px">
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:36px;font-weight:800;color:var(--gold-text);letter-spacing:-.02em;line-height:1;margin-bottom:10px">I</div>
+      <div class="card-h">Iterate — Lanjutkan Dialognya</div>
+      <div class="card-body" style="margin-bottom:14px">Dialog yang baik berkembang dari jawaban ke pertanyaan berikutnya. Jawaban pertama sering membuka pertanyaan yang lebih relevan dari yang kita bayangkan sebelumnya.</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:12px;font-size:12.5px;color:var(--txt-md)">
+          Setelah jawaban pertama: <span style="color:var(--txt-hi);font-style:italic">"Elaborasi poin ketiga"</span>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:12px;font-size:12.5px;color:var(--txt-md)">
+          Lanjutkan: <span style="color:var(--txt-hi);font-style:italic">"Apa implikasinya untuk [konteks Anda]?"</span>
+        </div>
+        <div style="background:rgba(255,255,255,.04);border-radius:8px;padding:12px;font-size:12.5px;color:var(--txt-md)">
+          Lebih dalam: <span style="color:var(--txt-hi);font-style:italic">"Apa asumsi yang mendasari argumen ini?"</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Y Panel -->
+  <div class="qviy-panel" data-l="Y">
+    <div class="card card--gold" style="padding:18px 22px">
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:36px;font-weight:800;color:var(--gold-text);letter-spacing:-.02em;line-height:1;margin-bottom:10px">Y</div>
+      <div class="card-h">Yield — Arahkan ke Sesuatu yang Konkret</div>
+      <div class="card-body" style="margin-bottom:14px">Sesi membaca yang berakhir pada output konkret lebih mudah ditindaklanjuti. Dialog bisa diarahkan ke sana dengan satu kalimat penutup yang tepat.</div>
+      <div style="background:var(--gold-dim);border:1px solid var(--gold-bdr);border-radius:8px;padding:14px">
+        <div style="font-size:11.5px;color:var(--gold-text);margin-bottom:6px;font-family:'JetBrains Mono',monospace;letter-spacing:.06em;font-size:9px">CONTOH YIELD PROMPT</div>
+        <div style="font-size:13.5px;color:var(--txt-hi);font-style:italic;line-height:1.5">"Dari sintesis ini, buat 3 poin rekomendasi untuk rapat besok."</div>
+      </div>
+      <div style="margin-top:10px;font-size:11.5px;color:var(--txt-lo)">Titik di mana <strong style="color:var(--txt-md)">belajar bertemu tindakan nyata.</strong></div>
+    </div>
+  </div>
+
+</section>
+
+
+</section>
+
+<!-- ── S10 COBA SEKARANG ── -->
+<section class="slide" id="s10">
+  <div class="s-eyebrow">Praktik</div>
+  <h2 class="s-title">Coba Sekarang</h2>
+  <p class="s-lead">Gunakan NotebookLM langsung dengan video homework Anda — dari sumber ke insight ke produk belajar.</p>
+  <div class="ex-box">
+    <div class="chk-list">
+      <div class="chk" onclick="chkToggle(this)">
+        <div class="chk-box"></div>
+        <div class="chk-text"><strong>Buka NotebookLM</strong> — notebooklm.google.com</div>
+      </div>
+      <div class="chk" onclick="chkToggle(this)">
+        <div class="chk-box"></div>
+        <div class="chk-text"><strong>Add Source</strong> — masukkan link YouTube yang menjadi homework Anda</div>
+      </div>
+      <div class="chk" onclick="chkToggle(this)">
+        <div class="chk-box"></div>
+        <div class="chk-text"><strong>Dialog</strong> — ajukan 2 pertanyaan spesifik menggunakan pola QVIY. Klik kutipan untuk verifikasi ke sumber aslinya.</div>
+      </div>
+      <div class="chk" onclick="chkToggle(this)">
+        <div class="chk-box"></div>
+        <div class="chk-text"><strong>Kreasi</strong> — gunakan Studio untuk membuat materi belajar yang bisa digunakan</div>
+      </div>
+      <div class="chk" onclick="chkToggle(this)">
+        <div class="chk-box"></div>
+        <div class="chk-text"><strong>Masukkan ke Padlet</strong></div>
+      </div>
+      <div class="chk" onclick="chkToggle(this)">
+        <div class="chk-box"></div>
+        <div class="chk-text"><strong>Bagikan</strong> satu insight paling mengejutkan kepada peserta di sebelah Anda.</div>
+      </div>
+    </div>
+    <div id="chk-prog">0/6 langkah selesai &nbsp;·&nbsp; ⏱ 20 menit</div>
+  </div>
+</section>
+
+<!-- ── S11 TAKEAWAY ── -->
+<section class="slide" id="s11">
+  <div style="display:grid;grid-template-columns:1.15fr 0.85fr;gap:40px;height:100%;align-items:start;padding-top:4px">
+
+    <!-- LEFT: Takeaway -->
+    <div>
+      <div class="s-eyebrow" style="margin-bottom:5px">Penutup</div>
+      <h2 class="s-title" style="margin-bottom:20px">Takeaway</h2>
+
+      <div class="s11-row">
+        <div class="s11-ghost">01</div>
+        <div class="s11-kw">AI sebagai <em>thinking partner</em> — bukan hanya search yang lebih cepat</div>
+        <div class="s11-desc">Membaca bersama AI mengubah apa yang kita temukan. Koneksi antar sumber yang sulit terlihat sendiri bisa muncul dalam satu sesi.</div>
+      </div>
+
+      <div class="s11-row">
+        <div class="s11-ghost">02</div>
+        <div class="s11-kw">Setiap jawaban bisa <em>diverifikasi</em> — NotebookLM bekerja dari sumber Anda</div>
+        <div class="s11-desc">Bukan asumsi, bukan hallusinasi. Kutipan langsung dari dokumen yang Anda pilih sendiri.</div>
+      </div>
+
+      <div class="s11-row">
+        <div class="s11-ghost">03</div>
+        <div class="s11-kw"><em>Lima mode</em> untuk satu dokumen — tergantung apa yang Anda butuhkan</div>
+        <div class="s11-desc">Dari orientasi cepat (Big Picture First) hingga menghasilkan output konkret (Synthesize & Discover).</div>
+      </div>
+
+      <div class="s11-row">
+        <div class="s11-ghost">04</div>
+        <div class="s11-kw">Dialog berkembang seiring <em>kualitas pertanyaan</em> — QVIY membantu ke sana</div>
+        <div class="s11-desc">Quantity → Variety → Insight → Yield. Pola ini membuat eksplorasi lebih terarah dan hasilnya lebih bermakna.</div>
+      </div>
+
+      <div class="s11-row">
+        <div class="s11-ghost">05</div>
+        <div class="s11-kw">Keputusan dari <em>pemahaman lebih dalam</em> cenderung lebih solid</div>
+        <div class="s11-desc">Membaca dengan AI adalah salah satu jalan ke sana — dan hari ini Anda sudah mulai berjalan.</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: What's Next -->
+    <div style="padding-top:6px">
+      <div class="s-eyebrow" style="margin-bottom:5px">What's Next</div>
+      <h2 class="s-title" style="margin-bottom:20px">Level 2 · Journey</h2>
+
+      <!-- Day 1 — completed -->
+      <div style="display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-top:1px solid var(--bdr);opacity:0.45;margin-bottom:4px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--txt-lo);text-transform:uppercase;min-width:52px;padding-top:2px">Day 1</div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--txt-md);margin-bottom:3px">✓ Selesai</div>
+          <div style="font-size:12px;color:var(--txt-lo);line-height:1.5">AI sebagai partner berpikir — chatting, reading, dan deep research</div>
+        </div>
+      </div>
+
+      <!-- Day 2 — highlighted -->
+      <div style="display:flex;align-items:flex-start;gap:14px;padding:16px 16px 16px 14px;border-top:1px solid var(--bdr);border-left:3px solid var(--gold);background:rgba(212,168,75,.04);border-radius:0 10px 10px 0;margin-bottom:24px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--gold-text);text-transform:uppercase;min-width:52px;padding-top:2px">Day 2</div>
+        <div>
+          <div style="font-size:11px;font-weight:700;color:var(--gold-text);margin-bottom:5px">▶ Berikutnya</div>
+          <div style="font-size:12.5px;color:var(--txt-hi);line-height:1.55;font-weight:500">Personal knowledge management, writing, dan multimodal AI</div>
+        </div>
+      </div>
+
+      <!-- Action box -->
+      <div style="border:1px solid var(--gold-bdr);border-radius:12px;padding:20px 20px;background:rgba(212,168,75,0.04)">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:.13em;color:var(--gold-text);text-transform:uppercase;margin-bottom:10px">⚡ Satu Aksi Sebelum Day 2</div>
+        <div style="font-size:13px;color:var(--txt-md);line-height:1.7;margin-bottom:12px">Buat satu Notebook di NotebookLM untuk topik yang paling relevan sekarang. Upload dua dokumen. Coba Mode 1, lanjut ke Mode 2.</div>
+        <div style="font-size:13px;color:var(--txt-hi);font-weight:600;border-top:1px solid var(--bdr);padding-top:12px">Dua puluh menit sudah cukup untuk merasakan perbedaannya.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</main>
+</div>
+
+<!-- Navigation arrows -->
+<div id="arrows">
+  <button class="arr" onclick="go(cur-1)" title="← Sebelumnya">←</button>
+  <button class="arr" onclick="go(cur+1)" title="→ Berikutnya">→</button>
+</div>
+
+<script>
+const TOTAL=12;let cur=1;
+const slides=document.querySelectorAll('.slide');
+const navItems=document.querySelectorAll('.nav-item');
+const pfill=document.getElementById('prog-fill');
+
+function go(n){
+  if(n<1||n>TOTAL||n===cur)return;
+  slides[cur-1].classList.remove('on');
+  slides[cur-1].classList.add('out');
+  setTimeout(()=>slides[cur-1].classList.remove('out'),300);
+  cur=n;
+  slides[cur-1].classList.add('on');
+  slides[cur-1].scrollTop=0;
+  navItems.forEach(i=>i.classList.toggle('on',parseInt(i.dataset.s)===cur));
+  pfill.style.width=(((cur-1)/(TOTAL-1))*100)+'%';
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')go(cur+1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(cur-1);
+});
+
+let tx=0;
+const sa=document.getElementById('slides');
+sa.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+sa.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>48)go(cur+(dx<0?1:-1));
+},{passive:true});
+
+// ── Tab system ──
+function setTab(id, idx) {
+  document.querySelectorAll('#'+id+' .ts-btn').forEach((b,i)=>b.classList.toggle('on',i===idx));
+  document.querySelectorAll('#'+id+' .tab-pane').forEach((p,i)=>p.classList.toggle('on',i===idx));
+}
+
+// ── QVIY selector ──
+function selCol(el){
+  const wasOn=el.classList.contains('on');
+  document.querySelectorAll('.col-item').forEach(c=>c.classList.remove('on'));
+  if(!wasOn)el.classList.add('on');
+}
+function selQ(l) {
+  document.querySelectorAll('.qb').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
+  document.querySelectorAll('.qviy-panel').forEach(p=>p.classList.toggle('on',p.dataset.l===l));
+}
+
+// ── Mode row selector S05 ──
+function selMode(el) {
+  const wasOn = el.classList.contains('on');
+  document.querySelectorAll('#s05 .mode-row').forEach(r=>r.classList.remove('on'));
+  if (!wasOn) el.classList.add('on');
+}
+
+// ── Checklist S10 ──
+function chkToggle(el) {
+  el.classList.toggle('done');
+  el.querySelector('.chk-box').textContent = el.classList.contains('done') ? '✓' : '';
+  const done = document.querySelectorAll('#s10 .chk.done').length;
+  const total = document.querySelectorAll('#s10 .chk').length;
+  const pr = document.getElementById('chk-prog');
+  if (pr) pr.textContent = done+'/'+total+' langkah selesai' + (done===total ? ' — selesai! 🎉' : ' · ⏱ 20 menit');
+}
+
+
+// Mode card accordion (S06, S07)
+function selMC(slideId, el) {
+  const wasOn = el.classList.contains('on');
+  document.querySelectorAll('#'+slideId+' .mode-card').forEach(c=>c.classList.remove('on'));
+  if (!wasOn) el.classList.add('on');
+}
+
+</script>
+</body>
+</html>

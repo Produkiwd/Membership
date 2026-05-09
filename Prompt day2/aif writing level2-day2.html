@@ -1,0 +1,2349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI for Writing &amp; Slide · L2 D2 · AIF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=block" rel="stylesheet">
+<style>
+:root {
+  --bg: #FFFFFF;
+  --bg-soft: #F7F7F4;
+  --bg-sidebar: #FBFAF7;
+  --text: #0A0A0A;
+  --text-strong: #000000;
+  --text-md: #2A2A2A;
+  --text-soft: #5A5A5A;
+  --gold: #D4A84B;
+  --gold-deep: #8B7340;
+  --gold-tint: rgba(212, 168, 75, 0.08);
+  --gold-soft: rgba(212, 168, 75, 0.16);
+  --border: rgba(10, 10, 10, 0.10);
+  --border-soft: rgba(10, 10, 10, 0.06);
+  --border-strong: rgba(10, 10, 10, 0.18);
+
+  --sidebar-w: 300px;
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* === LAYOUT === */
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  height: 100vh;
+}
+
+/* === SIDEBAR === */
+.sidebar {
+  height: 100vh;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 32px 24px;
+  position: relative;
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+}
+.brand-row img {
+  display: block;
+  height: 30px;
+  width: auto;
+}
+.brand-divider {
+  width: 1px;
+  height: 22px;
+  background: var(--border-strong);
+  flex-shrink: 0;
+}
+
+.module-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-bottom: 8px;
+}
+.module-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
+  margin-bottom: 8px;
+}
+.module-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-md);
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+  line-height: 1.5;
+}
+.module-meta strong { color: var(--text-strong); font-weight: 700; }
+
+/* TOC */
+.nav-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin-bottom: 12px;
+}
+.nav {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.nav-item {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-md);
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  border-radius: 0 4px 4px 0;
+  transition: all 0.18s var(--ease);
+  user-select: none;
+}
+.nav-item:hover { background: var(--bg); color: var(--text-strong); }
+.nav-item.active {
+  background: var(--gold-tint);
+  border-left-color: var(--gold);
+  color: var(--text-strong);
+  font-weight: 600;
+}
+.nav-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-soft);
+  flex-shrink: 0;
+}
+.nav-item.active .nav-num { color: var(--gold-deep); }
+
+/* SIDEBAR FOOTER */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.copyright {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-soft);
+  line-height: 1.5;
+  font-style: italic;
+}
+.copyright strong { color: var(--text-md); font-weight: 600; font-style: normal; }
+
+/* === MAIN STAGE === */
+.stage {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+}
+.slides-track {
+  display: flex;
+  width: 1100%;
+  height: 100%;
+  transform: translateX(0);
+  transition: transform 0.55s var(--ease);
+  will-change: transform;
+}
+.slide {
+  flex: 0 0 9.0909%;
+  height: 100%;
+  overflow: hidden;
+  padding: clamp(28px, 4vh, 44px) clamp(36px, 4vw, 56px);
+  position: relative;
+}
+.slide-inner {
+  max-width: 980px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+}
+
+/* SLIDE COMMON */
+.slide-eyebrow {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(10px, 0.85vw, 11px);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  background: var(--gold-tint);
+  padding: 4px 10px;
+  border-radius: 3px;
+  margin-bottom: clamp(10px, 1.5vh, 14px);
+  align-self: flex-start;
+}
+.slide-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--text-strong);
+  line-height: 1.05;
+}
+.slide-lead {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  color: var(--text-md);
+  line-height: 1.5;
+  max-width: 760px;
+}
+
+/* === SLIDE 1: PENGANTAR === */
+.s1-title { font-size: 64px; margin-bottom: 22px; }
+.s1-lead { font-size: 21px; margin-bottom: 56px; }
+.s1-outcomes {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 48px;
+}
+.outcome {
+  padding: 26px 24px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--gold);
+  border-radius: 8px;
+}
+.outcome-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--gold-deep);
+  margin-bottom: 14px;
+}
+.outcome-verb {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: var(--text-strong);
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+.outcome-desc {
+  font-size: 14px;
+  color: var(--text-md);
+  line-height: 1.5;
+  font-weight: 500;
+}
+.s1-meta {
+  margin-top: auto;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 40px;
+}
+.s1-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.s1-meta-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+.s1-meta-val {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+/* === SLIDE 2: KONTEKS === */
+.s2-title { font-size: clamp(28px, 3.6vw, 40px); margin-bottom: 10px; }
+.s2-lead { font-size: clamp(13px, 1.05vw, 15px); margin-bottom: 18px; }
+.hier-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+.hier-row {
+  display: grid;
+  grid-template-columns: 42px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+}
+.hier-row.highlight { border-color: var(--gold); background: var(--gold-tint); }
+.hier-row.muted { background: var(--bg-soft); border-color: var(--border-soft); }
+.hier-row.muted .hier-name { color: var(--text-soft); }
+.hier-num {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.hier-content { display: flex; flex-direction: column; gap: 1px; }
+.hier-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+.hier-row.highlight .hier-tag { color: var(--gold-deep); }
+.hier-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.012em;
+}
+.hier-marker {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+}
+.note {
+  padding: 11px 18px;
+  background: var(--bg-soft);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 5px 5px 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-md);
+  font-style: italic;
+}
+
+/* === FLIP CARDS (Slide 2) === */
+.flip-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  flex: 1;
+  align-content: center;
+  margin-top: 8px;
+  perspective: 1200px;
+}
+.flip-card {
+  position: relative;
+  height: clamp(160px, 23vh, 200px);
+  cursor: pointer;
+}
+.flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.55s var(--ease);
+}
+.flip-card:hover .flip-inner,
+.flip-card:focus-within .flip-inner { transform: rotateY(180deg); }
+.flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--gold);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(10, 10, 10, 0.04);
+}
+.flip-back {
+  transform: rotateY(180deg);
+  background: var(--gold-tint);
+  border-color: var(--gold);
+  padding: 13px 12px;
+}
+.flip-num {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--gold);
+  line-height: 1;
+  letter-spacing: -0.025em;
+  margin-bottom: 6px;
+}
+.flip-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  line-height: 1.18;
+  margin-top: auto;
+}
+.flip-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--text-soft);
+  margin-top: 6px;
+}
+.flip-back-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-bottom: 8px;
+}
+.flip-examples {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+}
+.flip-examples li {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.35;
+  padding-left: 9px;
+  position: relative;
+}
+.flip-examples li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+@media (max-width: 1280px) {
+  .flip-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* === BEFORE / AFTER (Slides 5 & 6) === */
+.ba-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 8px;
+}
+.ba-pair + .ba-pair { margin-top: 10px; }
+.ba-pair-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+}
+.ba-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.ba-col {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.ba-col.before {
+  background: #FFFBF9;
+  border-color: rgba(180, 60, 60, 0.20);
+  border-left: 3px solid rgba(180, 60, 60, 0.55);
+}
+.ba-col.after {
+  background: var(--gold-tint);
+  border-color: var(--gold);
+  border-left: 3px solid var(--gold);
+}
+.ba-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.ba-col.before .ba-tag { color: rgba(160, 50, 50, 0.92); }
+.ba-col.after .ba-tag { color: var(--gold-deep); }
+.ba-prompt {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px dashed var(--border);
+  border-radius: 3px;
+  padding: 5px 9px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  line-height: 1.4;
+  color: var(--text-md);
+  white-space: pre-wrap;
+}
+.ba-prompt::before {
+  content: '› Prompt';
+  display: block;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--text-soft);
+  margin-bottom: 3px;
+}
+.ba-prompt-act {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ba-prompt-act-line {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  line-height: 1.35;
+  color: var(--text-md);
+}
+.ba-prompt-act-letter {
+  color: var(--gold-deep);
+  font-weight: 800;
+  margin-right: 5px;
+}
+.ba-output {
+  font-family: 'Inter', sans-serif;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--text);
+  white-space: pre-line;
+  font-weight: 500;
+  padding: 5px 0 0;
+  border-top: 1px solid var(--border-soft);
+}
+.ba-output::before {
+  content: '› Output';
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--text-soft);
+  margin-bottom: 4px;
+}
+
+/* === LADDER · TANGGA AI FOR WRITING (Slide 3) === */
+.ladder {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin: 14px 0 12px 0;
+  perspective: 1200px;
+}
+.ladder-card {
+  position: relative;
+  height: 130px;
+  cursor: pointer;
+}
+.ladder-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.55s var(--ease);
+}
+.ladder-card:hover .ladder-inner,
+.ladder-card:focus-within .ladder-inner { transform: rotateY(180deg); }
+.ladder-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  padding: 12px 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--gold);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px rgba(10, 10, 10, 0.04);
+}
+.ladder-front { justify-content: center; align-items: flex-start; }
+.ladder-back {
+  transform: rotateY(180deg);
+  background: var(--gold-tint);
+  border-color: var(--gold);
+  padding: 10px 11px;
+  gap: 5px;
+}
+.ladder-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--gold-deep);
+  margin-bottom: 6px;
+}
+.ladder-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.ladder-back-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+}
+.ladder-tag {
+  font-family: 'Inter', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-strong);
+  font-style: italic;
+  line-height: 1.3;
+}
+.ladder-eg {
+  font-family: 'Inter', sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--text-md);
+  line-height: 1.4;
+  margin-top: auto;
+  padding-top: 5px;
+  border-top: 1px dashed rgba(212, 168, 75, 0.45);
+}
+.ladder-arrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--gold-tint);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 5px 5px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 14px;
+  font-style: italic;
+}
+.ladder-arrow strong { color: var(--gold-deep); font-weight: 700; font-style: normal; }
+
+.ap-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.ap-card {
+  padding: 13px 16px;
+  border: 1px solid rgba(180, 60, 60, 0.20);
+  background: #FFFAF8;
+  border-left: 3px solid rgba(180, 60, 60, 0.55);
+  border-radius: 5px;
+}
+.ap-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  color: rgba(160, 50, 50, 0.92);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+.ap-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+.ap-text {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-md);
+  font-weight: 500;
+}
+.note strong { color: var(--text-strong); font-style: normal; font-weight: 700; }
+
+/* === SLIDE 3: FRAMEWORK === */
+.s3-title { font-size: clamp(28px, 3.6vw, 40px); margin-bottom: 10px; }
+.s3-lead { font-size: clamp(13px, 1.05vw, 15px); margin-bottom: 18px; }
+.fw-block {
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  margin-bottom: 12px;
+}
+.fw-block.lite { background: var(--bg); }
+.fw-block.pro { background: var(--gold-tint); border-color: var(--gold); }
+.fw-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.fw-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 3px;
+}
+.fw-block.lite .fw-badge { background: var(--text-strong); color: var(--bg); }
+.fw-block.pro .fw-badge { background: var(--gold); color: var(--text-strong); }
+.fw-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.015em;
+}
+.fw-context {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-md);
+  font-style: italic;
+  margin-bottom: 11px;
+  line-height: 1.45;
+}
+.fw-elements { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; perspective: 1200px; }
+.fw-block.pro .fw-elements { grid-template-columns: repeat(7, 1fr); }
+
+/* === Mini placeholder card (A C T di Pro) === */
+.fw-mini {
+  padding: 14px 10px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 130px;
+  opacity: 0.62;
+}
+.fw-mini .fw-mini-letter {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+/* === Flip card untuk framework === */
+.fw-flip {
+  position: relative;
+  height: 130px;
+  cursor: pointer;
+}
+.fw-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s var(--ease);
+}
+.fw-flip:hover .fw-flip-inner,
+.fw-flip:focus-within .fw-flip-inner { transform: rotateY(180deg); }
+.fw-flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: 5px;
+  box-shadow: 0 1px 2px rgba(10, 10, 10, 0.03);
+}
+.fw-flip-front { justify-content: center; align-items: flex-start; }
+.fw-flip.new .fw-flip-front { background: var(--gold-soft); border-color: var(--gold); }
+.fw-flip-back {
+  transform: rotateY(180deg);
+  background: var(--gold-tint);
+  border-color: var(--gold);
+  padding: 14px 13px;
+  justify-content: center;
+  gap: 8px;
+}
+.fw-flip-letter {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  margin-bottom: 6px;
+}
+.fw-flip-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.005em;
+  line-height: 1.22;
+}
+.fw-flip-flag {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--gold-deep);
+}
+.fw-flip-back-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+}
+.fw-flip-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+/* === SLIDE 4: PRAKTIK === */
+.s4-title { font-size: clamp(28px, 3.6vw, 40px); margin-bottom: 8px; }
+.s4-lead { font-size: clamp(13px, 1.05vw, 15px); margin-bottom: 16px; }
+.s4-section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-bottom: 8px;
+  margin-top: 14px;
+}
+.s4-section-label:first-of-type { margin-top: 0; }
+.uc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  margin-bottom: 4px;
+}
+.uc-chip {
+  padding: 9px 12px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--gold);
+  border-radius: 5px;
+}
+.uc-chip-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  margin-bottom: 3px;
+}
+.uc-chip-eg {
+  font-size: 10.5px;
+  color: var(--text-md);
+  line-height: 1.35;
+  font-weight: 500;
+}
+.ex-flow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+.ex-step {
+  padding: 11px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--gold);
+  border-radius: 5px;
+}
+.ex-step-num {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+  margin-bottom: 4px;
+  letter-spacing: -0.04em;
+}
+.ex-step-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.ex-step-detail {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+/* === SLIDE TOOLS BY CATEGORY (AI for Slide) === */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 14px 0 14px 0;
+}
+.cat-card {
+  padding: 14px 16px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--gold);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+}
+.cat-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-bottom: 6px;
+}
+.cat-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+.cat-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-md);
+  line-height: 1.4;
+  font-style: italic;
+  margin-bottom: 10px;
+}
+.cat-tools {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+.cat-tools li {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.35;
+  padding-left: 12px;
+  position: relative;
+}
+.cat-tools li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.cat-tools li.star::before { background: transparent; content: '★'; color: var(--gold); top: 0; font-size: 10px; }
+.cat-tools li strong {
+  color: var(--text-strong);
+  font-weight: 800;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.workflow-tip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  background: var(--gold-tint);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  margin-top: 6px;
+}
+.workflow-tip-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  flex-shrink: 0;
+}
+.workflow-tip-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+}
+.workflow-tip-text strong { color: var(--text-strong); font-weight: 700; }
+
+/* === SLIDE BIG-PICTURE: Slide ≠ Writing (3 dimensi) === */
+.dim-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 12px 0 14px 0;
+}
+.dim-card {
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: 5px;
+}
+.dim-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-deep);
+  margin-bottom: 4px;
+}
+.dim-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  line-height: 1.18;
+  margin-bottom: 4px;
+}
+.dim-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-md);
+  line-height: 1.4;
+}
+
+/* === SLIDE 5: PENUTUP === */
+.s5-title { font-size: clamp(28px, 3.6vw, 40px); margin-bottom: 8px; }
+.s5-lead { font-size: clamp(13px, 1.05vw, 15px); margin-bottom: 16px; }
+.recipe {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--gold-tint);
+  border: 1px solid var(--gold);
+  border-radius: 7px;
+  margin-bottom: 12px;
+}
+.recipe-step { flex: 1; text-align: center; }
+.recipe-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--gold-deep);
+  margin-bottom: 3px;
+}
+.recipe-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.015em;
+}
+.recipe-arrow {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--gold);
+}
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  margin-bottom: 16px;
+}
+.action-card {
+  padding: 13px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--gold);
+  border-radius: 5px;
+}
+.action-num {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+.action-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+.action-detail {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.45;
+}
+.closing {
+  margin-top: auto;
+  padding: 14px 16px 4px;
+  border-top: 2px solid var(--text-strong);
+  text-align: center;
+}
+.closing-quote {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
+  line-height: 1.2;
+  margin-bottom: 5px;
+}
+.closing-tag {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-md);
+  line-height: 1.5;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+/* === SWIPE INDICATORS === */
+.swipe-hint {
+  position: absolute;
+  bottom: 24px;
+  right: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 10;
+}
+.swipe-progress {
+  display: flex;
+  gap: 6px;
+}
+.swipe-dot {
+  width: 24px;
+  height: 3px;
+  background: var(--border-strong);
+  border-radius: 2px;
+  transition: all 0.3s var(--ease);
+}
+.swipe-dot.active { background: var(--gold); width: 36px; }
+.swipe-keys {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--text-soft);
+  text-transform: uppercase;
+}
+.swipe-arrow {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.18s var(--ease);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text-strong);
+  user-select: none;
+}
+.swipe-arrow:hover { background: var(--gold-tint); border-color: var(--gold); color: var(--gold-deep); }
+.swipe-arrow.disabled { opacity: 0.3; pointer-events: none; }
+
+.sidebar::-webkit-scrollbar, .slide::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb, .slide::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+/* === COVER DARK (slide 1 only) — FIT 1 PAGE === */
+.slide.cover {
+  background: #0A0A0A;
+  background-image: radial-gradient(ellipse at 75% 35%, rgba(212, 168, 75, 0.10), transparent 55%);
+  padding: 0 !important;
+  overflow: hidden !important;
+  height: 100vh;
+}
+.cover-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  height: 100vh;
+  align-items: center;
+  padding: clamp(32px, 4vh, 56px) clamp(32px, 4vw, 64px);
+  gap: clamp(24px, 3vw, 48px);
+  max-width: none;
+  box-sizing: border-box;
+}
+.cover-text {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  justify-content: center;
+}
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: clamp(20px, 4vh, 40px);
+}
+.pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(9.5px, 0.9vw, 11px);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(212, 168, 75, 0.45);
+  color: rgba(212, 168, 75, 0.92);
+  background: transparent;
+  white-space: nowrap;
+}
+.pill.primary {
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  background: rgba(212, 168, 75, 0.06);
+}
+.pill.muted {
+  border-color: rgba(248, 246, 242, 0.25);
+  color: rgba(248, 246, 242, 0.70);
+}
+.cover-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(40px, 5.2vw, 64px);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  color: #FFFFFF;
+  margin-bottom: clamp(16px, 2.5vh, 24px);
+}
+.cover-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(14px, 1.2vw, 16.5px);
+  font-weight: 500;
+  line-height: 1.55;
+  color: rgba(248, 246, 242, 0.68);
+  max-width: 95%;
+  margin-bottom: clamp(20px, 4vh, 36px);
+}
+.cover-meta {
+  display: flex;
+  gap: clamp(20px, 2.5vw, 32px);
+  padding-top: clamp(14px, 2vh, 22px);
+  border-top: 1px solid rgba(248, 246, 242, 0.12);
+}
+.cover-meta-item { display: flex; flex-direction: column; gap: 4px; }
+.cover-meta-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(212, 168, 75, 0.85);
+}
+.cover-meta-val {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(12.5px, 1vw, 14px);
+  font-weight: 700;
+  color: rgba(248, 246, 242, 0.92);
+}
+
+.cover-svg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+}
+.cover-svg svg {
+  width: 100%;
+  max-width: min(540px, 90%);
+  max-height: 88vh;
+  height: auto;
+}
+.svg-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  fill: rgba(212, 168, 75, 0.92);
+}
+.svg-label-deep {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  fill: rgba(212, 168, 75, 0.55);
+}
+.svg-letter {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  fill: rgba(212, 168, 75, 0.95);
+}
+.svg-caption {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  fill: rgba(212, 168, 75, 0.65);
+}
+
+@media (max-width: 1100px) {
+  .app { grid-template-columns: 260px 1fr; }
+  .slide { padding: 40px 40px 64px; }
+  .s1-title { font-size: 48px; }
+  .s2-title, .s3-title, .s4-title, .s5-title { font-size: 38px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside class="sidebar">
+    <!-- Logos side-by-side, no redundancy -->
+    <div class="brand-row">
+      <img src="logo-tjitra.png" alt="Tjitra & Associates">
+      <div class="brand-divider"></div>
+      <img src="logo-iwdemy.png" alt="IWDemy">
+    </div>
+
+    <div class="nav-label">Daftar Slide</div>
+    <ul class="nav" id="nav">
+      <li class="nav-item active" data-idx="0"><span class="nav-num">01</span>Pengantar</li>
+      <li class="nav-item" data-idx="1"><span class="nav-num">02</span>Konteks</li>
+      <li class="nav-item" data-idx="2"><span class="nav-num">03</span>Naik Tangga: 7 Tingkat</li>
+      <li class="nav-item" data-idx="3"><span class="nav-num">04</span>Framework</li>
+      <li class="nav-item" data-idx="4"><span class="nav-num">05</span>Writing Lite (A.C.T.)</li>
+      <li class="nav-item" data-idx="5"><span class="nav-num">06</span>Writing Pro (A.C.T.I.O.N.S.)</li>
+      <li class="nav-item" data-idx="6"><span class="nav-num">07</span>AI for Slide: Tangga</li>
+      <li class="nav-item" data-idx="7"><span class="nav-num">08</span>AI for Slide: Tools</li>
+      <li class="nav-item" data-idx="8"><span class="nav-num">09</span>Slide Lite (A.C.T.)</li>
+      <li class="nav-item" data-idx="9"><span class="nav-num">10</span>Slide Pro (A.C.T.I.O.N.S.)</li>
+      <li class="nav-item" data-idx="10"><span class="nav-num">11</span>Penutup</li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <p class="copyright">
+        <strong>© 2026 Tjitra &amp; Associates.</strong><br>
+        All rights reserved.
+      </p>
+    </div>
+  </aside>
+
+  <!-- ========== STAGE WITH SWIPE SLIDES ========== -->
+  <main class="stage">
+    <div class="slides-track" id="track">
+
+      <!-- ===== SLIDE 1: PENGANTAR (COVER DARK) ===== -->
+      <section class="slide cover" id="s0">
+        <div class="cover-wrap">
+          <div class="cover-text">
+            <div class="pills">
+              <span class="pill primary">AI First Program</span>
+              <span class="pill muted">Level 2</span>
+              <span class="pill muted">Day 2</span>
+            </div>
+            <h1 class="cover-title">AI for Writing &amp; Slide</h1>
+            <p class="cover-subtitle">Bangun framework yang membuat AI menulis tajam dan slide tajam — bukan generik.</p>
+          </div>
+
+          <div class="cover-svg">
+            <svg viewBox="0 0 580 540" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient id="hexGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="rgba(212,168,75,0.40)"/>
+                  <stop offset="60%" stop-color="rgba(212,168,75,0.10)"/>
+                  <stop offset="100%" stop-color="rgba(212,168,75,0)"/>
+                </radialGradient>
+              </defs>
+
+              <!-- Outer halo around central hexagon -->
+              <circle cx="290" cy="120" r="110" fill="url(#hexGlow)"/>
+              <circle cx="290" cy="120" r="78" fill="none" stroke="rgba(212,168,75,0.30)" stroke-width="1" stroke-dasharray="3 5"/>
+
+              <!-- Central hexagon: WRITING -->
+              <g transform="translate(290,120)">
+                <path d="M 0 -50 L 43 -25 L 43 25 L 0 50 L -43 25 L -43 -25 Z"
+                      fill="rgba(212,168,75,0.12)" stroke="rgba(212,168,75,0.85)" stroke-width="1.5"/>
+                <path d="M 0 -34 L 30 -17 L 30 17 L 0 34 L -30 17 L -30 -17 Z"
+                      fill="none" stroke="rgba(212,168,75,0.50)" stroke-width="1"/>
+                <text x="0" y="5" text-anchor="middle" class="svg-label">Writing</text>
+              </g>
+
+              <!-- Connecting dashed lines from center to 3 circles below -->
+              <line x1="290" y1="180" x2="160" y2="280" stroke="rgba(212,168,75,0.30)" stroke-width="1" stroke-dasharray="2 4"/>
+              <line x1="290" y1="180" x2="290" y2="280" stroke="rgba(212,168,75,0.30)" stroke-width="1" stroke-dasharray="2 4"/>
+              <line x1="290" y1="180" x2="420" y2="280" stroke="rgba(212,168,75,0.30)" stroke-width="1" stroke-dasharray="2 4"/>
+
+              <!-- 3 circles: A, C, T (Lite framework) -->
+              <g transform="translate(160,310)">
+                <circle r="42" fill="rgba(212,168,75,0.08)" stroke="rgba(212,168,75,0.75)" stroke-width="1.5"/>
+                <text x="0" y="10" text-anchor="middle" class="svg-letter">A</text>
+                <text x="0" y="62" text-anchor="middle" class="svg-label-deep">Actor &amp; Audience</text>
+              </g>
+              <g transform="translate(290,310)">
+                <circle r="42" fill="rgba(212,168,75,0.08)" stroke="rgba(212,168,75,0.75)" stroke-width="1.5"/>
+                <text x="0" y="10" text-anchor="middle" class="svg-letter">C</text>
+                <text x="0" y="62" text-anchor="middle" class="svg-label-deep">Context &amp; Conditions</text>
+              </g>
+              <g transform="translate(420,310)">
+                <circle r="42" fill="rgba(212,168,75,0.08)" stroke="rgba(212,168,75,0.75)" stroke-width="1.5"/>
+                <text x="0" y="10" text-anchor="middle" class="svg-letter">T</text>
+                <text x="0" y="62" text-anchor="middle" class="svg-label-deep">Target &amp; Task</text>
+              </g>
+
+              <!-- 4 boxes: I, O, N, S (Pro extension) -->
+              <g transform="translate(60,420)">
+                <rect width="90" height="68" rx="6"
+                      fill="rgba(212,168,75,0.06)" stroke="rgba(212,168,75,0.55)" stroke-width="1.2"/>
+                <text x="45" y="28" text-anchor="middle" class="svg-label">Intention</text>
+                <text x="45" y="52" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="-0.02em" fill="rgba(212,168,75,0.95)">I</text>
+              </g>
+              <g transform="translate(180,420)">
+                <rect width="90" height="68" rx="6"
+                      fill="rgba(212,168,75,0.06)" stroke="rgba(212,168,75,0.55)" stroke-width="1.2"/>
+                <text x="45" y="28" text-anchor="middle" class="svg-label">Output</text>
+                <text x="45" y="52" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="-0.02em" fill="rgba(212,168,75,0.95)">O</text>
+              </g>
+              <g transform="translate(300,420)">
+                <rect width="90" height="68" rx="6"
+                      fill="rgba(212,168,75,0.06)" stroke="rgba(212,168,75,0.55)" stroke-width="1.2"/>
+                <text x="45" y="28" text-anchor="middle" class="svg-label">Negatives</text>
+                <text x="45" y="52" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="-0.02em" fill="rgba(212,168,75,0.95)">N</text>
+              </g>
+              <g transform="translate(420,420)">
+                <rect width="90" height="68" rx="6"
+                      fill="rgba(212,168,75,0.06)" stroke="rgba(212,168,75,0.55)" stroke-width="1.2"/>
+                <text x="45" y="28" text-anchor="middle" class="svg-label">Steps</text>
+                <text x="45" y="52" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-size="20" font-weight="800" letter-spacing="-0.02em" fill="rgba(212,168,75,0.95)">S</text>
+              </g>
+
+              <!-- Bottom caption -->
+              <text x="290" y="525" text-anchor="middle" class="svg-caption">A · C · T · I · O · N · S</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 2: KONTEKS · 7 FLIP CARDS ===== -->
+      <section class="slide" id="s1">
+        <div class="slide-inner">
+          <span class="slide-eyebrow">Konteks · Big Picture</span>
+          <h2 class="slide-title s2-title">Tujuh Jenis Tulisan, Setiap Hari di Meja Anda</h2>
+          <p class="slide-lead s2-lead">Dari email harian hingga laporan strategis. Masing-masing punya karakter yang berbeda — sorotkan pada setiap kartu untuk melihat contohnya.</p>
+
+          <div class="flip-grid">
+            <div class="flip-card" tabindex="0">
+              <div class="flip-inner">
+                <div class="flip-face flip-front">
+                  <div class="flip-num">1</div>
+                  <div class="flip-name">Pribadi &amp; Antarpribadi</div>
+                  <div class="flip-hint">Hover</div>
+                </div>
+                <div class="flip-face flip-back">
+                  <div class="flip-back-label">Contoh</div>
+                  <ul class="flip-examples">
+                    <li>Email harian</li>
+                    <li>WhatsApp tim</li>
+                    <li>Memo internal</li>
+                    <li>Notulen rapat</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="flip-card" tabindex="0">
+              <div class="flip-inner">
+                <div class="flip-face flip-front">
+                  <div class="flip-num">2</div>
+                  <div class="flip-name">Bisnis &amp; Strategis</div>
+                  <div class="flip-hint">Hover</div>
+                </div>
+                <div class="flip-face flip-back">
+                  <div class="flip-back-label">Contoh</div>
+                  <ul class="flip-examples">
+                    <li>Executive summary</li>
+                    <li>Proposal taruhan tinggi</li>
+                    <li>Whitepaper bisnis</li>
+                    <li>Product Requirements Doc</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="flip-card" tabindex="0">
+              <div class="flip-inner">
+                <div class="flip-face flip-front">
+                  <div class="flip-num">3</div>
+                  <div class="flip-name">Konten &amp; Media Digital</div>
+                  <div class="flip-hint">Hover</div>
+                </div>
+                <div class="flip-face flip-back">
+                  <div class="flip-back-label">Contoh</div>
+                  <ul class="flip-examples">
+                    <li>Op-ed &amp; thought leadership</li>
+                    <li>Press release</li>
+                    <li>Buletin profesional</li>
+                    <li>Landing page</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="flip-card" tabindex="0">
+              <div class="flip-inner">
+                <div class="flip-face flip-front">
+                  <div class="flip-num">4</div>
+                  <div class="flip-name">Teknis &amp; Instruksional</div>
+                  <div class="flip-hint">Hover</div>
+                </div>
+                <div class="flip-face flip-back">
+                  <div class="flip-back-label">Contoh</div>
+                  <ul class="flip-examples">
+                    <li>Standard Operating Procedure</li>
+                    <li>Kurikulum pelatihan</li>
+                    <li>Templat rekayasa prompt</li>
+                    <li>Manual teknis</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="flip-card" tabindex="0">
+              <div class="flip-inner">
+                <div class="flip-face flip-front">
+                  <div class="flip-num">5</div>
+                  <div class="flip-name">Slide &amp; Presentasi</div>
+                  <div class="flip-hint">Hover</div>
+                </div>
+                <div class="flip-face flip-back">
+                  <div class="flip-back-label">Contoh</div>
+                  <ul class="flip-examples">
+                    <li>Deck pidato keynote</li>
+                    <li>Board deck eksekutif</li>
+                    <li>Workshop kepemimpinan</li>
+                    <li>Infografis penyederhana</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="flip-card" tabindex="0">
+              <div class="flip-inner">
+                <div class="flip-face flip-front">
+                  <div class="flip-num">6</div>
+                  <div class="flip-name">Kreatif &amp; Naratif</div>
+                  <div class="flip-hint">Hover</div>
+                </div>
+                <div class="flip-face flip-back">
+                  <div class="flip-back-label">Contoh</div>
+                  <ul class="flip-examples">
+                    <li>Novel &amp; novela</li>
+                    <li>Cerita pendek</li>
+                    <li>Skenario lakon panggung</li>
+                    <li>Puisi &amp; non-fiksi kreatif</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="flip-card" tabindex="0">
+              <div class="flip-inner">
+                <div class="flip-face flip-front">
+                  <div class="flip-num">7</div>
+                  <div class="flip-name">Akademik &amp; Ilmiah</div>
+                  <div class="flip-hint">Hover</div>
+                </div>
+                <div class="flip-face flip-back">
+                  <div class="flip-back-label">Contoh</div>
+                  <ul class="flip-examples">
+                    <li>Makalah riset</li>
+                    <li>Tinjauan pustaka</li>
+                    <li>Proposal hibah</li>
+                    <li>Tesis &amp; disertasi</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 3: TANGGA AI FOR WRITING ===== -->
+      <section class="slide" id="s2-ladder">
+        <div class="slide-inner">
+          <span class="slide-eyebrow">Big Picture · Tangga Kompleksitas</span>
+          <h2 class="slide-title s2-title">Naik Tangga: dari Typo Fixer ke Ghostwriter</h2>
+          <p class="slide-lead s2-lead">Tujuh tingkat penggunaan AI untuk menulis. Yang bertambah bukan panjang output — tapi konteks, skill, dan risk yang Anda kelola.</p>
+
+          <div class="ladder">
+            <div class="ladder-card" tabindex="0">
+              <div class="ladder-inner">
+                <div class="ladder-face ladder-front">
+                  <div class="ladder-num">Level 0</div>
+                  <div class="ladder-name">Mikro</div>
+                </div>
+                <div class="ladder-face ladder-back">
+                  <div class="ladder-back-num">Level 0 · Mikro</div>
+                  <div class="ladder-tag">Satu kalimat</div>
+                  <div class="ladder-eg">Fix typo · Ganti kata · Terjemah baris</div>
+                </div>
+              </div>
+            </div>
+            <div class="ladder-card" tabindex="0">
+              <div class="ladder-inner">
+                <div class="ladder-face ladder-front">
+                  <div class="ladder-num">Level 1</div>
+                  <div class="ladder-name">Reaktif</div>
+                </div>
+                <div class="ladder-face ladder-back">
+                  <div class="ladder-back-num">Level 1 · Reaktif</div>
+                  <div class="ladder-tag">Perbaiki yang sudah ada</div>
+                  <div class="ladder-eg">Rapikan email · Ringkas chat · Parafrase</div>
+                </div>
+              </div>
+            </div>
+            <div class="ladder-card" tabindex="0">
+              <div class="ladder-inner">
+                <div class="ladder-face ladder-front">
+                  <div class="ladder-num">Level 2</div>
+                  <div class="ladder-name">Generatif Pendek</div>
+                </div>
+                <div class="ladder-face ladder-back">
+                  <div class="ladder-back-num">Level 2 · Pendek</div>
+                  <div class="ladder-tag">Buat dari nol, singkat</div>
+                  <div class="ladder-eg">Reply email · Caption IG · Subject line</div>
+                </div>
+              </div>
+            </div>
+            <div class="ladder-card" tabindex="0">
+              <div class="ladder-inner">
+                <div class="ladder-face ladder-front">
+                  <div class="ladder-num">Level 3</div>
+                  <div class="ladder-name">Generatif Panjang</div>
+                </div>
+                <div class="ladder-face ladder-back">
+                  <div class="ladder-back-num">Level 3 · Panjang</div>
+                  <div class="ladder-tag">Berstruktur, butuh outline</div>
+                  <div class="ladder-eg">Email proposal · Artikel blog · Spec produk</div>
+                </div>
+              </div>
+            </div>
+            <div class="ladder-card" tabindex="0">
+              <div class="ladder-inner">
+                <div class="ladder-face ladder-front">
+                  <div class="ladder-num">Level 4</div>
+                  <div class="ladder-name">Adaptif</div>
+                </div>
+                <div class="ladder-face ladder-back">
+                  <div class="ladder-back-num">Level 4 · Adaptif</div>
+                  <div class="ladder-tag">Match audience &amp; tone</div>
+                  <div class="ladder-eg">BUMN ↔ Gen Z · Investor ↔ tim</div>
+                </div>
+              </div>
+            </div>
+            <div class="ladder-card" tabindex="0">
+              <div class="ladder-inner">
+                <div class="ladder-face ladder-front">
+                  <div class="ladder-num">Level 5</div>
+                  <div class="ladder-name">Strategis</div>
+                </div>
+                <div class="ladder-face ladder-back">
+                  <div class="ladder-back-num">Level 5 · Strategis</div>
+                  <div class="ladder-tag">Multi-step, bukan satu output</div>
+                  <div class="ladder-eg">Funnel email · Content calendar · Sekuens</div>
+                </div>
+              </div>
+            </div>
+            <div class="ladder-card" tabindex="0">
+              <div class="ladder-inner">
+                <div class="ladder-face ladder-front">
+                  <div class="ladder-num">Level 6</div>
+                  <div class="ladder-name">Ghostwriter</div>
+                </div>
+                <div class="ladder-face ladder-back">
+                  <div class="ladder-back-num">Level 6 · Ghostwriter</div>
+                  <div class="ladder-tag">Suara Anda, bukan AI</div>
+                  <div class="ladder-eg">Op-ed · Buku · Annual letter</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ladder-arrow">
+            <strong>Setiap anak tangga:</strong> konteks ↑ &nbsp;·&nbsp; skill ↑ &nbsp;·&nbsp; risk halusinasi ↑ &nbsp;·&nbsp; value ↑
+          </div>
+
+          <div class="ap-pair">
+            <div class="ap-card">
+              <div class="ap-tag">Anti-pattern · Stuck</div>
+              <div class="ap-title">Mandek di Level 1–2</div>
+              <p class="ap-text">"AI cuma buat fix typo." Tidak naik ke L3+ — padahal value baru terasa mulai di sana.</p>
+            </div>
+            <div class="ap-card">
+              <div class="ap-tag">Anti-pattern · Lompat</div>
+              <div class="ap-title">Lompat ke Level 5</div>
+              <p class="ap-text">Tanpa latihan L0–2, langsung minta content calendar. Prompt jelek → output jelek → <em>"AI tidak bisa nulis."</em></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 4: FRAMEWORK ===== -->
+      <section class="slide" id="s2">
+        <div class="slide-inner">
+          <span class="slide-eyebrow">Framework · Eskalasi, Bukan Kompetisi</span>
+          <h2 class="slide-title s3-title">Tiga Elemen Wajib, Empat Lapis Eskalasi</h2>
+          <p class="slide-lead s3-lead">Pro dibangun di atas Lite — tiga elemen pertama sama persis. Pro menambah empat lapis untuk situasi tinggi-konsekuensi.</p>
+
+          <div class="fw-block lite">
+            <div class="fw-head">
+              <span class="fw-badge">A.C.T. · Lite</span>
+              <span class="fw-name">Untuk Tulisan Harian</span>
+            </div>
+            <p class="fw-context">Tugas sehari-hari, cepat, atau pemula yang baru memulai. Tiga elemen, sekitar 3 menit menulis prompt. <em>Sorotkan pada setiap kartu untuk melihat detailnya.</em></p>
+            <div class="fw-elements">
+              <div class="fw-flip" tabindex="0">
+                <div class="fw-flip-inner">
+                  <div class="fw-flip-face fw-flip-front">
+                    <div class="fw-flip-letter">A</div>
+                    <div class="fw-flip-name">Actor &amp; Audience</div>
+                  </div>
+                  <div class="fw-flip-face fw-flip-back">
+                    <div class="fw-flip-back-label">Detail</div>
+                    <div class="fw-flip-desc">Siapa AI berperan, untuk siapa hasilnya.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="fw-flip" tabindex="0">
+                <div class="fw-flip-inner">
+                  <div class="fw-flip-face fw-flip-front">
+                    <div class="fw-flip-letter">C</div>
+                    <div class="fw-flip-name">Context &amp; Conditions</div>
+                  </div>
+                  <div class="fw-flip-face fw-flip-back">
+                    <div class="fw-flip-back-label">Detail</div>
+                    <div class="fw-flip-desc">Latar belakang, situasi, data input.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="fw-flip" tabindex="0">
+                <div class="fw-flip-inner">
+                  <div class="fw-flip-face fw-flip-front">
+                    <div class="fw-flip-letter">T</div>
+                    <div class="fw-flip-name">Target &amp; Task</div>
+                  </div>
+                  <div class="fw-flip-face fw-flip-back">
+                    <div class="fw-flip-back-label">Detail</div>
+                    <div class="fw-flip-desc">Tujuan utama, pekerjaan spesifik.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="fw-block pro">
+            <div class="fw-head">
+              <span class="fw-badge">A.C.T.I.O.N.S. · Pro</span>
+              <span class="fw-name">Untuk Tinggi-Konsekuensi</span>
+            </div>
+            <p class="fw-context">Strategic, high-stakes, atau konten spesialis yang presisinya tidak negotiable. <strong>A · C · T sama persis dengan Lite</strong> — empat lapis baru (<strong>I · O · N · S</strong>) ditambahkan untuk presisi tinggi.</p>
+            <div class="fw-elements">
+              <div class="fw-mini">
+                <div class="fw-mini-letter">A</div>
+              </div>
+              <div class="fw-mini">
+                <div class="fw-mini-letter">C</div>
+              </div>
+              <div class="fw-mini">
+                <div class="fw-mini-letter">T</div>
+              </div>
+              <div class="fw-flip new" tabindex="0">
+                <div class="fw-flip-inner">
+                  <div class="fw-flip-face fw-flip-front">
+                    <span class="fw-flip-flag">+</span>
+                    <div class="fw-flip-letter">I</div>
+                    <div class="fw-flip-name">Intention &amp; Impact</div>
+                  </div>
+                  <div class="fw-flip-face fw-flip-back">
+                    <div class="fw-flip-back-label">Detail</div>
+                    <div class="fw-flip-desc">Dampak psikologis atau bisnis yang dituju.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="fw-flip new" tabindex="0">
+                <div class="fw-flip-inner">
+                  <div class="fw-flip-face fw-flip-front">
+                    <span class="fw-flip-flag">+</span>
+                    <div class="fw-flip-letter">O</div>
+                    <div class="fw-flip-name">Output &amp; Organization</div>
+                  </div>
+                  <div class="fw-flip-face fw-flip-back">
+                    <div class="fw-flip-back-label">Detail</div>
+                    <div class="fw-flip-desc">Format · panjang · tone · contoh.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="fw-flip new" tabindex="0">
+                <div class="fw-flip-inner">
+                  <div class="fw-flip-face fw-flip-front">
+                    <span class="fw-flip-flag">+</span>
+                    <div class="fw-flip-letter">N</div>
+                    <div class="fw-flip-name">Negatives &amp; Non-negotiables</div>
+                  </div>
+                  <div class="fw-flip-face fw-flip-back">
+                    <div class="fw-flip-back-label">Detail</div>
+                    <div class="fw-flip-desc">Guardrails — yang TIDAK boleh muncul.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="fw-flip new" tabindex="0">
+                <div class="fw-flip-inner">
+                  <div class="fw-flip-face fw-flip-front">
+                    <span class="fw-flip-flag">+</span>
+                    <div class="fw-flip-letter">S</div>
+                    <div class="fw-flip-name">Steps &amp; Sequencing</div>
+                  </div>
+                  <div class="fw-flip-face fw-flip-back">
+                    <div class="fw-flip-back-label">Detail</div>
+                    <div class="fw-flip-desc">Analyze → outline → draft → revise.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 5: AI FOR WRITING · PRAKTIK LITE (A.C.T.) ===== -->
+      <section class="slide" id="s3">
+        <div class="slide-inner">
+          <span class="slide-eyebrow">AI for Writing · Praktik Lite (A.C.T.)</span>
+          <h2 class="slide-title s4-title">WhatsApp ke Tim — Tiga Menit, Hasil Beda</h2>
+          <p class="slide-lead s4-lead">Tiga elemen prompt, tiga menit menulis. Output sama-sama "rapi" — tapi sangat berbeda dalam kesiapan dipakai dan dampaknya pada penerima.</p>
+
+          <div class="ba-pair">
+            <div class="ba-pair-tag">WhatsApp ke Anggota Tim · Pesan Harian</div>
+            <div class="ba-grid">
+              <div class="ba-col before">
+                <span class="ba-tag">Tanpa A.C.T.</span>
+                <div class="ba-prompt">Tulis pesan WA ke tim, ingatkan rapat besok pagi.</div>
+                <p class="ba-output">Halo tim, mengingatkan kembali rapat besok pagi pukul 9. Mohon hadir tepat waktu. Terima kasih.</p>
+              </div>
+              <div class="ba-col after">
+                <span class="ba-tag">Dengan A.C.T.</span>
+                <div class="ba-prompt ba-prompt-act">
+                  <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">A</span>Manajer marketing → 8 anggota tim baru join 3 bulan</span>
+                  <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">C</span>Rapat pertama setelah summer break, review Q3 + rencana Q4</span>
+                  <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">T</span>WA singkat (max 4 baris) — ingatkan + bawa apa + hangat</span>
+                </div>
+                <p class="ba-output">Selamat sore tim 👋
+Besok kita Q3 review jam 9 di ruang Diponegoro — meeting pertama setelah break.
+Tolong bawa: satu highlight terbesar Anda Q3, plus satu hal yang perlu kita pecahkan bareng.
+Sampai besok.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 6: AI FOR WRITING · PRAKTIK PRO (A.C.T.I.O.N.S.) ===== -->
+      <section class="slide" id="s4">
+        <div class="slide-inner">
+          <span class="slide-eyebrow">AI for Writing · Praktik Pro (A.C.T.I.O.N.S.)</span>
+          <h2 class="slide-title s4-title">Job Description — Filter Talent, Bukan Daftar Tugas</h2>
+          <p class="slide-lead s4-lead">Tujuh elemen, sepuluh menit menulis. Setiap kalimat menjadi filter kandidat — JD bukan tugas HR, ini surat pemimpin ke calon talent.</p>
+
+          <div class="ba-grid">
+            <div class="ba-col before">
+              <span class="ba-tag">Tanpa A.C.T.I.O.N.S.</span>
+              <div class="ba-prompt">Buatkan Job Description Software Engineer.</div>
+              <p class="ba-output">Software Engineer
+Kami mencari Software Engineer dengan pengalaman 3+ tahun di Python, JavaScript, dan SQL.
+
+Tanggung jawab:
+• Menulis kode bersih
+• Berkolaborasi dengan tim produk
+• Menyelesaikan fitur tepat waktu
+
+Persyaratan:
+• S1 Teknik Informatika atau bidang terkait
+• Pengalaman 3 tahun di software development
+• Komunikasi yang baik
+• Mampu bekerja dalam tim</p>
+            </div>
+            <div class="ba-col after">
+              <span class="ba-tag">Dengan A.C.T.I.O.N.S.</span>
+              <div class="ba-prompt ba-prompt-act">
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">A</span>CTO → senior engineer di fintech early-stage</span>
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">C</span>10 juta transaksi/hari, masih startup, tim kecil intentional</span>
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">T</span>Tarik orang yang mau ownership, bukan stability</span>
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">I</span>Self-selection tajam — mis-hire = 1.5–2× gaji tahunan</span>
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">O</span>Outcome-based: impact paragraph + 12-month outcomes + thrive-if + not-for</span>
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">N</span>Tidak ada bullet "tanggung jawab generik", tidak pakai jargon kosong</span>
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">S</span>Mulai dari posisi perusahaan → role → 12-bulan → cocok/tidak</span>
+              </div>
+              <p class="ba-output">Software Engineer — [Fintech X]
+Anda akan membangun sistem yang memproses lebih dari 10 juta transaksi setiap hari di Indonesia. Setiap baris kode menyentuh keuangan orang sungguhan.
+
+Dalam 12 bulan pertama, Anda akan:
+1. Memegang satu domain — risk engine atau payment flow
+2. Menurunkan latency lewat refactor arsitektur
+3. Menjadi reviewer utama kualitas engineering
+
+Anda akan thrive di sini kalau senang masalah besar tanpa handholding, lebih peduli "apakah bekerja untuk user" daripada "apakah sesuai pattern", nyaman dengan ambiguitas.
+
+Ini bukan untuk Anda kalau mencari stabilitas proses yang sudah matang.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 7 (NEW): BIG PICTURE + TANGGA AI FOR SLIDE ===== -->
+      <section class="slide" id="s-slide-tangga">
+        <div class="slide-inner">
+          <span class="slide-eyebrow">Big Picture · AI for Slide ≠ AI for Writing</span>
+          <h2 class="slide-title s2-title">Slide = Konten + Visual + Struktur</h2>
+          <p class="slide-lead s2-lead">Writing satu dimensi: teks. Slide menggabungkan tiga — itu sebabnya pitfall-nya berbeda. Sorotkan pada setiap kartu untuk melihat detailnya.</p>
+
+          <div class="dim-grid">
+            <div class="dim-card">
+              <div class="dim-tag">Pitfall #1</div>
+              <div class="dim-name">Lebih Kompleks</div>
+              <p class="dim-desc">Tiga dimensi sekaligus berarti lebih banyak titik gagal — konten salah, visual generik, atau struktur tidak runut.</p>
+            </div>
+            <div class="dim-card">
+              <div class="dim-tag">Pitfall #2</div>
+              <div class="dim-name">Sering "Kelihatan AI"</div>
+              <p class="dim-desc">Stock photo + bullet points generik. Output lumayan tapi belum siap pakai — perlu polish manual.</p>
+            </div>
+            <div class="dim-card">
+              <div class="dim-tag">Pitfall #3</div>
+              <div class="dim-name">Susah Match Brand</div>
+              <p class="dim-desc">Warna, font, dan layout perusahaan jarang otomatis. Free tier sering watermark.</p>
+            </div>
+          </div>
+
+          <div class="ladder">
+            <div class="ladder-card" tabindex="0">
+              <div class="ladder-inner">
+                <div class="ladder-face ladder-front">
+                  <div class="ladder-num">Level 1</div>
+                  <div class="ladder-name">Bantu di 1 Slide</div>
+                </div>
+                <div class="ladder-face ladder-back">
+                  <div class="ladder-back-num">Level 1 · Bantu</div>
+                  <div class="ladder-tag">Edit elemen kecil</div>
+                  <div class="ladder-eg">Fix typo · Suggest icon · Rewrite bullet</div>
+                </div>
+              </div>
+            </div>
+            <div class="ladder-card" tabindex="0">
+              <div class="ladder-inner">
+                <div class="ladder-face ladder-front">
+                  <div class="ladder-num">Level 2</div>
+                  <div class="ladder-name">Outline → Slide</div>
+                </div>
+                <div class="ladder-face ladder-back">
+                  <div class="ladder-back-num">Level 2 · Convert</div>
+                  <div class="ladder-tag">Konten ada, tinggal visualkan</div>
+                  <div class="ladder-eg">Plus AI · Gamma paste outline · Copilot</div>
+                </div>
+              </div>
+            </div>
+            <div class="ladder-card" tabindex="0">
+              <div class="ladder-inner">
+                <div class="ladder-face ladder-front">
+                  <div class="ladder-num">Level 3</div>
+                  <div class="ladder-name">Topic → Full Deck</div>
+                </div>
+                <div class="ladder-face ladder-back">
+                  <div class="ladder-back-num">Level 3 · Generatif</div>
+                  <div class="ladder-tag">Dari prompt ke deck utuh</div>
+                  <div class="ladder-eg">Gamma · Beautiful.ai · Decktopus</div>
+                </div>
+              </div>
+            </div>
+            <div class="ladder-card" tabindex="0">
+              <div class="ladder-inner">
+                <div class="ladder-face ladder-front">
+                  <div class="ladder-num">Level 4</div>
+                  <div class="ladder-name">Brand-Aware</div>
+                </div>
+                <div class="ladder-face ladder-back">
+                  <div class="ladder-back-num">Level 4 · Brand</div>
+                  <div class="ladder-tag">Match warna, font, logo</div>
+                  <div class="ladder-eg">Gamma Pro · Beautiful.ai brand kit</div>
+                </div>
+              </div>
+            </div>
+            <div class="ladder-card" tabindex="0">
+              <div class="ladder-inner">
+                <div class="ladder-face ladder-front">
+                  <div class="ladder-num">Level 5</div>
+                  <div class="ladder-name">Voice &amp; Custom</div>
+                </div>
+                <div class="ladder-face ladder-back">
+                  <div class="ladder-back-num">Level 5 · Voice</div>
+                  <div class="ladder-tag">Tone &amp; suara spesifik</div>
+                  <div class="ladder-eg">Claude Projects + manual paste ke template</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ladder-arrow">
+            <strong>Realita 70/30:</strong> AI bagus untuk draft pertama, bukan final. Sekitar 70% siap pakai, 30% selalu butuh polish manual.
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 8 (NEW): TOOLS AI FOR SLIDE ===== -->
+      <section class="slide" id="s-slide-tools">
+        <div class="slide-inner">
+          <span class="slide-eyebrow">Tools · 3 Kategori Pendekatan</span>
+          <h2 class="slide-title s3-title">Tiga Kategori Tools — Pilih Sesuai Konteks</h2>
+          <p class="slide-lead s3-lead">Pilih berdasarkan tools yang sudah dipakai tim, ekspektasi kustomisasi brand, dan ketersediaan budget. Bukan tools terbaik secara umum — tools yang cocok untuk konteks Anda.</p>
+
+          <div class="cat-grid">
+            <div class="cat-card">
+              <div class="cat-tag">Kategori #1</div>
+              <div class="cat-name">Embedded di Tools Existing</div>
+              <p class="cat-desc">AI features di tools yang sudah Anda pakai sehari-hari. Adopsi paling rendah friksi.</p>
+              <ul class="cat-tools">
+                <li><strong>PowerPoint + Copilot</strong> — generate full deck, butuh M365</li>
+                <li><strong>Google Slides + Gemini</strong> — "Help me create"</li>
+                <li class="star"><strong>Canva + Magic Design</strong> — paling populer di Indonesia</li>
+                <li><strong>Apple Keynote</strong> — AI features masih limited</li>
+              </ul>
+            </div>
+            <div class="cat-card">
+              <div class="cat-tag">Kategori #2</div>
+              <div class="cat-name">Dedicated AI Slide Makers</div>
+              <p class="cat-desc">Text-to-slides — paling cepat dari prompt mentah ke deck visual.</p>
+              <ul class="cat-tools">
+                <li class="star"><strong>Gamma.app</strong> — paling populer 2026, free dengan limit</li>
+                <li><strong>Beautiful.ai</strong> — opinionated design, kurang fleksibel</li>
+                <li><strong>Decktopus · Pitch · Tome</strong> — alternatives</li>
+                <li><strong>Plus AI</strong> — extension untuk Google Slides</li>
+              </ul>
+            </div>
+            <div class="cat-card">
+              <div class="cat-tag">Kategori #3</div>
+              <div class="cat-name">Hybrid · Manual + AI Assist</div>
+              <p class="cat-desc">Bukan pure AI — kombinasi template + AI features per komponen.</p>
+              <ul class="cat-tools">
+                <li><strong>Canva</strong> — template + Magic Write + Magic Design + Magic Edit</li>
+                <li><strong>Visme</strong> — design tool dengan AI features</li>
+                <li>Cocok untuk yang sudah comfort di tool desain visual</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="workflow-tip">
+            <div class="workflow-tip-label">Workflow Paling Efektif</div>
+            <div class="workflow-tip-text"><strong>Claude/ChatGPT</strong> untuk outline + konten <em>(struktur dulu)</em> → <strong>Gamma · Canva · PowerPoint</strong> untuk visual → <strong>polish manual</strong>. Lebih cepat daripada langsung minta AI bikin deck dari prompt mentah.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 9: AI FOR SLIDE · PRAKTIK LITE (A.C.T.) ===== -->
+      <section class="slide" id="s-slide-lite">
+        <div class="slide-inner">
+          <span class="slide-eyebrow">AI for Slide · Praktik Lite (A.C.T.)</span>
+          <h2 class="slide-title s4-title">Update Tim Mingguan — Lima Slide, Siap Standup</h2>
+          <p class="slide-lead s4-lead">Tools: <strong>Gamma</strong> untuk draft cepat dengan visual otomatis, atau <strong>NotebookLM</strong> kalau materi harus berakar di dokumen. A.C.T. menentukan struktur — tools mengerjakan visualnya.</p>
+
+          <div class="ba-pair">
+            <div class="ba-pair-tag">Slide Update Mingguan · 5 slide untuk standup</div>
+            <div class="ba-grid">
+              <div class="ba-col before">
+                <span class="ba-tag">Tanpa A.C.T.</span>
+                <div class="ba-prompt">Buat slide update mingguan tim marketing.</div>
+                <p class="ba-output">Slide 1: Update Mingguan
+Slide 2: Pencapaian Minggu Ini
+Slide 3: Tantangan
+Slide 4: Rencana Minggu Depan
+Slide 5: Terima Kasih
+
+(Generic — judul topic, bullet generik, tidak ada angka)</p>
+              </div>
+              <div class="ba-col after">
+                <span class="ba-tag">Dengan A.C.T.</span>
+                <div class="ba-prompt ba-prompt-act">
+                  <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">A</span>Manajer marketing → 8 anggota tim untuk standup Senin pagi</span>
+                  <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">C</span>Minggu lalu: 3 kampanye live, 1 launch tertunda, 2 hire baru</span>
+                  <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">T</span>5 slide standup — judul actionable, bukan topic. Cukup 10 menit baca</span>
+                </div>
+                <p class="ba-output">Slide 1: Q3 di jalur — 2 dari 3 kampanye over-target
+Slide 2: Launch B tertunda 2 minggu — fix vendor, bukan tim
+Slide 3: Dua hire baru onboard — Tirta &amp; Putri di growth
+Slide 4: Minggu ini fokus tunggal — selesaikan launch B
+Slide 5: Yang saya butuhkan dari Anda — flagging blocker hari ini</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 8: AI FOR SLIDE · PRAKTIK PRO (A.C.T.I.O.N.S.) ===== -->
+      <section class="slide" id="s-slide-pro">
+        <div class="slide-inner">
+          <span class="slide-eyebrow">AI for Slide · Praktik Pro (A.C.T.I.O.N.S.)</span>
+          <h2 class="slide-title s4-title">Board Deck Q4 — Minta Keputusan, Bukan Presentasi</h2>
+          <p class="slide-lead s4-lead">Tools: <strong>NotebookLM</strong> untuk akurasi sumber, lalu <strong>Google Slides</strong> via add-on Doc to Slides. Untuk deck yang setiap angkanya harus bisa ditelusuri ke dokumennya.</p>
+
+          <div class="ba-grid">
+            <div class="ba-col before">
+              <span class="ba-tag">Tanpa A.C.T.I.O.N.S.</span>
+              <div class="ba-prompt">Buatkan deck board meeting Q4 perusahaan saya.</div>
+              <p class="ba-output">Slide 1: Q4 Performance Review
+Slide 2: Revenue Highlights
+Slide 3: Operational Excellence
+Slide 4: Strategic Initiatives
+Slide 5: Financial Outlook
+Slide 6: Q1 Roadmap
+Slide 7: Thank You
+
+(Topik abstrak. Tidak ada keputusan yang diminta dari board. Tidak ada angka — atau angka karangan.)</p>
+            </div>
+            <div class="ba-col after">
+              <span class="ba-tag">Dengan A.C.T.I.O.N.S.</span>
+              <div class="ba-prompt ba-prompt-act">
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">A</span>CEO → 5 board member, sebagian non-eksekutif investor</span>
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">C</span>Q4 2026, miss revenue 12%, ada keputusan funding 2027</span>
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">T</span>Deck 12 slide untuk minta 3 keputusan board, bukan presentasi</span>
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">I</span>Bangun trust setelah miss — tunjukkan diagnosa &amp; rencana, bukan excuse</span>
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">O</span>Action title per slide, tabel angka per slide, slot keputusan eksplisit di akhir</span>
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">N</span>Tidak ada bullet generik, tidak ada "kami akan terus berusaha"</span>
+                <span class="ba-prompt-act-line"><span class="ba-prompt-act-letter">S</span>Diagnosa miss → akar 2 penyebab → opsi → rekomendasi → minta keputusan</span>
+              </div>
+              <p class="ba-output">Slide 1: Q4 miss revenue 12% — dua penyebab, satu sudah diperbaiki
+Slide 2: Penyebab #1: Pipeline turun 30% di Oktober (sumber: CRM Q4)
+Slide 3: Penyebab #2: Churn enterprise naik dari 8% ke 14% (sumber: NRR data)
+Slide 4: Yang sudah dijalankan — replace SDR lead, install QBR proses
+Slide 5: Tiga opsi 2027 — agresif · cautious · pivot
+Slide 6: Rekomendasi: cautious + investasi enterprise success
+Slide 7: Tiga keputusan yang kami minta dari board hari ini</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SLIDE 9: PENUTUP ===== -->
+      <section class="slide" id="s5">
+        <div class="slide-inner">
+          <span class="slide-eyebrow">Penutup · Takeaway &amp; What's Next</span>
+          <h2 class="slide-title s5-title">Anda Dulu, AI Kemudian — Tiga Langkah Tetap</h2>
+          <p class="slide-lead s5-lead">Hanya Anda yang bisa menjawab dua langkah pertama. AI mengeksekusi sisanya. Resep ini berulang di setiap output yang Anda buat.</p>
+
+          <div class="recipe">
+            <div class="recipe-step">
+              <div class="recipe-num">Step 01</div>
+              <div class="recipe-name">Perjelas Tujuan</div>
+            </div>
+            <div class="recipe-arrow">→</div>
+            <div class="recipe-step">
+              <div class="recipe-num">Step 02</div>
+              <div class="recipe-name">Diskusi Cara</div>
+            </div>
+            <div class="recipe-arrow">→</div>
+            <div class="recipe-step">
+              <div class="recipe-num">Step 03</div>
+              <div class="recipe-name">Baru Eksekusi</div>
+            </div>
+          </div>
+
+          <div class="s4-section-label" style="margin-top: 8px;">What's Next · Tiga Langkah Pulang</div>
+          <div class="action-grid">
+            <div class="action-card">
+              <div class="action-num">01</div>
+              <div class="action-title">Pakai A.C.T. Minggu Ini</div>
+              <p class="action-detail">Pilih satu jenis tulisan harian (email, WA, notulen). Jalankan A.C.T. selama satu minggu. Ukur: berapa lama waktu tulis Anda turun?</p>
+            </div>
+            <div class="action-card">
+              <div class="action-num">02</div>
+              <div class="action-title">Pakai A.C.T.I.O.N.S. di Satu Hal Penting</div>
+              <p class="action-detail">Pilih satu output tinggi-konsekuensi bulan ini (board memo, proposal, op-ed). Pakai 7 elemen lengkap.</p>
+            </div>
+            <div class="action-card">
+              <div class="action-num">03</div>
+              <div class="action-title">Bawa ke Sesi Berikutnya</div>
+              <p class="action-detail">Bawa satu before-after — tulisan tanpa AI vs dengan AI First. Review komunitas akan menarik insight bersama.</p>
+            </div>
+          </div>
+
+          <div class="closing">
+            <p class="closing-quote">Output bagus dimulai dari arahan yang tepat.</p>
+            <p class="closing-tag">Bukan soal model yang lebih canggih. Hanya Anda yang bisa memberi <em>konteks, tujuan, dan rambu</em> yang sesuai dengan kebutuhan — itulah inti A.C.T. dan A.C.T.I.O.N.S.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Swipe hints -->
+    <div class="swipe-hint">
+      <span class="swipe-arrow" id="prev">‹</span>
+      <div class="swipe-progress" id="dots"></div>
+      <span class="swipe-arrow" id="next">›</span>
+    </div>
+  </main>
+
+</div>
+
+<script>
+const track = document.getElementById('track');
+const navItems = document.querySelectorAll('.nav-item');
+const dotsEl = document.getElementById('dots');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const total = 11;
+let current = 0;
+const slideStep = 100 / total;
+
+// Build dots
+for (let i = 0; i < total; i++) {
+  const d = document.createElement('span');
+  d.className = 'swipe-dot' + (i === 0 ? ' active' : '');
+  d.dataset.idx = i;
+  d.addEventListener('click', () => goTo(i));
+  dotsEl.appendChild(d);
+}
+const dots = document.querySelectorAll('.swipe-dot');
+
+function goTo(idx) {
+  if (idx < 0 || idx >= total) return;
+  current = idx;
+  track.style.transform = `translateX(-${idx * slideStep}%)`;
+  navItems.forEach(n => n.classList.toggle('active', parseInt(n.dataset.idx) === idx));
+  dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+  prevBtn.classList.toggle('disabled', idx === 0);
+  nextBtn.classList.toggle('disabled', idx === total - 1);
+}
+
+navItems.forEach(item => {
+  item.addEventListener('click', () => goTo(parseInt(item.dataset.idx)));
+});
+
+prevBtn.addEventListener('click', () => goTo(current - 1));
+nextBtn.addEventListener('click', () => goTo(current + 1));
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); goTo(current + 1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); goTo(current - 1); }
+  else if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+  else if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+});
+
+// Touch swipe
+let touchStartX = 0, touchEndX = 0;
+const stage = document.querySelector('.stage');
+stage.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+stage.addEventListener('touchend', e => {
+  touchEndX = e.changedTouches[0].screenX;
+  const diff = touchStartX - touchEndX;
+  if (Math.abs(diff) > 50) {
+    if (diff > 0) goTo(current + 1);
+    else goTo(current - 1);
+  }
+}, { passive: true });
+
+// Mouse wheel horizontal swipe (optional)
+let wheelLock = false;
+stage.addEventListener('wheel', (e) => {
+  if (Math.abs(e.deltaX) < 30) return;
+  if (wheelLock) return;
+  wheelLock = true;
+  if (e.deltaX > 0) goTo(current + 1);
+  else goTo(current - 1);
+  setTimeout(() => wheelLock = false, 600);
+}, { passive: true });
+</script>
+
+</body>
+</html>
