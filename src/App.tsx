@@ -2,7 +2,7 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword, secondaryAu
 import { BookOpen, Calendar, ChevronRight, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent } from 'react';
 import { cn } from './lib/utils';
-import { onAuthStateChanged, type User, updatePassword } from 'firebase/auth';
+import { onAuthStateChanged, type User, updatePassword, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, updateDoc, Timestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { db } from './lib/firebase';
 import aifPromptingHtml from '../materi/Prompt day1/aif-prompting-level2-day1.html?raw';
@@ -207,7 +207,7 @@ function LoginView() {
   );
 }
 
-function MemberRow({ mb, isUpdating, handleUpdate }: { key?: string | number, mb: any, isUpdating: boolean, handleUpdate: (id: string, role: string, tier: string, exp: string) => void }) {
+function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset }: { key?: string | number, mb: any, isUpdating: boolean, handleUpdate: (id: string, role: string, tier: string, exp: string) => void, handleSendPasswordReset: (email: string) => void }) {
   const [tier, setTier] = useState(mb.tier || 'Normal');
   const [role, setRole] = useState(mb.role || 'member');
   const currentExp = mb.expiresAt ? mb.expiresAt.toDate().toISOString().split('T')[0] : '';
@@ -260,14 +260,25 @@ function MemberRow({ mb, isUpdating, handleUpdate }: { key?: string | number, mb
         </span>
       </td>
       <td className="py-3 px-2">
-        <Button 
-          disabled={isUpdating}
-          onClick={() => handleUpdate(mb.id, role, tier, exp)}
-          variant="primary" 
-          className="py-1.5 px-4 text-[10px]"
-        >
-          Simpan
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            disabled={isUpdating}
+            onClick={() => handleUpdate(mb.id, role, tier, exp)}
+            variant="primary" 
+            className="py-1.5 px-4 text-[10px]"
+          >
+            Simpan
+          </Button>
+          <Button 
+            disabled={isUpdating}
+            onClick={() => handleSendPasswordReset(mb.email)}
+            variant="secondary" 
+            className="py-1.5 px-4 text-[10px] whitespace-nowrap"
+            title="Kirim email reset password ke user"
+          >
+            Reset Sandi
+          </Button>
+        </div>
       </td>
     </tr>
   );
@@ -367,6 +378,15 @@ function AdminView() {
     setIsCreating(false);
   };
 
+  const handleSendPasswordReset = async (email: string) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert(`Email reset password berhasil dikirim ke ${email}. User dapat mengganti password melalui tautan di email tersebut.`);
+    } catch (err: any) {
+      alert(`Gagal mengirim email reset password: ${err.message}`);
+    }
+  };
+
   return (
     <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
       <Eyebrow variant="flat">Admin Panel</Eyebrow>
@@ -438,7 +458,7 @@ function AdminView() {
               <th className="py-3 px-2 font-bold text-light-hi w-32">Tier</th>
               <th className="py-3 px-2 font-bold text-light-hi min-w-[200px]">Atur Waktu (Kedaluwarsa)</th>
               <th className="py-3 px-2 font-bold text-light-hi">Sisa Waktu</th>
-              <th className="py-3 px-2 font-bold text-light-hi">Aksi</th>
+              <th className="py-3 px-2 font-bold text-light-hi min-w-[200px]">Aksi</th>
             </tr>
           </thead>
           <tbody>
@@ -448,7 +468,7 @@ function AdminView() {
               </tr>
             )}
             {members.map(mb => (
-              <MemberRow key={mb.id} mb={mb} isUpdating={isUpdating} handleUpdate={handleUpdate} />
+              <MemberRow key={mb.id} mb={mb} isUpdating={isUpdating} handleUpdate={handleUpdate} handleSendPasswordReset={handleSendPasswordReset} />
             ))}
           </tbody>
         </table>
@@ -565,7 +585,7 @@ function DashboardView({ user }: { user: User }) {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'admin'>('dashboard');
   const [isAdmin, setIsAdmin] = useState(user.email === 'stephen.tssgroup@gmail.com');
   const [selectedModule, setSelectedModule] = useState<any>(null);
-  const [selectedHtmlData, setSelectedHtmlData] = useState<{ activeIndex: number; htmls: { title: string; content: string }[] } | null>(null);
+  const [selectedHtmlData, setSelectedHtmlData] = useState<{ activeIndex: number; htmls: { title: string; content?: string; url?: string }[] } | null>(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
@@ -681,16 +701,16 @@ function DashboardView({ user }: { user: User }) {
               </div>
             </div>
             
-            <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "02", title: "Prompt", subtitle: "Chat Mastery", materials: [{ day: "Day 1", title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }] }, { day: "Day 2", title: "Materi AI First Level 2 Day 2", htmls: [{ title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }] })}>
+            <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "02", title: "Prompt", subtitle: "Chat Mastery", materials: [{ day: "Day 1", title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }] }, { day: "Day 2", title: "Materi AI First Level 2 Day 2", htmls: [{ title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }] })}>
                <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">02</span>
               <div>
                 <div className="font-sans font-bold text-lg text-light-hi mb-2">Prompt</div>
                 <p className="font-body text-sm text-light-md">Chat Mastery</p>
                 <div className="mt-6 flex items-center gap-3">
                    <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                      <div className="bg-gold h-full rounded-full w-[50%]"></div>
+                      <div className="bg-gold h-full rounded-full w-[100%]"></div>
                    </div>
-                   <span className="font-mono text-xs text-light-lo">50%</span>
+                   <span className="font-mono text-xs text-light-lo">100%</span>
                 </div>
               </div>
             </div>
@@ -801,6 +821,13 @@ function DashboardView({ user }: { user: User }) {
                 </div>
                 <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
               </a>
+              <a href="https://prompt-database-v2-0-849022455337.us-west1.run.app" target="_blank" rel="noopener noreferrer" className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
+                <div className="flex items-center gap-4">
+                  <BookOpen className="w-4 h-4 text-gold-muted" />
+                  <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Prompt Database v2</span>
+                </div>
+                <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
+              </a>
             </div>
           </div>
         </div>
@@ -874,7 +901,11 @@ function DashboardView({ user }: { user: User }) {
                 )}
               </div>
               <div className="flex-1 overflow-auto bg-black p-0 rounded-b-xl">
-                <iframe srcDoc={selectedHtmlData.htmls[selectedHtmlData.activeIndex].content} className="w-full h-full min-h-[70vh] border-0" title="Materi" />
+                {selectedHtmlData.htmls[selectedHtmlData.activeIndex].url ? (
+                  <iframe src={selectedHtmlData.htmls[selectedHtmlData.activeIndex].url} className="w-full h-full min-h-[70vh] border-0" title="Materi" />
+                ) : (
+                  <iframe srcDoc={selectedHtmlData.htmls[selectedHtmlData.activeIndex].content} className="w-full h-full min-h-[70vh] border-0" title="Materi" />
+                )}
               </div>
             </div>
           </div>
