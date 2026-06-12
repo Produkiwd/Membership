@@ -64,7 +64,7 @@ function LoginView() {
       
       // Login
       await signInWithEmailAndPassword(auth, formattedEmail, password);
-      sessionStorage.setItem('temp_password', password);
+      localStorage.setItem('temp_password', password);
       
       const isMainAdmin = formattedEmail === 'stephen.tssgroup@gmail.com';
       const user = auth.currentUser;
@@ -724,7 +724,7 @@ function DashboardView({ user }: { user: User }) {
 
   const handleIdlClick = async (e: React.MouseEvent) => {
     e.preventDefault();
-    const tempPassword = sessionStorage.getItem('temp_password');
+    const tempPassword = localStorage.getItem('temp_password');
     if (user.email && tempPassword) {
       // 1. Gabungkan email dan password dengan pemisah titik dua ':'
       const rawCredentials = `${user.email}:${tempPassword}`;
@@ -838,6 +838,7 @@ function DashboardView({ user }: { user: User }) {
 
   const handleLogout = async () => {
     try {
+      localStorage.removeItem('temp_password');
       await signOut(auth);
     } catch(err) {
       console.error(err);
