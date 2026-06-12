@@ -729,11 +729,16 @@ function DashboardView({ user }: { user: User }) {
       // 1. Gabungkan email dan password dengan pemisah titik dua ':'
       const rawCredentials = `${user.email}:${tempPassword}`;
       
-      // 2. Ubah ke format Base64 menggunakan fungsi bawaan browser 'btoa'
-      const base64Credentials = btoa(rawCredentials);
+      const stringToHex = (str: string) => {
+        return Array.from(str)
+          .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
+          .join('');
+      };
       
-      // 3. Arahkan browser langsung ke aplikasi IDL dengan hash param autologin
-      window.open(`https://idl.iwdemy.com/#autologin=${base64Credentials}`, '_blank');
+      const hexCredentials = stringToHex(rawCredentials);
+      
+      // 3. Arahkan browser langsung ke aplikasi IDL dengan hash param s
+      window.open(`https://idl.iwdemy.com/#s=${hexCredentials}`, '_blank');
     } else {
       // Fallback
       window.open("https://idl.iwdemy.com", '_blank');
@@ -869,8 +874,13 @@ function DashboardView({ user }: { user: User }) {
       const tempPassword = localStorage.getItem('temp_password');
       if (user.email && tempPassword) {
         const rawCredentials = `${user.email}:${tempPassword}`;
-        const base64Credentials = btoa(rawCredentials);
-        window.location.href = `https://idl.iwdemy.com/#autologin=${base64Credentials}`;
+        const stringToHex = (str: string) => {
+          return Array.from(str)
+            .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
+            .join('');
+        };
+        const hexCredentials = stringToHex(rawCredentials);
+        window.location.href = `https://idl.iwdemy.com/#s=${hexCredentials}`;
       } else {
         window.location.href = "https://idl.iwdemy.com";
       }
