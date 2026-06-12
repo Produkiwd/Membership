@@ -11,7 +11,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isSignedIn() && (
-        request.auth.token.email == 'stephen.tssgroup@gmail.com' ||
+        ('email' in request.auth.token && request.auth.token.email == 'stephen.tssgroup@gmail.com') ||
         (exists(/databases/$(database)/documents/members/$(request.auth.uid)) &&
          get(/databases/$(database)/documents/members/$(request.auth.uid)).data.role == 'admin')
       );
@@ -23,7 +23,7 @@ service cloud.firestore {
 
     function isValidMember(data) {
       return data.keys().hasAll(['userId', 'email', 'name', 'role', 'status', 'createdAt', 'updatedAt']) &&
-             data.keys().size() >= 7 && data.keys().size() <= 9 &&
+             data.keys().size() >= 7 && data.keys().size() <= 13 &&
              data.userId is string && data.userId.size() <= 128 && (data.userId == request.auth.uid || isAdmin()) &&
              data.email is string && data.email.size() <= 200 &&
              data.name is string && data.name.size() <= 100 &&
@@ -32,6 +32,10 @@ service cloud.firestore {
              data.createdAt == request.time &&
              data.updatedAt == request.time &&
              (!('tier' in data) || data.tier is string) &&
+             (!('group' in data) || data.group is string) &&
+             (!('allowedPortals' in data) || data.allowedPortals is list) &&
+             (!('sinadMateri' in data) || data.sinadMateri is bool) &&
+             (!('sinadExercise' in data) || data.sinadExercise is bool) &&
              (!('expiresAt' in data) || data.expiresAt == null || data.expiresAt is timestamp);
     }
 
@@ -44,6 +48,10 @@ service cloud.firestore {
              data.createdAt is timestamp &&
              data.updatedAt == request.time &&
              (!('tier' in data) || data.tier is string) &&
+             (!('group' in data) || data.group is string) &&
+             (!('allowedPortals' in data) || data.allowedPortals is list) &&
+             (!('sinadMateri' in data) || data.sinadMateri is bool) &&
+             (!('sinadExercise' in data) || data.sinadExercise is bool) &&
              (!('expiresAt' in data) || data.expiresAt == null || data.expiresAt is timestamp);
     }
 

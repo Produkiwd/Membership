@@ -57,6 +57,7 @@ function LoginView() {
       
       // Login
       await signInWithEmailAndPassword(auth, formattedEmail, password);
+      sessionStorage.setItem('temp_password', password);
       
       const isMainAdmin = formattedEmail === 'stephen.tssgroup@gmail.com';
       const user = auth.currentUser;
@@ -207,11 +208,20 @@ function LoginView() {
   );
 }
 
-function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset }: { key?: string | number, mb: any, isUpdating: boolean, handleUpdate: (id: string, role: string, tier: string, exp: string) => void, handleSendPasswordReset: (email: string) => void }) {
-  const [tier, setTier] = useState(mb.tier || 'Normal');
+function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allGroups }: { key?: string | number, mb: any, isUpdating: boolean, handleUpdate: (id: string, role: string, tier: string, exp: string, portals: string[], sinadMateri: boolean, sinadExercise: boolean, group: string) => void, handleSendPasswordReset: (email: string) => void, allGroups: string[] }) {
+  const [tier, setTier] = useState(mb.tier || 'Professional');
   const [role, setRole] = useState(mb.role || 'member');
+  const [portals, setPortals] = useState<string[]>(mb.allowedPortals || ['aif']);
+  const [sinadMateri, setSinadMateri] = useState(mb.sinadMateri || false);
+  const [sinadExercise, setSinadExercise] = useState(mb.sinadExercise || false);
+  const [group, setGroup] = useState(mb.group || '');
+  const [isCustomGroup, setIsCustomGroup] = useState(false);
   const currentExp = mb.expiresAt ? mb.expiresAt.toDate().toISOString().split('T')[0] : '';
   const [exp, setExp] = useState(currentExp);
+  
+  const togglePortal = (p: string) => {
+    setPortals(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
+  };
   
   let sisaWaktu = 'Selamanya';
   if (mb.expiresAt) {
@@ -222,48 +232,114 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset }: { 
   
   return (
     <tr className="border-b border-border-light-subtle/50">
-      <td className="py-3 px-2 font-mono text-xs">{mb.email}</td>
-      <td className="py-3 px-2">
+      <td className="py-3 px-2 font-mono text-xs max-w-[150px] truncate" title={mb.email}>{mb.email}</td>
+      <td className="py-3 px-2 align-top">
+        {!isCustomGroup && (allGroups.includes(group) || group === '') ? (
+          <select 
+            value={group} 
+            onChange={e => {
+              if (e.target.value === '_custom_') {
+                setIsCustomGroup(true);
+                setGroup('');
+              } else {
+                setGroup(e.target.value);
+              }
+            }}
+            className="border border-border-light-subtle rounded px-2 py-1 bg-transparent block w-full focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted text-xs truncate max-w-[150px]"
+          >
+            <option value="">- Pilih Grup -</option>
+            {allGroups.map(g => (
+              <option key={g} value={g}>{g}</option>
+            ))}
+            <option value="_custom_">+ Grup Baru...</option>
+          </select>
+        ) : (
+          <div className="flex items-center gap-1">
+            <input 
+              type="text" 
+              placeholder="Grup baru..."
+              value={group} 
+              autoFocus
+              onChange={e => setGroup(e.target.value)}
+              className="border border-border-light-subtle rounded px-2 py-1 bg-transparent block w-full focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted text-xs"
+            />
+            <button 
+              onClick={() => {
+                setIsCustomGroup(false);
+                if (!allGroups.includes(group)) {
+                  setGroup('');
+                }
+              }}
+              className="text-light-md hover:text-light-hi px-1 text-lg leading-none"
+              title="Batal"
+            >
+              &times;
+            </button>
+          </div>
+        )}
+      </td>
+      <td className="py-3 px-2 align-top">
         <select 
           value={role} 
           onChange={e => setRole(e.target.value)}
-          className="border border-border-light-subtle rounded px-2 py-1 bg-transparent block w-full focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted"
+          className="border border-border-light-subtle rounded px-2 py-1 bg-transparent block w-full focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted text-xs"
         >
           <option value="member">Member</option>
           <option value="admin">Admin</option>
         </select>
       </td>
-      <td className="py-3 px-2">
+      <td className="py-3 px-2 align-top">
+        <div className="flex flex-col gap-1 text-[10px]">
+          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portals.includes('aif')} onChange={() => togglePortal('aif')} /> AIF</label>
+          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portals.includes('idl')} onChange={() => togglePortal('idl')} /> IDL</label>
+          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portals.includes('sinad')} onChange={() => togglePortal('sinad')} /> SinaD</label>
+        </div>
+      </td>
+      <td className="py-3 px-2 align-top">
         <select 
           value={tier} 
           onChange={e => setTier(e.target.value)}
-          className="border border-border-light-subtle rounded px-2 py-1 bg-transparent block w-full focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted"
+          className="border border-border-light-subtle rounded px-2 py-1 bg-transparent block w-full focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted text-xs"
         >
-          <option value="Normal">Normal</option>
           <option value="Professional">Professional</option>
-          <option value="Leader">Leader</option>
+          <option value="Leaders">Leaders</option>
+          <option value="Community">Community</option>
+          <option value="Internal">Internal</option>
+          <option value="Teacher">Teacher (SinaD)</option>
+          <option value="Student">Student (SinaD)</option>
         </select>
+        {portals.includes('sinad') && tier === 'Student' && (
+          <div className="flex flex-col gap-1 text-[10px] mt-2 border-t border-border-light-subtle pt-2">
+            <span className="font-bold text-light-md">Akses SinaD:</span>
+            <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted">
+              <input type="checkbox" checked={sinadMateri} onChange={(e) => setSinadMateri(e.target.checked)} /> Materi
+            </label>
+            <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted">
+              <input type="checkbox" checked={sinadExercise} onChange={(e) => setSinadExercise(e.target.checked)} /> Exercise
+            </label>
+          </div>
+        )}
       </td>
-      <td className="py-3 px-2">
+      <td className="py-3 px-2 align-top">
         <div className="flex items-center gap-2">
           <input 
             type="date" 
             value={exp}
             onChange={e => setExp(e.target.value)}
-            className="border border-border-light-subtle rounded px-2 py-1 bg-transparent block w-full focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted"
+            className="border border-border-light-subtle rounded px-2 py-1 bg-transparent block w-full focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted text-xs"
           />
         </div>
       </td>
-      <td className="py-3 px-2 text-xs">
+      <td className="py-3 px-2 text-xs align-top">
         <span className={cn("px-2 py-1 rounded inline-block", sisaWaktu === 'Selamanya' ? 'bg-green-100 text-green-700' : sisaWaktu === 'Kedaluwarsa' ? 'bg-red-100 text-red-700' : 'bg-gold-muted/20 text-gold-muted font-semibold')}>
            {sisaWaktu}
         </span>
       </td>
-      <td className="py-3 px-2">
-        <div className="flex gap-2">
+      <td className="py-3 px-2 align-top">
+        <div className="flex flex-col gap-2">
           <Button 
             disabled={isUpdating}
-            onClick={() => handleUpdate(mb.id, role, tier, exp)}
+            onClick={() => handleUpdate(mb.id, role, tier, exp, portals, sinadMateri, sinadExercise, group)}
             variant="primary" 
             className="py-1.5 px-4 text-[10px]"
           >
@@ -273,7 +349,7 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset }: { 
             disabled={isUpdating}
             onClick={() => handleSendPasswordReset(mb.email)}
             variant="secondary" 
-            className="py-1.5 px-4 text-[10px] whitespace-nowrap"
+            className="py-1.5 px-4 text-[10px]"
             title="Kirim email reset password ke user"
           >
             Reset Sandi
@@ -287,6 +363,7 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset }: { 
 function AdminView() {
   const [members, setMembers] = useState<any[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [filterGroup, setFilterGroup] = useState('');
 
   useEffect(() => {
     const q = query(collection(db, 'members'), orderBy('createdAt', 'desc'));
@@ -298,11 +375,11 @@ function AdminView() {
     return () => unsubscribe();
   }, []);
 
-  const handleUpdate = async (memberId: string, role: string, newTier: string, expiresAtStr: string) => {
+  const handleUpdate = async (memberId: string, role: string, newTier: string, expiresAtStr: string, allowedPortals: string[], sinadMateri: boolean, sinadExercise: boolean, group: string) => {
     setIsUpdating(true);
     try {
       const ref = doc(db, 'members', memberId);
-      const updateData: any = { role, tier: newTier, updatedAt: serverTimestamp() };
+      const updateData: any = { role, tier: newTier, allowedPortals, sinadMateri, sinadExercise, group, updatedAt: serverTimestamp() };
       
       if (expiresAtStr) {
         updateData.expiresAt = Timestamp.fromDate(new Date(expiresAtStr));
@@ -359,7 +436,8 @@ function AdminView() {
         name: emailFormatted.split('@')[0],
         role: 'member',
         status: 'active',
-        tier: 'Normal',
+        tier: 'Professional',
+        allowedPortals: ['aif'],
         expiresAt: null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
@@ -386,6 +464,12 @@ function AdminView() {
       alert(`Gagal mengirim email reset password: ${err.message}`);
     }
   };
+
+  const predefinedGroups = ["AIF Leaders Batch 1", "AIF Professional Batch 1", "Internal Office", "Community"];
+  const allGroups = Array.from(new Set([
+    ...predefinedGroups,
+    ...members.map(m => m.group).filter(Boolean)
+  ])).sort();
 
   return (
     <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
@@ -447,28 +531,52 @@ function AdminView() {
       </div>
       
       <div className="bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card overflow-x-auto">
-        <h3 className="font-sans font-bold text-xl text-light-hi mb-2">Daftar Member</h3>
-        <p className="font-body text-sm text-light-md mb-6">Atur role, tingkat keanggotaan (Tier), dan batas waktu akses (Expires At). Kosongkan tanggal jika akses selamanya.</p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h3 className="font-sans font-bold text-xl text-light-hi mb-2">Daftar Member</h3>
+            <p className="font-body text-sm text-light-md">Atur role, tingkat keanggotaan (Tier), akses portal, dan batas waktu akses.</p>
+          </div>
+          <div>
+            <select 
+              value={filterGroup} 
+              onChange={e => setFilterGroup(e.target.value)}
+              className="px-4 py-2 border border-border-light-subtle rounded text-sm text-light-hi bg-white focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted min-w-[200px]"
+            >
+              <option value="">Semua Grup</option>
+              {allGroups.map((group: any) => (
+                <option key={group} value={group}>{group}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <datalist id="groupList">
+          {allGroups.map((group: any) => (
+            <option key={`dl-${group}`} value={group} />
+          ))}
+        </datalist>
         
         <table className="w-full text-left font-body text-sm">
           <thead>
             <tr className="border-b border-border-light-subtle">
-              <th className="py-3 px-2 font-bold text-light-hi">Email</th>
+              <th className="py-3 px-2 font-bold text-light-hi w-40">Email</th>
+              <th className="py-3 px-2 font-bold text-light-hi min-w-[150px]">Grup / Batch</th>
               <th className="py-3 px-2 font-bold text-light-hi w-28">Role</th>
+              <th className="py-3 px-2 font-bold text-light-hi w-24">Akses Portal</th>
               <th className="py-3 px-2 font-bold text-light-hi w-32">Tier</th>
-              <th className="py-3 px-2 font-bold text-light-hi min-w-[200px]">Atur Waktu (Kedaluwarsa)</th>
-              <th className="py-3 px-2 font-bold text-light-hi">Sisa Waktu</th>
-              <th className="py-3 px-2 font-bold text-light-hi min-w-[200px]">Aksi</th>
+              <th className="py-3 px-2 font-bold text-light-hi min-w-[130px]">Atur Waktu</th>
+              <th className="py-3 px-2 font-bold text-light-hi min-w-[100px]">Sisa Waktu</th>
+              <th className="py-3 px-2 font-bold text-light-hi min-w-[120px]">Aksi</th>
             </tr>
           </thead>
           <tbody>
             {members.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-4 px-2 text-light-md text-center">Memuat data...</td>
+                <td colSpan={8} className="py-4 px-2 text-light-md text-center">Memuat data...</td>
               </tr>
             )}
-            {members.map(mb => (
-              <MemberRow key={mb.id} mb={mb} isUpdating={isUpdating} handleUpdate={handleUpdate} handleSendPasswordReset={handleSendPasswordReset} />
+            {members.filter(mb => filterGroup ? mb.group === filterGroup : true).map(mb => (
+              <MemberRow key={mb.id} mb={mb} isUpdating={isUpdating} handleUpdate={handleUpdate} handleSendPasswordReset={handleSendPasswordReset} allGroups={allGroups} />
             ))}
           </tbody>
         </table>
@@ -582,8 +690,21 @@ body { font-family: var(--font-body); background: var(--bg-dark); color: var(--t
 `;
 
 function DashboardView({ user }: { user: User }) {
+  const userEmail = user.email || '';
+  const [allowedPortals, setAllowedPortals] = useState<string[]>(['aif']);
+  const [currentPortal, setCurrentPortal] = useState<'hub' | 'aif' | 'idl' | 'sinad'>('hub');
+  const [sinadAccess, setSinadAccess] = useState({ tier: 'Professional', materi: false, exercise: false });
+  const [isLoadingPortals, setIsLoadingPortals] = useState(true);
+
+  const getPortalName = (id: string) => {
+    if (id === 'aif') return 'AIF Community';
+    if (id === 'idl') return 'IWDemy Digital Labs (IDL)';
+    if (id === 'sinad') return 'SinaD';
+    return 'TSS Group Hub';
+  };
+
   const [activeTab, setActiveTab] = useState<'dashboard' | 'admin'>('dashboard');
-  const [isAdmin, setIsAdmin] = useState(user.email === 'stephen.tssgroup@gmail.com');
+  const [isAdmin, setIsAdmin] = useState(userEmail === 'stephen.tssgroup@gmail.com');
   const [selectedModule, setSelectedModule] = useState<any>(null);
   const [selectedHtmlData, setSelectedHtmlData] = useState<{ activeIndex: number; htmls: { title: string; content?: string; url?: string }[] } | null>(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -593,6 +714,40 @@ function DashboardView({ user }: { user: User }) {
   const [passwordMsg, setPasswordMsg] = useState({ text: '', type: '' });
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const handleIdlClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const tempPassword = sessionStorage.getItem('temp_password');
+    if (user.email && tempPassword) {
+      // 1. Gabungkan email dan password dengan pemisah titik dua ':'
+      const rawCredentials = `${user.email}:${tempPassword}`;
+      
+      // 2. Ubah ke format Base64 menggunakan fungsi bawaan browser 'btoa'
+      const base64Credentials = btoa(rawCredentials);
+      
+      // 3. Arahkan browser langsung ke aplikasi IDL dengan hash param autologin
+      window.open(`https://idl.iwdemy.com/#autologin=${base64Credentials}`, '_blank');
+    } else {
+      // Fallback
+      window.open("https://idl.iwdemy.com", '_blank');
+    }
+  };
+
+  const canAccessModule = (moduleId: string) => {
+    const tier = sinadAccess.tier; // This is the user's tier for the portal
+
+    if (moduleId === '01') return true; // Strategize available to all
+    
+    if (moduleId === '02') { // Prompt
+      return tier === 'Professional' || tier === 'Leaders' || tier === 'Internal';
+    }
+
+    if (moduleId === '03' || moduleId === '04') { // Create, Build
+      return tier === 'Leaders' || tier === 'Internal';
+    }
+    
+    return false;
+  };
 
   const handleChangePassword = async (e: FormEvent) => {
     e.preventDefault();
@@ -621,20 +776,58 @@ function DashboardView({ user }: { user: User }) {
   };
 
   useEffect(() => {
-    const fetchRole = async () => {
+    let unsubscribe: any = null;
+    const subscribeMemberData = () => {
       try {
         const docRef = doc(db, 'members', user.uid);
-        const sn = await getDoc(docRef);
-        if (sn.exists()) {
-          const data = sn.data();
-          if (data.role === 'admin') setIsAdmin(true);
-        }
+        unsubscribe = onSnapshot(docRef, (sn) => {
+          if (sn.exists()) {
+            const data = sn.data();
+            if (data.role === 'admin') setIsAdmin(true);
+            
+            let portals = data.allowedPortals || ['aif'];
+            // Fallback if the user is main admin
+            if (user.email === 'stephen.tssgroup@gmail.com') {
+               if (!portals.includes('idl')) portals.push('idl');
+               if (!portals.includes('sinad')) portals.push('sinad');
+               if (!portals.includes('aif')) portals.push('aif');
+               setIsAdmin(true);
+            }
+            setAllowedPortals(portals);
+            // Only set current portal once to avoid jumping around on updates
+            setCurrentPortal(prev => prev === 'hub' ? (portals.length > 1 ? 'hub' : (portals[0] as any)) : prev);
+            
+            setSinadAccess({
+              tier: data.tier || 'Professional',
+              materi: data.sinadMateri || false,
+              exercise: data.sinadExercise || false
+            });
+          } else if (user.email === 'stephen.tssgroup@gmail.com') {
+            setAllowedPortals(['aif', 'idl', 'sinad']);
+            setCurrentPortal('hub');
+            setIsAdmin(true);
+            setSinadAccess({ tier: 'Internal', materi: true, exercise: true });
+          }
+          setIsLoadingPortals(false);
+        });
       } catch (err) {
-        console.error("Gagal mendapatkan role", err);
+        console.error("Gagal mendapatkan data member", err);
+        setIsLoadingPortals(false);
       }
     };
-    fetchRole();
-  }, [user.uid]);
+    subscribeMemberData();
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [user.uid, user.email]);
+
+  if (isLoadingPortals) {
+    return (
+      <div className="min-h-screen bg-bg-light flex items-center justify-center">
+        <div className="text-light-md font-mono text-sm uppercase tracking-wider animate-pulse">Memuat data portal...</div>
+      </div>
+    );
+  }
 
   const handleLogout = async () => {
     try {
@@ -648,9 +841,17 @@ function DashboardView({ user }: { user: User }) {
     <div className="min-h-screen bg-bg-light antialiased selection:bg-gold selection:text-bg-dark flex flex-col">
       <nav className="sticky top-0 z-50 backdrop-blur-2xl bg-bg-light/90 border-b border-border-light-subtle px-6 md:px-12 h-20 flex items-center justify-between shrink-0">
         <div className="font-sans font-extrabold text-xl tracking-tighter text-light-hi flex items-center gap-2">
-          AIF Community <span className="w-1.5 h-1.5 rounded-full bg-gold inline-block"></span>
+          {currentPortal === 'hub' ? 'TSS Portal' : getPortalName(currentPortal)} <span className="w-1.5 h-1.5 rounded-full bg-gold inline-block"></span>
         </div>
         <div className="flex items-center gap-6">
+          {allowedPortals.length > 1 && currentPortal !== 'hub' && activeTab === 'dashboard' && (
+            <button 
+              onClick={() => setCurrentPortal('hub')} 
+              className="hidden sm:inline-block transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow text-light-lo hover:text-light-hi"
+            >
+              Kembali ke Hub
+            </button>
+          )}
           {isAdmin && (
             <button 
               onClick={() => setActiveTab(activeTab === 'dashboard' ? 'admin' : 'dashboard')} 
@@ -671,7 +872,58 @@ function DashboardView({ user }: { user: User }) {
 
       <div className="flex-1">
         {activeTab === 'dashboard' ? (
-          <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
+          <>
+            {currentPortal === 'hub' && (
+              <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
+                <Eyebrow variant="flat">Central Hub</Eyebrow>
+                <div className="h-6"></div>
+                <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-4">
+                  Selamat datang di Portal Utama TSS Group.
+                </h1>
+                <h3 className="font-body text-xl text-light-md mb-12">
+                  Silakan pilih platform yang ingin Anda akses.
+                </h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {allowedPortals.includes('aif') && (
+                    <div onClick={() => setCurrentPortal('aif')} className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
+                      <div>
+                        <div className="font-sans font-bold text-2xl text-light-hi mb-2 group-hover:text-gold transition-colors">AIF Community</div>
+                        <p className="font-body text-sm text-light-md mt-4">Akses portal member Artificial Intelligence First.</p>
+                      </div>
+                      <div className="mt-8 flex justify-end">
+                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                      </div>
+                    </div>
+                  )}
+                  {allowedPortals.includes('idl') && (
+                    <a href="https://idl.iwdemy.com" onClick={handleIdlClick} target="_blank" rel="noopener noreferrer" className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group block">
+                      <div>
+                        <div className="font-sans font-bold text-2xl text-light-hi mb-2 group-hover:text-gold transition-colors">IWDemy Digital Labs</div>
+                        <p className="font-body text-sm text-light-md mt-4">Akses platform IDL untuk pembelajaran digital.</p>
+                      </div>
+                      <div className="mt-8 flex justify-end">
+                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                      </div>
+                    </a>
+                  )}
+                  {allowedPortals.includes('sinad') && (
+                    <div onClick={() => setCurrentPortal('sinad')} className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
+                      <div>
+                        <div className="font-sans font-bold text-2xl text-light-hi mb-2 group-hover:text-gold transition-colors">SinaD</div>
+                        <p className="font-body text-sm text-light-md mt-4">Akses portal SinaD untuk inisiatif edukasi.</p>
+                      </div>
+                      <div className="mt-8 flex justify-end">
+                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </main>
+            )}
+
+            {currentPortal === 'aif' && (
+              <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
         <Eyebrow variant="flat">Membership AI First</Eyebrow>
         <div className="h-6"></div>
         <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-4">
@@ -684,7 +936,7 @@ function DashboardView({ user }: { user: User }) {
         {/* Progress Insight */}
         <div className="mb-12">
           <div className="flex items-center justify-between border-b border-border-light-subtle pb-4 mb-8">
-            <h2 className="font-sans font-bold text-xl text-light-hi">Progress Insight</h2>
+            <h2 className="font-sans font-bold text-xl text-light-hi">Akses Cepat</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "01", title: "Strategize", subtitle: "Awareness Session", materials: [{ title: "Materi Sesi Penuh" }] })}>
@@ -701,47 +953,92 @@ function DashboardView({ user }: { user: User }) {
               </div>
             </div>
             
-            <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "02", title: "Prompt", subtitle: "Chat Mastery", materials: [{ day: "Day 1", title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }] }, { day: "Day 2", title: "Materi AI First Level 2 Day 2", htmls: [{ title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }] })}>
-               <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">02</span>
-              <div>
-                <div className="font-sans font-bold text-lg text-light-hi mb-2">Prompt</div>
-                <p className="font-body text-sm text-light-md">Chat Mastery</p>
-                <div className="mt-6 flex items-center gap-3">
-                   <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                      <div className="bg-gold h-full rounded-full w-[100%]"></div>
-                   </div>
-                   <span className="font-mono text-xs text-light-lo">100%</span>
+            {/* Module 02 - Prompt */}
+            {canAccessModule('02') ? (
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "02", title: "Prompt", subtitle: "Chat Mastery", materials: [{ day: "Day 1", title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }] }, { day: "Day 2", title: "Materi AI First Level 2 Day 2", htmls: [{ title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }] })}>
+                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">02</span>
+                <div>
+                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Prompt</div>
+                  <p className="font-body text-sm text-light-md">Chat Mastery</p>
+                  <div className="mt-6 flex items-center gap-3">
+                     <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
+                        <div className="bg-gold h-full rounded-full w-[100%]"></div>
+                     </div>
+                     <span className="font-mono text-xs text-light-lo">100%</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
+                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">02</span>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-sans font-bold text-lg text-light-md">Prompt</div>
+                    <Lock className="w-4 h-4 text-light-lo" />
+                  </div>
+                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
+                  <p className="font-body text-[10px] text-light-lo">Tingkatkan tier Anda ke Professional untuk mengakses.</p>
+                </div>
+              </div>
+            )}
 
-            <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "03", title: "Create", subtitle: "Output Creation", materials: [{ day: "Day 1", title: "Materi Day 1" }, { day: "Day 2", title: "Materi Day 2" }] })}>
-               <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">03</span>
-              <div>
-                <div className="font-sans font-bold text-lg text-light-hi mb-2">Create</div>
-                <p className="font-body text-sm text-light-md">Output Creation</p>
-                <div className="mt-6 flex items-center gap-3">
-                   <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                      <div className="bg-gold h-full rounded-full w-[0%]"></div>
-                   </div>
-                   <span className="font-mono text-xs text-light-lo">0%</span>
+            {/* Module 03 - Create */}
+            {canAccessModule('03') ? (
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "03", title: "Create", subtitle: "Output Creation", materials: [{ day: "Day 1", title: "Materi Day 1" }, { day: "Day 2", title: "Materi Day 2" }] })}>
+                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">03</span>
+                <div>
+                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Create</div>
+                  <p className="font-body text-sm text-light-md">Output Creation</p>
+                  <div className="mt-6 flex items-center gap-3">
+                     <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
+                        <div className="bg-gold h-full rounded-full w-[0%]"></div>
+                     </div>
+                     <span className="font-mono text-xs text-light-lo">0%</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
+                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">03</span>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-sans font-bold text-lg text-light-md">Create</div>
+                    <Lock className="w-4 h-4 text-light-lo" />
+                  </div>
+                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
+                  <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
+                </div>
+              </div>
+            )}
             
-            <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "04", title: "Build", subtitle: "NoCode AI Build", materials: [{ day: "Day 1", title: "Materi Day 1" }, { day: "Day 2", title: "Materi Day 2" }] })}>
-               <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">04</span>
-              <div>
-                <div className="font-sans font-bold text-lg text-light-hi mb-2">Build</div>
-                <p className="font-body text-sm text-light-md">NoCode AI Build</p>
-                <div className="mt-6 flex items-center gap-3">
-                   <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                      <div className="bg-gold h-full rounded-full w-[0%]"></div>
-                   </div>
-                   <span className="font-mono text-xs text-light-lo">0%</span>
+            {/* Module 04 - Build */}
+            {canAccessModule('04') ? (
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "04", title: "Build", subtitle: "NoCode AI Build", materials: [{ day: "Day 1", title: "Materi Day 1" }, { day: "Day 2", title: "Materi Day 2" }] })}>
+                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">04</span>
+                <div>
+                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Build</div>
+                  <p className="font-body text-sm text-light-md">NoCode AI Build</p>
+                  <div className="mt-6 flex items-center gap-3">
+                     <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
+                        <div className="bg-gold h-full rounded-full w-[0%]"></div>
+                     </div>
+                     <span className="font-mono text-xs text-light-lo">0%</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
+                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">04</span>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-sans font-bold text-lg text-light-md">Build</div>
+                    <Lock className="w-4 h-4 text-light-lo" />
+                  </div>
+                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
+                  <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         
@@ -754,18 +1051,18 @@ function DashboardView({ user }: { user: User }) {
             
             <div className="space-y-4">
               {/* Module Item Active */}
-              <div className="group bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card flex flex-col sm:flex-row gap-6 lg:gap-8 items-start sm:items-center hover:border-gold/30 transition-all cursor-pointer">
+              <a href="https://idl.iwdemy.com" onClick={handleIdlClick} target="_blank" rel="noopener noreferrer" className="group bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card flex flex-col sm:flex-row gap-6 lg:gap-8 items-start sm:items-center hover:border-gold/30 transition-all cursor-pointer block">
                 <div className="w-14 h-14 rounded-lg bg-bg-light border border-border-light-subtle flex items-center justify-center shrink-0">
                   <BookOpen className="w-6 h-6 text-gold-muted" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-sans font-bold text-lg text-light-hi mb-2 group-hover:text-gold-muted transition-colors">Arsitektur Microservices Eksekusi</h3>
-                  <p className="font-body text-sm text-light-md">Pola komunikasi, manajemen state, dan saga.</p>
+                  <h3 className="font-sans font-bold text-lg text-light-hi mb-2 group-hover:text-gold-muted transition-colors">Akses Ke IWDemy Digital Labs</h3>
+                  <p className="font-body text-sm text-light-md">Akses platform IDL untuk pembelajaran digital.</p>
                 </div>
                 <div className="shrink-0 flex items-center gap-2 font-mono text-xs text-gold-muted tracking-eyebrow font-bold uppercase">
                   Lanjutkan <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
-              </div>
+              </a>
 
               {/* Module Item Locked */}
               <div className="group bg-bg-light border border-transparent p-6 md:p-8 rounded-xl flex flex-col sm:flex-row gap-6 lg:gap-8 items-start sm:items-center opacity-80 mix-blend-multiply">
@@ -800,34 +1097,74 @@ function DashboardView({ user }: { user: User }) {
           <div className="lg:col-span-4">
             <h2 className="font-sans font-bold text-sm text-light-hi tracking-eyebrow uppercase mb-6 border-b border-border-light-subtle pb-4">Akses Lainnya</h2>
             <div className="space-y-4">
-              <a href="#" onClick={(e) => { e.preventDefault(); setIsTimelineModalOpen(true); }} className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
-                <div className="flex items-center gap-4">
-                  <Calendar className="w-4 h-4 text-gold-muted" />
-                  <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Sesi Tatap Muka</span>
+              {sinadAccess.tier === 'Internal' || isAdmin ? (
+                <a href="#" onClick={(e) => { e.preventDefault(); setIsTimelineModalOpen(true); }} className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <Calendar className="w-4 h-4 text-gold-muted" />
+                    <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Sesi Tatap Muka</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
+                </a>
+              ) : (
+                <div className="flex justify-between p-5 bg-bg-light border border-border-light-subtle opacity-60 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <Calendar className="w-4 h-4 text-light-lo" />
+                    <span className="font-body font-medium text-sm text-light-lo">Sesi Tatap Muka</span>
+                  </div>
+                  <Lock className="w-4 h-4 text-light-lo" />
                 </div>
-                <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
-              </a>
-              <a href="#" className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
-                <div className="flex items-center gap-4">
-                  <Video className="w-4 h-4 text-gold-muted" />
-                  <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Pustaka Rekaman</span>
+              )}
+              {sinadAccess.tier === 'Internal' || isAdmin ? (
+                <a href="#" className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <Video className="w-4 h-4 text-gold-muted" />
+                    <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Pustaka Rekaman</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
+                </a>
+              ) : (
+                <div className="flex justify-between p-5 bg-bg-light border border-border-light-subtle opacity-60 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <Video className="w-4 h-4 text-light-lo" />
+                    <span className="font-body font-medium text-sm text-light-lo">Pustaka Rekaman</span>
+                  </div>
+                  <Lock className="w-4 h-4 text-light-lo" />
                 </div>
-                <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
-              </a>
-              <a href="#" className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
-                <div className="flex items-center gap-4">
-                  <FileText className="w-4 h-4 text-gold-muted" />
-                  <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Arsip Arsitektur</span>
+              )}
+              {sinadAccess.tier === 'Internal' || isAdmin ? (
+                <a href="#" className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <FileText className="w-4 h-4 text-gold-muted" />
+                    <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Arsip Arsitektur</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
+                </a>
+              ) : (
+                <div className="flex justify-between p-5 bg-bg-light border border-border-light-subtle opacity-60 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <FileText className="w-4 h-4 text-light-lo" />
+                    <span className="font-body font-medium text-sm text-light-lo">Arsip Arsitektur</span>
+                  </div>
+                  <Lock className="w-4 h-4 text-light-lo" />
                 </div>
-                <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
-              </a>
-              <a href="https://prompt-database-v2-0-849022455337.us-west1.run.app" target="_blank" rel="noopener noreferrer" className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
-                <div className="flex items-center gap-4">
-                  <BookOpen className="w-4 h-4 text-gold-muted" />
-                  <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Prompt Database v2</span>
+              )}
+              {sinadAccess.tier !== 'Community' || isAdmin ? (
+                <a href="https://prompt-database-v2-0-849022455337.us-west1.run.app" target="_blank" rel="noopener noreferrer" className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
+                  <div className="flex items-center gap-4">
+                    <BookOpen className="w-4 h-4 text-gold-muted" />
+                    <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Prompt Database v2</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
+                </a>
+              ) : (
+                <div className="flex justify-between p-5 bg-bg-light border border-border-light-subtle opacity-60 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <BookOpen className="w-4 h-4 text-light-lo" />
+                    <span className="font-body font-medium text-sm text-light-lo">Prompt Database v2</span>
+                  </div>
+                  <Lock className="w-4 h-4 text-light-lo" />
                 </div>
-                <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
-              </a>
+              )}
             </div>
           </div>
         </div>
@@ -979,6 +1316,92 @@ function DashboardView({ user }: { user: User }) {
           </div>
         )}
       </main>
+            )}
+
+            {currentPortal === 'idl' && (
+              <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24 flex flex-col items-center justify-center text-center min-h-[60vh]">
+                <div className="w-20 h-20 rounded-2xl bg-bg-light border border-border-light-subtle flex items-center justify-center mb-8">
+                  <BookOpen className="w-10 h-10 text-gold-muted" />
+                </div>
+                <Eyebrow variant="flat">IWDemy Digital Lab</Eyebrow>
+                <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mt-4 mb-4">
+                  Coming Soon
+                </h1>
+                <h3 className="font-body text-lg text-light-md max-w-lg mx-auto">
+                  Platform IWDemy Digital Lab sedang dalam tahap pengembangan. Silakan kembali lagi nanti.
+                </h3>
+              </main>
+            )}
+
+            {currentPortal === 'sinad' && (
+              <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
+                <Eyebrow variant="flat">SinaD Learning</Eyebrow>
+                <div className="h-6"></div>
+                <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-4">
+                  SinaD Portal
+                </h1>
+                <div className="flex items-center gap-3 mb-10">
+                  <span className="inline-block px-3 py-1 rounded bg-bg-light-eyebrow border border-border-light-eyebrow text-gold-muted font-mono text-xs font-bold uppercase">
+                    Role: {sinadAccess.tier}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Materi Access */}
+                  {(sinadAccess.tier === 'Teacher' || (sinadAccess.tier === 'Student' && sinadAccess.materi) || isAdmin) ? (
+                    <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
+                      <div>
+                        <div className="flex items-center gap-3 mb-4">
+                           <BookOpen className="w-6 h-6 text-gold" />
+                           <div className="font-sans font-bold text-2xl text-light-hi group-hover:text-gold transition-colors">Materi</div>
+                        </div>
+                        <p className="font-body text-sm text-light-md mt-4">Akses semua materi pembelajaran yang tersedia di platform SinaD.</p>
+                      </div>
+                      <div className="mt-8 flex justify-end">
+                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center gap-3 mb-4">
+                           <Lock className="w-6 h-6 text-light-lo" />
+                           <div className="font-sans font-bold text-2xl text-light-md">Materi</div>
+                        </div>
+                        <p className="font-body text-sm text-light-md mt-4">Anda belum memiliki akses ke materi. Hubungi pengajar Anda.</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Exercise Access */}
+                  {(sinadAccess.tier === 'Teacher' || (sinadAccess.tier === 'Student' && sinadAccess.exercise) || isAdmin) ? (
+                    <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
+                      <div>
+                        <div className="flex items-center gap-3 mb-4">
+                           <FileText className="w-6 h-6 text-gold" />
+                           <div className="font-sans font-bold text-2xl text-light-hi group-hover:text-gold transition-colors">Exercise</div>
+                        </div>
+                        <p className="font-body text-sm text-light-md mt-4">Kerjakan latihan soal dan ujian kompetensi Anda di sini.</p>
+                      </div>
+                      <div className="mt-8 flex justify-end">
+                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-center gap-3 mb-4">
+                           <Lock className="w-6 h-6 text-light-lo" />
+                           <div className="font-sans font-bold text-2xl text-light-md">Exercise</div>
+                        </div>
+                        <p className="font-body text-sm text-light-md mt-4">Anda belum memiliki akses ke latihan soal. Hubungi pengajar Anda.</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </main>
+            )}
+          </>
         ) : (
           <AdminView />
         )}
