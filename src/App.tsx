@@ -722,7 +722,7 @@ function DashboardView({ user }: { user: User }) {
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const handleIdlClick = async (e: React.MouseEvent) => {
+  const handleIdlClick = async (e: any) => {
     e.preventDefault();
     const tempPassword = localStorage.getItem('temp_password');
     if (user.email && tempPassword) {
@@ -828,14 +828,6 @@ function DashboardView({ user }: { user: User }) {
     };
   }, [user.uid, user.email]);
 
-  if (isLoadingPortals) {
-    return (
-      <div className="min-h-screen bg-bg-light flex items-center justify-center">
-        <div className="text-light-md font-mono text-sm uppercase tracking-wider animate-pulse">Memuat data portal...</div>
-      </div>
-    );
-  }
-
   const handleLogout = async () => {
     try {
       localStorage.removeItem('temp_password');
@@ -844,6 +836,55 @@ function DashboardView({ user }: { user: User }) {
       console.error(err);
     }
   };
+
+  useEffect(() => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const resetTimer = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      // 5 minutes = 300000 ms
+      timeoutId = setTimeout(() => {
+        handleLogout();
+      }, 300000);
+    };
+
+    resetTimer();
+
+    const events = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart'];
+
+    for (const ev of events) {
+      window.addEventListener(ev, resetTimer);
+    }
+
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      for (const ev of events) {
+        window.removeEventListener(ev, resetTimer);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isLoadingPortals && allowedPortals.length === 1 && allowedPortals[0] === 'idl') {
+      const tempPassword = localStorage.getItem('temp_password');
+      if (user.email && tempPassword) {
+        const rawCredentials = `${user.email}:${tempPassword}`;
+        const base64Credentials = btoa(rawCredentials);
+        window.location.href = `https://idl.iwdemy.com/#autologin=${base64Credentials}`;
+      } else {
+        window.location.href = "https://idl.iwdemy.com";
+      }
+    }
+  }, [isLoadingPortals, allowedPortals, user.email]);
+
+  if (isLoadingPortals) {
+    return (
+      <div className="min-h-screen bg-bg-light flex items-center justify-center">
+        <div className="text-light-md font-mono text-sm uppercase tracking-wider animate-pulse">Memuat data portal...</div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-bg-light antialiased selection:bg-gold selection:text-bg-dark flex flex-col">
