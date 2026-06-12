@@ -9,6 +9,13 @@ import aifPromptingHtml from '../materi/Prompt day1/aif-prompting-level2-day1.ht
 import aifReadingHtml from '../materi/Prompt day1/aif-reading-level2-day1.html?raw';
 import aifPkmHtml from '../materi/Prompt day2/aif-pkm-level2-day2.html?raw';
 import aifWritingHtml from '../materi/Prompt day2/aif-writing-level2-day2.html?raw';
+import level3Day1Html from './Level 3/Level 3 day 1.html?raw';
+import level3Day1_1Html from './Level 3/Level 3 day 1.1.html?raw';
+import aptAssessmentHtml from './Strategize/apt-assessment.html?raw';
+import stratImg1 from './Strategize/image (1).png';
+import stratImg2 from './Strategize/image (2).png';
+import stratImg3 from './Strategize/image (3).png';
+import stratImg4 from './Strategize/image (4).png';
 
 function Eyebrow({ children, variant = 'light' }: { children: ReactNode, variant?: 'light' | 'dark' | 'flat' }) {
   return (
@@ -706,7 +713,7 @@ function DashboardView({ user }: { user: User }) {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'admin'>('dashboard');
   const [isAdmin, setIsAdmin] = useState(userEmail === 'stephen.tssgroup@gmail.com');
   const [selectedModule, setSelectedModule] = useState<any>(null);
-  const [selectedHtmlData, setSelectedHtmlData] = useState<{ activeIndex: number; htmls: { title: string; content?: string; url?: string }[] } | null>(null);
+  const [selectedHtmlData, setSelectedHtmlData] = useState<{ activeIndex: number; htmls: { title: string; content?: string; url?: string; images?: string[] }[] } | null>(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
@@ -939,7 +946,7 @@ function DashboardView({ user }: { user: User }) {
             <h2 className="font-sans font-bold text-xl text-light-hi">Akses Cepat</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "01", title: "Strategize", subtitle: "Awareness Session", materials: [{ title: "Materi Sesi Penuh" }] })}>
+            <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "01", title: "Strategize", subtitle: "Awareness Session", materials: [{ title: "Materi Sesi Penuh", htmls: [{ title: "Materi Visual", images: [stratImg1, stratImg2, stratImg3, stratImg4] }, { title: "APT Assessment", content: aptAssessmentHtml }] }] })}>
               <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">01</span>
               <div>
                 <div className="font-sans font-bold text-lg text-light-hi mb-2">Strategize</div>
@@ -984,16 +991,16 @@ function DashboardView({ user }: { user: User }) {
 
             {/* Module 03 - Create */}
             {canAccessModule('03') ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "03", title: "Create", subtitle: "Output Creation", materials: [{ day: "Day 1", title: "Materi Day 1" }, { day: "Day 2", title: "Materi Day 2" }] })}>
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "03", title: "Create", subtitle: "Output Creation", materials: [{ day: "Day 1", title: "Materi Level 3 Day 1", htmls: [{ title: "AI Skills Manual", content: level3Day1Html }, { title: "CIS Prompting", content: level3Day1_1Html }] }] })}>
                  <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">03</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Create</div>
                   <p className="font-body text-sm text-light-md">Output Creation</p>
                   <div className="mt-6 flex items-center gap-3">
                      <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                        <div className="bg-gold h-full rounded-full w-[0%]"></div>
+                        <div className="bg-gold h-full rounded-full w-[100%]"></div>
                      </div>
-                     <span className="font-mono text-xs text-light-lo">0%</span>
+                     <span className="font-mono text-xs text-light-lo">100%</span>
                   </div>
                 </div>
               </div>
@@ -1020,9 +1027,9 @@ function DashboardView({ user }: { user: User }) {
                   <p className="font-body text-sm text-light-md">NoCode AI Build</p>
                   <div className="mt-6 flex items-center gap-3">
                      <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                        <div className="bg-gold h-full rounded-full w-[0%]"></div>
+                        <div className="bg-gold h-full rounded-full w-[50%]"></div>
                      </div>
-                     <span className="font-mono text-xs text-light-lo">0%</span>
+                     <span className="font-mono text-xs text-light-lo">50%</span>
                   </div>
                 </div>
               </div>
@@ -1240,6 +1247,12 @@ function DashboardView({ user }: { user: User }) {
               <div className="flex-1 overflow-auto bg-black p-0 rounded-b-xl">
                 {selectedHtmlData.htmls[selectedHtmlData.activeIndex].url ? (
                   <iframe src={selectedHtmlData.htmls[selectedHtmlData.activeIndex].url} className="w-full h-full min-h-[70vh] border-0" title="Materi" />
+                ) : selectedHtmlData.htmls[selectedHtmlData.activeIndex].images ? (
+                  <div className="w-full h-full min-h-[70vh] overflow-auto p-4 bg-[#F6F4EF] flex flex-col items-center gap-6">
+                    {selectedHtmlData.htmls[selectedHtmlData.activeIndex].images?.map((img, idx) => (
+                      <img key={idx} src={img} className="max-w-full rounded-lg shadow-md" alt="Materi" />
+                    ))}
+                  </div>
                 ) : (
                   <iframe srcDoc={selectedHtmlData.htmls[selectedHtmlData.activeIndex].content} className="w-full h-full min-h-[70vh] border-0" title="Materi" />
                 )}

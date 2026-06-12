@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Skills Manual — APT Model v2.0 · Tjitra & Associates · IWDemy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F0E8;
+  --bg-elevated: #FFFFFF;
+  --bg-subtle: rgba(30,28,24,0.04);
+  --bg-hover: rgba(30,28,24,0.06);
+  --headline: #1A1814;
+  --body: rgba(30,28,24,0.78);
+  --body-muted: rgba(30,28,24,0.55);
+  --caption: rgba(139,115,64,0.65);
+  --gold: #8B7340;
+  --gold-strong: #6E5A2F;
+  --gold-soft: rgba(139,115,64,0.10);
+  --gold-mid: rgba(139,115,64,0.25);
+  --border: rgba(30,28,24,0.10);
+  --border-strong: rgba(30,28,24,0.18);
+  --shadow-sm: 0 1px 2px rgba(30,28,24,0.04), 0 2px 8px rgba(30,28,24,0.04);
+  --shadow-md: 0 4px 12px rgba(30,28,24,0.06), 0 8px 24px rgba(30,28,24,0.06);
+  --shadow-lg: 0 12px 32px rgba(30,28,24,0.08), 0 24px 64px rgba(30,28,24,0.08);
+  --accent-human: #8B7340;
+  --accent-agent: #3D8B4A;
+  --font-display: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --sidebar-w: 280px;
+  --content-max: 1100px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+[data-theme="dark"] {
+  --bg: #1A1814;
+  --bg-elevated: #25221C;
+  --bg-subtle: rgba(255,255,255,0.04);
+  --bg-hover: rgba(255,255,255,0.06);
+  --headline: #FFFFFF;
+  --body: rgba(255,255,255,0.72);
+  --body-muted: rgba(255,255,255,0.50);
+  --caption: rgba(212,168,75,0.65);
+  --gold: #D4A84B;
+  --gold-strong: #E5BC60;
+  --gold-soft: rgba(212,168,75,0.10);
+  --gold-mid: rgba(212,168,75,0.25);
+  --border: rgba(255,255,255,0.10);
+  --border-strong: rgba(255,255,255,0.18);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.25), 0 8px 24px rgba(0,0,0,0.25);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.35), 0 24px 64px rgba(0,0,0,0.35);
+  --accent-human: #D4A84B;
+  --accent-agent: #6BBF6B;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; font-family: var(--font-body); font-weight: 500; color: var(--body); background: var(--bg); line-height: 1.65; font-size: 15.5px; -webkit-font-smoothing: antialiased; transition: background 0.3s ease, color 0.3s ease; }
+::selection { background: var(--gold-mid); color: var(--headline); }
+h1, h2, h3, h4, h5 { font-family: var(--font-display); color: var(--headline); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; margin: 0 0 0.5em; }
+h1 { font-size: clamp(2.2rem, 4.5vw, 3.4rem); }
+h2 { font-size: clamp(1.7rem, 3vw, 2.2rem); margin-top: 2em; }
+h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); font-weight: 700; margin-top: 1.4em; }
+h4 { font-size: 1.05rem; font-weight: 700; }
+p { margin: 0 0 1em; }
+ul, ol { margin: 0 0 1em; padding-left: 1.3em; }
+li { margin-bottom: 0.4em; }
+strong { color: var(--headline); font-weight: 700; }
+em { color: var(--gold); font-style: italic; }
+a { color: var(--gold); text-decoration: none; }
+a:hover { color: var(--gold-strong); }
+code, .mono { font-family: var(--font-mono); font-size: 0.92em; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); display: inline-block; margin-bottom: 0.8em; }
+.pill { display: inline-flex; align-items: center; gap: 0.5em; padding: 6px 14px; border-radius: 999px; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; background: var(--gold-soft); border: 1px solid var(--gold-mid); color: var(--gold); }
+.brand-bar { height: 4px; background: linear-gradient(90deg, var(--gold-strong) 0%, var(--gold) 50%, var(--gold-strong) 100%); position: fixed; top: 0; left: 0; right: 0; z-index: 200; }
+.app { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 100vh; padding-top: 4px; }
+.sidebar { position: fixed; top: 4px; left: 0; bottom: 0; width: var(--sidebar-w); background: var(--bg-elevated); border-right: 1px solid var(--border); padding: 28px 22px; overflow-y: auto; z-index: 100; display: flex; flex-direction: column; }
+.sidebar-logo { display: flex; flex-direction: column; gap: 4px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: opacity 0.2s ease; }
+.sidebar-logo:hover { opacity: 0.75; }
+.sidebar-logo .wordmark { font-family: var(--font-display); font-weight: 800; font-size: 1.15rem; color: var(--headline); letter-spacing: -0.02em; }
+.sidebar-logo .sub { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); }
+.sidebar-section-label { font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--body-muted); margin: 18px 8px 8px; }
+.nav-link { display: flex; align-items: flex-start; gap: 10px; padding: 9px 12px; margin: 1px 0; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 500; color: var(--body); cursor: pointer; transition: all 0.15s ease; border: none; background: transparent; text-align: left; width: 100%; font-family: var(--font-body); }
+.nav-link:hover { background: var(--bg-hover); color: var(--headline); }
+.nav-link.active { background: var(--gold-soft); color: var(--gold); font-weight: 600; }
+.nav-link .num { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: var(--gold); min-width: 22px; padding-top: 2px; }
+.nav-link .label { flex: 1; line-height: 1.35; }
+.nav-sublink { padding-left: 42px; font-size: 0.82rem; color: var(--body-muted); }
+.nav-sublink:hover { color: var(--headline); }
+.nav-sublink.active { background: transparent; color: var(--gold); font-weight: 600; }
+.nav-sublink .num { font-size: 0.65rem; min-width: 0; margin-right: 6px; }
+.theme-toggle { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.theme-toggle .label { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--body-muted); }
+.theme-switch { position: relative; width: 44px; height: 24px; border-radius: 999px; background: var(--bg-subtle); border: 1px solid var(--border); cursor: pointer; transition: background 0.2s; }
+.theme-switch::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: var(--gold); top: 2px; left: 2px; transition: transform 0.25s ease; }
+[data-theme="dark"] .theme-switch::after { transform: translateX(20px); }
+.main { grid-column: 2; padding: 48px 56px 80px; max-width: calc(var(--content-max) + 112px); width: 100%; }
+.page { display: none; }
+.page.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.page-header { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+.page-header .eyebrow { margin-bottom: 12px; }
+.page-header h1 { margin: 0 0 8px; }
+.page-header .subtitle { font-size: 1.1rem; color: var(--body-muted); margin: 0; font-weight: 500; }
+.section { margin-bottom: 48px; }
+.section-label { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; padding-bottom: 6px; border-bottom: 2px solid var(--gold-mid); display: inline-block; }
+.card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 26px; margin-bottom: 18px; }
+.callout { background: var(--gold-soft); border-left: 3px solid var(--gold); border-radius: 0 var(--radius-md) var(--radius-md) 0; padding: 18px 22px; margin: 22px 0; font-style: italic; color: var(--body); }
+.callout p:last-child { margin-bottom: 0; }
+.callout em { font-style: italic; color: var(--gold-strong); }
+.callout-warn { background: rgba(180, 80, 60, 0.08); border-left-color: #B45040; font-style: normal; }
+[data-theme="dark"] .callout-warn { background: rgba(220, 120, 100, 0.10); border-left-color: #DC7864; }
+.table-wrap { overflow-x: auto; margin: 18px 0; border-radius: var(--radius-md); border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 0.92rem; background: var(--bg-elevated); }
+th, td { text-align: left; padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--bg-subtle); font-weight: 700; color: var(--headline); font-size: 0.82rem; letter-spacing: 0.02em; }
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--headline); }
+.cover { min-height: calc(100vh - 4px); margin: -48px -56px -80px; padding: 72px 56px 64px; background: radial-gradient(ellipse at top right, var(--gold-soft) 0%, transparent 55%), radial-gradient(ellipse at bottom left, var(--gold-soft) 0%, transparent 50%), var(--bg); position: relative; overflow: hidden; }
+.cover::before { content: ''; position: absolute; top: 80px; right: -100px; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, var(--gold-soft) 0%, transparent 70%); pointer-events: none; opacity: 0.6; }
+.cover-hero { position: relative; max-width: 920px; margin-bottom: 60px; }
+.cover-eyebrow { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); margin-bottom: 18px; display: flex; align-items: center; gap: 14px; }
+.cover-eyebrow::after { content: ''; flex: 1; max-width: 80px; height: 1px; background: var(--gold-mid); }
+.cover-title { font-family: var(--font-display); font-size: clamp(2.8rem, 6vw, 4.8rem); font-weight: 800; line-height: 1.0; letter-spacing: -0.035em; color: var(--headline); margin: 0 0 18px; }
+.cover-title .accent { color: var(--gold); font-style: italic; }
+.cover-subtitle { font-size: clamp(1.05rem, 1.4vw, 1.25rem); color: var(--body-muted); max-width: 720px; font-weight: 500; margin: 0 0 28px; line-height: 1.55; }
+.cover-meta { display: flex; flex-wrap: wrap; gap: 24px; padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 0; }
+.cover-meta-item { display: flex; flex-direction: column; gap: 2px; }
+.cover-meta-num { font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; color: var(--gold); line-height: 1; }
+.cover-meta-label { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--body-muted); }
+.cover-cta { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 18px; font-weight: 600; }
+.chapter-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; position: relative; }
+.chapter-card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px 22px 22px; cursor: pointer; transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1); position: relative; overflow: hidden; display: flex; flex-direction: column; min-height: 180px; }
+.chapter-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease; }
+.chapter-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--gold-mid); }
+.chapter-card:hover::before { transform: scaleX(1); }
+.chapter-card .num { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; color: var(--gold); letter-spacing: 0.2em; margin-bottom: 14px; }
+.chapter-card .title { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--headline); line-height: 1.25; margin-bottom: 10px; }
+.chapter-card .desc { font-size: 0.86rem; color: var(--body-muted); line-height: 1.5; flex: 1; }
+.chapter-card .arrow { font-family: var(--font-mono); font-size: 1.1rem; color: var(--gold); margin-top: 14px; align-self: flex-end; transition: transform 0.25s ease; }
+.chapter-card:hover .arrow { transform: translateX(4px); }
+.chapter-card.featured { background: linear-gradient(135deg, var(--gold-soft) 0%, var(--bg-elevated) 100%); border-color: var(--gold-mid); }
+.chapter-card.featured .title { color: var(--gold-strong); }
+[data-theme="dark"] .chapter-card.featured .title { color: var(--gold); }
+.cover-footer { position: relative; margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; }
+.cover-footer .credit { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--caption); }
+.cover-footer .tagline { font-family: var(--font-display); font-style: italic; font-size: 0.95rem; color: var(--gold); font-weight: 600; }
+.triangle-hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: center; margin: 28px 0 40px; padding: 36px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-xl); position: relative; overflow: hidden; }
+.triangle-hero::before { content: ''; position: absolute; top: -50%; right: -20%; width: 60%; height: 200%; background: radial-gradient(circle, var(--gold-soft) 0%, transparent 60%); pointer-events: none; }
+.triangle-svg-wrap { position: relative; display: flex; justify-content: center; align-items: center; }
+.triangle-svg { width: 100%; max-width: 480px; height: auto; }
+.triangle-content { position: relative; z-index: 1; }
+.triangle-content h2 { margin: 0 0 12px; font-size: clamp(1.5rem, 2.2vw, 1.9rem); }
+.triangle-content p { color: var(--body); margin: 0 0 14px; }
+.dimension-legend { display: flex; flex-direction: column; gap: 12px; margin-top: 22px; }
+.dimension-legend-item { display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; background: var(--bg-subtle); border-radius: var(--radius-sm); border-left: 3px solid var(--gold); transition: all 0.2s ease; cursor: pointer; }
+.dimension-legend-item:hover { background: var(--gold-soft); transform: translateX(2px); }
+.dimension-legend-item.hero { border-left-color: var(--gold-strong); background: var(--gold-soft); }
+.dimension-legend-item .marker { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: var(--gold); letter-spacing: 0.18em; min-width: 24px; }
+.dimension-legend-item .name { font-family: var(--font-display); font-weight: 700; color: var(--headline); font-size: 0.98rem; margin-bottom: 2px; }
+.dimension-legend-item .sub { font-size: 0.82rem; color: var(--body-muted); line-height: 1.4; }
+.svg-node-circle { fill: var(--bg-elevated); stroke: var(--gold); stroke-width: 2.5; transition: all 0.3s ease; }
+.svg-node-circle.apex { fill: var(--gold); stroke: var(--gold-strong); stroke-width: 3; }
+.svg-node-label { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; fill: var(--headline); text-anchor: middle; font-size: 17px; letter-spacing: -0.01em; }
+.svg-node-label.apex { font-size: 19px; }
+.svg-node-label.apex-fill { fill: #1A1814; }
+.svg-node-sublabel { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; fill: var(--body-muted); text-anchor: middle; }
+.svg-node-sublabel.apex-fill { fill: rgba(26,24,20,0.7); }
+.svg-annotation { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: var(--gold); font-weight: 600; letter-spacing: 0.06em; }
+.svg-arrow { stroke: var(--gold); stroke-width: 1.5; fill: none; }
+.svg-formula-text { font-family: 'Plus Jakarta Sans', sans-serif; fill: var(--body); font-size: 11px; font-weight: 600; text-anchor: middle; }
+.bi-formula { background: var(--bg-subtle); border-radius: var(--radius-md); padding: 26px 30px; text-align: center; margin: 22px 0; border: 1px dashed var(--border-strong); }
+.bi-formula-equation { font-family: var(--font-display); font-size: clamp(1.4rem, 2.6vw, 1.9rem); font-weight: 700; color: var(--headline); margin: 0; letter-spacing: -0.01em; }
+.bi-formula-equation .var-apt { color: var(--gold); }
+.bi-formula-equation .var-apt-sup { font-size: 0.75em; vertical-align: super; }
+.bi-formula-caption { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--body-muted); margin-top: 14px; }
+.apt-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 24px 0; }
+.apt-grid-cell { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 18px; }
+.apt-grid-cell .val { font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: var(--gold); margin-bottom: 8px; letter-spacing: 0.1em; }
+.apt-grid-cell .label { font-family: var(--font-display); font-weight: 700; color: var(--headline); margin-bottom: 6px; font-size: 0.98rem; }
+.apt-grid-cell .desc { font-size: 0.84rem; color: var(--body-muted); line-height: 1.45; }
+.stack-diagram { display: flex; flex-direction: column; gap: 14px; margin: 28px auto; max-width: 620px; }
+.stack-layer { position: relative; border-radius: var(--radius-md); border: 1.5px solid var(--gold-mid); background: var(--gold-soft); padding: 16px 22px; transition: all 0.25s ease; cursor: pointer; }
+.stack-layer:hover { transform: translateY(-1px); border-color: var(--gold); }
+.stack-layer.layer-1 { margin: 0 60px; background: var(--gold-soft); }
+.stack-layer.layer-2 { margin: 0 30px; background: rgba(139,115,64,0.06); }
+.stack-layer.layer-3 { margin: 0; background: rgba(139,115,64,0.04); }
+[data-theme="dark"] .stack-layer.layer-2 { background: rgba(212,168,75,0.06); }
+[data-theme="dark"] .stack-layer.layer-3 { background: rgba(212,168,75,0.04); }
+.stack-num { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; color: var(--gold); letter-spacing: 0.18em; }
+.stack-name { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; color: var(--headline); margin-top: 4px; }
+.stack-sub { font-size: 0.84rem; color: var(--body-muted); margin-top: 4px; }
+.subtab-nav { display: flex; gap: 6px; margin: 0 0 32px; padding: 6px; background: var(--bg-subtle); border-radius: var(--radius-md); position: sticky; top: 16px; z-index: 50; backdrop-filter: blur(8px); }
+.subtab-btn { flex: 1; padding: 14px 18px; border: none; background: transparent; border-radius: var(--radius-sm); cursor: pointer; font-family: var(--font-body); font-weight: 600; font-size: 0.92rem; color: var(--body-muted); transition: all 0.2s ease; text-align: left; display: flex; flex-direction: column; gap: 4px; }
+.subtab-btn:hover { background: var(--bg-hover); color: var(--headline); }
+.subtab-btn.active { background: var(--bg-elevated); color: var(--headline); box-shadow: var(--shadow-sm); }
+.subtab-btn .num { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.22em; color: var(--gold); font-weight: 700; }
+.subtab-btn .name { font-family: var(--font-display); font-weight: 800; font-size: 1rem; color: inherit; }
+.subtab-btn .frame { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.12em; color: var(--body-muted); text-transform: uppercase; margin-top: 2px; }
+.subtab-panel { display: none; }
+.subtab-panel.active { display: block; animation: fadeIn 0.25s ease; }
+.mode-hero { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px; position: relative; overflow: hidden; }
+.mode-hero::after { content: ''; position: absolute; top: -40%; right: -10%; width: 320px; height: 320px; background: radial-gradient(circle, var(--gold-soft) 0%, transparent 65%); pointer-events: none; }
+.mode-hero-header { display: flex; align-items: center; gap: 18px; margin-bottom: 18px; position: relative; z-index: 1; }
+.mode-hero-num { font-family: var(--font-display); font-size: 3rem; font-weight: 800; color: var(--gold); line-height: 0.9; letter-spacing: -0.04em; }
+.mode-hero-titles { flex: 1; }
+.mode-hero-name { font-family: var(--font-display); font-size: clamp(1.6rem, 2.6vw, 2.1rem); font-weight: 800; color: var(--headline); letter-spacing: -0.02em; margin: 0; }
+.mode-hero-frame { font-family: var(--font-mono); font-size: 0.74rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--body-muted); margin-top: 6px; }
+.mode-hero-tagline { font-style: italic; color: var(--gold); font-size: 1.05rem; font-weight: 600; position: relative; z-index: 1; margin: 0; }
+.graduation { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 28px; margin: 28px 0; }
+.graduation-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+.graduation-title { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--headline); margin: 0; }
+.graduation-toggle { display: inline-flex; background: var(--bg-subtle); border-radius: var(--radius-sm); padding: 4px; gap: 2px; }
+.grad-btn { padding: 7px 14px; border: none; background: transparent; border-radius: 4px; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; color: var(--body-muted); cursor: pointer; letter-spacing: 0.08em; transition: all 0.15s; }
+.grad-btn:hover { color: var(--headline); }
+.grad-btn.active { background: var(--gold); color: #1A1814; }
+.graduation-row { display: grid; grid-template-columns: 80px 1fr 180px; gap: 14px; padding: 11px 14px; border-radius: var(--radius-sm); margin-bottom: 4px; align-items: center; transition: all 0.25s ease; border: 1px solid transparent; }
+.graduation-row.inline { background: var(--bg-subtle); }
+.graduation-row.graduates { background: var(--gold-soft); border-color: var(--gold-mid); }
+.graduation-row.inherited { background: transparent; opacity: 0.55; }
+.graduation-row.delegated { background: rgba(61,139,74,0.06); border-color: rgba(61,139,74,0.25); }
+.grad-letter { font-family: var(--font-display); font-weight: 800; font-size: 1.6rem; color: var(--gold); text-align: center; letter-spacing: -0.04em; line-height: 1; }
+.grad-name { font-family: var(--font-display); font-weight: 700; color: var(--headline); font-size: 0.98rem; }
+.grad-status { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-align: right; }
+.grad-status.inline { color: var(--body-muted); }
+.grad-status.graduates { color: var(--gold); }
+.grad-status.inherited { color: var(--body-muted); }
+.grad-status.delegated { color: var(--accent-agent); }
+.principles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 28px 0; }
+.principle-card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px 22px; position: relative; transition: all 0.25s ease; cursor: default; overflow: hidden; display: flex; flex-direction: column; min-height: 220px; }
+.principle-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--gold); transition: width 0.25s ease; }
+.principle-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--gold-mid); }
+.principle-card:hover::before { width: 6px; }
+.principle-card .num { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; color: var(--gold); letter-spacing: 0.18em; margin-bottom: 12px; }
+.principle-card .title { font-family: var(--font-display); font-weight: 800; font-size: 1.02rem; color: var(--headline); line-height: 1.3; margin-bottom: 10px; }
+.principle-card .body { font-size: 0.86rem; color: var(--body-muted); line-height: 1.55; flex: 1; }
+.page-footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.page-footer .credit { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--caption); }
+.page-footer .tagline { font-family: var(--font-display); font-style: italic; font-size: 0.85rem; color: var(--gold); }
+.menu-toggle { display: none; position: fixed; top: 14px; right: 14px; z-index: 150; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; font-family: var(--font-mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; color: var(--headline); cursor: pointer; }
+@media (max-width: 960px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; width: 280px; box-shadow: var(--shadow-lg); }
+  .sidebar.open { transform: translateX(0); }
+  .main { grid-column: 1; padding: 60px 24px 60px; }
+  .menu-toggle { display: block; }
+  .cover { margin: -60px -24px -60px; padding: 80px 24px 56px; }
+  .chapter-grid { grid-template-columns: 1fr; }
+  .triangle-hero { grid-template-columns: 1fr; padding: 24px; }
+  .apt-grid { grid-template-columns: 1fr 1fr; }
+  .principles-grid { grid-template-columns: 1fr; }
+  .graduation-row { grid-template-columns: 50px 1fr 100px; }
+  .subtab-btn { padding: 10px 12px; }
+}
+@media print { .sidebar, .menu-toggle, .theme-toggle { display: none; } .main { grid-column: 1; padding: 24px; } .page { display: block !important; page-break-after: always; } }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-right: 6px; }
+.tag-human { background: rgba(139,115,64,0.12); color: var(--accent-human); border: 1px solid rgba(139,115,64,0.25); }
+[data-theme="dark"] .tag-human { background: rgba(212,168,75,0.12); border-color: rgba(212,168,75,0.25); }
+.tag-agent { background: rgba(61,139,74,0.12); color: var(--accent-agent); border: 1px solid rgba(61,139,74,0.25); }
+</style>
+</head>
+<body>
+<div class="brand-bar"></div>
+<button class="menu-toggle" onclick="toggleSidebar()" aria-label="Toggle navigation">☰ Menu</button>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo" onclick="navigate('cover')" role="button">
+      <span class="wordmark">AI Skills Manual</span>
+      <span class="sub">APT Model · v2.0</span>
+    </div>
+    <div class="sidebar-section-label">Manual</div>
+    <button class="nav-link" onclick="navigate('cover')" data-page="cover"><span class="num">—</span><span class="label">Cover</span></button>
+    <button class="nav-link" onclick="navigate('p1')" data-page="p1"><span class="num">01</span><span class="label">APT in 60 Seconds</span></button>
+    <button class="nav-link" onclick="navigate('p2')" data-page="p2"><span class="num">02</span><span class="label">AI-Skills of APT Model</span></button>
+    <button class="nav-link" onclick="navigate('p3')" data-page="p3"><span class="num">03</span><span class="label">The Three Modes</span></button>
+    <button class="nav-link nav-sublink" onclick="navigate('p3','3a')" data-subtab="3a"><span class="num">3a</span><span class="label">ACTIONS</span></button>
+    <button class="nav-link nav-sublink" onclick="navigate('p3','3b')" data-subtab="3b"><span class="num">3b</span><span class="label">CIS Prompt</span></button>
+    <button class="nav-link nav-sublink" onclick="navigate('p3','3c')" data-subtab="3c"><span class="num">3c</span><span class="label">ATN Prompt</span></button>
+    <button class="nav-link" onclick="navigate('p4')" data-page="p4"><span class="num">04</span><span class="label">Thinking &amp; Domain Expertise</span></button>
+    <button class="nav-link" onclick="navigate('p5')" data-page="p5"><span class="num">05</span><span class="label">AIF TrainShop</span></button>
+    <button class="nav-link" onclick="navigate('p6')" data-page="p6"><span class="num">06</span><span class="label">9 Key Principles</span></button>
+    <div class="theme-toggle">
+      <span class="label">Theme</span>
+      <div class="theme-switch" onclick="toggleTheme()" role="button" aria-label="Toggle theme"></div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- COVER -->
+    <section class="page active" id="page-cover">
+      <div class="cover">
+        <div class="cover-hero">
+          <div class="cover-eyebrow">AI Skills Manual · APT Model · v2.0</div>
+          <h1 class="cover-title">The <span class="accent">Hero</span> of the<br>APT Triangle.</h1>
+          <p class="cover-subtitle">AI Skills is the Execution Layer of the AI Performance Triangle — the dimension that turns human intent into AI output. This manual covers all three modes, the cognitive frameworks that ground them, and the principles that hold the architecture together.</p>
+          <div class="cover-meta">
+            <div class="cover-meta-item"><span class="cover-meta-num">3</span><span class="cover-meta-label">Modes</span></div>
+            <div class="cover-meta-item"><span class="cover-meta-num">7</span><span class="cover-meta-label">ACTIONS</span></div>
+            <div class="cover-meta-item"><span class="cover-meta-num">5</span><span class="cover-meta-label">Levels</span></div>
+            <div class="cover-meta-item"><span class="cover-meta-num">9</span><span class="cover-meta-label">Principles</span></div>
+            <div class="cover-meta-item"><span class="cover-meta-num">6</span><span class="cover-meta-label">Chapters</span></div>
+          </div>
+        </div>
+        <div class="cover-cta">Start anywhere · 6 chapters</div>
+        <div class="chapter-grid">
+          <div class="chapter-card featured" onclick="navigate('p1')">
+            <div class="num">Chapter 01</div>
+            <div class="title">APT in 60 Seconds</div>
+            <div class="desc">The triangle, the three dimensions, and where AI Skills sits as the hero.</div>
+            <div class="arrow">→</div>
+          </div>
+          <div class="chapter-card featured" onclick="navigate('p2')">
+            <div class="num">Chapter 02</div>
+            <div class="title">AI-Skills of APT</div>
+            <div class="desc">Why AI Skills is the Execution Layer — and how the three modes stack concentrically.</div>
+            <div class="arrow">→</div>
+          </div>
+          <div class="chapter-card featured" onclick="navigate('p3')">
+            <div class="num">Chapter 03</div>
+            <div class="title">The Three Modes</div>
+            <div class="desc">ACTIONS · CIS Prompt · ATN Prompt — with the ACTIONS Graduation pattern threading through all three.</div>
+            <div class="arrow">→</div>
+          </div>
+          <div class="chapter-card" onclick="navigate('p4')">
+            <div class="num">Chapter 04</div>
+            <div class="title">Thinking &amp; Domain Expertise</div>
+            <div class="desc">The cognitive layer and the reality check — the two dimensions that wrap around AI Skills.</div>
+            <div class="arrow">→</div>
+          </div>
+          <div class="chapter-card" onclick="navigate('p5')">
+            <div class="num">Chapter 05</div>
+            <div class="title">AIF TrainShop</div>
+            <div class="desc">The pedagogical model: TEACH · ENHANCE · DIAGNOSE — and the Five Levels of capability.</div>
+            <div class="arrow">→</div>
+          </div>
+          <div class="chapter-card" onclick="navigate('p6')">
+            <div class="num">Chapter 06</div>
+            <div class="title">9 Key Principles</div>
+            <div class="desc">The non-negotiables. The rules that keep the AI Skills architecture from collapsing in practice.</div>
+            <div class="arrow">→</div>
+          </div>
+        </div>
+        <div class="cover-footer">
+          <span class="credit">Designed by Tjitra · Powered by IWDemy</span>
+          <span class="tagline">Aspiring Growth, Experiencing Technology</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 01 -->
+    <section class="page" id="page-p1">
+      <div class="page-header">
+        <span class="eyebrow">Chapter 01 · Foundation</span>
+        <h1>APT in 60 Seconds</h1>
+        <p class="subtitle">The triangle. The three dimensions. The hero.</p>
+      </div>
+
+      <section class="section">
+        <span class="section-label">1.1 The APT Model</span>
+        <div class="triangle-hero">
+          <div class="triangle-svg-wrap">
+            <svg class="triangle-svg" viewBox="0 0 480 420" xmlns="http://www.w3.org/2000/svg" aria-label="APT Triangle with AI Skills at apex">
+              <defs>
+                <radialGradient id="apexGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="currentColor" stop-opacity="0.35"/>
+                  <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
+                </radialGradient>
+                <linearGradient id="triFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="currentColor" stop-opacity="0.18"/>
+                  <stop offset="100%" stop-color="currentColor" stop-opacity="0.04"/>
+                </linearGradient>
+                <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+                  <path d="M 0 0 L 6 4 L 0 8 Z" fill="currentColor" style="color: var(--gold);"/>
+                </marker>
+              </defs>
+              <circle cx="240" cy="90" r="100" fill="url(#apexGlow)" style="color: var(--gold);" opacity="0.5"/>
+              <path d="M 240 70 L 420 350 L 60 350 Z" fill="url(#triFill)" stroke="currentColor" stroke-width="1.5" style="color: var(--gold);" stroke-opacity="0.4"/>
+              <path d="M 240 90 L 240 270 M 75 340 L 240 270 M 405 340 L 240 270" stroke="currentColor" stroke-width="0.6" stroke-dasharray="3 4" style="color: var(--gold);" stroke-opacity="0.35" fill="none"/>
+              <circle cx="240" cy="90" r="46" class="svg-node-circle apex"/>
+              <text x="240" y="86" class="svg-node-label apex apex-fill">AI Skills</text>
+              <text x="240" y="104" class="svg-node-sublabel apex-fill">Execution</text>
+              <circle cx="75" cy="340" r="40" class="svg-node-circle"/>
+              <text x="75" y="338" class="svg-node-label">Thinking</text>
+              <text x="75" y="356" class="svg-node-sublabel">Cognitive</text>
+              <circle cx="405" cy="340" r="40" class="svg-node-circle"/>
+              <text x="405" y="338" class="svg-node-label">Domain</text>
+              <text x="405" y="356" class="svg-node-sublabel">Reality</text>
+              <path d="M 360 50 Q 320 50 295 78" class="svg-arrow" marker-end="url(#arrowhead)" fill="none"/>
+              <text x="370" y="38" class="svg-annotation">THE HERO</text>
+              <text x="370" y="52" class="svg-annotation" style="font-size: 8px; opacity: 0.75;">of this manual</text>
+              <text x="240" y="402" class="svg-formula-text">APT = f(AI Skills × Domain × Thinking)</text>
+            </svg>
+          </div>
+          <div class="triangle-content">
+            <span class="pill">AI Performance Triangle</span>
+            <h2>Three dimensions.<br>One human exponent.</h2>
+            <p>The APT Model is the framework behind every successful AI deployment in business. It says: AI Capability alone does not produce Business Impact. <strong>Human capability — distributed across three independent dimensions — is the exponential amplifier.</strong></p>
+            <div class="dimension-legend">
+              <div class="dimension-legend-item hero" onclick="navigate('p2')">
+                <span class="marker">01</span>
+                <div>
+                  <div class="name">AI Skills <span style="color: var(--gold); font-size: 0.7em; font-weight: 500;">· The Hero</span></div>
+                  <div class="sub">Execution Layer — translate intent into AI output.</div>
+                </div>
+              </div>
+              <div class="dimension-legend-item" onclick="navigate('p4')">
+                <span class="marker">02</span>
+                <div>
+                  <div class="name">Thinking Framework</div>
+                  <div class="sub">Cognitive Layer — how you think when working with AI.</div>
+                </div>
+              </div>
+              <div class="dimension-legend-item" onclick="navigate('p4')">
+                <span class="marker">03</span>
+                <div>
+                  <div class="name">Domain Expertise</div>
+                  <div class="sub">Reality Check — what you know that makes AI work in your world.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="callout">
+          <p>The three dimensions are <em>multiplicative, not additive</em>. Weakness in any one suppresses the whole. You cannot compensate for a zero with strength in the others.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <span class="section-label">1.2 The BI Formula · Why APT is the Exponent</span>
+        <p>APT does not stand alone — it sits inside a larger model that captures how organizations turn AI investments into measurable Business Impact. This is the context that makes APT matter:</p>
+        <div class="bi-formula">
+          <p class="bi-formula-equation">BI = D<sub>X</sub> × (C<sub>AI</sub>)<span class="var-apt-sup"><span class="var-apt">APT</span></span></p>
+          <p class="bi-formula-caption">Business Impact = Data × AI Capability<sup>Human Capability</sup></p>
+        </div>
+        <div class="apt-grid">
+          <div class="apt-grid-cell">
+            <div class="val">APT = 0</div>
+            <div class="label">Neutralized</div>
+            <div class="desc">(C<sub>AI</sub>)⁰ = 1. AI investment wasted entirely.</div>
+          </div>
+          <div class="apt-grid-cell">
+            <div class="val">APT &lt; 1</div>
+            <div class="label">Dampened</div>
+            <div class="desc">Weak humans degrade AI output below its own baseline.</div>
+          </div>
+          <div class="apt-grid-cell">
+            <div class="val">APT = 1</div>
+            <div class="label">Linear</div>
+            <div class="desc">AI used at face value. Parity with competitors.</div>
+          </div>
+          <div class="apt-grid-cell" style="background: var(--gold-soft); border-color: var(--gold-mid);">
+            <div class="val">APT &gt; 1</div>
+            <div class="label">Exponential</div>
+            <div class="desc">Differentiated impact. Where strategic value happens.</div>
+          </div>
+        </div>
+        <div class="callout">
+          <p><em>The strategic narrative:</em> you can buy the best AI and curate the finest data, but without investing in your people's AI capability, returns are linear at best. <strong>APT is the cheapest lever with the highest exponential payoff — and AI Skills is the dimension you can teach.</strong></p>
+        </div>
+      </section>
+
+      <div class="page-footer">
+        <span class="credit">Designed by Tjitra · Powered by IWDemy</span>
+        <span class="tagline">Aspiring Growth, Experiencing Technology</span>
+      </div>
+    </section>
+
+    <!-- PAGE 02 -->
+    <section class="page" id="page-p2">
+      <div class="page-header">
+        <span class="eyebrow">Chapter 02 · The Hero Dimension</span>
+        <h1>AI-Skills of the APT Model</h1>
+        <p class="subtitle">The Execution Layer — where intent becomes output.</p>
+      </div>
+
+      <section class="section">
+        <span class="section-label">2.1 What AI Skills Is</span>
+        <p><strong>AI Skills is the hands-on, tactical capability to interact effectively with AI systems.</strong> It is the operational and technical fluency dimension of APT — the layer where human intent is translated into machine action.</p>
+        <p>Where <strong>Thinking Framework</strong> determines <em>what to ask</em> and <strong>Domain Expertise</strong> determines <em>what is true</em>, AI Skills determines <em>whether the asking actually works</em>. Without it, both cognitive strengths bottleneck at the interface: the leader knows what they want, knows whether AI got it right, but cannot consistently produce the output they need.</p>
+        <div class="callout callout-warn">
+          <p><strong>AI Skills is explicitly distinct from Thinking Framework.</strong> Thinking is cognitive; AI Skills is operational. Merging them collapses the APT model and obscures where the actual bottleneck sits in any given leader's profile.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <span class="section-label">2.2 Four Capability Clusters</span>
+        <p>Four clusters operate <em>across</em> all three modes of AI Skills. They are not stages — they are skill dimensions every practitioner develops in parallel as they progress through the stack.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width: 30%;">Cluster</th><th>What It Means</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Prompt, Context &amp; Agentic Engineering Design</strong></td><td>Moving beyond simple requests to architecting the entire interaction surface — from prompt to context payload to agentic flow.</td></tr>
+              <tr><td><strong>AI Capability Mapping</strong></td><td>Knowing what current AI excels at and where it fails. The meta-skill of <em>when to delegate to AI and when to keep human</em>.</td></tr>
+              <tr><td><strong>Algorithmic Workflow Integration</strong></td><td>Embedding AI into daily operations — turning disjointed tasks into augmented processes that scale across teams.</td></tr>
+              <tr><td><strong>Strategic Prompt Sequencing</strong></td><td>Chaining AI interactions — decomposition, sequencing, validation, recomposition into a coherent end-state.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section">
+        <span class="section-label">2.3 The Three Modes · Concentric, Not Parallel</span>
+        <p>AI Skills is built as a <strong>stacked architecture</strong>. Each outer mode contains and depends on the inner ones. A practitioner operating at the ATN Prompt mode is still actively using CIS Prompt techniques, which are still grounded in ACTIONS fundamentals.</p>
+        <div class="stack-diagram">
+          <div class="stack-layer layer-1" onclick="navigate('p3','3a')">
+            <div class="stack-num">MODE 1 · CORE</div>
+            <div class="stack-name">ACTIONS</div>
+            <div class="stack-sub">The seven prompt fundamentals. Where every interaction starts.</div>
+          </div>
+          <div class="stack-layer layer-2" onclick="navigate('p3','3b')">
+            <div class="stack-num">MODE 2 · ENVELOPE</div>
+            <div class="stack-name">CIS Prompt</div>
+            <div class="stack-sub">Context · Intention · Specification — engineered payloads that wrap the prompt.</div>
+          </div>
+          <div class="stack-layer layer-3" onclick="navigate('p3','3c')">
+            <div class="stack-num">MODE 3 · OUTER SHELL</div>
+            <div class="stack-name">ATN Prompt</div>
+            <div class="stack-sub">Actor · Target · Negatives — agentic workflows with delegated authority.</div>
+          </div>
+        </div>
+        <div class="callout">
+          <p><strong>Mastery moves outward; foundation moves inward.</strong> You cannot do ATN Prompt well if your CIS Prompt is shallow. You cannot do CIS Prompt well if your ACTIONS mechanics are weak.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <span class="section-label">2.4 Mastery Progression</span>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width: 28%;">Stage</th><th>Practitioner Profile</th><th>Primary Risk</th></tr></thead>
+            <tbody>
+              <tr><td><strong>ACTIONS-only</strong></td><td>Can get good single-shot answers; treats each interaction as isolated.</td><td>Cannot scale; produces inconsistent quality across team.</td></tr>
+              <tr><td><strong>ACTIONS + CIS Prompt</strong></td><td>Builds reusable context payloads; runs Meta Prompting loops; selects models deliberately.</td><td>Has not yet embedded AI as a persistent organizational capability.</td></tr>
+              <tr><td><strong>Full stack · ATN Prompt</strong></td><td>Designs AI workflows with governance, delegated execution, and human approval gates.</td><td>Risks over-delegation if Inference Policy is weak.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="page-footer">
+        <span class="credit">Designed by Tjitra · Powered by IWDemy</span>
+        <span class="tagline">Aspiring Growth, Experiencing Technology</span>
+      </div>
+    </section>
+
+    <!-- PAGE 03 — THE THREE MODES -->
+    <section class="page" id="page-p3">
+      <div class="page-header">
+        <span class="eyebrow">Chapter 03 · The Stack</span>
+        <h1>The Three Modes</h1>
+        <p class="subtitle">ACTIONS · CIS Prompt · ATN Prompt — concentric, not parallel.</p>
+      </div>
+
+      <div class="subtab-nav">
+        <button class="subtab-btn active" data-tab="3a" onclick="switchSubtab('3a')">
+          <span class="num">3a · Mode 1</span>
+          <span class="name">ACTIONS</span>
+          <span class="frame">Prompt Engineering</span>
+        </button>
+        <button class="subtab-btn" data-tab="3b" onclick="switchSubtab('3b')">
+          <span class="num">3b · Mode 2</span>
+          <span class="name">CIS Prompt</span>
+          <span class="frame">Context Engineering</span>
+        </button>
+        <button class="subtab-btn" data-tab="3c" onclick="switchSubtab('3c')">
+          <span class="num">3c · Mode 3</span>
+          <span class="name">ATN Prompt</span>
+          <span class="frame">Agentic Engineering</span>
+        </button>
+      </div>
+
+      <!-- ============ SUB-TAB 3a — ACTIONS ============ -->
+      <div class="subtab-panel active" id="subtab-3a">
+
+        <div class="mode-hero">
+          <div class="mode-hero-header">
+            <div class="mode-hero-num">01</div>
+            <div class="mode-hero-titles">
+              <h2 class="mode-hero-name">ACTIONS</h2>
+              <div class="mode-hero-frame">Mode 1 · Core · Framework: Prompt Engineering</div>
+            </div>
+          </div>
+          <p class="mode-hero-tagline">"How do I get a usable answer in a single interaction?"</p>
+        </div>
+
+        <section class="section">
+          <span class="section-label">3a.1 What ACTIONS Is</span>
+          <p>ACTIONS covers the mechanics of the prompt itself: how the human formulates a request to an AI model and gets a usable response in a single interaction. Most leaders begin here. The failure mode at this level is treating AI as a search engine — typing fragments instead of structured requests.</p>
+          <p>ACTIONS is an acronym for the seven elements that structure every prompt — all of them <em>inline</em> within the prompt body itself.</p>
+        </section>
+
+        <section class="section">
+          <span class="section-label">3a.2 The Seven Elements</span>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th style="width: 14%;">Letter</th><th style="width: 22%;">Element</th><th>What it specifies</th></tr></thead>
+              <tbody>
+                <tr><td><strong style="color: var(--gold); font-family: var(--font-mono); font-size: 1.1rem;">A</strong></td><td><strong>Actor</strong></td><td>Who the AI should act as — the persona, expertise level, voice.</td></tr>
+                <tr><td><strong style="color: var(--gold); font-family: var(--font-mono); font-size: 1.1rem;">C</strong></td><td><strong>Context</strong></td><td>The inline situational ground — what the AI needs to know for this turn.</td></tr>
+                <tr><td><strong style="color: var(--gold); font-family: var(--font-mono); font-size: 1.1rem;">T</strong></td><td><strong>Target</strong></td><td>The task itself — what the AI is being asked to do.</td></tr>
+                <tr><td><strong style="color: var(--gold); font-family: var(--font-mono); font-size: 1.1rem;">I</strong></td><td><strong>Intention</strong></td><td>The purpose behind the task — why this matters strategically.</td></tr>
+                <tr><td><strong style="color: var(--gold); font-family: var(--font-mono); font-size: 1.1rem;">O</strong></td><td><strong>Output</strong></td><td>Format, structure, length, tone of the deliverable.</td></tr>
+                <tr><td><strong style="color: var(--gold); font-family: var(--font-mono); font-size: 1.1rem;">N</strong></td><td><strong>Negatives</strong></td><td>What to avoid — constraints, anti-patterns, boundaries.</td></tr>
+                <tr><td><strong style="color: var(--gold); font-family: var(--font-mono); font-size: 1.1rem;">S</strong></td><td><strong>Sequences</strong></td><td>The order of multi-part requests, or how outputs chain.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <span class="section-label">3a.3 Application Example</span>
+          <div class="card">
+            <p style="margin-top: 0;"><em>A leader needs to draft a board update on Q1 performance.</em></p>
+            <p>At the ACTIONS layer, they write a structured prompt that specifies <strong>Actor</strong> (finance analyst voice), <strong>Context</strong> (Q1 actual vs. budget data), <strong>Target</strong> (one-page memo), <strong>Intention</strong> (defend the variance to the board), <strong>Output</strong> (three sections, no hedging), <strong>Negatives</strong> (no jargon, no caveats), <strong>Sequences</strong> (executive summary first, then drill-down). They iterate twice. They get a usable draft in five minutes.</p>
+          </div>
+        </section>
+
+        <div class="callout">
+          <p>Mastery at ACTIONS means the leader can <em>reliably get a quality single-shot answer</em> when the problem fits within a single interaction. Beyond that, they need CIS Prompt.</p>
+        </div>
+
+      </div>
+
+      <!-- ============ SUB-TAB 3b — CIS PROMPT ============ -->
+      <div class="subtab-panel" id="subtab-3b">
+
+        <div class="mode-hero">
+          <div class="mode-hero-header">
+            <div class="mode-hero-num">02</div>
+            <div class="mode-hero-titles">
+              <h2 class="mode-hero-name">CIS Prompt</h2>
+              <div class="mode-hero-frame">Mode 2 · Envelope · Framework: Context Engineering</div>
+            </div>
+          </div>
+          <p class="mode-hero-tagline">"How do I turn prompts from isolated requests into reusable systems of intent?"</p>
+        </div>
+
+        <section class="section">
+          <span class="section-label">3b.1 The Graduation</span>
+          <p>CIS Prompt wraps the ACTIONS-level prompt inside a deliberately engineered <em>context payload</em>. Three of the seven ACTIONS elements <strong>graduate</strong> from inline-in-the-prompt to engineered-as-attached-template:</p>
+          <ul>
+            <li><strong>C — Context</strong> graduates into <em>Context Engineering</em> — versioned reference materials, structured knowledge.</li>
+            <li><strong>I — Intention</strong> graduates into <em>Intention Engineering</em> — articulated strategic, transformational, systemic purpose.</li>
+            <li><strong>O — Output</strong> graduates into <em>Specification Engineering</em> — precise acceptance bars, format constraints, quality criteria.</li>
+          </ul>
+          <p>The four remaining elements (A, T, N, S) stay inline in the prompt body. They will graduate later — but only in Mode 3.</p>
+        </section>
+
+        <section class="section">
+          <span class="section-label">3b.2 CIS Components</span>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th style="width: 24%;">Component</th><th style="width: 38%;">Role</th><th>Anchor Principle</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Context</strong></td><td>The factual and situational ground the AI operates on</td><td>Strip assumptions; provide raw truth</td></tr>
+                <tr><td><strong>Intention</strong></td><td>The strategic purpose behind the interaction</td><td><span class="tag tag-human">Human</span> Always human-written — non-negotiable</td></tr>
+                <tr><td><strong>Specification</strong></td><td>The precise output requirements: format, constraints, acceptance bar</td><td>Specificity determines output quality</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Intention is structured around three thinking levels:</strong> Strategic (the long-horizon goal), Transformational (the possibility that did not exist before AI), and Systemic (the cross-functional second-order effects).</p>
+        </section>
+
+        <section class="section">
+          <span class="section-label">3b.3 Meta Prompting · The Optimization Loop</span>
+          <p>Inside CIS Prompt sits <strong>Meta Prompting</strong>: the iterative practice of using AI to critique, refine, and stress-test the prompt itself <em>before</em> and <em>during</em> execution. This is the mechanism by which CIS payloads improve across cycles rather than degrading into stale templates.</p>
+        </section>
+
+        <section class="section">
+          <span class="section-label">3b.4 Tool Selection · A CIS Engineering Decision</span>
+          <p>Choosing the right AI model for a CIS Prompt is itself an engineering decision driven by the Context Payload, Intention complexity, and Specification requirements. It is not a basic ACTIONS-level concern.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th style="width: 38%;">Criterion</th><th>When it matters</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Reasoning vs. general-purpose</strong></td><td>Complex multi-step Specification → reasoning model</td></tr>
+                <tr><td><strong>Long-context vs. fast</strong></td><td>Heavy Context Payload → long-context model</td></tr>
+                <tr><td><strong>Public vs. enterprise-deployed</strong></td><td>Sensitive data in Context → enterprise-deployed instance</td></tr>
+                <tr><td><strong>Privacy / Cost / Speed / Control</strong></td><td>Trade-offs encoded in the Inference Policy (see ATN)</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <span class="section-label">3b.5 Application Example</span>
+          <div class="card">
+            <p style="margin-top: 0;"><em>Same leader. Now the task is strategic: "Help us decide whether to enter the East Java mid-tier segment."</em></p>
+            <p>At CIS Prompt level, they construct a <strong>Context Payload</strong> (market data, competitive intelligence, internal capabilities, regulatory constraints), articulate <strong>Intention</strong> (this is a 3-year strategic bet, not a tactical pilot), and write a <strong>Specification</strong> (compare three entry models against five criteria, flag what the analysis cannot resolve). They run a Meta Prompting loop: <em>"What did you miss? What assumptions are weakest?"</em> They select a long-context reasoning model fit for the payload. The output is decision-grade.</p>
+          </div>
+        </section>
+
+        <div class="callout">
+          <p><strong>CIS layers attach <em>to</em> prompts — they do not embed <em>inside</em> them.</strong> The Context Payload is a deliberate, versioned artifact, separate from the live conversation. This separation of concerns is what makes CIS Prompt scalable across teams and use cases.</p>
+        </div>
+
+      </div>
+
+      <!-- ============ SUB-TAB 3c — ATN PROMPT ============ -->
+      <div class="subtab-panel" id="subtab-3c">
+
+        <div class="mode-hero">
+          <div class="mode-hero-header">
+            <div class="mode-hero-num">03</div>
+            <div class="mode-hero-titles">
+              <h2 class="mode-hero-name">ATN Prompt</h2>
+              <div class="mode-hero-frame">Mode 3 · Outer Shell · Framework: Agentic Engineering</div>
+            </div>
+          </div>
+          <p class="mode-hero-tagline">"How do I design AI workflows that run with delegated authority — safely?"</p>
+        </div>
+
+        <section class="section">
+          <span class="section-label">3c.1 The Graduation</span>
+          <p>ATN Prompt wraps CIS Prompt inside a system where AI executes autonomously across multiple steps, calls tools, and operates within a governance envelope defined by humans. Three more ACTIONS elements <strong>graduate</strong>:</p>
+          <ul>
+            <li><strong>A — Actor</strong> graduates into <em>Actor Engineering</em> — agent identity, role boundaries, and the <strong>Inference Policy</strong> (Privacy · Cost · Speed · Control).</li>
+            <li><strong>T — Target</strong> graduates into <em>Target Engineering</em> — outcome specifications and <strong>Acceptance Criteria</strong> for autonomous work.</li>
+            <li><strong>N — Negatives</strong> graduates into <em>Negatives Engineering</em> — <strong>Approval Gates</strong>, hard stops, and the boundaries of autonomous action.</li>
+          </ul>
+          <p><strong>S — Sequences</strong> is <em>delegated to the agent</em>: once the agent is well-bounded, it determines its own step order. C, I, O are <em>inherited</em> from CIS layer — they don't graduate again.</p>
+        </section>
+
+        <section class="section">
+          <span class="section-label">3c.2 Four Human-Controlled Elements · Non-Delegable</span>
+          <p>Regardless of how much execution is delegated, four elements remain permanently under human control. These are not friction points — they are the design requirements that make agentic AI safe and effective.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th style="width: 26%;">Element</th><th>Why It Cannot Be Delegated</th></tr></thead>
+              <tbody>
+                <tr><td><span class="tag tag-human">Human</span> <strong>Intention</strong></td><td>The strategic purpose behind any AI workflow must originate from human judgment. AI does not set its own goals.</td></tr>
+                <tr><td><span class="tag tag-human">Human</span> <strong>Approval Gates</strong></td><td>Decision points where human authorization is required before AI proceeds. These define the boundaries of autonomous action.</td></tr>
+                <tr><td><span class="tag tag-human">Human</span> <strong>Acceptance Criteria</strong></td><td>The standards by which AI output is judged satisfactory. Only humans with domain expertise can define what "good" looks like.</td></tr>
+                <tr><td><span class="tag tag-human">Human</span> <strong>Inference Policy</strong></td><td>The rules governing how AI should reason, what assumptions are permitted, and Privacy/Cost/Speed/Control trade-offs.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout">
+            <p>Human-in-the-loop governance is not a limitation of agentic AI — it is the design requirement that makes agentic AI safe and effective.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <span class="section-label">3c.3 The Dual-Mode Slider</span>
+          <p>ATN Prompt operates on a <strong>spectrum of autonomy</strong>, from fully manual (every step approved) to fully agentic (the system runs end-to-end within its governance envelope). The slider is not a maturity rating — it is a <em>task-fit decision</em>.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th style="width: 22%;">Mode</th><th style="width: 36%;">Description</th><th>When to Use</th></tr></thead>
+              <tbody>
+                <tr><td><strong>Manual end</strong></td><td>AI suggests, human executes each step</td><td>Novel domains, high-stakes decisions, low trust in model on this task class</td></tr>
+                <tr><td><strong>Hybrid</strong></td><td>AI executes; human approves at gates</td><td>Mature use cases with defined acceptance criteria</td></tr>
+                <tr><td><strong>Agentic end</strong></td><td>AI executes end-to-end; human reviews outcomes</td><td>High-volume, well-bounded tasks with strong Inference Policy and post-hoc auditability</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="section">
+          <span class="section-label">3c.4 Application Example</span>
+          <div class="card">
+            <p style="margin-top: 0;"><em>The same strategic decision is now scaled.</em></p>
+            <p>The leader configures an agentic workflow that runs monthly competitive intelligence sweeps across five markets. The workflow uses CIS payloads as its core, executes data collection and synthesis autonomously, but stops at <strong>Approval Gates</strong> before sending findings to the executive team. <strong>Acceptance Criteria</strong> — <em>"must flag any regulatory change with potential P&amp;L impact &gt;IDR 5B"</em> — are encoded in the <strong>Inference Policy</strong>. ATN Prompt has converted what was a quarterly manual effort into a continuous capability.</p>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- ============ ACTIONS GRADUATION VISUALIZER (shared) ============ -->
+      <section class="section">
+        <span class="section-label">3.4 The ACTIONS Graduation Pattern</span>
+        <p>The same seven ACTIONS fundamentals underlie all three modes. What changes is <em>where each element lives</em> — inline, graduated to an engineering framework, inherited, or delegated. Toggle between modes to see the pattern.</p>
+
+        <div class="graduation">
+          <div class="graduation-header">
+            <h3 class="graduation-title">ACTIONS · Where each element lives in each mode</h3>
+            <div class="graduation-toggle">
+              <button class="grad-btn active" data-mode="1" onclick="setGradMode(1)">Mode 1</button>
+              <button class="grad-btn" data-mode="2" onclick="setGradMode(2)">Mode 2</button>
+              <button class="grad-btn" data-mode="3" onclick="setGradMode(3)">Mode 3</button>
+            </div>
+          </div>
+
+          <div class="graduation-row inline" data-letter="A">
+            <div class="grad-letter">A</div>
+            <div><div class="grad-name">Actor</div></div>
+            <div class="grad-status inline">Inline</div>
+          </div>
+          <div class="graduation-row inline" data-letter="C">
+            <div class="grad-letter">C</div>
+            <div><div class="grad-name">Context</div></div>
+            <div class="grad-status inline">Inline</div>
+          </div>
+          <div class="graduation-row inline" data-letter="T">
+            <div class="grad-letter">T</div>
+            <div><div class="grad-name">Target</div></div>
+            <div class="grad-status inline">Inline</div>
+          </div>
+          <div class="graduation-row inline" data-letter="I">
+            <div class="grad-letter">I</div>
+            <div><div class="grad-name">Intention</div></div>
+            <div class="grad-status inline">Inline</div>
+          </div>
+          <div class="graduation-row inline" data-letter="O">
+            <div class="grad-letter">O</div>
+            <div><div class="grad-name">Output</div></div>
+            <div class="grad-status inline">Inline</div>
+          </div>
+          <div class="graduation-row inline" data-letter="N">
+            <div class="grad-letter">N</div>
+            <div><div class="grad-name">Negatives</div></div>
+            <div class="grad-status inline">Inline</div>
+          </div>
+          <div class="graduation-row inline" data-letter="S">
+            <div class="grad-letter">S</div>
+            <div><div class="grad-name">Sequences</div></div>
+            <div class="grad-status inline">Inline</div>
+          </div>
+
+          <p style="font-size: 0.82rem; color: var(--body-muted); margin: 18px 0 0;">
+            <strong style="color: var(--gold);">Graduates →</strong> moves to an engineering framework as attached payload ·
+            <strong style="color: var(--accent-agent);">Delegated</strong> handed off to the agent ·
+            <strong style="color: var(--body-muted);">Inherited</strong> remains from the inner mode without re-engineering
+          </p>
+        </div>
+      </section>
+
+      <div class="page-footer">
+        <span class="credit">Designed by Tjitra · Powered by IWDemy</span>
+        <span class="tagline">Aspiring Growth, Experiencing Technology</span>
+      </div>
+    </section>
+
+    <!-- PAGE 04 — THINKING & DOMAIN EXPERTISE -->
+    <section class="page" id="page-p4">
+      <div class="page-header">
+        <span class="eyebrow">Chapter 04 · The Other Two Dimensions</span>
+        <h1>Thinking &amp; Domain Expertise</h1>
+        <p class="subtitle">The cognitive layer and the reality check — wrapping around AI Skills.</p>
+      </div>
+
+      <section class="section">
+        <span class="section-label">4.1 Thinking Framework · The Cognitive Layer</span>
+        <p>The Thinking Framework dimension is the <em>cognitive architecture</em> required to operate AI Skills well. Where AI Skills is operational and technical, Thinking Framework is cognitive: it shapes <strong>how the leader thinks</strong> when engaging with AI.</p>
+        <p>Four frameworks form a progression, each grounding a specific mode of AI Skills:</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width: 28%;">Framework</th><th style="width: 22%;">Grounds</th><th>Concept</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Algorithmic Empathy</strong></td><td>ACTIONS</td><td>Talk to AI as a human (NLP), respect that it is an LLM (probabilistic, no implicit org knowledge, confident-but-not-always-right).</td></tr>
+              <tr><td><strong>Dialectical Sparring</strong></td><td>CIS · Meta Prompting</td><td>Use AI for productive friction — not consensus. Challenge, refine, critique, iterate.</td></tr>
+              <tr><td><strong>Synthetic Sense-Making</strong></td><td>CIS · Context + Intention</td><td>Fuse AI's data-processing with human domain nuance and strategic vision to build cohesive world models.</td></tr>
+              <tr><td><strong>Systemic Agentic Thinking</strong></td><td>ATN Prompt</td><td>Shift from individual productivity to architecting ecosystems where humans and autonomous agents operate seamlessly.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">
+          <p>The progression names where each framework becomes <em>primary</em>, not where it stops mattering. A leader at the ATN layer is <strong>still using</strong> Algorithmic Empathy, Dialectical Sparring, and Synthetic Sense-Making — they have not graduated past them.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <span class="section-label">4.2 The Magnificent 7 · Tactical Micro-Skills</span>
+        <p>Inside the four frameworks sit seven deployable micro-skills — specific mental models that operationalize the frameworks in daily AI interactions.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Micro-Skill</th><th>Parent Framework</th><th>Function</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><strong>Algorithmic / Sequential Thinking</strong></td><td>Algorithmic Empathy</td><td>Decompose intent into step-by-step logic the model can execute</td></tr>
+              <tr><td>2</td><td><strong>First Principles Thinking</strong></td><td>Algorithmic Empathy</td><td>Strip assumptions; provide raw truth to AI from scratch</td></tr>
+              <tr><td>3</td><td><strong>Inversion / Backward Thinking</strong></td><td>Dialectical Sparring</td><td>Pre-mortem; find every way the output could fail</td></tr>
+              <tr><td>4</td><td><strong>Critical Thinking</strong></td><td>Dialectical Sparring</td><td>Quality gate; evaluate AI's pushback for soundness</td></tr>
+              <tr><td>5</td><td><strong>Design Thinking</strong></td><td>Synthetic Sense-Making</td><td>Human-centered iteration on AI output</td></tr>
+              <tr><td>6</td><td><strong>Systems Thinking</strong></td><td>Systemic Agentic Thinking</td><td>Map ecosystem; understand downstream impact of agentic deployment</td></tr>
+              <tr><td>7</td><td><strong>Second-Order Thinking</strong></td><td>Systemic Agentic Thinking</td><td>Anticipate delayed feedback loops; prevent systemic degradation</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section">
+        <span class="section-label">4.3 Domain Expertise · The Reality Check</span>
+        <p><strong>Domain Expertise is the professional "reality check" you bring to AI.</strong> It is the application of your industry knowledge, organizational experience, and professional intuition to guide the AI — ensuring its outputs are not just logically smart, but workable, highly relevant, and up to the highest standards of your field.</p>
+
+        <h3 style="margin-top: 1.4em;">Dual Mode</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width: 18%;">Mode</th><th style="width: 14%;">Role</th><th style="width: 14%;">DE Level</th><th>AI Skills Range</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Production</strong></td><td>Editor</td><td>High</td><td>Full stack — including ATN (bounded by Trust Filter)</td></tr>
+              <tr><td><strong>Exploration</strong></td><td>Student</td><td>Low</td><td>ACTIONS + CIS with heavy Meta Prompting; <em>minimal ATN delegation</em></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-warn">
+          <p><strong>Caution:</strong> Exploration Mode is for learning, not for decision-making in unfamiliar domains. When stakes are real and DE is low, bring in an expert or upgrade to Production Mode via partnership. Do not stretch Exploration Mode to cover decisions it was not designed to support.</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <span class="section-label">4.4 The Four Filters · In Production Mode</span>
+        <p>When leaders operate in Production Mode, they apply their Domain Expertise through four sequential filters. Each catches a different class of failure that the previous filters miss.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Filter</th><th>Catches</th><th>AI Skills Anchor</th><th>Compensable?</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><strong>Relevance</strong></td><td>Generic output that ignores org context</td><td>CIS Context Payload</td><td>Partially</td></tr>
+              <tr><td>2</td><td><strong>Excellence</strong></td><td>Competent but not world-class output</td><td>CIS Specification + ATN Acceptance Criteria</td><td>Partially</td></tr>
+              <tr><td>3</td><td><strong>Reality</strong></td><td>Logically perfect but operationally impossible</td><td>CIS Specification + ATN Inference Policy</td><td>Partially</td></tr>
+              <tr><td>4</td><td><strong>Trust</strong></td><td>Human relational territory misread or skipped</td><td>ATN Approval Gates (where AI stops)</td><td><strong style="color: #B45040;">No</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">
+          <p>Relevance → Excellence → Reality → Trust. Each filter narrows the gap between AI output and Business Impact. <strong>The first three are partially compensable through CIS engineering and ATN governance. The fourth — Trust — is not.</strong> It is the irreducible human contribution that closes the loop from AI output to measurable Business Impact.</p>
+        </div>
+      </section>
+
+      <div class="page-footer">
+        <span class="credit">Designed by Tjitra · Powered by IWDemy</span>
+        <span class="tagline">Aspiring Growth, Experiencing Technology</span>
+      </div>
+    </section>
+
+    <!-- PAGE 05 — AIF TRAINSHOP -->
+    <section class="page" id="page-p5">
+      <div class="page-header">
+        <span class="eyebrow">Chapter 05 · Learning Design</span>
+        <h1>AIF TrainShop</h1>
+        <p class="subtitle">Three pedagogical modes. Five capability levels. One progression.</p>
+      </div>
+
+      <section class="section">
+        <span class="section-label">5.1 Three Pedagogical Modes</span>
+        <p>Each APT dimension requires a fundamentally different pedagogical treatment. This is the core insight that shapes the AIF TrainShop curriculum.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th style="width: 22%;">Dimension</th><th style="width: 18%;">Mode</th><th style="width: 14%;">Time</th><th>Rationale</th></tr></thead>
+            <tbody>
+              <tr><td><strong>AI Skills</strong><br><span style="font-size: 0.78rem; color: var(--body-muted);">ACTIONS · CIS · ATN</span></td><td><strong style="color: var(--gold);">TEACH</strong></td><td>Heavy — core</td><td>Leaders do not have this capability. This is what they come to TrainShop to learn.</td></tr>
+              <tr><td><strong>Thinking Framework</strong><br><span style="font-size: 0.78rem; color: var(--body-muted);">4 Frameworks + Magnificent 7</span></td><td><strong style="color: var(--gold);">ENHANCE &amp; RELINK</strong></td><td>Medium — bridge</td><td>Leaders already think in these modes. Training enhances each framework and relinks them to specific AI Skills modes.</td></tr>
+              <tr><td><strong>Domain Expertise</strong><br><span style="font-size: 0.78rem; color: var(--body-muted);">Dual Mode + Four Filters</span></td><td><strong style="color: var(--gold);">DIAGNOSE &amp; COMPENSATE</strong></td><td>Light — self-assessment</td><td>Leaders bring this. Training helps them recognize which mode they're in and deploy the Four Filters deliberately.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section">
+        <span class="section-label">5.2 Learning Outcomes</span>
+        <h3>AI Skills · TEACH</h3>
+        <p>Upon completion, leaders can operate the full AI Skills stack: write effective single-shot prompts at the <strong>ACTIONS</strong> layer using all seven elements; construct <strong>CIS Prompt</strong> payloads (Context, Intention, Specification) with Meta Prompting optimization loops and deliberate Tool Selection; and design <strong>ATN Prompt</strong> workflows with appropriate Approval Gates, Acceptance Criteria, and Inference Policy.</p>
+
+        <h3>Thinking Framework · ENHANCE &amp; RELINK</h3>
+        <p>Upon completion, leaders have been equipped with new techniques that enhance each of the four frameworks, and have relinked them to specific modes of the AI Skills stack. The enhanced frameworks transfer beyond AI — they sharpen judgment in daily leadership decisions as well.</p>
+
+        <h3>Domain Expertise · DIAGNOSE &amp; COMPENSATE</h3>
+        <p>Upon completion, leaders can identify whether they are operating in <strong>Production Mode</strong> or <strong>Exploration Mode</strong> for any given AI interaction, and apply the <strong>Four Filters</strong> deliberately in Production Mode. They understand that the first three filters are partially compensable through CIS engineering — while the <strong>Trust Filter is irreducible</strong>.</p>
+      </section>
+
+      <section class="section">
+        <span class="section-label">5.3 The Commercial Logic</span>
+        <div class="callout">
+          <p>The Thinking Framework modules are the natural upsell. Leaders who complete the AI Skills core training realize that their bottleneck is <em>thinking</em> — not prompting. Tjitra &amp; Associates, as a psychology-based consultancy, can offer standalone Thinking Framework programs — <em>Systemic Agentic Thinking for AI Leaders</em>, <em>Dialectical Sparring for AI Risk Management</em>, <em>Synthetic Sense-Making for AI-Augmented Strategy</em> — as premium follow-on engagements. One executive sponsor creates pathways to multiple revenue streams.</p>
+        </div>
+      </section>
+
+      <div class="page-footer">
+        <span class="credit">Designed by Tjitra · Powered by IWDemy</span>
+        <span class="tagline">Aspiring Growth, Experiencing Technology</span>
+      </div>
+    </section>
+
+    <!-- PAGE 06 — THE 9 KEY PRINCIPLES -->
+    <section class="page" id="page-p6">
+      <div class="page-header">
+        <span class="eyebrow">Chapter 06 · The Non-Negotiables</span>
+        <h1>The 9 Key Principles of AI-Skills</h1>
+        <p class="subtitle">The rules that hold the architecture together. Non-negotiable.</p>
+      </div>
+
+      <section class="section">
+        <p>These nine principles are the bedrock of the AI Skills architecture. Drop any one and the rest start to wobble. They are the standard by which every training module, every advisory engagement, and every internal artifact is checked.</p>
+
+        <div class="principles-grid">
+
+          <div class="principle-card">
+            <div class="num">Principle 01</div>
+            <div class="title">AI Skills is the Execution Layer — distinct from Thinking</div>
+            <div class="body">AI Skills is operational and technical. Thinking Framework is cognitive. Merging them collapses APT and hides the real bottleneck in any leader's profile.</div>
+          </div>
+
+          <div class="principle-card">
+            <div class="num">Principle 02</div>
+            <div class="title">The three APT dimensions are multiplicative — not additive</div>
+            <div class="body">APT = f(AI Skills × DE × TF). Weakness in any one dimension suppresses the whole. You cannot compensate with strength in the others.</div>
+          </div>
+
+          <div class="principle-card">
+            <div class="num">Principle 03</div>
+            <div class="title">The Three Modes are concentric, not parallel</div>
+            <div class="body">ACTIONS ⊂ CIS Prompt ⊂ ATN Prompt. Each outer mode contains and depends on the inner ones. Mastery moves outward; foundation moves inward.</div>
+          </div>
+
+          <div class="principle-card">
+            <div class="num">Principle 04</div>
+            <div class="title">The same seven ACTIONS underlie all three Modes</div>
+            <div class="body">A · C · T · I · O · N · S. What changes across modes is <em>where</em> each element lives — inline, graduated, inherited, or delegated. The fundamentals don't disappear.</div>
+          </div>
+
+          <div class="principle-card">
+            <div class="num">Principle 05</div>
+            <div class="title">AI is an NLP model — talk to it as a human, respect that it is an LLM</div>
+            <div class="body">Natural language in, structured discipline beneath. The LLM has world knowledge but no implicit grasp of your organization. It is probabilistic, confident-but-not-always-right.</div>
+          </div>
+
+          <div class="principle-card">
+            <div class="num">Principle 06</div>
+            <div class="title">CIS layers attach to prompts — they do not embed inside them</div>
+            <div class="body">Context · Intention · Specification are engineered, versioned artifacts separate from the live prompt. Separation of concerns is not stylistic — it is what makes CIS scalable.</div>
+          </div>
+
+          <div class="principle-card">
+            <div class="num">Principle 07</div>
+            <div class="title">Intention is always human-written — across CIS and ATN</div>
+            <div class="body">AI does not set its own goals. Intention is the strategic anchor that originates from human judgment — both inside CIS Prompt and inside ATN Prompt workflows.</div>
+          </div>
+
+          <div class="principle-card">
+            <div class="num">Principle 08</div>
+            <div class="title">Govern the envelope, not every step</div>
+            <div class="body">In ATN Prompt, humans control Intention, Approval Gates, Acceptance Criteria, and Inference Policy — the envelope. Step-by-step execution is the agent's job. This is the design that makes agentic AI safe <em>and</em> effective.</div>
+          </div>
+
+          <div class="principle-card">
+            <div class="num">Principle 09</div>
+            <div class="title">The Trust Filter is irreducible</div>
+            <div class="body">Relational impact, psychological safety, and stakeholder trust cannot be delegated to AI. The Trust Filter defines where AI delegation must end — even in Production Mode, even with strong DE.</div>
+          </div>
+
+        </div>
+
+        <div class="callout">
+          <p>Use these as the audit checklist. Before shipping any AI capability — internal or client-facing — run it past all nine. If any principle is being bent, surface it explicitly and decide whether the trade-off is conscious or accidental.</p>
+        </div>
+      </section>
+
+      <div class="page-footer">
+        <span class="credit">Designed by Tjitra · Powered by IWDemy</span>
+        <span class="tagline">Aspiring Growth, Experiencing Technology</span>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+function navigate(pageId, subtab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('page-' + pageId);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+  const navBtn = document.querySelector('.nav-link[data-page="' + pageId + '"]');
+  if (navBtn) navBtn.classList.add('active');
+  if (subtab) {
+    setTimeout(() => switchSubtab(subtab), 50);
+  } else if (pageId === 'p3') {
+    setTimeout(() => switchSubtab('3a'), 50);
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.getElementById('sidebar').classList.remove('open');
+  try { localStorage.setItem('apt-page', pageId); if (subtab) localStorage.setItem('apt-subtab', subtab); } catch(e) {}
+}
+
+function switchSubtab(id) {
+  document.querySelectorAll('.subtab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById('subtab-' + id);
+  if (panel) panel.classList.add('active');
+  const btn = document.querySelector('.subtab-btn[data-tab="' + id + '"]');
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.nav-sublink').forEach(n => n.classList.remove('active'));
+  const sideSub = document.querySelector('.nav-sublink[data-subtab="' + id + '"]');
+  if (sideSub) sideSub.classList.add('active');
+  try { localStorage.setItem('apt-subtab', id); } catch(e) {}
+}
+
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  try { localStorage.setItem('apt-theme', next); } catch(e) {}
+}
+
+function setGradMode(mode) {
+  document.querySelectorAll('.grad-btn').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.querySelector('.grad-btn[data-mode="' + mode + '"]');
+  if (activeBtn) activeBtn.classList.add('active');
+  const patterns = {
+    1: { A: 'inline', C: 'inline', T: 'inline', I: 'inline', O: 'inline', N: 'inline', S: 'inline' },
+    2: { A: 'inline', C: 'graduates', T: 'inline', I: 'graduates', O: 'graduates', N: 'inline', S: 'inline' },
+    3: { A: 'graduates', C: 'inherited', T: 'graduates', I: 'inherited', O: 'inherited', N: 'graduates', S: 'delegated' }
+  };
+  const labels = {
+    inline: 'Inline',
+    graduates: 'Graduates →',
+    inherited: 'Inherited',
+    delegated: 'Delegated'
+  };
+  Object.keys(patterns[mode]).forEach(letter => {
+    const row = document.querySelector('.graduation-row[data-letter="' + letter + '"]');
+    if (!row) return;
+    const status = patterns[mode][letter];
+    row.classList.remove('inline','graduates','inherited','delegated');
+    row.classList.add(status);
+    const statusEl = row.querySelector('.grad-status');
+    statusEl.classList.remove('inline','graduates','inherited','delegated');
+    statusEl.classList.add(status);
+    statusEl.textContent = labels[status];
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const savedTheme = localStorage.getItem('apt-theme');
+    if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+    const savedPage = localStorage.getItem('apt-page') || 'cover';
+    const savedSubtab = localStorage.getItem('apt-subtab');
+    navigate(savedPage, (savedPage === 'p3' && savedSubtab) ? savedSubtab : null);
+  } catch(e) {
+    navigate('cover');
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  const order = ['cover','p1','p2','p3','p4','p5','p6'];
+  const currentPage = document.querySelector('.page.active');
+  if (!currentPage) return;
+  const currentId = currentPage.id.replace('page-','');
+  const idx = order.indexOf(currentId);
+  if (e.key === 'ArrowRight' && idx < order.length - 1) navigate(order[idx+1]);
+  if (e.key === 'ArrowLeft' && idx > 0) navigate(order[idx-1]);
+});
+</script>
+
+</body>
+</html>

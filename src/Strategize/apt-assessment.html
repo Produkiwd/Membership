@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)https://sinau.tech/Artifact/apt-assessment-%2Dv1.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="author" content="Tjitra &amp; Associates">
+  <meta name="description" content="APT Capability Assessment — measure your AI Performance Triangle readiness across AI Skills, Thinking Framework, and Domain Expertise in the AI First Program.">
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>APT Assessment — AI First Program · Tjitra &amp; Associates | IWDemy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="./APT Assessment — AI First Program · Tjitra &amp; Associates _ IWDemy._files/css2" rel="stylesheet">
+<style>
+    /* ══════ AIF Proportional System ══════ */
+    :root {
+      --canvas-w: 1920;
+      --canvas-h: 1080;
+      --u: calc(min(var(--canvas-w), var(--canvas-h)) * 1px / 100);
+      --base-body: calc(var(--u) * 1.5);
+      --ratio-display: 5.33;
+      --ratio-h1: 3.33;
+      --ratio-h2: 2;
+      --ratio-h3: 1.33;
+
+      /* ══════ AIF Brand Color Tokens ══════ */
+      /* Light Theme (default) */
+      --bg-dark: #0E0E0E;
+      --bg-light: #F8F6F2;
+      --gold: #D4A84B;
+      --gold-muted: #8B7340;
+
+      /* Text Opacity — Light bg */
+      --text-hi: rgba(14,14,14,0.92);
+      --text-md: rgba(30,28,24,0.68);
+      --text-lo: rgba(30,28,24,0.55);
+      --text-subtle: rgba(30,28,24,0.25);
+
+      /* Brand Fonts */
+      --font-display: 'Plus Jakarta Sans', 'Calibri', 'Arial', sans-serif;
+      --font-body: 'Inter', 'Calibri', 'Arial', sans-serif;
+      --font-mono: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+    }
+
+    [data-theme="dark"] {
+      --text-hi: rgba(230,225,215,0.92);
+      --text-md: rgba(230,225,215,0.68);
+      --text-lo: rgba(230,225,215,0.45);
+      --text-subtle: rgba(230,225,215,0.16);
+    }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  :root{
+    --bg:#F6F4EF;
+    --surface:rgba(255,255,255,0.55);
+    --surface-solid:#FFFFFF;
+    --gold:#D4A84B;
+    --gold-soft:#C49A42;
+    --gold-muted:#8B7340;
+    --navy:#111010;
+    --green:#3A8548;
+    --hi:rgba(17,16,16,0.88);
+    --md:rgba(17,16,16,0.58);
+    --lo:rgba(17,16,16,0.38);
+    --xs:rgba(17,16,16,0.08);
+    --xxs:rgba(17,16,16,0.04);
+    --border:rgba(17,16,16,0.06);
+    --gold-border:rgba(212,168,75,0.15);
+    --gold-bg:rgba(212,168,75,0.05);
+    --gold-bg2:rgba(212,168,75,0.08);
+    --green-bg:rgba(58,133,72,0.06);
+    --green-border:rgba(58,133,72,0.14);
+    --green-text:#2E7A3A;
+    --red-bg:rgba(180,60,50,0.05);
+    --red-border:rgba(180,60,50,0.14);
+    --red-text:#8B3A34;
+    --bar:rgba(17,16,16,0.05);
+    --shadow-s:0 1px 2px rgba(0,0,0,0.03),0 1px 3px rgba(0,0,0,0.02);
+    --shadow-m:0 2px 6px rgba(0,0,0,0.04),0 1px 2px rgba(0,0,0,0.02);
+    --shadow-l:0 4px 16px rgba(0,0,0,0.05),0 1px 4px rgba(0,0,0,0.03);
+    --radius:16px;
+    --radius-s:12px;
+    --radius-xs:10px;
+    --ease:cubic-bezier(0.25,0.1,0.25,1);
+    --ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  body{
+    min-height:100vh;min-height:100dvh;
+    background:var(--bg);
+    color:var(--hi);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    -webkit-tap-highlight-color:transparent;
+    overflow-x:hidden;
+    font-size:15px;
+    line-height:1.6;
+  }
+
+  ::selection{background:rgba(212,168,75,0.15);color:var(--navy);}
+
+  .fd{font-family:'Plus Jakarta Sans',system-ui,sans-serif;}
+  .fm{font-family:'JetBrains Mono','SF Mono',monospace;}
+
+  /* ── Animations ── */
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .animate{animation:fadeUp 0.5s var(--ease) both;}
+
+  /* ── Header ── */
+  .header{
+    padding:clamp(28px,5vh,44px) clamp(20px,5vw,32px) clamp(24px,4vh,36px);
+    text-align:center;
+    position:relative;
+  }
+  .header::after{
+    content:'';position:absolute;bottom:0;left:clamp(20px,5vw,32px);right:clamp(20px,5vw,32px);
+    height:1px;background:linear-gradient(90deg,transparent,var(--xs),transparent);
+  }
+
+  .program-pill{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 16px;border-radius:100px;
+    background:var(--navy);margin-bottom:18px;
+    box-shadow:var(--shadow-s);
+  }
+  .program-pill span{
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    font-size:10px;font-weight:700;letter-spacing:1.8px;
+    color:var(--gold);text-transform:uppercase;
+  }
+
+  .logos{
+    display:flex;align-items:center;justify-content:center;
+    gap:22px;margin-bottom:18px;
+  }
+  .logo-name{
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    font-size:15px;font-weight:800;color:var(--navy);letter-spacing:-0.5px;
+  }
+  .logo-sub{
+    font-family:'JetBrains Mono',monospace;
+    font-size:7px;font-weight:600;letter-spacing:2px;
+    color:var(--lo);text-transform:uppercase;margin-top:2px;
+  }
+  .logo-sep{width:1px;height:28px;background:var(--xs);}
+
+  .header-title{
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    font-size:clamp(17px,2.2vw,20px);font-weight:600;
+    color:var(--md);letter-spacing:-0.4px;
+  }
+  .header-mode{
+    font-family:'JetBrains Mono',monospace;font-size:10px;
+    color:var(--lo);letter-spacing:2px;margin-top:6px;text-transform:uppercase;
+  }
+
+  /* ── Container ── */
+  .container{
+    padding:clamp(24px,4.5vh,36px) clamp(20px,5vw,28px);
+    max-width:520px;margin:0 auto;
+  }
+
+  /* ── Eyebrow ── */
+  .eyebrow{
+    display:inline-block;padding:5px 14px;border-radius:100px;
+    background:var(--gold-bg);
+    font-family:'JetBrains Mono',monospace;
+    font-size:9px;font-weight:600;letter-spacing:2.5px;
+    color:var(--gold-muted);text-transform:uppercase;
+  }
+
+  /* ── Card ── */
+  .card{
+    background:var(--surface-solid);
+    border-radius:var(--radius);
+    padding:clamp(22px,3.5vh,32px) clamp(20px,3.5vw,28px);
+    box-shadow:var(--shadow-m);
+    border:1px solid var(--border);
+  }
+  .card-title{
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    font-size:clamp(20px,2.5vw,24px);font-weight:700;
+    color:var(--navy);letter-spacing:-0.6px;margin-bottom:10px;line-height:1.2;
+  }
+  .card-body{font-size:clamp(14px,1.5vw,15px);color:var(--md);line-height:1.7;}
+
+  /* ── Notice ── */
+  .notice{
+    background:var(--surface-solid);border:1px solid var(--border);
+    border-radius:var(--radius-s);padding:clamp(16px,2.5vh,22px);
+    margin-top:clamp(16px,3vh,22px);box-shadow:var(--shadow-s);
+  }
+  .notice-head{
+    font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;
+    letter-spacing:2px;color:var(--gold-muted);text-transform:uppercase;
+    margin-bottom:8px;display:flex;align-items:center;gap:7px;
+  }
+  .notice-dot{
+    width:6px;height:6px;border-radius:50%;background:var(--gold);
+  }
+  .notice-body{font-size:13px;color:var(--md);line-height:1.65;}
+  .notice-body strong{color:var(--hi);font-weight:600;}
+
+  .notice-cta{
+    display:flex;align-items:center;gap:10px;
+    margin-top:12px;padding:10px 14px;
+    background:var(--gold-bg);border-radius:var(--radius-xs);
+  }
+  .notice-cta-icon{font-size:16px;flex:0 0 22px;text-align:center;opacity:0.8;}
+  .notice-cta-text{font-size:12px;color:var(--hi);line-height:1.55;font-weight:500;}
+  .notice-cta-text strong{font-weight:600;}
+
+  /* ── Dim cards ── */
+  .dims{display:flex;gap:clamp(8px,1.5vw,12px);}
+  .dim{
+    flex:1;padding:clamp(18px,3vh,26px) 10px;
+    border-radius:var(--radius-s);text-align:center;
+    background:var(--surface-solid);border:1px solid var(--border);
+    box-shadow:var(--shadow-s);transition:transform 0.3s var(--ease),box-shadow 0.3s var(--ease);
+  }
+  .dim:active{transform:scale(0.97);}
+  .dim-letter{
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    font-size:clamp(28px,4vw,34px);font-weight:800;
+    color:var(--gold);letter-spacing:-1.5px;margin-bottom:6px;
+  }
+  .dim-label{
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    font-size:clamp(10px,1.2vw,11px);font-weight:700;
+    color:var(--navy);line-height:1.3;
+  }
+  .dim-sub{
+    font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:500;
+    letter-spacing:1.5px;color:var(--lo);text-transform:uppercase;margin-top:4px;
+  }
+
+  /* ── Mode ── */
+  .mode-lbl{
+    font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;
+    letter-spacing:2.5px;color:var(--lo);text-transform:uppercase;margin-bottom:12px;
+  }
+  .mode-btn{
+    width:100%;padding:clamp(16px,2.5vh,20px) clamp(18px,3vw,22px);
+    margin-bottom:8px;border-radius:var(--radius-s);cursor:pointer;
+    border:1px solid var(--border);background:var(--surface-solid);
+    text-align:left;font-family:inherit;
+    box-shadow:var(--shadow-s);transition:all 0.3s var(--ease);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mode-btn:active:not(.off){transform:scale(0.985);box-shadow:var(--shadow-m);}
+  .mode-btn.off{opacity:0.3;cursor:default;box-shadow:none;}
+  .mode-btn-t{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:15px;font-weight:700;color:var(--navy);}
+  .mode-btn.off .mode-btn-t{color:var(--lo);}
+  .mode-btn-s{font-size:13px;color:var(--lo);margin-top:3px;}
+
+  /* ── Progress ── */
+  .prog{display:flex;align-items:center;gap:10px;margin-bottom:clamp(20px,3.5vh,28px);}
+  .prog-track{flex:1;height:2px;border-radius:1px;background:var(--bar);overflow:hidden;}
+  .prog-fill{height:100%;border-radius:1px;background:var(--gold);transition:width 0.5s var(--ease);}
+  .prog-n{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;color:var(--lo);letter-spacing:0.5px;}
+
+  /* ── Question ── */
+  .q-top{display:flex;align-items:center;gap:8px;margin-bottom:clamp(14px,2.5vh,20px);}
+  .q-type{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--lo);letter-spacing:1px;text-transform:uppercase;}
+
+  .sit-box{
+    background:var(--xxs);
+    border-left:2px solid var(--gold);
+    border-radius:0 var(--radius-xs) var(--radius-xs) 0;
+    padding:clamp(14px,2.5vh,20px) clamp(16px,3vw,22px);
+    margin-bottom:clamp(14px,2.5vh,18px);
+  }
+  .sit-lbl{
+    font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;
+    letter-spacing:2.5px;color:var(--gold-muted);text-transform:uppercase;margin-bottom:8px;
+  }
+  .sit-txt{font-size:clamp(14px,1.5vw,15px);color:var(--hi);line-height:1.7;}
+
+  .q-prompt{
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    font-size:clamp(15px,1.7vw,17px);font-weight:700;
+    color:var(--navy);margin-bottom:clamp(14px,2.5vh,18px);letter-spacing:-0.3px;line-height:1.4;
+  }
+  .q-scale{
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    font-size:clamp(15px,1.7vw,17px);font-weight:600;
+    color:var(--navy);line-height:1.6;
+    margin-bottom:clamp(16px,3vh,22px);letter-spacing:-0.3px;
+  }
+
+  /* ── Option buttons ── */
+  .ob{
+    width:100%;padding:clamp(13px,2vh,17px) clamp(16px,2.5vw,20px);
+    margin-bottom:8px;border-radius:var(--radius-xs);cursor:pointer;
+    text-align:left;font-family:'Inter',system-ui,sans-serif;
+    background:var(--surface-solid);border:1px solid var(--border);
+    transition:all 0.25s var(--ease);
+    display:flex;align-items:flex-start;gap:10px;
+    font-size:clamp(13px,1.4vw,14px);color:var(--md);line-height:1.65;
+    box-shadow:var(--shadow-s);min-height:48px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .ob:active:not(.lk){transform:scale(0.985);}
+  .ob.sel{background:var(--gold-bg2);border-color:var(--gold-border);color:var(--hi);box-shadow:0 0 0 1px var(--gold-border),var(--shadow-s);}
+  .ob.ok{background:var(--green-bg);border-color:var(--green-border);color:var(--hi);box-shadow:0 0 0 1px var(--green-border);}
+  .ob.no{background:var(--red-bg);border-color:var(--red-border);color:var(--hi);}
+  .ob.lk{cursor:default;}
+  .ob-ic{flex:0 0 18px;font-size:14px;font-weight:600;margin-top:2px;}
+  .ob-ic.g{color:var(--green-text);}
+  .ob-ic.r{color:var(--red-text);}
+
+  /* ── Scale buttons ── */
+  .sb{
+    width:100%;display:flex;gap:14px;align-items:flex-start;
+    padding:clamp(14px,2.2vh,18px) clamp(16px,2.5vw,20px);
+    margin-bottom:8px;border-radius:var(--radius-xs);cursor:pointer;
+    text-align:left;font-family:'Inter',system-ui,sans-serif;
+    background:var(--surface-solid);border:1px solid var(--border);
+    box-shadow:var(--shadow-s);transition:all 0.25s var(--ease);
+    min-height:48px;-webkit-tap-highlight-color:transparent;
+  }
+  .sb:active{transform:scale(0.985);}
+  .sb.sel{background:var(--gold-bg2);border-color:var(--gold-border);box-shadow:0 0 0 1px var(--gold-border),var(--shadow-s);}
+  .sb-n{
+    flex:0 0 28px;height:28px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;
+    background:transparent;border:1.5px solid var(--xs);color:var(--lo);transition:all 0.25s var(--ease);
+  }
+  .sb.sel .sb-n{background:var(--gold);border-color:var(--gold);color:#fff;}
+  .sb-t{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:clamp(13px,1.4vw,14px);font-weight:700;color:var(--hi);}
+  .sb.sel .sb-t{color:var(--navy);}
+  .sb-d{font-size:clamp(12px,1.3vw,13px);color:var(--lo);line-height:1.55;margin-top:2px;}
+
+  /* ── Lesson ── */
+  .lesson{
+    margin-top:clamp(14px,2.5vh,18px);padding:clamp(16px,3vh,22px);
+    border-radius:var(--radius-s);
+    background:var(--green-bg);border:1px solid var(--green-border);
+    animation:fadeIn 0.4s var(--ease) both;
+  }
+  .lesson-lbl{
+    font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;
+    letter-spacing:2.5px;color:var(--green-text);text-transform:uppercase;margin-bottom:8px;
+  }
+  .lesson-txt{font-size:clamp(13px,1.4vw,14px);color:var(--md);line-height:1.7;margin-bottom:8px;}
+  .lesson-apt{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:13px;font-weight:600;color:var(--gold-muted);font-style:italic;}
+
+  /* ── Nav ── */
+  .nav{display:flex;justify-content:space-between;margin-top:clamp(20px,3.5vh,28px);padding-bottom:clamp(24px,4vh,32px);}
+  .nb{
+    padding:11px 22px;border-radius:var(--radius-xs);
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    font-size:13px;font-weight:600;cursor:pointer;
+    transition:all 0.25s var(--ease);min-height:44px;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .nb:active:not(:disabled){transform:scale(0.96);}
+  .nb-back{border:1px solid var(--xs);background:transparent;color:var(--lo);}
+  .nb-back:disabled{opacity:0.25;cursor:default;}
+  .nb-next{border:1px solid var(--gold-border);background:var(--gold-bg);color:var(--gold-muted);}
+  .nb-next:disabled{border-color:var(--xs);background:transparent;color:var(--xs);cursor:default;}
+  .nb-fin{
+    padding:11px 26px;border:none;border-radius:var(--radius-xs);
+    background:var(--gold);color:#fff;font-weight:700;letter-spacing:-0.2px;
+    box-shadow:0 2px 12px rgba(212,168,75,0.3),0 1px 3px rgba(212,168,75,0.15);
+  }
+  .nb-fin:disabled{background:var(--surface);color:var(--lo);box-shadow:none;cursor:default;}
+
+  /* ── Results ── */
+  .r-top{text-align:center;padding:clamp(12px,2vh,20px) 0 clamp(24px,4vh,32px);}
+  .r-score{
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    font-size:clamp(52px,9vw,64px);font-weight:800;
+    color:var(--gold);letter-spacing:-3px;margin-top:16px;line-height:1;
+  }
+  .r-lbl{font-size:14px;color:var(--md);margin-top:8px;font-weight:500;}
+
+  .rd{
+    padding:clamp(16px,2.5vh,22px) clamp(18px,3vw,24px);margin-bottom:10px;
+    border-radius:var(--radius-s);background:var(--surface-solid);
+    border:1px solid var(--border);box-shadow:var(--shadow-s);
+  }
+  .rd-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .rd-left{display:flex;align-items:center;gap:12px;}
+  .rd-circ{
+    width:32px;height:32px;border-radius:50%;display:inline-flex;
+    align-items:center;justify-content:center;
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    font-size:15px;font-weight:800;
+    background:var(--gold-bg2);color:var(--gold);
+  }
+  .rd-name{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:14px;font-weight:700;color:var(--navy);}
+  .rd-sub{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:500;letter-spacing:1.5px;color:var(--lo);text-transform:uppercase;margin-top:1px;}
+  .rd-right{display:flex;align-items:center;gap:8px;}
+  .rd-lvl{
+    font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;
+    padding:4px 10px;border-radius:100px;
+  }
+  .rd-pct{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:24px;font-weight:800;color:var(--gold);letter-spacing:-1px;}
+  .rd-bar{height:4px;border-radius:2px;background:var(--bar);position:relative;overflow:hidden;}
+  .rd-bar-f{position:absolute;height:100%;border-radius:2px;background:var(--gold);transition:width 0.8s var(--ease);}
+  .rd-delta{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;}
+  .rd-pp{display:flex;justify-content:space-between;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--lo);}
+
+  .ss-remind{
+    margin-top:clamp(16px,3vh,22px);padding:14px 16px;
+    border-radius:var(--radius-xs);background:var(--gold-bg);
+    display:flex;align-items:center;gap:12px;
+  }
+  .ss-remind-ic{font-size:18px;flex:0 0 24px;text-align:center;opacity:0.7;}
+  .ss-remind-tx{font-size:12px;color:var(--hi);line-height:1.55;font-weight:500;}
+  .ss-remind-tx strong{font-weight:600;}
+
+  .fc{
+    margin-top:clamp(18px,3.5vh,28px);padding:clamp(22px,3.5vh,32px) clamp(20px,3.5vw,28px);
+    border-radius:var(--radius);background:var(--surface-solid);
+    border:1px solid var(--border);box-shadow:var(--shadow-m);
+  }
+  .fc-eq{
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    font-size:clamp(22px,3.5vw,28px);font-weight:700;
+    color:var(--navy);text-align:center;margin:14px 0 16px;letter-spacing:-0.8px;
+  }
+  .fc-eq sup{color:var(--gold);font-weight:800;font-size:0.55em;}
+  .fc-eq sub{font-size:0.6em;}
+
+  .prio{
+    margin-top:14px;padding:clamp(16px,3vh,22px);
+    border-radius:var(--radius-s);
+    border-left:2px solid var(--gold);background:var(--xxs);
+  }
+  .prio-t{font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:14px;font-weight:700;color:var(--gold-muted);margin-bottom:6px;}
+
+  .retake{
+    width:100%;padding:14px;border-radius:var(--radius-xs);
+    border:1px solid var(--xs);background:transparent;
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+    font-size:13px;font-weight:600;color:var(--lo);cursor:pointer;
+    margin-top:clamp(20px,3.5vh,28px);min-height:48px;
+    transition:all 0.25s var(--ease);
+  }
+  .retake:active{transform:scale(0.98);background:var(--xxs);}
+
+  .footer{
+    text-align:center;padding:clamp(20px,3.5vh,28px);
+    font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:500;
+    letter-spacing:2px;color:var(--lo);text-transform:uppercase;
+    position:relative;
+  }
+  .footer::before{
+    content:'';position:absolute;top:0;left:clamp(20px,5vw,32px);right:clamp(20px,5vw,32px);
+    height:1px;background:linear-gradient(90deg,transparent,var(--xs),transparent);
+  }
+
+  /* ── Mobile Responsive ── */
+  @media (max-width: 480px) {
+    .dims { flex-direction: column; }
+    .dim { flex: none; padding: 16px 12px; }
+    .rd-hdr { flex-wrap: wrap; gap: 8px; }
+    .rd-right { flex-wrap: wrap; }
+    .logos { gap: 14px; }
+    .nb { padding: 11px 16px; font-size: 12px; }
+    .container { padding: 20px 16px; }
+    .card { padding: 20px 16px; }
+  }
+
+  .hidden{display:none !important;}
+  .offline-msg{
+    display:none;padding:10px 16px;margin:8px clamp(20px,5vw,28px);border-radius:var(--radius-xs);
+    background:var(--red-bg);border:1px solid var(--red-border);
+    font-size:12px;color:var(--red-text);text-align:center;line-height:1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="offline-msg" id="offlineMsg">Please ensure an active internet connection for optimal display.</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="program-pill"><span>AI First Program</span></div>
+  <div class="logos">
+    <div style="text-align:center">
+      <div class="logo-name">TJITRA</div>
+      <div class="logo-sub">&amp; Associates</div>
+    </div>
+    <div class="logo-sep"></div>
+    <div style="text-align:center">
+      <div class="logo-name">IWDemy</div>
+      <div class="logo-sub">Insight Web Academy</div>
+    </div>
+  </div>
+  <div class="header-title">APT Capability Assessment</div>
+  <div class="header-mode hidden" id="hMode"></div>
+</div>
+
+<div class="container">
+
+  <!-- INTRO -->
+  <div id="intro" class="animate">
+    <div style="text-align:center;margin-bottom:clamp(22px,4vh,32px)">
+      <span class="eyebrow">AI Performance Triangle</span>
+    </div>
+
+    <div class="card" style="margin-bottom:clamp(16px,3vh,22px)">
+      <div class="card-title">How AI-ready are you?</div>
+      <div class="card-body">6 questions. 3–5 minutes. Discover your strengths and gaps across the three dimensions that determine AI business impact.</div>
+    </div>
+
+    <div class="notice">
+      <div class="notice-head"><div class="notice-dot"></div>Confidential · No Data Stored</div>
+      <div class="notice-body"><strong>No data is stored.</strong> All responses are processed on your device only and will be lost when you close this page.</div>
+      <div class="notice-cta">
+        <div class="notice-cta-text"><strong>Screenshot your results</strong> — you'll need them for comparison at the end of the program.</div>
+      </div>
+    </div>
+
+    <div class="dims" style="margin:clamp(20px,3.5vh,28px) 0">
+      <div class="dim"><div class="dim-letter">A</div><div class="dim-label">AI Skills</div><div class="dim-sub">Prompt 2.0</div></div>
+      <div class="dim"><div class="dim-letter">T</div><div class="dim-label">Thinking Framework</div><div class="dim-sub">5 Models</div></div>
+      <div class="dim"><div class="dim-letter">D</div><div class="dim-label">Domain Expertise</div><div class="dim-sub">S.E.T.</div></div>
+    </div>
+
+    <div style="font-size:13px;color:var(--md);line-height:1.7;margin-bottom:clamp(24px,4vh,32px)">
+      Each dimension is tested with a scenario (right/wrong) and a self-placement. After each scenario, you'll see the correct answer and why it matters.
+    </div>
+
+    <div class="mode-lbl">Select Mode</div>
+    <button class="mode-btn" onclick="go(&#39;pre&#39;)">
+      <div class="mode-btn-t">Pre-Training</div>
+      <div class="mode-btn-s">Beginning of AI First · Week 1</div>
+    </button>
+    <button class="mode-btn off" id="postBtn" onclick="go(&#39;post&#39;)">
+      <div class="mode-btn-t">Post-Training</div>
+      <div class="mode-btn-s" id="postSub">Complete pre-training first</div>
+    </button>
+  </div>
+
+  <div id="qSec" class="hidden"></div>
+  <div id="rSec" class="hidden"></div>
+</div>
+
+
+<script>
+const D={ai_skills:{l:"AI Skills",s:"Prompt 2.0",k:"A"},thinking:{l:"Thinking Framework",s:"5 Models",k:"T"},domain:{l:"Domain Expertise",s:"S.E.T.",k:"D"}};
+const Q=[
+  {id:1,d:"ai_skills",t:"scenario",sit:"You ask AI to \u201Canalyze our customer churn.\u201D It returns a generic report with broad industry statistics.",pr:"What went wrong?",
+   opts:[{id:"a",tx:"The AI model is not powerful enough for this task",c:false},{id:"b",tx:"The prompt lacked specific context, clear intention, and output specifications",c:true},{id:"c",tx:"AI cannot do meaningful business analysis",c:false}],
+   les:"AI output quality is determined by input quality. Prompt 2.0 teaches leaders to attach a CIS Payload \u2014 Context (your specific data), Intention (what decision this supports), and Specification (what good output looks like) \u2014 to every AI interaction.",
+   apt:"This is the core of AI Skills \u2014 the \u201CA\u201D in APT."},
+  {id:2,d:"ai_skills",t:"scale",tx:"When using AI, I structure my requests with explicit context about my situation, a clear purpose, and specific quality requirements for the output.",
+   lvs:[{sc:1,lb:"Rarely",ds:"I type what comes to mind and see what happens"},{sc:2,lb:"Sometimes",ds:"I add some context but not consistently"},{sc:3,lb:"Consistently",ds:"I design structured requests with context, purpose, and specifications"}]},
+  {id:3,d:"thinking",t:"scenario",sit:"AI produces a confident, data-rich market entry analysis for Kalimantan and recommends proceeding. Your team is enthusiastic and wants to move fast.",pr:"What is the best leadership response?",
+   opts:[{id:"a",tx:"Approve \u2014 the analysis is thorough and the team is aligned",c:false},{id:"b",tx:"Ask the team to verify the data sources manually",c:false},{id:"c",tx:"Run a pre-mortem: \u201CWhat would make this fail? What did AI miss? What local realities could invalidate this?\u201D",c:true}],
+   les:"AI\u2019s biggest danger for leaders is not wrong answers \u2014 it\u2019s confidently wrong answers. Inversion Thinking (one of 5 Thinking Models in APT) is the \u201CAI antibody\u201D: systematically challenging output before acting on it.",
+   apt:"This is the Thinking Framework \u2014 the \u201CT\u201D in APT."},
+  {id:4,d:"thinking",t:"scale",tx:"When AI gives me a well-structured, convincing analysis, my instinct is to actively challenge it \u2014 looking for what it missed, what assumptions might be wrong, and how it could fail.",
+   lvs:[{sc:1,lb:"Rarely",ds:"If AI output looks good, I tend to trust it"},{sc:2,lb:"Sometimes",ds:"I question output when something feels off"},{sc:3,lb:"Consistently",ds:"I systematically test AI reasoning against failure scenarios before acting"}]},
+  {id:5,d:"domain",t:"scenario",sit:"Two division heads receive the same AI-generated competitive analysis. Head A shares it with the board as-is. Head B notices a footnote about a supplier\u2019s regulatory filing, recognizes it signals a Q3 supply disruption, and restructures vendor contracts immediately.",pr:"What best explains the difference in business impact?",
+   opts:[{id:"a",tx:"Head B is more careful and detail-oriented",c:false},{id:"b",tx:"The AI should have flagged the risk more clearly",c:false},{id:"c",tx:"Head B\u2019s domain expertise allowed her to translate the AI output into an actionable decision",c:true}],
+   les:"The same AI output produces different business impact depending on the leader\u2019s Domain Expertise. The S.E.T. pattern (Specify \u2192 Evaluate \u2192 Translate) shows that Translate \u2014 converting AI output into business decisions \u2014 is the irreducible human contribution.",
+   apt:"This is Domain Expertise \u2014 the \u201CD\u201D in APT."},
+  {id:6,d:"domain",t:"scale",tx:"I can detect errors, omissions, or misleading conclusions in AI output within my area of expertise \u2014 catching issues that someone without my background would miss.",
+   lvs:[{sc:1,lb:"Rarely",ds:"I struggle to judge AI output quality in my field"},{sc:2,lb:"Sometimes",ds:"I catch obvious errors but might miss subtle ones"},{sc:3,lb:"Consistently",ds:"I reliably identify errors, gaps, and flawed reasoning that non-experts would accept"}]},
+];
+
+let S={m:null,c:0,a:{},r:{},pre:null};
+try{const x=localStorage.getItem("apt-v6-pre");if(x)S.pre=JSON.parse(x);}catch(e){}
+ckPost();
+
+function ckPost(){const b=document.getElementById("postBtn"),s=document.getElementById("postSub");
+  if(S.pre){b.classList.remove("off");s.textContent="End of AI First \u00B7 Week 10";}
+  else{b.classList.add("off");s.textContent="Complete pre-training first";}}
+
+function go(m){if(m==="post"&&!S.pre)return;
+  S.m=m;S.c=0;S.a={};S.r={};
+  document.getElementById("intro").classList.add("hidden");
+  const h=document.getElementById("hMode");h.classList.remove("hidden");
+  h.textContent=m==="pre"?"Pre-Training \u00B7 Week 1":"Post-Training \u00B7 Week 10";
+  rnd();}
+
+function rnd(){
+  const sec=document.getElementById("qSec");sec.classList.remove("hidden");
+  const q=Q[S.c],d=D[q.d],pct=((S.c+1)/Q.length)*100,last=S.c===Q.length-1;
+
+  let h=`<div class="animate"><div class="prog"><div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div><span class="prog-n">${S.c+1}/${Q.length}</span></div>`;
+  h+=`<div class="q-top"><span class="eyebrow">${d.k} \u00B7 ${d.l}</span><span class="q-type">${q.t==="scenario"?"Scenario":"Self-Placement"}</span></div>`;
+
+  if(q.t==="scenario"){
+    h+=`<div class="sit-box"><div class="sit-lbl">Situation</div><div class="sit-txt">${q.sit}</div></div>`;
+    h+=`<div class="q-prompt">${q.pr}</div>`;
+    q.opts.forEach(o=>{
+      const sel=S.a[q.id]===o.id,rev=S.r[q.id];
+      let cls="ob",ic="";
+      if(rev&&o.c){cls+=" ok lk";ic=`<span class="ob-ic g">\u2713</span>`;}
+      else if(rev&&sel&&!o.c){cls+=" no lk";ic=`<span class="ob-ic r">\u2717</span>`;}
+      else if(sel)cls+=" sel";
+      if(rev)cls+=" lk";
+      h+=`<button class="${cls}" onclick="pS(${q.id},'${o.id}')">${ic}<span>${o.tx}</span></button>`;
+    });
+    if(S.r[q.id])h+=`<div class="lesson"><div class="lesson-lbl">APT Insight</div><div class="lesson-txt">${q.les}</div><div class="lesson-apt">${q.apt}</div></div>`;
+  } else {
+    h+=`<div class="q-scale">${q.tx}</div>`;
+    q.lvs.forEach(l=>{const sel=S.a[q.id]===l.sc;
+      h+=`<button class="sb ${sel?"sel":""}" onclick="pL(${q.id},${l.sc})"><div class="sb-n">${l.sc}</div><div><div class="sb-t">${l.lb}</div><div class="sb-d">${l.ds}</div></div></button>`;
+    });
+  }
+
+  const cp=q.t==="scenario"?S.r[q.id]:S.a[q.id]!==undefined;
+  const all=Q.every(x=>S.a[x.id]!==undefined);
+  h+=`<div class="nav"><button class="nb nb-back" ${S.c===0?"disabled":""} onclick="gB()">\u2190 Back</button>`;
+  if(!last)h+=`<button class="nb nb-next" ${!cp?"disabled":""} onclick="gN()">Next \u2192</button>`;
+  else h+=`<button class="nb nb-fin" ${!all?"disabled":""} onclick="fin()">View Results</button>`;
+  h+=`</div></div>`;
+  sec.innerHTML=h;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function pS(id,oid){if(S.r[id])return;S.a[id]=oid;S.r[id]=true;rnd();}
+function pL(id,sc){S.a[id]=sc;rnd();}
+function gB(){if(S.c>0){S.c--;rnd();}}
+function gN(){if(S.c<Q.length-1){S.c++;rnd();}}
+
+function calc(){
+  const r={};Object.keys(D).forEach(d=>{const qs=Q.filter(x=>x.d===d);let t=0,m=0;
+    qs.forEach(x=>{if(x.t==="scenario"){m+=3;const o=x.opts.find(o=>o.id===S.a[x.id]);t+=o?.c?3:0;}else{m+=3;t+=S.a[x.id]||0;}});
+    r[d]=m>0?Math.round((t/m)*100):0;});
+  r.overall=Math.round(Object.values(r).reduce((a,b)=>a+b,0)/3);return r;
+}
+
+function lv(p){return p>=80?"Strong":p>=50?"Developing":"Early";}
+function lc(p){return p>=80?"var(--green-text)":p>=50?"var(--gold-muted)":"var(--red-text)";}
+
+function fin(){
+  const sc=calc();
+  if(S.m==="pre"){try{localStorage.setItem("apt-v6-pre",JSON.stringify(sc));S.pre=sc;}catch(e){}}
+  document.getElementById("qSec").classList.add("hidden");
+  const sec=document.getElementById("rSec");sec.classList.remove("hidden");
+  const dl=S.m==="post"&&S.pre;
+
+  let h=`<div class="animate"><div class="r-top"><span class="eyebrow">${S.m==="pre"?"Pre-Training Baseline":"Post-Training Result"}</span><div class="r-score">${sc.overall}%</div><div class="r-lbl">Overall APT Readiness</div></div>`;
+
+  Object.entries(D).forEach(([k,d])=>{
+    const s=sc[k],p=dl?S.pre[k]:null,dt=p!==null?s-p:null;
+    h+=`<div class="rd"><div class="rd-hdr"><div class="rd-left"><span class="rd-circ">${d.k}</span><div><div class="rd-name">${d.l}</div><div class="rd-sub">${d.s}</div></div></div><div class="rd-right">`;
+    if(dt!==null){const dc=dt>0?"var(--green-text)":dt<0?"var(--red-text)":"var(--lo)",db=dt>0?"var(--green-bg)":"transparent";
+      h+=`<span class="rd-delta" style="color:${dc};background:${db}">${dt>0?"+":""}${dt}%</span>`;}
+    h+=`<span class="rd-lvl" style="color:${lc(s)};background:${lc(s)}10;border:1px solid ${lc(s)}18">${lv(s)}</span><span class="rd-pct">${s}%</span></div></div>`;
+    h+=`<div class="rd-bar">`;
+    if(p!==null)h+=`<div style="position:absolute;height:100%;width:${p}%;border-radius:2px;background:rgba(212,168,75,0.15)"></div>`;
+    h+=`<div class="rd-bar-f" style="width:${s}%"></div></div>`;
+    if(dl)h+=`<div class="rd-pp"><span>Pre: ${p}%</span><span>Post: ${s}%</span></div>`;
+    h+=`</div>`;
+  });
+
+  h+=`<div class="ss-remind"><div class="ss-remind-tx"><strong>Screenshot now.</strong> Save your results for comparison at the end of the program.</div></div>`;
+
+  h+=`<div class="fc"><div style="text-align:center;margin-bottom:14px"><span class="eyebrow">The APT Model</span></div>`;
+  h+=`<div class="fc-eq">BI = D<sub>X</sub> \u00D7 (C<sub>AI</sub>)<sup>APT</sup></div>`;
+  h+=`<div style="font-size:14px;color:var(--md);line-height:1.7;margin-bottom:10px">Your APT score is the <strong style="color:var(--navy)">exponent</strong> that determines whether your AI investment produces linear or exponential returns.</div>`;
+  h+=`<div style="font-size:14px;color:var(--md);line-height:1.7"><strong style="color:var(--gold-muted)">AI Skills</strong> (how you interact with AI) \u00D7 <strong style="color:var(--gold-muted)">Thinking Framework</strong> (how you reason with AI) \u00D7 <strong style="color:var(--gold-muted)">Domain Expertise</strong> (what you know that makes AI relevant).</div>`;
+  h+=`<div style="font-size:13px;color:var(--lo);line-height:1.7;margin-top:14px;font-style:italic">Weakness in any dimension suppresses the whole. Your strongest lever for growth is your weakest dimension.</div></div>`;
+
+  const sorted=Object.entries(sc).filter(([k])=>k!=="overall").sort((a,b)=>a[1]-b[1]);
+  if(sorted.length){const[wK]=sorted[0];const msgs={
+    ai_skills:"The AI First core curriculum (Prompt 2.0) is designed precisely for this \u2014 you will learn the complete framework across all layers.",
+    thinking:"AI First includes bridging modules that relink your existing thinking skills to AI. Tjitra & Associates also offers standalone Thinking programs for deeper development.",
+    domain:"Domain Expertise is something you bring. The training helps you see where your DE is strong, where it has gaps, and how Prompt 2.0 compensates."};
+    h+=`<div class="prio"><div class="prio-t">Your Priority: ${D[wK].l}</div><div style="font-size:13px;color:var(--md);line-height:1.7">${msgs[wK]}</div></div>`;}
+
+  h+=`<button class="retake" onclick="retake()">Retake Assessment</button><div style="height:28px"></div></div>`;
+  sec.innerHTML=h;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function retake(){
+  S.a={};S.r={};S.c=0;S.m=null;
+  document.getElementById("rSec").classList.add("hidden");
+  document.getElementById("qSec").classList.add("hidden");
+  document.getElementById("hMode").classList.add("hidden");
+  document.getElementById("intro").classList.remove("hidden");
+  ckPost();window.scrollTo({top:0,behavior:'smooth'});
+}
+
+window.addEventListener("offline",()=>{document.getElementById("offlineMsg").style.display="block";});
+window.addEventListener("online",()=>{document.getElementById("offlineMsg").style.display="none";});
+if(!navigator.onLine)document.getElementById("offlineMsg").style.display="block";
+</script>
+
+  <footer style="text-align:center; padding:1.5rem 1rem 2.5rem; border-top:1px solid var(--border);">
+    <p style="font-family:&#39;JetBrains Mono&#39;,monospace; font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--lo); margin-bottom:0.35rem;">Designed by Tjitra | Powered by IWDemy</p>
+    <p style="font-family:&#39;Plus Jakarta Sans&#39;,sans-serif; font-size:0.65rem; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:rgba(212,168,75,0.5); margin-bottom:0.35rem;">PROMPT · CREATE · BUILD</p>
+    <p style="font-family:&#39;JetBrains Mono&#39;,monospace; font-size:0.6rem; letter-spacing:0.12em; text-transform:uppercase; color:var(--lo); opacity:0.7; margin-bottom:0.25rem;">sinau.tech &nbsp;·&nbsp; aifirst26.iwdemy.com</p>
+    <p style="font-family:&#39;JetBrains Mono&#39;,monospace; font-size:0.6rem; letter-spacing:0.15em; text-transform:uppercase; color:var(--lo); opacity:0.5;">© 2026 Tjitra &amp; Associates — Insight Web Academy</p>
+  </footer>
+
+
+
+</body></html>
