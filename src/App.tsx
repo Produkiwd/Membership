@@ -1,10 +1,19 @@
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, secondaryAuth, auth, signOut, handleFirestoreError, OperationType } from './lib/firebase';
 import { BookOpen, Calendar, ChevronRight, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent } from 'react';
 import { cn } from './lib/utils';
-import { onAuthStateChanged, type User, updatePassword, sendPasswordResetEmail } from 'firebase/auth';
-import { doc, getDoc, setDoc, serverTimestamp, collection, getDocs, updateDoc, Timestamp, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { db } from './lib/firebase';
+import {
+  createPendingMember,
+  getCurrentUser,
+  getMyMemberProfile,
+  listMembers,
+  onAuthUserChange,
+  sendMemberPasswordReset,
+  signInMember,
+  signOutMember,
+  updateMember,
+  updateMemberPassword,
+  type User,
+} from './lib/membership';
 import aifPromptingHtml from '../materi/Prompt day1/aif-prompting-level2-day1.html?raw';
 import aifReadingHtml from '../materi/Prompt day1/aif-reading-level2-day1.html?raw';
 import aifPkmHtml from '../materi/Prompt day2/aif-pkm-level2-day2.html?raw';
@@ -47,7 +56,9 @@ function Button({ children, variant = 'primary', className, ...props }: ButtonHT
 
 function LoginView() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isResetLoading, setIsResetLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isExpiredOpen, setIsExpiredOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -58,62 +69,48 @@ function LoginView() {
     if (!email || !password) return;
     setIsLoading(true);
     setErrorMsg(null);
+    setSuccessMsg(null);
     setIsExpiredOpen(false);
     try {
       const formattedEmail = email.trim().toLowerCase();
-      
-      // Login
-      await signInWithEmailAndPassword(auth, formattedEmail, password);
+
+      await signInMember(formattedEmail, password);
       localStorage.setItem('temp_password', password);
-      
-      const isMainAdmin = formattedEmail === 'stephen.tssgroup@gmail.com';
-      const user = auth.currentUser;
-      
-      if (user) {
-        const userDocRef = doc(db, 'members', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (!userDoc.exists()) {
-          // Buat data member baru dengan tier basic dan tanpa expiry (atau default admin)
-          await setDoc(userDocRef, {
-            userId: user.uid,
-            email: formattedEmail,
-            name: isMainAdmin ? 'Admin' : formattedEmail.split('@')[0],
-            role: isMainAdmin ? 'admin' : 'member',
-            status: 'active',
-            tier: isMainAdmin ? 'Leader' : 'Normal',
-            expiresAt: null,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-          });
-        } else {
-          // Jika sudah ada, validasi tanggal kedaluwarsa jika bukan main admin
-          if (!isMainAdmin) {
-            const data = userDoc.data();
-            if (data.expiresAt) {
-              const expiresDate = data.expiresAt.toDate();
-              if (expiresDate < new Date()) {
-                await signOut(auth);
-                const expiredError = new Error('EXPIRED');
-                expiredError.name = 'ExpiredError';
-                throw expiredError;
-              }
-            }
-          }
-        }
-      }
     } catch (error: any) {
       // Handle predictable errors without printing to console
       if (error.name === 'ExpiredError' || error.message === 'EXPIRED') {
         setIsExpiredOpen(true);
-      } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+      } else if (error.message?.toLowerCase().includes('invalid login credentials')) {
         setErrorMsg('Email atau kata sandi salah.');
-      } else if (error.code === 'auth/user-not-found') {
+      } else if (error.message?.toLowerCase().includes('email not confirmed')) {
+        setErrorMsg('Email belum dikonfirmasi. Silakan cek email Anda.');
+      } else if (error.message?.toLowerCase().includes('not found')) {
         setErrorMsg('Akun belum terdaftar.');
       } else {
         setErrorMsg(error.message || 'Gagal autentikasi');
       }
       setIsLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    const formattedEmail = email.trim().toLowerCase();
+    if (!formattedEmail) {
+      setErrorMsg('Isi email terlebih dahulu untuk reset password.');
+      setSuccessMsg(null);
+      return;
+    }
+
+    setIsResetLoading(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    try {
+      await sendMemberPasswordReset(formattedEmail);
+      setSuccessMsg(`Link reset password sudah dikirim ke ${formattedEmail}.`);
+    } catch (error: any) {
+      setErrorMsg(error.message || 'Gagal mengirim email reset password.');
+    } finally {
+      setIsResetLoading(false);
     }
   };
 
@@ -150,6 +147,12 @@ function LoginView() {
           </div>
         )}
 
+        {successMsg && (
+          <div className="bg-green-500/10 border border-green-500/30 text-green-400 p-4 rounded mb-6 text-sm">
+            {successMsg}
+          </div>
+        )}
+
         <form onSubmit={handleAuth} className="space-y-6">
           <div className="space-y-2">
             <label className="font-mono text-xs font-bold text-dark-md tracking-eyebrow uppercase block">Email</label>
@@ -165,7 +168,17 @@ function LoginView() {
           </div>
           
           <div className="space-y-2">
-            <label className="font-mono text-xs font-bold text-dark-md tracking-eyebrow uppercase block">Kata Sandi</label>
+            <div className="flex items-center justify-between gap-3">
+              <label className="font-mono text-xs font-bold text-dark-md tracking-eyebrow uppercase block">Kata Sandi</label>
+              <button
+                type="button"
+                onClick={handlePasswordReset}
+                disabled={isLoading || isResetLoading}
+                className="font-body text-xs text-gold hover:text-dark-hi transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isResetLoading ? 'Mengirim...' : 'Lupa kata sandi?'}
+              </button>
+            </div>
             <div className="relative">
               <input 
                 type={showPassword ? "text" : "password"}
@@ -373,28 +386,26 @@ function AdminView() {
   const [filterGroup, setFilterGroup] = useState('');
 
   useEffect(() => {
-    const q = query(collection(db, 'members'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (sn) => {
-      setMembers(sn.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    }, (error) => {
-      console.error("Gagal mendapatkan member", error);
-    });
-    return () => unsubscribe();
+    let isMounted = true;
+
+    listMembers()
+      .then((rows) => {
+        if (isMounted) setMembers(rows);
+      })
+      .catch((error) => {
+        console.error("Gagal mendapatkan member", error);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleUpdate = async (memberId: string, role: string, newTier: string, expiresAtStr: string, allowedPortals: string[], sinadMateri: boolean, sinadExercise: boolean, group: string) => {
     setIsUpdating(true);
     try {
-      const ref = doc(db, 'members', memberId);
-      const updateData: any = { role, tier: newTier, allowedPortals, sinadMateri, sinadExercise, group, updatedAt: serverTimestamp() };
-      
-      if (expiresAtStr) {
-        updateData.expiresAt = Timestamp.fromDate(new Date(expiresAtStr));
-      } else {
-        updateData.expiresAt = null;
-      }
-      
-      await updateDoc(ref, updateData);
+      await updateMember(memberId, role, newTier, expiresAtStr, allowedPortals, sinadMateri, sinadExercise, group);
+      setMembers(await listMembers());
     } catch (err) {
       console.error(err);
       alert('Gagal update data member');
@@ -404,7 +415,6 @@ function AdminView() {
 
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState({ text: '', type: '' });
 
@@ -416,44 +426,14 @@ function AdminView() {
     
     try {
       const emailFormatted = newEmail.trim().toLowerCase();
-      
-      let uid = '';
-      try {
-        const userCredential = await createUserWithEmailAndPassword(secondaryAuth, emailFormatted, newPassword);
-        uid = userCredential.user.uid;
-      } catch (authErr: any) {
-        if (authErr.code === 'auth/email-already-in-use') {
-          // Attempt to login to get UID if they provided the correct password
-          try {
-            const { signInWithEmailAndPassword } = await import('./lib/firebase');
-            const userCredential = await signInWithEmailAndPassword(secondaryAuth, emailFormatted, newPassword);
-            uid = userCredential.user.uid;
-          } catch (loginErr) {
-            throw new Error('Email sudah terdaftar dengan kata sandi berbeda. Minta user login pertama kali agar datanya muncul, atau masukkan kata sandi yang benar.');
-          }
-        } else {
-          throw authErr;
-        }
+      if (newPassword.length < 6) {
+        throw new Error('Password minimal 6 karakter.');
       }
-      
-      const userDocRef = doc(db, 'members', uid);
-      const newMemberData = {
-        userId: uid,
-        email: emailFormatted,
-        name: emailFormatted.split('@')[0],
-        role: 'member',
-        status: 'active',
-        tier: 'Professional',
-        allowedPortals: ['aif'],
-        expiresAt: null,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
-      
-      await setDoc(userDocRef, newMemberData);
-      await secondaryAuth.signOut();
-      
-      setCreateMsg({ text: `Berhasil menambahkan akun: ${emailFormatted}`, type: 'success' });
+
+      await createPendingMember(emailFormatted, newPassword);
+      setMembers(await listMembers());
+
+      setCreateMsg({ text: `Akun login dan akses ${emailFormatted} sudah dibuat. User bisa login dengan password yang kamu tentukan.`, type: 'success' });
       setNewEmail('');
       setNewPassword('');
     } catch (err: any) {
@@ -465,7 +445,7 @@ function AdminView() {
 
   const handleSendPasswordReset = async (email: string) => {
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendMemberPasswordReset(email);
       alert(`Email reset password berhasil dikirim ke ${email}. User dapat mengganti password melalui tautan di email tersebut.`);
     } catch (err: any) {
       alert(`Gagal mengirim email reset password: ${err.message}`);
@@ -488,7 +468,7 @@ function AdminView() {
 
       <div className="bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card mb-8">
         <h3 className="font-sans font-bold text-xl text-light-hi mb-2">Tambah Member Baru</h3>
-        <p className="font-body text-sm text-light-md mb-6">Buat akun untuk memberikan akses ke portal.</p>
+        <p className="font-body text-sm text-light-md mb-6">Buat akun login dan akses portal dalam satu langkah.</p>
         
         <form onSubmit={handleCreateUser} className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
           <div className="flex-1 w-full min-w-[200px]">
@@ -504,29 +484,20 @@ function AdminView() {
             />
           </div>
           <div className="flex-1 w-full min-w-[200px]">
-            <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Kata Sandi</label>
-            <div className="relative">
-              <input 
-                type={showPassword ? "text" : "password"}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-                placeholder="Minimal 6 karakter"
-                className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi placeholder:text-light-lo focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted transition-all pr-12"
-                disabled={isCreating}
-              />
-              <button 
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 px-3 flex items-center justify-center text-light-md hover:text-gold-muted transition-colors focus:outline-none"
-                tabIndex={-1}
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
+            <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+              minLength={6}
+              placeholder="Minimal 6 karakter"
+              className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi placeholder:text-light-lo focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted transition-all"
+              disabled={isCreating}
+            />
           </div>
           <Button type="submit" variant="primary" disabled={isCreating} className="py-3 px-8 border border-transparent w-full sm:w-auto mt-4 sm:mt-0">
-            {isCreating ? "Menambahkan..." : "Tambah"}
+            {isCreating ? "Membuat..." : "Tambah"}
           </Button>
         </form>
 
@@ -696,7 +667,7 @@ body { font-family: var(--font-body); background: var(--bg-dark); color: var(--t
 </html>
 `;
 
-function DashboardView({ user }: { user: User }) {
+function DashboardView({ user, forcePasswordReset = false }: { user: User, forcePasswordReset?: boolean }) {
   const userEmail = user.email || '';
   const [allowedPortals, setAllowedPortals] = useState<string[]>(['aif']);
   const [currentPortal, setCurrentPortal] = useState<'hub' | 'aif' | 'idl' | 'sinad'>('hub');
@@ -721,6 +692,13 @@ function DashboardView({ user }: { user: User }) {
   const [passwordMsg, setPasswordMsg] = useState({ text: '', type: '' });
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    if (forcePasswordReset) {
+      setIsPasswordModalOpen(true);
+      setPasswordMsg({ text: 'Silakan buat password baru untuk menyelesaikan proses reset password.', type: 'success' });
+    }
+  }, [forcePasswordReset]);
 
   const handleIdlClick = async (e: any) => {
     e.preventDefault();
@@ -769,7 +747,7 @@ function DashboardView({ user }: { user: User }) {
     }
     setIsUpdatingPassword(true);
     try {
-      await updatePassword(user, newPassword);
+      await updateMemberPassword(newPassword);
       setPasswordMsg({ text: 'Password berhasil diubah.', type: 'success' });
       setTimeout(() => {
         setIsPasswordModalOpen(false);
@@ -777,7 +755,7 @@ function DashboardView({ user }: { user: User }) {
         setPasswordMsg({ text: '', type: '' });
       }, 2000);
     } catch (err: any) {
-      if (err.code === 'auth/requires-recent-login') {
+      if (err.message?.toLowerCase().includes('reauthentication')) {
         setPasswordMsg({ text: 'Sesi Anda telah kedaluwarsa. Silakan logout dan login kembali untuk mengubah password.', type: 'error' });
       } else {
         setPasswordMsg({ text: err.message, type: 'error' });
@@ -788,55 +766,49 @@ function DashboardView({ user }: { user: User }) {
   };
 
   useEffect(() => {
-    let unsubscribe: any = null;
-    const subscribeMemberData = () => {
+    let isMounted = true;
+    const loadMemberData = async () => {
       try {
-        const docRef = doc(db, 'members', user.uid);
-        unsubscribe = onSnapshot(docRef, (sn) => {
-          if (sn.exists()) {
-            const data = sn.data();
-            if (data.role === 'admin') setIsAdmin(true);
-            
-            let portals = data.allowedPortals || ['aif'];
-            // Fallback if the user is main admin
-            if (user.email === 'stephen.tssgroup@gmail.com') {
-               if (!portals.includes('idl')) portals.push('idl');
-               if (!portals.includes('sinad')) portals.push('sinad');
-               if (!portals.includes('aif')) portals.push('aif');
-               setIsAdmin(true);
-            }
-            setAllowedPortals(portals);
-            // Only set current portal once to avoid jumping around on updates
-            setCurrentPortal(prev => prev === 'hub' ? (portals.length > 1 ? 'hub' : (portals[0] as any)) : prev);
-            
-            setSinadAccess({
-              tier: data.tier || 'Professional',
-              materi: data.sinadMateri || false,
-              exercise: data.sinadExercise || false
-            });
-          } else if (user.email === 'stephen.tssgroup@gmail.com') {
-            setAllowedPortals(['aif', 'idl', 'sinad']);
-            setCurrentPortal('hub');
-            setIsAdmin(true);
-            setSinadAccess({ tier: 'Internal', materi: true, exercise: true });
-          }
-          setIsLoadingPortals(false);
+        const data = await getMyMemberProfile();
+        if (!isMounted) return;
+
+        if (data.role === 'admin') setIsAdmin(true);
+
+        let portals = data.allowedPortals || ['aif'];
+        // Fallback if the user is main admin
+        if (user.email === 'stephen.tssgroup@gmail.com') {
+           if (!portals.includes('idl')) portals.push('idl');
+           if (!portals.includes('sinad')) portals.push('sinad');
+           if (!portals.includes('aif')) portals.push('aif');
+           setIsAdmin(true);
+        }
+        setAllowedPortals(portals);
+        // Only set current portal once to avoid jumping around on updates
+        setCurrentPortal(prev => prev === 'hub' ? (portals.length > 1 ? 'hub' : (portals[0] as any)) : prev);
+
+        setSinadAccess({
+          tier: data.tier || 'Professional',
+          materi: data.sinadMateri || false,
+          exercise: data.sinadExercise || false
         });
       } catch (err) {
         console.error("Gagal mendapatkan data member", err);
-        setIsLoadingPortals(false);
+      } finally {
+        if (isMounted) {
+          setIsLoadingPortals(false);
+        }
       }
     };
-    subscribeMemberData();
+    loadMemberData();
     return () => {
-      if (unsubscribe) unsubscribe();
+      isMounted = false;
     };
-  }, [user.uid, user.email]);
+  }, [user.id, user.email]);
 
   const handleLogout = async () => {
     try {
       localStorage.removeItem('temp_password');
-      await signOut(auth);
+      await signOutMember();
     } catch(err) {
       console.error(err);
     }
@@ -919,7 +891,7 @@ function DashboardView({ user }: { user: User }) {
               {activeTab === 'dashboard' ? 'Admin Panel' : 'Kembali'}
             </button>
           )}
-          <span className="hidden md:inline-block font-body text-sm font-semibold text-light-md">{user.displayName || user.email}</span>
+          <span className="hidden md:inline-block font-body text-sm font-semibold text-light-md">{user.user_metadata?.name || user.email}</span>
           <button onClick={() => setIsPasswordModalOpen(true)} className="text-light-lo hover:text-light-hi transition-colors p-2 cursor-pointer" title="Ganti Password">
             <Key className="w-5 h-5" />
           </button>
@@ -1478,32 +1450,26 @@ function DashboardView({ user }: { user: User }) {
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authInitialized, setAuthInitialized] = useState(false);
+  const [forcePasswordReset, setForcePasswordReset] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        const isMainAdmin = currentUser.email === 'stephen.tssgroup@gmail.com';
-        if (!isMainAdmin) {
-          try {
-            const userDocRef = doc(db, 'members', currentUser.uid);
-            const userDoc = await getDoc(userDocRef);
-            if (userDoc.exists()) {
-              const data = userDoc.data();
-              if (data.expiresAt && data.expiresAt.toDate() < new Date()) {
-                await signOut(auth);
-                setUser(null);
-                setAuthInitialized(true);
-                return;
-              }
-            }
-          } catch (err) {
-            console.error("Gagal memvalidasi sesi:", err);
-          }
-        }
+    getCurrentUser().then((currentUser) => {
+      setUser(currentUser);
+      setAuthInitialized(true);
+    }).catch((err) => {
+      console.error("Gagal memvalidasi sesi:", err);
+      setUser(null);
+      setAuthInitialized(true);
+    });
+
+    const unsubscribe = onAuthUserChange((currentUser, event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setForcePasswordReset(true);
       }
       setUser(currentUser);
       setAuthInitialized(true);
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -1513,7 +1479,7 @@ export default function App() {
 
   return (
     <>
-      {!user ? <LoginView /> : <DashboardView user={user} />}
+      {!user ? <LoginView /> : <DashboardView user={user} forcePasswordReset={forcePasswordReset} />}
     </>
   );
 }
