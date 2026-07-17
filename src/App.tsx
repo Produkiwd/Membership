@@ -1,4 +1,4 @@
-import { BookOpen, Calendar, ChevronRight, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff } from 'lucide-react';
+import { Monitor, Sparkles, BookOpen, Calendar, ChevronRight, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X } from 'lucide-react';
 import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent } from 'react';
 import { cn } from './lib/utils';
 import {
@@ -692,6 +692,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   const [passwordMsg, setPasswordMsg] = useState({ text: '', type: '' });
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [iframeModalUrl, setIframeModalUrl] = useState<{url: string, title: string} | null>(null);
 
   useEffect(() => {
     if (forcePasswordReset) {
@@ -768,8 +769,14 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   useEffect(() => {
     let isMounted = true;
     const loadMemberData = async () => {
+      let data: any = { role: 'member', allowedPortals: ['aif'], tier: 'Professional', sinadMateri: false, sinadExercise: false };
       try {
-        const data = await getMyMemberProfile();
+        data = await getMyMemberProfile();
+      } catch (err) {
+        console.error("Gagal mendapatkan data member", err);
+      }
+
+      try {
         if (!isMounted) return;
 
         if (data.role === 'admin') setIsAdmin(true);
@@ -792,7 +799,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
           exercise: data.sinadExercise || false
         });
       } catch (err) {
-        console.error("Gagal mendapatkan data member", err);
+        console.error("Error setting portal states", err);
       } finally {
         if (isMounted) {
           setIsLoadingPortals(false);
@@ -1386,7 +1393,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Materi Access */}
                   {(sinadAccess.tier === 'Teacher' || (sinadAccess.tier === 'Student' && sinadAccess.materi) || isAdmin) ? (
-                    <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
+                    <div onClick={() => setIframeModalUrl({ url: 'https://sinad.id/materi', title: 'Materi SinaD' })} className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
                       <div>
                         <div className="flex items-center gap-3 mb-4">
                            <BookOpen className="w-6 h-6 text-gold" />
@@ -1412,7 +1419,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
                   {/* Exercise Access */}
                   {(sinadAccess.tier === 'Teacher' || (sinadAccess.tier === 'Student' && sinadAccess.exercise) || isAdmin) ? (
-                    <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
+                    <div onClick={() => setIframeModalUrl({ url: 'https://sinad.id/exercise', title: 'Exercise SinaD' })} className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
                       <div>
                         <div className="flex items-center gap-3 mb-4">
                            <FileText className="w-6 h-6 text-gold" />
@@ -1435,8 +1442,65 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                       </div>
                     </div>
                   )}
+
+                  {/* Informasi Interaktif Flat Panel (IFP) */}
+                  <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-3 mb-4">
+                         <Monitor className="w-6 h-6 text-gold" />
+                         <div className="font-sans font-bold text-2xl text-light-hi">Informasi Interaktif Flat Panel (IFP)</div>
+                      </div>
+                      <p className="font-body text-sm text-light-md mt-4">Panduan, spesifikasi, dan informasi terkini mengenai Interaktif Flat Panel (IFP).</p>
+                    </div>
+                    <div className="mt-8 flex flex-col gap-3">
+                      <button onClick={() => setIframeModalUrl({ url: '/ifp-panduan.html', title: 'Buku Panduan IFP' })} className="flex w-full items-center justify-between p-4 rounded-lg border border-border-light-subtle bg-bg-light hover:border-gold/30 group transition-colors text-left">
+                        <span className="font-sans font-semibold text-light-hi group-hover:text-gold transition-colors">Buku Panduan IFP</span>
+                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                      </button>
+                      <button onClick={() => setIframeModalUrl({ url: '/ifp-spesifikasi.html', title: 'Spesifikasi IFP' })} className="flex w-full items-center justify-between p-4 rounded-lg border border-border-light-subtle bg-bg-light hover:border-gold/30 group transition-colors text-left">
+                        <span className="font-sans font-semibold text-light-hi group-hover:text-gold transition-colors">Spesifikasi IFP</span>
+                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Informasi AI */}
+                  <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
+                    <div>
+                      <div className="flex items-center gap-3 mb-4">
+                         <Sparkles className="w-6 h-6 text-gold" />
+                         <div className="font-sans font-bold text-2xl text-light-hi group-hover:text-gold transition-colors">Informasi AI</div>
+                      </div>
+                      <p className="font-body text-sm text-light-md mt-4">Pelajari perkembangan terbaru dan wawasan seputar teknologi Artificial Intelligence (AI).</p>
+                    </div>
+                    <div className="mt-8 flex justify-end">
+                      <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                    </div>
+                  </div>
                 </div>
               </main>
+            )}
+
+            {/* Generic Iframe Modal */}
+            {iframeModalUrl && (
+              <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#0a0a09]/80 backdrop-blur-sm">
+                <div className={`bg-bg-light border border-border-light-subtle/30 shadow-2xl w-full overflow-hidden p-0 transform transition-all relative z-[61] flex flex-col ${isFullscreen ? 'fixed inset-0 rounded-none max-w-none max-h-none h-screen' : 'rounded-2xl max-w-5xl max-h-[90vh]'}`}>
+                  <div className="flex justify-between items-center p-4 border-b border-border-light-subtle/30 bg-white">
+                    <h3 className="text-xl font-bold font-sans text-light-hi">{iframeModalUrl.title}</h3>
+                    <div className="flex gap-2">
+                        <button onClick={() => setIsFullscreen(!isFullscreen)} className="text-light-md hover:text-gold transition-colors p-1" title={isFullscreen ? 'Kecilkan' : 'Layar Penuh'}>
+                          {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+                        </button>
+                        <button onClick={() => setIframeModalUrl(null)} className="text-light-md hover:text-gold transition-colors p-1">
+                          <X className="w-6 h-6" />
+                        </button>
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-auto bg-white min-h-[80vh]">
+                    <iframe src={iframeModalUrl.url} className="w-full h-full min-h-[80vh] border-0" title={iframeModalUrl.title} />
+                  </div>
+                </div>
+              </div>
             )}
           </>
         ) : (
