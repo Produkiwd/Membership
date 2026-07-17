@@ -1388,16 +1388,23 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Materi Access */}
                   {(sinadAccess.tier === 'Teacher' || (sinadAccess.tier === 'Student' && sinadAccess.materi) || isAdmin) ? (
-                    <div onClick={() => setIframeModalUrl({ url: 'https://sinad.id/materi', title: 'Materi SinaD' })} className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
+                    <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between">
                       <div>
                         <div className="flex items-center gap-3 mb-4">
                            <BookOpen className="w-6 h-6 text-gold" />
-                           <div className="font-sans font-bold text-2xl text-light-hi group-hover:text-gold transition-colors">Materi</div>
+                           <div className="font-sans font-bold text-2xl text-light-hi">Materi</div>
                         </div>
                         <p className="font-body text-sm text-light-md mt-4">Akses semua materi pembelajaran yang tersedia di platform SinaD.</p>
                       </div>
-                      <div className="mt-8 flex justify-end">
-                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                      <div className="mt-8 flex flex-col gap-3">
+                        <button onClick={() => setIframeModalUrl({ url: '/SinaD support.html', title: 'Materi 1' })} className="flex w-full items-center justify-between p-4 rounded-lg border border-border-light-subtle bg-bg-light hover:border-gold/30 group transition-colors text-left">
+                          <span className="font-sans font-semibold text-light-hi group-hover:text-gold transition-colors">Materi 1</span>
+                          <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                        </button>
+                        <button onClick={() => {}} className="flex w-full items-center justify-between p-4 rounded-lg border border-border-light-subtle bg-bg-light hover:border-gold/30 group transition-colors text-left opacity-50 cursor-not-allowed">
+                          <span className="font-sans font-semibold text-light-hi group-hover:text-gold transition-colors">Materi 2</span>
+                          <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                        </button>
                       </div>
                     </div>
                   ) : (
