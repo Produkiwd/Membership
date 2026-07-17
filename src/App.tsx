@@ -1381,14 +1381,9 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
                 <Eyebrow variant="flat">SinaD Learning</Eyebrow>
                 <div className="h-6"></div>
-                <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-4">
+                <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-12">
                   SinaD Portal
                 </h1>
-                <div className="flex items-center gap-3 mb-10">
-                  <span className="inline-block px-3 py-1 rounded bg-bg-light-eyebrow border border-border-light-eyebrow text-gold-muted font-mono text-xs font-bold uppercase">
-                    Role: {sinadAccess.tier}
-                  </span>
-                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Materi Access */}
