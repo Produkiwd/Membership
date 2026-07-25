@@ -1421,7 +1421,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
                   {/* Exercise Access */}
                   {(sinadAccess.tier === 'Teacher' || (sinadAccess.tier === 'Student' && sinadAccess.exercise) || isAdmin) ? (
-                    <div onClick={() => setIframeModalUrl({ url: 'https://sinad.id/exercise', title: 'Exercise SinaD' })} className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
+                    <a href="https://papan-penilaian-sinad.ai.studio" target="_blank" rel="noopener noreferrer" className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
                       <div>
                         <div className="flex items-center gap-3 mb-4">
                            <FileText className="w-6 h-6 text-gold" />
@@ -1432,7 +1432,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                       <div className="mt-8 flex justify-end">
                         <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
                       </div>
-                    </div>
+                    </a>
                   ) : (
                     <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
                       <div>
