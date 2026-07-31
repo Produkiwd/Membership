@@ -1,5 +1,5 @@
-import { Monitor, Sparkles, BookOpen, Calendar, ChevronRight, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X } from 'lucide-react';
-import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent } from 'react';
+import { Monitor, Sparkles, BookOpen, Calendar, ChevronRight, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2 } from 'lucide-react';
+import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent, type ChangeEvent } from 'react';
 import { cn } from './lib/utils';
 import {
   createPendingMember,
@@ -233,7 +233,7 @@ function LoginView() {
   );
 }
 
-function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allGroups }: { key?: string | number, mb: any, isUpdating: boolean, handleUpdate: (id: string, role: string, tier: string, exp: string, portals: string[], sinadMateri: boolean, sinadExercise: boolean, group: string) => void, handleSendPasswordReset: (email: string) => void, allGroups: string[] }) {
+function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allGroups, allTiers }: { key?: string | number, mb: any, isUpdating: boolean, handleUpdate: (id: string, role: string, tier: string, exp: string, portals: string[], sinadMateri: boolean, sinadExercise: boolean, group: string) => void, handleSendPasswordReset: (email: string) => void, allGroups: string[], allTiers: string[] }) {
   const [tier, setTier] = useState(mb.tier || 'Professional');
   const [role, setRole] = useState(mb.role || 'member');
   const [portals, setPortals] = useState<string[]>(mb.allowedPortals || ['aif']);
@@ -323,15 +323,16 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
       <td className="py-3 px-2 align-top">
         <select 
           value={tier} 
-          onChange={e => setTier(e.target.value)}
+          onChange={e => {
+            const newTier = e.target.value;
+            setTier(newTier);
+            handleUpdate(mb.id, role, newTier, exp, portals, sinadMateri, sinadExercise, group);
+          }}
           className="border border-border-light-subtle rounded px-2 py-1 bg-transparent block w-full focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted text-xs"
         >
-          <option value="Professional">Professional</option>
-          <option value="Leaders">Leaders</option>
-          <option value="Community">Community</option>
-          <option value="Internal">Internal</option>
-          <option value="Teacher">Teacher (SinaD)</option>
-          <option value="Student">Student (SinaD)</option>
+          {allTiers.map(t => (
+            <option key={t} value={t}>{t === 'Teacher' ? 'Teacher (SinaD)' : t === 'Student' ? 'Student (SinaD)' : t}</option>
+          ))}
         </select>
         {portals.includes('sinad') && tier === 'Student' && (
           <div className="flex flex-col gap-1 text-[10px] mt-2 border-t border-border-light-subtle pt-2">
@@ -382,6 +383,179 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
         </div>
       </td>
     </tr>
+  );
+}
+
+function MateriView() {
+  const [selectedModule, setSelectedModule] = useState('05');
+  const [materiTitle, setMateriTitle] = useState('');
+  const [materiLink, setMateriLink] = useState('');
+  const [materiList, setMateriList] = useState<{title: string, url: string}[]>([]);
+
+  const MODULES = [
+    { id: '01', name: 'Strategize' },
+    { id: '02', name: 'Prompt' },
+    { id: '03', name: 'Create' },
+    { id: '04', name: 'Build' },
+    { id: '05', name: 'Thinking with Claude' },
+  ];
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(`materi_module_${selectedModule}`);
+      if (stored) {
+        setMateriList(JSON.parse(stored));
+      } else if (selectedModule === '05') {
+        // Fallback for older data
+        const legacyStored = localStorage.getItem('thinking_with_claude_materials');
+        if (legacyStored) {
+          setMateriList(JSON.parse(legacyStored));
+        } else {
+          const oldLink = localStorage.getItem('thinking_with_claude_link');
+          if (oldLink) setMateriList([{title: 'Thinking with Claude', url: oldLink}]);
+          else setMateriList([]);
+        }
+      } else {
+        setMateriList([]);
+      }
+    } catch {
+      setMateriList([]);
+    }
+  }, [selectedModule]);
+
+  const handleSaveMateri = (e: FormEvent) => {
+    e.preventDefault();
+    if (!materiTitle || !materiLink) {
+      alert("Judul dan link materi harus diisi.");
+      return;
+    }
+    const newList = [...materiList, { title: materiTitle, url: materiLink }];
+    setMateriList(newList);
+    localStorage.setItem(`materi_module_${selectedModule}`, JSON.stringify(newList));
+    if (selectedModule === '05') {
+      localStorage.setItem('thinking_with_claude_materials', JSON.stringify(newList));
+    }
+    setMateriTitle('');
+    setMateriLink('');
+    alert('Materi berhasil ditambahkan!');
+  };
+
+  const handleDeleteMateri = (index: number) => {
+    const newList = materiList.filter((_, i) => i !== index);
+    setMateriList(newList);
+    localStorage.setItem(`materi_module_${selectedModule}`, JSON.stringify(newList));
+    if (selectedModule === '05') {
+      localStorage.setItem('thinking_with_claude_materials', JSON.stringify(newList));
+    }
+  };
+
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Ukuran file terlalu besar. Maksimal 5MB.");
+      return;
+    }
+
+    if (!materiTitle) {
+      setMateriTitle(file.name);
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setMateriLink(event.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
+      <Eyebrow variant="flat">Materi Panel</Eyebrow>
+      <div className="h-6"></div>
+      <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-12">
+        Manajemen Materi
+      </h1>
+
+      <div className="bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 border-b border-border-light-subtle pb-6">
+          <div>
+            <h3 className="font-sans font-bold text-xl text-light-hi mb-2">Pilih Modul</h3>
+            <p className="font-body text-sm text-light-md">Pilih modul yang materinya ingin diubah/ditambah.</p>
+          </div>
+          <select 
+            value={selectedModule}
+            onChange={(e) => setSelectedModule(e.target.value)}
+            className="w-full sm:w-auto px-4 py-2 border border-border-light-subtle rounded text-light-hi focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted bg-white min-w-[200px]"
+          >
+            {MODULES.map(m => (
+              <option key={m.id} value={m.id}>{m.id} - {m.name}</option>
+            ))}
+          </select>
+        </div>
+        
+        <h3 className="font-sans font-bold text-lg text-light-hi mb-2">Tambah/Ubah Materi: {MODULES.find(m => m.id === selectedModule)?.name}</h3>
+        <p className="font-body text-sm text-light-md mb-6">Tambah link materi atau unggah file (HTML/PDF, max 5MB) yang akan ditampilkan pada modul ini.</p>
+        <form onSubmit={handleSaveMateri} className="flex flex-col gap-4">
+          <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
+            <div className="flex-1 w-full min-w-[200px]">
+              <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Judul Materi</label>
+              <input 
+                type="text" 
+                value={materiTitle}
+                onChange={(e) => setMateriTitle(e.target.value)}
+                placeholder="Contoh: Modul 1 / Website Utama"
+                className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi placeholder:text-light-lo focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted transition-all"
+              />
+            </div>
+          </div>
+          <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
+            <div className="flex-1 w-full min-w-[200px]">
+              <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Link Materi</label>
+              <input 
+                type="text" 
+                value={materiLink}
+                onChange={(e) => setMateriLink(e.target.value)}
+                placeholder="https://contoh.com/materi atau unggah file di bawah"
+                className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi placeholder:text-light-lo focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted transition-all"
+              />
+            </div>
+          </div>
+          <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
+             <div className="flex-1 w-full min-w-[200px]">
+                <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Upload File Materi</label>
+                <input 
+                  type="file" 
+                  accept=".html,.pdf"
+                  onChange={handleFileUpload}
+                  className="w-full px-4 py-2 border border-border-light-subtle rounded text-light-hi file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gold-muted/10 file:text-gold-muted hover:file:bg-gold-muted/20 transition-all cursor-pointer"
+                />
+             </div>
+             <Button type="submit" variant="primary" className="py-3 px-8 border border-transparent w-full sm:w-auto mt-4 sm:mt-0">
+                Tambah Materi
+             </Button>
+          </div>
+        </form>
+        {materiList.length > 0 && (
+          <div className="mt-8 space-y-3">
+            <h4 className="font-sans font-bold text-sm text-light-hi tracking-eyebrow uppercase mb-4 border-b border-border-light-subtle pb-2">Daftar Materi</h4>
+            {materiList.map((m, idx) => (
+              <div key={idx} className="flex justify-between items-center p-4 border border-border-light-subtle rounded-lg bg-bg-light">
+                 <div>
+                    <div className="font-sans font-bold text-light-hi text-sm">{m.title}</div>
+                    <div className="font-mono text-[10px] text-light-lo truncate max-w-xs sm:max-w-md">{m.url.startsWith('data:') ? 'File Terunggah' : m.url}</div>
+                 </div>
+                 <button onClick={() => handleDeleteMateri(idx)} className="text-red-500 hover:text-red-700 transition-colors p-2">
+                    <Trash2 className="w-4 h-4" />
+                 </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
 
@@ -463,71 +637,18 @@ function AdminView() {
     ...members.map(m => m.group).filter(Boolean)
   ])).sort();
 
-  const [materiLink, setMateriLink] = useState(localStorage.getItem('thinking_with_claude_link') || '');
-  const handleSaveMateri = (e: FormEvent) => {
-    e.preventDefault();
-    localStorage.setItem('thinking_with_claude_link', materiLink);
-    alert('Materi berhasil disimpan!');
-  };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Ukuran file terlalu besar. Maksimal 5MB.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        setMateriLink(event.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
+  const allTiers = Array.from(new Set([
+    "Professional", "Leaders", "Community", "Internal", "Teacher", "Student", "TWC",
+    ...members.map(m => m.tier).filter(Boolean)
+  ])).sort();
 
   return (
     <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
       <Eyebrow variant="flat">Admin Panel</Eyebrow>
       <div className="h-6"></div>
       <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-12">
-        Manajemen Keanggotaan & Materi
+        Manajemen Keanggotaan
       </h1>
-
-      <div className="bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card mb-8">
-        <h3 className="font-sans font-bold text-xl text-light-hi mb-2">Manajemen Materi: Thinking with Claude</h3>
-        <p className="font-body text-sm text-light-md mb-6">Ubah link materi atau unggah file (HTML/PDF, max 5MB) yang akan ditampilkan pada modul Thinking with Claude.</p>
-        <form onSubmit={handleSaveMateri} className="flex flex-col gap-4">
-          <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
-            <div className="flex-1 w-full min-w-[200px]">
-              <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Link Materi</label>
-              <input 
-                type="text" 
-                value={materiLink}
-                onChange={(e) => setMateriLink(e.target.value)}
-                placeholder="https://contoh.com/materi atau unggah file di bawah"
-                className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi placeholder:text-light-lo focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted transition-all"
-              />
-            </div>
-          </div>
-          <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
-             <div className="flex-1 w-full min-w-[200px]">
-                <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Upload File Materi</label>
-                <input 
-                  type="file" 
-                  accept=".html,.pdf"
-                  onChange={handleFileUpload}
-                  className="w-full px-4 py-2 border border-border-light-subtle rounded text-light-hi file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gold-muted/10 file:text-gold-muted hover:file:bg-gold-muted/20 transition-all cursor-pointer"
-                />
-             </div>
-             <Button type="submit" variant="primary" className="py-3 px-8 border border-transparent w-full sm:w-auto mt-4 sm:mt-0">
-                Simpan Materi
-             </Button>
-          </div>
-        </form>
-      </div>
 
       <div className="bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card mb-8">
         <h3 className="font-sans font-bold text-xl text-light-hi mb-2">Tambah Member Baru</h3>
@@ -617,7 +738,7 @@ function AdminView() {
               </tr>
             )}
             {members.filter(mb => filterGroup ? mb.group === filterGroup : true).map(mb => (
-              <MemberRow key={mb.id} mb={mb} isUpdating={isUpdating} handleUpdate={handleUpdate} handleSendPasswordReset={handleSendPasswordReset} allGroups={allGroups} />
+              <MemberRow key={mb.id} mb={mb} isUpdating={isUpdating} handleUpdate={handleUpdate} handleSendPasswordReset={handleSendPasswordReset} allGroups={allGroups} allTiers={allTiers} />
             ))}
           </tbody>
         </table>
@@ -744,7 +865,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
     return 'TSS Group Hub';
   };
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'admin'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'admin' | 'materi'>('dashboard');
   const [isAdmin, setIsAdmin] = useState(userEmail === 'stephen.tssgroup@gmail.com');
   const [selectedModule, setSelectedModule] = useState<any>(null);
   const [selectedHtmlData, setSelectedHtmlData] = useState<{ activeIndex: number; htmls: { title: string; content?: string; url?: string; images?: string[] }[] } | null>(null);
@@ -756,6 +877,45 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [iframeModalUrl, setIframeModalUrl] = useState<{url: string, title: string} | null>(null);
+
+  const handleModuleClick = (moduleId: string, defaultTitle: string, defaultSubtitle: string, defaultMaterials: any[]) => {
+    let materials: any[] = [];
+    try {
+      const stored = localStorage.getItem(`materi_module_${moduleId}`);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.length > 0) materials = parsed.map((m: any) => ({ title: m.title, url: m.url }));
+      }
+      if (materials.length === 0 && moduleId === '05') {
+        const legacyStored = localStorage.getItem('thinking_with_claude_materials');
+        if (legacyStored) {
+          const parsed = JSON.parse(legacyStored);
+          if (parsed.length > 0) materials = parsed.map((m: any) => ({ title: m.title, url: m.url }));
+        }
+        if (materials.length === 0) {
+          const oldLink = localStorage.getItem('thinking_with_claude_link');
+          if (oldLink) materials = [{title: 'Thinking with Claude', url: oldLink}];
+        }
+      }
+    } catch {}
+
+    let finalMaterials = [...defaultMaterials];
+    
+    if (materials.length > 0) {
+      if (moduleId === '05') {
+         finalMaterials = [{ day: "Materi", title: "Daftar Materi", htmls: materials }];
+      } else {
+         finalMaterials.push({ day: "Tambahan", title: "Materi Tambahan", htmls: materials });
+      }
+    }
+
+    setSelectedModule({
+      id: moduleId,
+      title: defaultTitle,
+      subtitle: defaultSubtitle,
+      materials: finalMaterials
+    });
+  };
 
   useEffect(() => {
     if (forcePasswordReset) {
@@ -801,7 +961,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
     }
 
     if (moduleId === '05') { // Thinking with Claude
-      return tier === 'Internal';
+      return tier === 'Internal' || tier === 'TWC';
     }
     
     return false;
@@ -958,12 +1118,28 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
             </button>
           )}
           {isAdmin && (
-            <button 
-              onClick={() => setActiveTab(activeTab === 'dashboard' ? 'admin' : 'dashboard')} 
-              className={cn("hidden sm:inline-block transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow", activeTab === 'admin' ? 'text-gold-muted' : 'text-light-lo hover:text-light-hi')}
-            >
-              {activeTab === 'dashboard' ? 'Admin Panel' : 'Kembali'}
-            </button>
+            <div className="hidden sm:flex items-center gap-4">
+              <button 
+                onClick={() => setActiveTab('materi')} 
+                className={cn("transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow", activeTab === 'materi' ? 'text-gold-muted' : 'text-light-lo hover:text-light-hi')}
+              >
+                Materi Panel
+              </button>
+              <button 
+                onClick={() => setActiveTab('admin')} 
+                className={cn("transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow", activeTab === 'admin' ? 'text-gold-muted' : 'text-light-lo hover:text-light-hi')}
+              >
+                Member Panel
+              </button>
+              {activeTab !== 'dashboard' && (
+                <button 
+                  onClick={() => setActiveTab('dashboard')} 
+                  className="transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow text-light-lo hover:text-light-hi"
+                >
+                  Dashboard
+                </button>
+              )}
+            </div>
           )}
           <span className="hidden md:inline-block font-body text-sm font-semibold text-light-md">{user.user_metadata?.name || user.email}</span>
           <button onClick={() => setIsPasswordModalOpen(true)} className="text-light-lo hover:text-light-hi transition-colors p-2 cursor-pointer" title="Ganti Password">
@@ -1044,7 +1220,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
             <h2 className="font-sans font-bold text-xl text-light-hi">Akses Cepat</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "01", title: "Strategize", subtitle: "Awareness Session", materials: [{ title: "Materi Sesi Penuh", htmls: [{ title: "Materi Visual", images: [stratImg1, stratImg2, stratImg3, stratImg4] }, { title: "APT Assessment", content: aptAssessmentHtml }] }] })}>
+            <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", [{ title: "Materi Sesi Penuh", htmls: [{ title: "Materi Visual", images: [stratImg1, stratImg2, stratImg3, stratImg4] }, { title: "APT Assessment", content: aptAssessmentHtml }] }])}>
               <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">01</span>
               <div>
                 <div className="font-sans font-bold text-lg text-light-hi mb-2">Strategize</div>
@@ -1060,7 +1236,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
             
             {/* Module 02 - Prompt */}
             {canAccessModule('02') ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "02", title: "Prompt", subtitle: "Chat Mastery", materials: [{ day: "Day 1", title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }] }, { day: "Day 2", title: "Materi AI First Level 2 Day 2", htmls: [{ title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }] })}>
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("02", "Prompt", "Chat Mastery", [{ day: "Day 1", title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }] }, { day: "Day 2", title: "Materi AI First Level 2 Day 2", htmls: [{ title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }])}>
                  <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">02</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Prompt</div>
@@ -1089,7 +1265,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
             {/* Module 03 - Create */}
             {canAccessModule('03') ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "03", title: "Create", subtitle: "Output Creation", materials: [{ day: "Day 1", title: "Materi Level 3 Day 1", htmls: [{ title: "AI Skills Manual", content: level3Day1Html }, { title: "CIS Prompting", content: level3Day1_1Html }] }] })}>
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("03", "Create", "Output Creation", [{ day: "Day 1", title: "Materi Level 3 Day 1", htmls: [{ title: "AI Skills Manual", content: level3Day1Html }, { title: "CIS Prompting", content: level3Day1_1Html }] }])}>
                  <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">03</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Create</div>
@@ -1118,16 +1294,16 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
             
             {/* Module 04 - Build */}
             {canAccessModule('04') ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "04", title: "Build", subtitle: "NoCode AI Build", materials: [{ day: "Day 1", title: "Materi Day 1" }, { day: "Day 2", title: "Materi Day 2" }] })}>
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("04", "Build", "NoCode AI Build", [{ day: "Day 1", title: "Materi Day 1" }, { day: "Day 2", title: "Materi Day 2" }])}>
                  <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">04</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Build</div>
                   <p className="font-body text-sm text-light-md">NoCode AI Build</p>
                   <div className="mt-6 flex items-center gap-3">
                      <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                        <div className="bg-gold h-full rounded-full w-[50%]"></div>
+                        <div className="bg-gold h-full rounded-full w-[100%]"></div>
                      </div>
-                     <span className="font-mono text-xs text-light-lo">50%</span>
+                     <span className="font-mono text-xs text-light-lo">100%</span>
                   </div>
                 </div>
               </div>
@@ -1147,11 +1323,11 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
             {/* Module 05 - Thinking with Claude */}
             {canAccessModule('05') ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "05", title: "Thinking with Claude", subtitle: "AI Reasoning", materials: [{ day: "Day 1", title: "Materi Thinking with Claude", htmls: [{ title: "Thinking with Claude", url: localStorage.getItem('thinking_with_claude_link') || "https://example.com" }] }] })}>
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("05", "Thinking with Claude", "One Day Intensive", [])}>
                  <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">05</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Thinking with Claude</div>
-                  <p className="font-body text-sm text-light-md">AI Reasoning</p>
+                  <p className="font-body text-sm text-light-md">One Day Intensive</p>
                   <div className="mt-6 flex items-center gap-3">
                      <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
                         <div className="bg-gold h-full rounded-full w-[0%]"></div>
@@ -1169,7 +1345,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                     <Lock className="w-4 h-4 text-light-lo" />
                   </div>
                   <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
-                  <p className="font-body text-[10px] text-light-lo">Tier Internal diperlukan untuk modul ini.</p>
+                  <p className="font-body text-[10px] text-light-lo">Tier Internal atau TWC diperlukan untuk modul ini.</p>
                 </div>
               </div>
             )}
@@ -1324,7 +1500,6 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                     className="p-4 border border-border-dark-subtle/30 rounded-xl bg-bg-dark flex justify-between items-center group hover:border-gold/30 transition-all cursor-pointer"
                   >
                     <div>
-                      {mat.day && <div className="font-mono text-xs text-gold-muted mb-1 font-bold">{mat.day}</div>}
                       <div className="font-sans font-medium text-dark-hi">{mat.title}</div>
                     </div>
                     <ChevronRight className="w-5 h-5 text-dark-md group-hover:text-gold-muted transition-colors" />
@@ -1601,8 +1776,10 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               </div>
             )}
           </>
-        ) : (
+        ) : activeTab === 'admin' ? (
           <AdminView />
+        ) : (
+          <MateriView />
         )}
       </div>
     </div>
