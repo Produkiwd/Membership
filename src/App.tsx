@@ -116,8 +116,13 @@ function LoginView() {
 
   return (
     <div className="min-h-screen bg-bg-dark flex items-center justify-center p-6 lg:p-12 relative overflow-hidden">
+      <video autoPlay loop muted playsInline className="absolute top-0 left-0 w-full h-full object-cover z-0" style={{ pointerEvents: 'none' }}>
+        <source src="https://uyqgionbubycyfdmweai.supabase.co/storage/v1/object/public/Asset%20WEB/Character_and_robots_idle_animation_202607311145.mp4" type="video/mp4" />
+      </video>
+      <div className="absolute top-0 left-0 w-full h-full bg-black/40 z-0"></div>
+      
       {/* Decorative Tech Nodes */}
-      <svg className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" fill="none">
+      <svg className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20 z-0" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" fill="none">
         <line x1="200" y1="200" x2="400" y2="300" stroke="#D4A84B" strokeWidth="1" strokeOpacity="0.2"/>
         <line x1="400" y1="300" x2="600" y2="150" stroke="#D4A84B" strokeWidth="1" strokeOpacity="0.2"/>
         <line x1="400" y1="300" x2="350" y2="600" stroke="#D4A84B" strokeWidth="1" strokeOpacity="0.2"/>
