@@ -458,13 +458,71 @@ function AdminView() {
     ...members.map(m => m.group).filter(Boolean)
   ])).sort();
 
+  const [materiLink, setMateriLink] = useState(localStorage.getItem('thinking_with_claude_link') || '');
+  const handleSaveMateri = (e: FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem('thinking_with_claude_link', materiLink);
+    alert('Materi berhasil disimpan!');
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Ukuran file terlalu besar. Maksimal 5MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setMateriLink(event.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
       <Eyebrow variant="flat">Admin Panel</Eyebrow>
       <div className="h-6"></div>
       <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-12">
-        Manajemen Keanggotaan
+        Manajemen Keanggotaan & Materi
       </h1>
+
+      <div className="bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card mb-8">
+        <h3 className="font-sans font-bold text-xl text-light-hi mb-2">Manajemen Materi: Thinking with Claude</h3>
+        <p className="font-body text-sm text-light-md mb-6">Ubah link materi atau unggah file (HTML/PDF, max 5MB) yang akan ditampilkan pada modul Thinking with Claude.</p>
+        <form onSubmit={handleSaveMateri} className="flex flex-col gap-4">
+          <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
+            <div className="flex-1 w-full min-w-[200px]">
+              <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Link Materi</label>
+              <input 
+                type="text" 
+                value={materiLink}
+                onChange={(e) => setMateriLink(e.target.value)}
+                placeholder="https://contoh.com/materi atau unggah file di bawah"
+                className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi placeholder:text-light-lo focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted transition-all"
+              />
+            </div>
+          </div>
+          <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
+             <div className="flex-1 w-full min-w-[200px]">
+                <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Upload File Materi</label>
+                <input 
+                  type="file" 
+                  accept=".html,.pdf"
+                  onChange={handleFileUpload}
+                  className="w-full px-4 py-2 border border-border-light-subtle rounded text-light-hi file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gold-muted/10 file:text-gold-muted hover:file:bg-gold-muted/20 transition-all cursor-pointer"
+                />
+             </div>
+             <Button type="submit" variant="primary" className="py-3 px-8 border border-transparent w-full sm:w-auto mt-4 sm:mt-0">
+                Simpan Materi
+             </Button>
+          </div>
+        </form>
+      </div>
 
       <div className="bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card mb-8">
         <h3 className="font-sans font-bold text-xl text-light-hi mb-2">Tambah Member Baru</h3>
@@ -735,6 +793,10 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
     if (moduleId === '03' || moduleId === '04') { // Create, Build
       return tier === 'Leaders' || tier === 'Internal';
+    }
+
+    if (moduleId === '05') { // Thinking with Claude
+      return tier === 'Internal';
     }
     
     return false;
@@ -1074,6 +1136,35 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   </div>
                   <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
                   <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
+                </div>
+              </div>
+            )}
+
+            {/* Module 05 - Thinking with Claude */}
+            {canAccessModule('05') ? (
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => setSelectedModule({ id: "05", title: "Thinking with Claude", subtitle: "AI Reasoning", materials: [{ day: "Day 1", title: "Materi Thinking with Claude", htmls: [{ title: "Thinking with Claude", url: localStorage.getItem('thinking_with_claude_link') || "https://example.com" }] }] })}>
+                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">05</span>
+                <div>
+                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Thinking with Claude</div>
+                  <p className="font-body text-sm text-light-md">AI Reasoning</p>
+                  <div className="mt-6 flex items-center gap-3">
+                     <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
+                        <div className="bg-gold h-full rounded-full w-[0%]"></div>
+                     </div>
+                     <span className="font-mono text-xs text-light-lo">0%</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
+                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">05</span>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-sans font-bold text-lg text-light-md">Thinking with Claude</div>
+                    <Lock className="w-4 h-4 text-light-lo" />
+                  </div>
+                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
+                  <p className="font-body text-[10px] text-light-lo">Tier Internal diperlukan untuk modul ini.</p>
                 </div>
               </div>
             )}
