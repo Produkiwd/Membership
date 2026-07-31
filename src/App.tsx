@@ -950,6 +950,10 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   const canAccessModule = (moduleId: string) => {
     const tier = sinadAccess.tier; // This is the user's tier for the portal
 
+    if (tier === 'TWC') {
+      return moduleId === '05';
+    }
+
     if (moduleId === '01') return true; // Strategize available to all
     
     if (moduleId === '02') { // Prompt
@@ -1220,20 +1224,34 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
             <h2 className="font-sans font-bold text-xl text-light-hi">Akses Cepat</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", [{ title: "Materi Sesi Penuh", htmls: [{ title: "Materi Visual", images: [stratImg1, stratImg2, stratImg3, stratImg4] }, { title: "APT Assessment", content: aptAssessmentHtml }] }])}>
-              <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">01</span>
-              <div>
-                <div className="font-sans font-bold text-lg text-light-hi mb-2">Strategize</div>
-                <p className="font-body text-sm text-light-md">Awareness Session</p>
-                <div className="mt-6 flex items-center gap-3">
-                   <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                      <div className="bg-gold h-full rounded-full w-[100%]"></div>
-                   </div>
-                   <span className="font-mono text-xs text-light-lo">100%</span>
+            {/* Module 01 - Strategize */}
+            {canAccessModule("01") ? (
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", [{ title: "Materi Sesi Penuh", htmls: [{ title: "Materi Visual", images: [stratImg1, stratImg2, stratImg3, stratImg4] }, { title: "APT Assessment", content: aptAssessmentHtml }] }])}>
+                <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">01</span>
+                <div>
+                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Strategize</div>
+                  <p className="font-body text-sm text-light-md">Awareness Session</p>
+                  <div className="mt-6 flex items-center gap-3">
+                     <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
+                        <div className="bg-gold h-full rounded-full w-[100%]"></div>
+                     </div>
+                     <span className="font-mono text-xs text-light-lo">100%</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            
+            ) : (
+              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
+                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">01</span>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-sans font-bold text-lg text-light-md">Strategize</div>
+                    <Lock className="w-4 h-4 text-light-lo" />
+                  </div>
+                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
+                  <p className="font-body text-[10px] text-light-lo">Tier Anda tidak memiliki akses ke modul ini.</p>
+                </div>
+              </div>
+            )}
             {/* Module 02 - Prompt */}
             {canAccessModule('02') ? (
               <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("02", "Prompt", "Chat Mastery", [{ day: "Day 1", title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }] }, { day: "Day 2", title: "Materi AI First Level 2 Day 2", htmls: [{ title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }])}>
@@ -1458,7 +1476,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   <Lock className="w-4 h-4 text-light-lo" />
                 </div>
               )}
-              {sinadAccess.tier !== 'Community' || isAdmin ? (
+              {sinadAccess.tier !== 'Community' && sinadAccess.tier !== 'TWC' || isAdmin ? (
                 <a href="https://prompt-database-v2-0-849022455337.us-west1.run.app" target="_blank" rel="noopener noreferrer" className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
                   <div className="flex items-center gap-4">
                     <BookOpen className="w-4 h-4 text-gold-muted" />
