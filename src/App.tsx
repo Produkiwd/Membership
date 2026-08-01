@@ -20,8 +20,8 @@ import aifPkmHtml from '../materi/Prompt day2/aif-pkm-level2-day2.html?raw';
 import aifWritingHtml from '../materi/Prompt day2/aif-writing-level2-day2.html?raw';
 import level3Day1Html from './Level 3/Level 3 day 1.html?raw';
 import level3Day1_1Html from './Level 3/Level 3 day 1.1.html?raw';
-import twcHtml1 from '../ThinkingWithClaude/claude-modul 1.html?raw';
-import twcHtml2 from '../ThinkingWithClaude/thinking-with-claude-ai.html?raw';
+import twcHtml1 from '../ThinkingWithClaude/02 setup-claude-modul 1.html?raw';
+import twcHtml2 from '../ThinkingWithClaude/01 thinking-with-claude-ai.html?raw';
 import aptAssessmentHtml from './Strategize/apt-assessment.html?raw';
 import stratImg1 from './Strategize/image (1).png';
 import stratImg2 from './Strategize/image (2).png';
@@ -1340,7 +1340,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
             {/* Module 05 - Thinking with Claude */}
             {canAccessModule('05') ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("05", "Thinking with Claude", "One Day Intensive", [{ day: "Materi", title: "Thinking with Claude", htmls: [{ title: "Setup Claude", content: twcHtml1 }, { title: "Thinking w/ Claude AI", content: twcHtml2 }] }])}>
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("05", "Thinking with Claude", "One Day Intensive", [{ day: "Materi", title: "Thinking with Claude", htmls: [{ title: "Thinking w/ Claude AI", content: twcHtml2 }, { title: "Setup Claude", content: twcHtml1 }] }])}>
                  <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">05</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Thinking with Claude</div>
