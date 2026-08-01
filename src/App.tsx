@@ -1056,10 +1056,10 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
     const resetTimer = () => {
       if (timeoutId) clearTimeout(timeoutId);
-      // 5 minutes = 300000 ms
+      // 60 minutes = 3600000 ms
       timeoutId = setTimeout(() => {
         handleLogout();
-      }, 300000);
+      }, 3600000);
     };
 
     resetTimer();
@@ -1067,13 +1067,13 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
     const events = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart'];
 
     for (const ev of events) {
-      window.addEventListener(ev, resetTimer);
+      window.addEventListener(ev, resetTimer, true); // true for capture phase to catch inner scrolls
     }
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
       for (const ev of events) {
-        window.removeEventListener(ev, resetTimer);
+        window.removeEventListener(ev, resetTimer, true);
       }
     };
   }, []);
