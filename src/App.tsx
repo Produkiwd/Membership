@@ -1475,7 +1475,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   <Lock className="w-4 h-4 text-light-lo" />
                 </div>
               )}
-              {sinadAccess.tier !== 'Community' && sinadAccess.tier !== 'TWC' || isAdmin ? (
+              {sinadAccess.tier !== 'Community' || isAdmin ? (
                 <a href="https://prompt-database-v2-0-849022455337.us-west1.run.app" target="_blank" rel="noopener noreferrer" className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
                   <div className="flex items-center gap-4">
                     <BookOpen className="w-4 h-4 text-gold-muted" />
