@@ -20,6 +20,8 @@ import aifPkmHtml from '../materi/Prompt day2/aif-pkm-level2-day2.html?raw';
 import aifWritingHtml from '../materi/Prompt day2/aif-writing-level2-day2.html?raw';
 import level3Day1Html from './Level 3/Level 3 day 1.html?raw';
 import level3Day1_1Html from './Level 3/Level 3 day 1.1.html?raw';
+import twcHtml1 from '../ThinkingWithClaude/claude-modul 1.html?raw';
+import twcHtml2 from '../ThinkingWithClaude/thinking-with-claude-ai.html?raw';
 import aptAssessmentHtml from './Strategize/apt-assessment.html?raw';
 import stratImg1 from './Strategize/image (1).png';
 import stratImg2 from './Strategize/image (2).png';
@@ -55,7 +57,6 @@ function Button({ children, variant = 'primary', className, ...props }: ButtonHT
 }
 
 function LoginView() {
-  const [isLoading, setIsLoading] = useState(false);
   const [isResetLoading, setIsResetLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -63,6 +64,7 @@ function LoginView() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   const handleAuth = async (e: FormEvent) => {
     e.preventDefault();
@@ -391,6 +393,7 @@ function MateriView() {
   const [materiTitle, setMateriTitle] = useState('');
   const [materiLink, setMateriLink] = useState('');
   const [materiList, setMateriList] = useState<{title: string, url: string}[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const MODULES = [
     { id: '01', name: 'Strategize' },
@@ -873,6 +876,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [passwordMsg, setPasswordMsg] = useState({ text: '', type: '' });
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -902,11 +906,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
     let finalMaterials = [...defaultMaterials];
     
     if (materials.length > 0) {
-      if (moduleId === '05') {
-         finalMaterials = [{ day: "Materi", title: "Daftar Materi", htmls: materials }];
-      } else {
-         finalMaterials.push({ day: "Tambahan", title: "Materi Tambahan", htmls: materials });
-      }
+      finalMaterials.push({ day: "Tambahan", title: "Materi Tambahan", htmls: materials });
     }
 
     setSelectedModule({
@@ -950,9 +950,6 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   const canAccessModule = (moduleId: string) => {
     const tier = sinadAccess.tier; // This is the user's tier for the portal
 
-    if (tier === 'TWC') {
-      return moduleId === '05';
-    }
 
     if (moduleId === '01') return true; // Strategize available to all
     
@@ -1012,8 +1009,10 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
         if (data.role === 'admin') setIsAdmin(true);
 
-        let portals = data.allowedPortals || ['aif'];
-        // Fallback if the user is main admin
+        let portals = data.allowedPortals || ["aif"];
+        if (data.tier === "TWC" && !portals.includes("idl")) {
+          portals.push("idl");
+        }
         if (user.email === 'stephen.tssgroup@gmail.com') {
            if (!portals.includes('idl')) portals.push('idl');
            if (!portals.includes('sinad')) portals.push('sinad');
@@ -1341,7 +1340,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
             {/* Module 05 - Thinking with Claude */}
             {canAccessModule('05') ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("05", "Thinking with Claude", "One Day Intensive", [])}>
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("05", "Thinking with Claude", "One Day Intensive", [{ day: "Materi", title: "Thinking with Claude", htmls: [{ title: "Setup Claude", content: twcHtml1 }, { title: "Thinking w/ Claude AI", content: twcHtml2 }] }])}>
                  <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">05</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Thinking with Claude</div>

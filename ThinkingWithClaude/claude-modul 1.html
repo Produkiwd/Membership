@@ -1,0 +1,2675 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setup Claude · AI First Program</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1A1814; --bg1:#201E1A; --bg2:#262320; --bg3:#2D2A24;
+  --bd:rgba(255,255,255,.09); --bdS:rgba(255,255,255,.18);
+  --gold:#D4A84B; --goldS:rgba(212,168,75,.10); --goldB:rgba(212,168,75,.28);
+  --t1:#FFFFFF; --t2:rgba(255,255,255,.93); --t3:rgba(255,255,255,.68); --t4:rgba(255,255,255,.40);
+  --red:#C85C50; --redS:rgba(200,92,80,.12);
+  --green:#4E9E6A; --greenS:rgba(78,158,106,.12);
+  --r:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t2);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;color:var(--t1);line-height:1.15;letter-spacing:-.025em}
+a{color:inherit;text-decoration:none}
+::selection{background:rgba(212,168,75,.2)}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:2px}
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVIGATION SYSTEM
+   Satu sumber kebenaran untuk topbar, main nav, sub-nav, chip strip,
+   dan bottom nav — di semua breakpoint. (Sebelumnya tersebar di
+   ~20 blok berbeda di sepanjang file dengan banyak rule usang yang
+   saling override; sekarang dirapikan jadi satu tempat.)
+
+   Breakpoint:
+   · HP     ≤768px        → topbar ringkas + bottom tab bar
+   · Tablet 769–1279px    → topbar + pill nav 2 baris
+   · IFP    ≥1280px       → sidebar kiri
+═══════════════════════════════════════════════════════════════ */
+
+/* ─── Shared: berlaku di semua breakpoint ─── */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(26,24,20,.95);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--bd);
+}
+.topbar-bar{
+  height:2px;
+  background:linear-gradient(90deg,transparent 0%,var(--gold) 35%,rgba(212,168,75,.2) 80%,transparent 100%);
+}
+.logo-pair{display:flex;align-items:center;gap:12px;margin-right:auto;flex-shrink:0}
+.logo-bg{background:#FFFFFF;border-radius:4px;padding:3px 7px;display:inline-flex;align-items:center}
+.logo-pair img{height:20px;width:auto;object-fit:contain;display:block}
+.logo-sep{width:1px;height:20px;background:var(--bd)}
+.logo-pair-row{display:none}
+
+.aif-pill{display:none} /* class tidak pernah dipakai di markup — disimpan untuk kompatibilitas */
+
+.brand-info{display:none;flex-direction:column;gap:2px}
+.brand-label{
+  font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.45);line-height:1;
+}
+.brand-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:800;color:#fff;line-height:1.1}
+
+.mnav{text-decoration:none;transition:.18s}
+.mnav-sep{color:rgba(255,255,255,.38);font-size:9px;flex-shrink:0}
+.tdot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.32);flex-shrink:0;display:inline-block}
+.tdot-1{background:#6B9FFF}  /* Instructions */
+.tdot-2{background:#F5A623}  /* Projects */
+.tdot-3{background:#A855F7}  /* Templates */
+.tdot-4{background:#EF4444}  /* Synthesis */
+
+.subnav-group{display:none;flex-direction:column}
+.subnav-group.open{display:flex}
+.snavlink{font-family:'Inter',sans-serif;font-weight:500;text-decoration:none;transition:.15s;line-height:1.3}
+.snavlink:hover{color:var(--t1);background:rgba(255,255,255,.06)}
+.snavlink.active{color:var(--gold);font-weight:600}
+
+.mod-chips{
+  display:none;overflow-x:auto;gap:6px;padding:10px 20px;
+  scrollbar-width:none;border-bottom:1px solid var(--bd);
+  background:var(--bg);position:sticky;z-index:80;
+}
+.mod-chips::-webkit-scrollbar{display:none}
+.chip{
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:5px 11px;border-radius:100px;flex-shrink:0;
+  border:1px solid var(--bd);color:rgba(255,255,255,.80);
+  text-decoration:none;white-space:nowrap;transition:.15s;background:transparent;
+}
+.chip:hover{border-color:var(--bdS);color:#fff}
+.chip.active{background:var(--goldS);border-color:var(--goldB);color:var(--gold)}
+
+.sidebar-footer{display:none;font-family:'JetBrains Mono',monospace;text-transform:uppercase;line-height:1.6}
+
+.bn-dot{width:8px;height:8px;border-radius:50%;display:block;background:rgba(255,255,255,.3);transition:.2s}
+.bn-dot-1{background:#6B9FFF}
+.bn-dot-2{background:#F5A623}
+.bn-dot-3{background:#A855F7}
+.bn-dot-4{background:#EF4444}
+.bottom-nav-icon{display:flex;align-items:center;justify-content:center;padding:2px}
+.bottom-nav-item.active .bn-dot{box-shadow:0 0 8px currentColor;transform:scale(1.2)}
+
+.float-progress{display:none} /* dot navigator: tidak tampil di breakpoint manapun saat ini */
+
+
+/* ─── HP: ≤768px — topbar ringkas + bottom tab bar ─── */
+@media(max-width:768px){
+  body{padding-bottom:64px}
+
+  .topbar-in{display:flex;align-items:center;height:44px;padding:0 14px;gap:12px}
+  .mod-nav{display:none}
+  .mnav-num,.mnav-label{display:none}
+
+  .mod-chips{display:flex;top:52px}
+  .subnav-group{display:none !important} /* cegah subnav sidebar ikut nongol di header HP */
+
+  .bottom-nav{
+    display:flex;position:fixed;bottom:0;left:0;right:0;z-index:200;
+    background:rgba(26,24,20,.97);border-top:1px solid var(--bd);
+    backdrop-filter:blur(20px);height:60px;
+  }
+  .bottom-nav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:3px;text-decoration:none;color:rgba(255,255,255,.55);transition:.15s;
+    padding:6px 4px;border-top:2px solid transparent;
+  }
+  .bottom-nav-item.active{color:#fff;border-top-color:var(--gold)}
+  .bottom-nav-lbl{
+    font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;
+    letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;max-width:56px;
+  }
+}
+@media(min-width:769px){.bottom-nav{display:none}}
+
+
+/* ─── Tablet: 769–1279px — topbar + pill nav (2 baris) ─── */
+@media(min-width:769px) and (max-width:1279px){
+  .logo-pair{gap:10px}
+  .logo-pair,.brand-info{height:52px}
+  .brand-info{display:flex}
+
+  .topbar-in{display:flex;flex-wrap:wrap;align-items:center;height:auto;padding:0 16px;gap:10px}
+
+  /* Baris 2: pill nav yang bisa discroll horizontal */
+  .mod-nav{
+    order:10;flex:0 0 100%;width:100%;height:44px;padding:0 10px;
+    display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;
+    background:var(--bg1);border-top:1px solid var(--bd);
+    align-items:center;justify-content:flex-start;
+  }
+  .mod-nav::-webkit-scrollbar{display:none}
+
+  .mnav{
+    display:inline-flex;align-items:center;gap:5px;
+    font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;
+    padding:5px 11px;border-radius:100px;border:1px solid transparent;
+    color:rgba(255,255,255,.55);white-space:nowrap;line-height:1;
+  }
+  .mnav:hover{color:rgba(255,255,255,.88);background:rgba(255,255,255,.06)}
+  .mnav.active{background:var(--gold);border-color:var(--gold);color:var(--bg);font-weight:700}
+  .mnav.active .mnav-num,.mnav.active .mnav-label,.mnav.active .mnav-sep{color:var(--bg)}
+  .mnav-home{color:rgba(255,255,255,.55)}
+  .mnav-home .tdot{background:rgba(255,255,255,.35)}
+
+  .mnav-num{
+    display:inline;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;opacity:.75;color:inherit;
+  }
+  .mnav-label{display:inline;font-size:12px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:inherit}
+  .mnav-sep{display:inline}
+
+  .mod-chips{display:flex;top:56px}
+  .subnav-group{display:none !important} /* subnav sidebar hanya untuk IFP; tablet pakai chip strip */
+  .snavlink{font-size:11px;color:var(--t3);padding:5px 10px;border-radius:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+
+
+/* ─── IFP: ≥1280px — sidebar kiri ─── */
+@media(min-width:1280px){
+  body{display:grid;grid-template-columns:220px 1fr;min-height:100vh;align-items:start}
+  .page-content{grid-column:2;min-width:0;min-height:100vh;display:block}
+
+  .topbar{
+    grid-column:1;grid-row:1/-1;height:100vh;overflow-y:auto;
+    border-right:1px solid var(--bd);border-bottom:none;
+    background:var(--bg1);display:flex;flex-direction:column;
+  }
+  .topbar-bar{width:100%;height:3px;flex-shrink:0}
+
+  .topbar-in{
+    display:flex;flex-direction:column;align-items:flex-start;
+    height:auto;flex:1;overflow-y:auto;padding:18px 16px;gap:12px;
+  }
+
+  .logo-pair{flex-direction:column;align-items:flex-start;margin-right:0;gap:10px}
+  .logo-pair-row{display:flex;align-items:center;gap:8px}
+  .logo-sep{width:20px;height:1px}
+
+  .brand-info{
+    display:flex;flex-direction:column;gap:3px;width:100%;
+    margin-top:4px;padding-bottom:12px;border-bottom:1px solid var(--bd);
+  }
+  .brand-label{font-size:7.5px}
+  .brand-name{font-size:12.5px}
+
+  .mod-nav{
+    display:flex;flex-direction:column;width:100%;height:auto;
+    background:transparent;padding:4px 0;gap:2px;
+    align-items:stretch;justify-content:flex-start;margin-bottom:8px;
+  }
+  .mnav{
+    display:flex;width:100%;text-align:left;padding:9px 12px;border-radius:7px;
+    font-family:'Plus Jakarta Sans',sans-serif;font-size:9px;font-weight:600;
+    color:rgba(255,255,255,.72);gap:8px;align-items:center;border:1px solid transparent;
+  }
+  .mnav:hover{color:#fff;background:rgba(255,255,255,.06)}
+  .mnav.active{background:rgba(212,168,75,.11);border-color:var(--goldB);color:var(--gold);font-weight:700}
+  .mnav-num{display:inline;font-size:8.5px;opacity:.75;color:var(--gold)}
+  .mnav.active .mnav-num{opacity:1}
+  .mnav-label{display:inline;font-size:9px}
+  .mnav-sep{display:inline;font-size:9px}
+  .tdot{width:7px;height:7px}
+
+  .subnav-group{
+    display:none;flex-direction:column;gap:1px;padding:2px 0 4px 18px;
+    border-left:1px solid rgba(212,168,75,.2);margin-left:12px;
+  }
+  .subnav-group.open{display:flex}
+  .snavlink{font-size:10.5px;color:rgba(255,255,255,.68);padding:4px 8px;border-radius:5px;white-space:normal}
+
+  .sidebar-footer{
+    display:flex;margin-top:auto;padding:14px 16px;border-top:1px solid var(--bd);
+    font-size:8px;letter-spacing:.1em;color:rgba(255,255,255,.35);
+  }
+
+  .mod-chips{display:none}
+}
+
+/* ─── HERO ─── */
+.hero{
+  max-width:1100px;margin:0 auto;
+  padding:96px 28px 80px;
+  display:grid;grid-template-columns:1fr 380px;gap:56px;align-items:center;
+}
+.hero-ew{
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--gold);
+  margin-bottom:20px;display:flex;align-items:center;gap:10px;
+}
+.hero-ew::before{content:'';width:16px;height:1px;background:var(--gold)}
+.hero h1{font-size:clamp(36px,3.6vw,60px);margin-bottom:18px}
+.hero h1 span[style*="color:var(--gold)"]{font-style:normal}
+.hero-sub{font-size:16px;color:var(--t2);line-height:1.75;max-width:460px;margin-bottom:28px}
+.hero-steps{display:flex;flex-direction:column;gap:10px}
+.hero-step{
+  display:flex;align-items:center;gap:12px;
+  font-size:13.5px;color:#fff;
+}
+.hero-step-num{
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  width:24px;height:24px;border-radius:50%;
+  border:1px solid var(--bdS);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gold);flex-shrink:0;
+}
+
+/* ─── MODULE ─── */
+.module{
+  max-width:1100px;margin:0 auto;
+  padding:80px 28px;
+  border-top:1px solid var(--bd);
+}
+.mod-header{margin-bottom:64px}
+.mod-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--gold);
+  margin-bottom:14px;
+}
+.mod-tag::before{content:'';width:16px;height:1px;background:var(--gold)}
+.mod-header h2{font-size:clamp(28px,3.5vw,40px);margin-bottom:12px}
+.mod-header .lead{font-size:16px;color:var(--t2);max-width:560px;line-height:1.75}
+
+/* ─── SECTION LABEL ─── */
+.slabel{
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--gold);
+  display:flex;align-items:center;gap:10px;margin-bottom:24px;
+}
+.slabel::after{content:'';flex:1;height:1px;background:var(--bd)}
+
+/* ─── WHY CARD ─── */
+.why-card{
+  background:var(--bg1);border:1px solid var(--bd);border-radius:var(--r);
+  padding:32px;margin-bottom:48px;
+  display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center;
+}
+.why-card h3{font-size:20px;margin-bottom:10px}
+.why-card p{color:var(--t2);font-size:15px;line-height:1.7;max-width:520px}
+.why-analogy{
+  background:var(--goldS);border:1px solid var(--goldB);border-radius:12px;
+  padding:18px 22px;min-width:220px;max-width:240px;
+}
+.analogy-tag{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;
+}
+.analogy-body{font-size:13px;color:var(--t2);line-height:1.65}
+
+/* ─── WHERE CARD (UI location mockup) ─── */
+.where-wrap{
+  display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:60px;
+}
+.where-card{
+  background:var(--bg2);border:1px solid var(--bd);border-radius:12px;
+  overflow:hidden;
+}
+.where-head{
+  padding:12px 16px;border-bottom:1px solid var(--bd);
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--gold);
+  display:flex;align-items:center;gap:8px;
+}
+.where-body{padding:16px 20px}
+.where-body p{font-size:13px;color:var(--t2);line-height:1.65;margin-top:10px}
+.where-step{
+  display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;
+  font-size:12.5px;color:var(--t2);line-height:1.5;
+}
+.wstep-n{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;
+  color:var(--gold);min-width:16px;padding-top:2px;
+}
+
+/* ─── UI MOCKUP (SVG-based Claude interface) ─── */
+.ui-mockup{
+  background:var(--bg3);border-radius:8px;overflow:hidden;
+  border:1px solid var(--bdS);margin-bottom:12px;
+}
+.ui-mockup-bar{
+  background:rgba(0,0,0,.3);height:28px;padding:0 12px;
+  display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--bd);
+}
+.ui-dot{width:7px;height:7px;border-radius:50%}
+.ui-frame{padding:12px}
+
+/* ─── EXAMPLE SPLIT ─── */
+.ba-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:60px}
+.ba-box{background:var(--bg1);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.ba-head{
+  padding:12px 16px;border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;gap:10px;
+}
+.ba-badge{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  padding:3px 10px;border-radius:100px;
+}
+.ba-before .ba-badge{background:var(--redS);color:var(--red)}
+.ba-after .ba-badge{background:var(--greenS);color:var(--green)}
+.ba-context{font-size:12px;color:var(--t3)}
+.ba-body{padding:16px}
+.cmsg{display:flex;align-items:flex-start;gap:9px;margin-bottom:12px}
+.cmsg:last-child{margin-bottom:0}
+.cav{
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;
+}
+.cu .cav{background:var(--bg3);color:var(--t3)}
+.cc .cav{background:var(--goldS);border:1px solid var(--goldB);color:var(--gold)}
+.cbub{
+  font-size:12.5px;color:var(--t2);line-height:1.7;
+  padding:10px 13px;border-radius:9px;
+  background:var(--bg2);border:1px solid var(--bd);
+  white-space:pre-wrap;flex:1;
+}
+.ba-before .cc .cbub{color:var(--t3)}
+.ba-after .cc .cbub{border-color:var(--goldB);background:rgba(212,168,75,.05);color:var(--t1)}
+
+/* ─── 4 BLOK GRID ─── */
+.blok-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:60px;
+}
+.blok{
+  background:var(--bg1);border:1px solid var(--bd);border-radius:12px;
+  padding:22px 18px;transition:.22s;position:relative;overflow:hidden;cursor:default;
+}
+.blok:hover{border-color:var(--goldB);background:var(--bg2)}
+.blok-detail{
+  position:absolute;inset:0;background:rgba(26,24,20,.97);border-radius:12px;
+  border:1px solid var(--goldB);padding:18px;
+  opacity:0;transition:.2s;pointer-events:none;
+  display:flex;flex-direction:column;justify-content:center;gap:8px;
+}
+.blok:hover .blok-detail{opacity:1}
+.blok-detail-item{font-size:11.5px;color:var(--t2);line-height:1.5;display:flex;align-items:flex-start;gap:8px}
+.blok-detail-item::before{content:"→";color:var(--gold);flex-shrink:0;font-weight:700}
+.blok-n{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:12px;
+}
+.blok h4{font-size:14.5px;margin-bottom:6px;color:var(--t1)}
+.blok p{font-size:12px;color:var(--t2);line-height:1.55}
+.blok-ico{margin-bottom:12px}
+
+/* ─── PERSONA ZONE ─── */
+.ppills{display:flex;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+.ppill{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;font-weight:700;
+  padding:8px 18px;border-radius:100px;
+  border:1px solid var(--bd);color:#fff;
+  cursor:pointer;transition:.18s;background:transparent;
+}
+.ppill:hover{border-color:var(--bdS);color:var(--t2)}
+.ppill.on{background:var(--gold);border-color:var(--gold);color:#1A1814}
+
+/* ─── CI BOX ─── */
+.ci-zone{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:60px}
+.ci-box{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.ci-head{
+  padding:12px 16px;border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.ci-label{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:var(--gold);
+}
+.copy-btn{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 11px;border-radius:6px;
+  background:var(--goldS);border:1px solid var(--goldB);color:var(--gold);
+  cursor:pointer;transition:.18s;
+}
+.copy-btn:hover{background:var(--gold);color:#1A1814}
+.copy-btn.done{background:var(--greenS);border-color:var(--green);color:var(--green)}
+.ci-body{
+  padding:16px;
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;
+  color:var(--t2);line-height:1.75;white-space:pre-wrap;
+}
+
+/* ─── POWER SENTENCES ─── */
+.power-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:60px}
+.power-card{
+  background:var(--bg2);border:1px solid var(--bd);border-radius:12px;
+  padding:22px;display:flex;flex-direction:column;gap:12px;
+}
+.power-q{
+  font-size:13.5px;color:var(--t1);line-height:1.65;
+  border-left:2px solid var(--gold);padding-left:14px;
+}
+.power-effect{font-size:12px;color:#fff;line-height:1.55}
+.power-effect strong{color:var(--gold)}
+
+/* ─── USE CASE GRID ─── */
+.uc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:60px}
+.uc-card{
+  background:var(--bg1);border:1px solid var(--bd);border-radius:12px;
+  padding:22px;transition:.18s;
+}
+.uc-card:hover{border-color:var(--goldB)}
+.uc-card.hl{border-color:var(--goldB);background:var(--goldS)}
+.uc-lvl{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.72);margin-bottom:10px;
+}
+.uc-card.hl .uc-lvl{color:var(--gold)}
+.uc-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:14.5px;font-weight:800;color:var(--t1);margin-bottom:6px}
+.uc-setup{font-size:11.5px;color:var(--t2);margin-bottom:12px}
+.uc-use{font-size:12.5px;color:var(--t2);line-height:1.6;border-top:1px solid var(--bd);padding-top:12px}
+
+/* ─── TEMPLATE CARDS ─── */
+.tpl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:60px}
+.tpl-card{background:var(--bg1);border:1px solid var(--bd);border-radius:12px;overflow:hidden}
+.tpl-head{
+  padding:12px 16px;border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.tpl-name{font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;color:var(--t1)}
+.tpl-body{
+  padding:14px;font-family:'JetBrains Mono',monospace;font-size:10.5px;
+  color:var(--t2);line-height:1.7;white-space:pre-wrap;
+  max-height:200px;overflow-y:auto;
+}
+
+/* ─── CONN SPLIT ─── */
+.conn-split{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:60px}
+.conn-panel{background:var(--bg1);border:1px solid var(--bd);border-radius:12px;padding:22px}
+.conn-panel h4{font-size:14.5px;margin-bottom:10px;color:var(--t1);display:flex;align-items:center;gap:8px}
+.conn-panel p{font-size:13px;color:var(--t2);line-height:1.65}
+.conn-panel.after{border-color:var(--goldB);background:var(--goldS)}
+.conn-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.conn-tag{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 9px;border-radius:6px;
+  background:var(--bg2);border:1px solid var(--bd);color:#fff;
+}
+
+/* ─── EXERCISE ─── */
+.exercise{
+  background:var(--bg2);border:1px solid var(--goldB);border-radius:var(--r);
+  padding:28px 32px;
+}
+.ex-tag{
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--gold);
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.exercise h3{font-size:17px;margin-bottom:18px}
+.ex-steps{display:flex;flex-direction:column;gap:8px}
+.ex-step{
+  display:flex;align-items:flex-start;gap:13px;
+  background:var(--bg1);border:1px solid var(--bd);border-radius:10px;
+  padding:13px 15px;cursor:pointer;transition:.18s;
+}
+.ex-step:hover{border-color:var(--bdS)}
+.ex-step.checked{border-color:var(--greenS);background:rgba(78,158,106,.05)}
+.ex-n{
+  width:24px;height:24px;border-radius:50%;
+  border:1.5px solid var(--bdS);color:#fff;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;
+  transition:.18s;margin-top:1px;
+}
+.ex-step.checked .ex-n{background:var(--greenS);border-color:var(--green);color:var(--green)}
+.ex-txt{font-size:13px;color:var(--t2);line-height:1.55}
+.ex-step.checked .ex-txt{color:var(--t3);text-decoration:line-through}
+
+/* ─── INLINE CALLOUT ─── */
+.callout{
+  border-left:3px solid var(--gold);background:rgba(212,168,75,.05);
+  border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:24px;
+  font-size:13.5px;color:var(--t2);line-height:1.65;
+}
+.callout strong{color:var(--t1)}
+
+/* ─── SYNTHESIS CARD ─── */
+.synth-card{
+  background:var(--goldS);border:1px solid var(--goldB);border-radius:20px;
+  padding:52px;text-align:center;
+}
+.synth-card h2{font-size:clamp(24px,3vw,36px);margin-bottom:12px}
+.synth-card p{font-size:16px;color:var(--t2);max-width:500px;margin:0 auto 28px;line-height:1.7}
+.synth-pills{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.synth-pill{
+  display:inline-block;
+  font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:.15em;text-transform:uppercase;
+  padding:8px 18px;border-radius:100px;
+  background:var(--gold);color:#1A1814;
+}
+
+/* ─── FOOTER ─── */
+.footer-cta-band{
+  background:var(--goldS);border-top:1px solid var(--goldB);
+  padding:32px 28px;
+}
+.footer-cta-in{
+  max-width:1100px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+}
+.cta-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:700;
+  color:#1A1814;background:var(--gold);
+  padding:14px 28px;border-radius:100px;
+  text-decoration:none;white-space:nowrap;
+  transition:.2s;flex-shrink:0;
+}
+.cta-btn:hover{background:#C49540;transform:translateY(-1px)}
+.footer{border-top:1px solid var(--bd);padding:24px 28px}
+.footer-in{
+  max-width:1100px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;
+}
+.footer-logos{display:flex;align-items:center;gap:12px}
+.footer-links{
+  display:flex;align-items:center;gap:16px;
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+}
+.footer-links a{color:var(--t3);transition:.15s}
+.footer-links a:hover{color:var(--gold)}
+.footer-attr{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--t3);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE CONTENT LAYOUT (non-nav)
+   Rule nav (topbar/sidebar/bottom-nav) sudah dikonsolidasikan di
+   blok NAVIGATION SYSTEM di atas. Di sini hanya sisa padding/grid
+   konten yang menyesuaikan breakpoint.
+═══════════════════════════════════════════════════════════════ */
+@media(min-width:1280px){
+  .hero{
+    max-width:none;
+    padding:80px 56px 64px;
+    grid-template-columns:1fr 400px;
+    gap:64px;
+  }
+  h1{font-size:clamp(38px,3.2vw,56px)}
+  .module{
+    max-width:none;
+    padding:72px 56px;
+  }
+  .blok-grid{grid-template-columns:repeat(4,1fr)}
+  .footer-cta-band,.footer{padding-left:56px;padding-right:56px}
+  .footer-cta-in,.footer-in{max-width:none}
+}
+
+@media(max-width:768px){
+  .hero{padding:40px 16px 32px;grid-template-columns:1fr}
+  .hero-visual{display:none}
+  .module{padding:40px 16px}
+  .blok-grid{grid-template-columns:1fr 1fr}
+  .ba-wrap,.ci-zone,.power-grid,.uc-grid,.tpl-grid,.conn-split,.where-wrap{grid-template-columns:1fr}
+  .synth-card{padding:32px 20px}
+  .exercise{padding:20px 16px}
+  .why-card{grid-template-columns:1fr}
+  .why-analogy{max-width:100%}
+  .footer-cta-band{padding:24px 16px}
+  .footer-in{padding:16px}
+  .footer-links{flex-wrap:wrap;gap:8px}
+}
+@media(max-width:480px){
+  .blok-grid{grid-template-columns:1fr}
+  .ppills{gap:6px}
+}
+
+/* Page content wrapper: normal flow on tablet/HP, grid cell on IFP
+   (display:block + grid-column:2 set inside NAVIGATION SYSTEM → IFP) */
+.page-content{display:contents}
+
+
+/* ════════════════════════════════════════════════════════════
+   PREMIUM ENHANCEMENT LAYER
+════════════════════════════════════════════════════════════ */
+
+/* ─── HERO ATMOSPHERIC GLOW ─── */
+.hero{position:relative}
+.hero::before{
+  content:'';position:absolute;top:-30%;left:0;right:0;height:65%;
+  background:radial-gradient(ellipse 75% 70% at 50% 0%,rgba(212,168,75,.07) 0%,transparent 72%);
+  pointer-events:none;z-index:0;
+}
+.hero>*{position:relative;z-index:1}
+
+/* ─── MODULE OVERVIEW NAVIGATOR ─── */
+.mod-overview{
+  max-width:1100px;margin:0 auto;
+  padding:0 28px 72px;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:12px;
+}
+.mov-card{
+  background:var(--bg1);border:1px solid var(--bd);border-radius:16px;
+  padding:22px 18px;text-decoration:none;
+  transition:.24s cubic-bezier(.22,1,.36,1);
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;gap:10px;
+}
+.mov-card::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(140deg,rgba(212,168,75,.09) 0%,transparent 55%);
+  opacity:0;transition:.25s;pointer-events:none;
+}
+.mov-card:hover::after{opacity:1}
+.mov-card:hover{
+  border-color:rgba(212,168,75,.45);
+  transform:translateY(-3px);
+  box-shadow:0 16px 48px rgba(0,0,0,.45),0 0 0 1px rgba(212,168,75,.1);
+}
+.mov-num{
+  font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--gold);opacity:.6;
+}
+.mov-ico{line-height:0;margin-bottom:4px}
+.mov-title{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:800;
+  color:var(--t1);line-height:1.2;
+}
+.mov-sub{font-size:11.5px;color:#fff;line-height:1.55;flex:1}
+.mov-cta{
+  font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--gold);
+  opacity:0;transition:.2s;transform:translateX(-5px);
+  display:flex;align-items:center;gap:5px;margin-top:2px;
+}
+.mov-card:hover .mov-cta{opacity:1;transform:translateX(0)}
+
+/* ─── NEXT MODULE CTA ─── */
+.next-mod{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg1);border:1px solid var(--bd);border-radius:14px;
+  padding:22px 28px;margin-top:40px;text-decoration:none;
+  transition:.22s cubic-bezier(.22,1,.36,1);gap:16px;
+}
+.next-mod:hover{
+  border-color:rgba(212,168,75,.35);
+  background:rgba(212,168,75,.04);
+  transform:translateX(6px);
+  box-shadow:0 4px 24px rgba(0,0,0,.3);
+}
+.next-mod-meta{flex:1}
+.next-mod-label{
+  font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.72);margin-bottom:6px;
+}
+.next-mod-title{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;
+  color:var(--t1);display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.next-mod-tag{
+  font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;
+  padding:3px 9px;border-radius:100px;
+  background:var(--goldS);border:1px solid var(--goldB);color:var(--gold);
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.next-mod-arr{font-size:22px;color:var(--gold);flex-shrink:0;transition:.22s;line-height:1}
+.next-mod:hover .next-mod-arr{transform:translateX(4px)}
+
+/* ─── MODULE SECTION DECO NUMBERS ─── */
+.mod-header{position:relative;overflow:hidden}
+.sec-deco{
+  position:absolute;right:-8px;top:-22px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:clamp(90px,10vw,132px);font-weight:900;
+  color:rgba(212,168,75,.04);line-height:1;
+  pointer-events:none;letter-spacing:-.04em;user-select:none;
+}
+
+/* ─── ENHANCED CARD DEPTHS ─── */
+.blok{transition:.22s cubic-bezier(.22,1,.36,1);box-shadow:0 1px 8px rgba(0,0,0,.2)}
+.blok:hover{
+  box-shadow:0 10px 36px rgba(0,0,0,.42),0 0 0 1px rgba(212,168,75,.14);
+  transform:translateY(-2px);
+}
+.why-card{box-shadow:0 2px 16px rgba(0,0,0,.2)}
+.tpl-card{transition:.18s}
+.tpl-card:hover{border-color:var(--bdS);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.power-card{transition:.18s;box-shadow:0 1px 8px rgba(0,0,0,.18)}
+.power-card:hover{border-color:var(--bdS);background:var(--bg3);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.uc-card{box-shadow:0 1px 6px rgba(0,0,0,.15);transition:.2s}
+.uc-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.3)}
+
+/* ─── IFP ENHANCEMENTS ─── */
+@media(min-width:1280px){
+  .mod-overview{padding:0 56px 72px}
+  .next-mod{padding:22px 36px}
+}
+
+/* ─── HP ENHANCEMENTS ─── */
+@media(max-width:768px){
+  .mod-overview{grid-template-columns:1fr 1fr;padding:0 16px 40px;gap:10px}
+  .next-mod{padding:16px 18px;margin-top:28px}
+  .mov-sub{display:none}
+  .mov-card{padding:16px 14px;gap:8px;border-radius:12px}
+  .sec-deco{font-size:72px}
+  .mov-title{font-size:13px}
+}
+@media(max-width:480px){.mov-num{font-size:7px}}
+
+
+/* ════════════════════════════════════════════════════════════
+   OVERHAUL v3 — Clean, Consistent, Readable
+════════════════════════════════════════════════════════════ */
+
+/* ─── 1. BRIGHTER TEXT VARIABLES ─── */
+:root{
+  --t2:rgba(255,255,255,.98);
+  --t3:rgba(255,255,255,.92);
+  --t4:rgba(255,255,255,.72);
+}
+
+/* ─── 3. HERO: TIGHTER + ALL TEXT WHITE ─── */
+.hero{padding:52px 28px 36px}
+.hero-sub{color:#fff !important}
+.hero-step span{color:#fff}
+.hero h1{font-size:clamp(30px,3.4vw,50px)}
+@media(min-width:1280px){.hero{padding:52px 56px 36px}}
+@media(max-width:768px){.hero{padding:28px 16px 20px}}
+
+/* Hero SVG: larger, more readable */
+.hero-visual svg{width:100%;height:auto;max-width:100%}
+.hero-visual{align-self:center}
+
+/* ─── 4. MODULE OVERVIEW: COMPACT ─── */
+.mod-overview{padding:0 28px 44px}
+.mov-num{color:var(--gold)}
+.mov-sub{color:#fff}
+.mov-title{color:#fff}
+@media(min-width:1280px){.mod-overview{padding:0 56px 44px}}
+@media(max-width:768px){.mod-overview{padding:0 16px 32px}}
+
+/* ─── 5. CARD UNIFORM HEIGHT + ALIGNMENT ─── */
+
+/* Grid containers: stretch all cards */
+.blok-grid,.tpl-grid,.power-grid,.uc-grid{align-items:stretch}
+.where-wrap,.ba-wrap,.ci-zone,.conn-split{align-items:stretch}
+
+/* Blok cards: flex column, aligned sections */
+.blok{display:flex;flex-direction:column}
+.blok-ico{height:40px;display:flex;align-items:center;margin-bottom:10px}
+.blok-n{flex-shrink:0;margin-bottom:8px}
+.blok h4{
+  flex-shrink:0;font-size:14px;min-height:40px;
+  display:flex;align-items:flex-start;margin-bottom:8px;color:#fff
+}
+.blok p{flex:1;color:#fff;font-size:12.5px;line-height:1.65}
+
+/* Template cards */
+.tpl-card{display:flex;flex-direction:column}
+.tpl-head{flex-shrink:0}
+.tpl-body{flex:1;min-height:175px;color:#fff}
+.tpl-name{color:#fff}
+
+/* Power cards */
+.power-card{display:flex;flex-direction:column}
+.power-q{color:#fff;font-size:13px;line-height:1.65}
+.power-effect{color:#fff;font-size:12px;flex:1}
+.power-effect strong{color:var(--gold)}
+
+/* Use case cards */
+.uc-card{display:flex;flex-direction:column}
+.uc-title{color:#fff;font-size:14px}
+.uc-setup{color:#fff;font-size:12px;line-height:1.6;margin-bottom:0;flex:1}
+.uc-lvl{color:rgba(255,255,255,.65)}
+.uc-use{color:#fff;font-size:12.5px;margin-top:auto}
+
+/* Where cards */
+.where-card{display:flex;flex-direction:column}
+.where-body{flex:1;color:#fff}
+.where-body p{color:#fff}
+.where-step{color:#fff}
+.wstep-n{color:var(--gold)}
+
+/* Why card */
+.why-card p{color:#fff}
+.analogy-body{color:#fff}
+.why-card h3{color:#fff}
+
+/* CI box */
+.ci-body{color:#fff}
+
+/* Conn panels */
+.conn-panel p{color:#fff}
+.conn-panel h4{color:#fff}
+
+/* ─── 6. MODULE CONTENT TEXT ─── */
+.mod-header .lead{color:#fff !important}
+.callout{color:#fff}
+.callout strong{color:#fff}
+.slabel{color:var(--gold)}
+.ex-txt{color:#fff}
+.exercise h3{color:#fff}
+.ex-tag{color:var(--gold)}
+
+/* Section titles */
+.mod-header h2{color:#fff;font-size:clamp(26px,3vw,36px)}
+
+/* ─── 7. NEXT MODULE BUTTON ─── */
+.next-mod-label{color:rgba(255,255,255,.65)}
+.next-mod-title{color:#fff}
+
+/* ─── 9. MOV CARD EQUAL HEIGHT ─── */
+.mov-card{min-height:168px}
+.mov-sub{flex:1;color:#fff}
+
+/* ─── 11. HERO STEPS ─── */
+.hero-step{color:#fff}
+.hero-step span{color:#fff}
+
+/* ─── 12. INLINE STYLE OVERRIDES ─── */
+/* Force white on common inline-greyed elements */
+.power-card .power-effect{color:#fff}
+.ba-context{color:rgba(255,255,255,.75)}
+.ba-head{background:transparent}
+
+/* Synth card */
+.synth-card p{color:#fff}
+.synth-card h2{color:#fff}
+
+/* Footer */
+.footer-attr{color:rgba(255,255,255,.65)}
+
+
+/* ─── BREATHING SPACE ─── */
+
+/* Module sections: controlled padding */
+.module{padding:56px 28px !important}
+.mod-header{margin-bottom:44px !important}
+@media(min-width:1280px){.module{padding:56px 56px !important}}
+@media(max-width:768px){.module{padding:32px 16px !important};.mod-header{margin-bottom:28px !important}}
+
+/* Card grids: consistent 40px gap */
+.blok-grid{margin-bottom:40px !important}
+.where-wrap{margin-bottom:40px !important}
+.ba-wrap{margin-bottom:40px !important}
+.ci-zone{margin-bottom:40px !important}
+.power-grid{margin-bottom:40px !important}
+.uc-grid{margin-bottom:40px !important}
+.tpl-grid{margin-bottom:40px !important}
+.conn-split{margin-bottom:40px !important}
+.why-card{margin-bottom:32px !important}
+
+/* Section labels: consistent rhythm */
+.slabel{margin-bottom:20px !important}
+
+/* Callout: tighter */
+.callout{margin-bottom:20px;padding:12px 16px}
+
+/* Hero: controlled rhythm */
+.hero-ew{margin-bottom:14px !important}
+.hero h1{margin-bottom:14px !important}
+.hero-sub{margin-bottom:20px !important}
+.hero-steps{gap:8px !important}
+
+/* Module overview: tight */
+.mod-overview{padding-bottom:40px !important}
+@media(min-width:1280px){.mod-overview{padding:0 56px 40px !important}}
+
+/* Synth card: tighter */
+.synth-card{padding:36px 28px !important}
+@media(max-width:768px){.synth-card{padding:24px 16px !important}}
+
+/* Exercise: tighter */
+.exercise{padding:24px 28px !important}
+@media(max-width:768px){.exercise{padding:18px 14px !important}}
+
+/* ─── MOV CARDS: equal compact height ─── */
+.mov-card{min-height:auto !important;padding:18px 16px !important;gap:8px !important}
+.mov-ico{margin-bottom:2px !important}
+.mov-ico svg{width:28px !important;height:28px !important}
+
+/* ─── SECTION HEADING SIZE ─── */
+.mod-header h2{font-size:clamp(24px,2.8vw,34px) !important;margin-bottom:10px !important}
+.mod-header .lead{font-size:15px !important;line-height:1.7 !important}
+
+
+/* ─── FONT SCALE OPTIMIZATION (all breakpoints) ─── */
+
+/* Body base */
+body{font-size:14px}
+
+/* Headings */
+h1,h2,h3,h4{letter-spacing:-.02em}
+.mod-header h2{font-size:clamp(22px,2.6vw,32px) !important}
+.hero h1{font-size:clamp(28px,3.2vw,46px) !important}
+
+/* Section labels */
+.slabel{font-size:10px !important;letter-spacing:.18em !important}
+.mod-tag{font-size:9px !important;letter-spacing:.18em !important}
+.hero-ew{font-size:9px !important;letter-spacing:.18em !important}
+
+/* Card text */
+.blok-n{font-size:9px !important}
+.blok h4{font-size:13.5px !important;min-height:36px !important}
+.blok p{font-size:13px !important}
+
+.power-q{font-size:13px !important}
+.power-effect{font-size:12.5px !important}
+
+.uc-lvl{font-size:9px !important}
+.uc-title{font-size:13.5px !important}
+.uc-setup{font-size:12px !important}
+.uc-use{font-size:12.5px !important}
+
+.wstep-n{font-size:9.5px !important}
+.where-step{font-size:13px !important}
+
+.cbub{font-size:12.5px !important}
+.ci-label{font-size:9px !important}
+.ci-body{font-size:12px !important;line-height:1.75 !important}
+
+.tpl-name{font-size:13px !important}
+.tpl-body{font-size:11.5px !important}
+
+.analogy-tag{font-size:9px !important;letter-spacing:.14em !important}
+.analogy-body{font-size:13px !important}
+
+.callout{font-size:13.5px !important}
+
+.ba-badge{font-size:9px !important}
+.ba-context{font-size:12px !important}
+
+.copy-btn{font-size:9px !important}
+
+.conn-tag{font-size:9px !important}
+.conn-panel p{font-size:13px !important}
+
+.why-card p{font-size:14px !important}
+.why-card h3{font-size:18px !important}
+
+.ex-txt{font-size:13.5px !important}
+.ex-n{font-size:9px !important}
+.ex-tag{font-size:9px !important;letter-spacing:.16em !important}
+
+.synth-pill{font-size:9px !important;letter-spacing:.12em !important}
+.synth-card p{font-size:15px !important}
+
+.mov-title{font-size:13.5px !important}
+.mov-sub{font-size:12px !important}
+.mov-num{font-size:8px !important}
+
+.next-mod-title{font-size:14px !important}
+.next-mod-label{font-size:9px !important;letter-spacing:.14em !important}
+
+.hero-sub{font-size:14.5px !important;line-height:1.72 !important}
+.mod-header .lead{font-size:14.5px !important;line-height:1.72 !important}
+
+.footer-attr{font-size:9.5px !important}
+.footer-links a{font-size:9.5px !important}
+
+/* ─── MOV CARD: compact ─── */
+.mov-card{padding:16px !important;gap:8px !important}
+.mov-ico svg{width:26px !important;height:26px !important}
+
+/* ─── SECTION DECO: reduce size ─── */
+.sec-deco{font-size:clamp(72px,8vw,108px) !important}
+
+
+/* ════════════════════════════════════════════════════════════
+   POLISH — Footer, Cards, Memory, Where-alignment
+════════════════════════════════════════════════════════════ */
+
+/* ─── MEMORY GRID: responsive ─── */
+@media(max-width:900px){
+  .memory-grid{grid-template-columns:1fr !important;gap:20px !important}
+}
+@media(max-width:768px){
+  .memory-grid{gap:16px !important}
+}
+
+/* ─── WHERE-CARD: body alignment ─── */
+.where-card{display:flex;flex-direction:column}
+.where-head{flex:0 0 auto}
+.where-body{flex:1;display:flex;flex-direction:column}
+.where-card .ui-mockup{
+  flex:0 0 auto;
+  max-height:176px;
+  overflow:hidden;
+  margin-bottom:8px;
+}
+.where-card .where-step{flex-shrink:0}
+
+/* ─── BLOK-CARDS: header/body alignment ─── */
+.blok{display:flex;flex-direction:column}
+.blok-ico{
+  height:40px;display:flex;align-items:center;
+  flex:0 0 40px;margin-bottom:8px;
+}
+.blok h4{
+  flex:0 0 auto;min-height:40px;
+  display:flex;align-items:flex-start;
+  font-size:13.5px;margin-bottom:8px;
+}
+.blok p{flex:1}
+
+/* ─── PREMIUM FOOTER ─── */
+.footer-cta-band{
+  position:relative;
+  background:linear-gradient(135deg,rgba(212,168,75,.09) 0%,rgba(212,168,75,.03) 60%,transparent 100%);
+  border-top:1px solid rgba(212,168,75,.35);
+  padding:36px 28px;
+}
+.footer-cta-band::before{
+  content:'';
+  position:absolute;
+  top:0;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(212,168,75,.6),transparent);
+}
+.footer-cta-in{
+  max-width:1100px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:24px;flex-wrap:wrap;
+}
+.footer-cta-in > div {max-width:540px}
+
+/* Footer bar: sleek dark */
+.footer{
+  background:rgba(0,0,0,.25);
+  border-top:1px solid rgba(255,255,255,.07);
+  padding:18px 28px;
+}
+.footer-in{
+  max-width:1100px;margin:0 auto;
+  display:flex;align-items:center;
+  justify-content:space-between;
+  gap:16px;flex-wrap:wrap;
+}
+.footer-logos{display:flex;align-items:center;gap:14px}
+.footer-logo-bg{
+  background:#fff;
+  border-radius:3px;
+  padding:2px 6px;
+  display:inline-flex;align-items:center;
+  opacity:.85;
+}
+.footer-attr{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(255,255,255,.42);
+  flex:1;text-align:center;
+}
+.footer-links{
+  display:flex;align-items:center;
+  gap:14px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9.5px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+}
+.footer-links a{
+  color:rgba(255,255,255,.45);
+  text-decoration:none;
+  transition:.15s;
+}
+.footer-links a:hover{color:var(--gold)}
+
+/* CTA button polish */
+.cta-btn{
+  font-size:13px !important;
+  padding:13px 26px !important;
+  border-radius:100px;
+  box-shadow:0 4px 20px rgba(212,168,75,.25);
+  transition:.2s;
+  flex-shrink:0;
+}
+.cta-btn:hover{
+  box-shadow:0 8px 32px rgba(212,168,75,.35);
+  transform:translateY(-1px);
+}
+
+/* Footer IFP */
+@media(min-width:1280px){
+  .footer-cta-band,.footer{padding-left:56px;padding-right:56px}
+  .footer-cta-in,.footer-in{max-width:none}
+}
+/* Footer HP */
+@media(max-width:768px){
+  .footer-cta-band{padding:24px 16px}
+  .footer{padding:16px}
+  .footer-attr{display:none}
+  .footer-in{justify-content:space-between}
+}
+
+/* ─── HERO SVG: responsive scaling ─── */
+.hero-visual svg{
+  max-width:100%;height:auto;
+  display:block;
+}
+
+/* ─── SYNTH CARD: center SVG ─── */
+.synth-card > div:first-child{
+  display:flex;justify-content:center;
+  margin-bottom:20px;
+}
+
+/* ─── WHERE-CARD body p consistent ─── */
+.where-body p{
+  font-size:13px;color:#fff;line-height:1.65;
+  margin-top:10px;
+}
+
+
+/* ─── CI BOX: full height, no scroll ─── */
+.ci-body{max-height:none !important;overflow-y:visible !important;overflow:visible !important}
+.tpl-body{max-height:none !important;overflow-y:visible !important;overflow:visible !important}
+
+/* ─── PREMIUM FOOTER BAR (no CTA band) ─── */
+.footer{
+  background:var(--bg1);
+  border-top:1px solid rgba(212,168,75,.25);
+  padding:0;
+  position:relative;
+}
+.footer::before{
+  content:'';
+  position:absolute;
+  top:0;left:8%;right:8%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(212,168,75,.55),transparent);
+}
+.footer-in{
+  max-width:1100px;margin:0 auto;
+  display:flex;align-items:center;
+  justify-content:space-between;
+  gap:20px;flex-wrap:wrap;
+  padding:22px 28px;
+}
+.footer-logos{
+  display:flex;align-items:center;
+  gap:12px;flex-shrink:0;
+}
+.footer-logo-bg{
+  background:#fff;border-radius:3px;
+  padding:3px 7px;display:inline-flex;
+  align-items:center;opacity:.82;
+  transition:.18s;
+}
+.footer-logo-bg:hover{opacity:1}
+.footer-logo-bg img{height:16px !important;width:auto !important}
+
+.footer-attr{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:rgba(255,255,255,.38);
+  flex:1;text-align:center;
+}
+
+.footer-links{
+  display:flex;align-items:center;
+  gap:16px;flex-shrink:0;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+}
+.footer-links a{
+  color:rgba(255,255,255,.45);
+  text-decoration:none;transition:.15s;
+}
+.footer-links a:hover{color:var(--gold)}
+.footer-links span{color:rgba(255,255,255,.15)}
+
+/* IFP footer */
+@media(min-width:1280px){
+  .footer-in{padding:22px 56px;max-width:none}
+}
+/* HP footer */
+@media(max-width:768px){
+  .footer-in{
+    padding:16px;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .footer-attr{text-align:left;flex:none}
+}
+
+
+/* ════════════════════════════════════════════════════════════
+   IFP: padding konten mengikuti lebar sidebar
+   (Rule nav IFP sudah dikonsolidasikan di blok NAVIGATION SYSTEM
+   di atas — di sini hanya sisa padding konten non-nav)
+════════════════════════════════════════════════════════════ */
+@media(min-width:1280px){
+  .hero{padding:52px 48px 36px !important}
+  .module{padding:52px 48px !important}
+  .mod-overview{padding:0 48px 40px !important}
+  .footer-in,.footer-cta-in{max-width:none !important;padding-left:48px;padding-right:48px}
+  .footer{padding-left:0 !important;padding-right:0 !important}
+}
+
+
+/* ─── MEMORY SECTION: aligned with module padding ─── */
+.module-memory{
+  max-width:1100px;
+  margin:0 auto;
+  padding:0 28px 0;
+}
+@media(min-width:1280px){
+  .module-memory{
+    max-width:none;
+    padding:0 48px 0;
+  }
+}
+@media(max-width:768px){
+  .module-memory{
+    padding:0 16px 0;
+  }
+}
+
+/* ─── MEMORY GRID: better proportions ─── */
+.memory-grid{
+  gap:24px !important;
+}
+@media(max-width:900px){
+  .memory-grid{
+    grid-template-columns:1fr !important;
+    gap:16px !important;
+  }
+}
+
+/* ─── MEMORY LEFT COLUMN CARDS: consistent ─── */
+.module-memory h3{color:#fff;font-size:17px}
+
+</style>
+</head>
+<body>
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-bar"></div>
+  <div class="topbar-in">
+    <div class="logo-pair">
+      <div class="logo-bg"><img src="data:image/png;base64,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" alt="IWDemy"></div>
+      <div class="logo-sep"></div>
+      <div class="logo-bg"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAvCAIAAAApexLzAAAfhUlEQVR42u18eXxTVdr/uUtykyZp0yXd1xRKKaEtIFspgkzpW5l5FUUtCjpSFf05MKKv47jMKJ/5KcooLpURR2dELQKyKTvFQlso0I1C9yVp2pS26ZpmX27uvef948A1pAso6KBvz6d/pDfnnnvvOd/zPN/n+zw3GIQQjLfxdrMbPj4F420cWONtHFjj7ZfZrkmNIISefUbrj41zrP+D0MEwbDSs4DgOAOA4zvNfvnEcxx/xHGf4mD8JsFiWRcPyF/O66nCwo884jns9yXj7mZvD4RCLxWMg0m63sywrk8kQziwWi5+f3y/JYiF0ekENQsiyLACAIIgRwTrertkuXKyenDhJJBLxWOnv71er1QRByGSyDRs2PPDAA5GRkTRNC4XCadOmoXmGEHIc19nZuXfvXrlcnpOTYzAY1Gr1J598smnTJoZh/Pz8BAIBfxXy2naT4zzBh+E4NrpRQaZy9+7d3d3dMTExEokEwzAMwwQCAUVRFEWRJAkhdLvdLpeLpmm3281xHMdxNputra1t5syZCxYsQIMQBDHCPsAwkiTHwXEjbWjIyLKc5xGDwVBVVSWTyYqLi/fv369Wqx955BGRSCQSiVJTU3lgEQSRm5vb29s7bdq0urq6vXv3mkym+vr6LVu2OByOtWvXKhQK3ieSY0MKIwiMILBRvhpx4VmWfemll1pbW9GRgIAAhUIhEAjsdrtWq70MZ5KcNGkSMj+Dg4MDAwPo+FNPPbVgwQKWZXEc37dv34kTJ55++ukpU6ZwHIdul2GYd99912az/elPf5LJZMNd+3i7Zhu+MydNmoTjeHl5uUKh0Ol0JSUlTU1NKpUqKSmJdxc4jtvt9ra2NqvVeuzYMV9f36VLlzY3N9fX12dnZ9vtdofDcdVVRgYVyyJIuUzmvosXDc0tjiEDQVF+UVHBKSnyCfEYQUCOAxjmua7I0qjVap1OR5JkTk5OTk6OSqWSSCQAALfbnZ6eXl5eDgB48803n3/+ed6pNzU15ebmfv75552dnQAAgUBQX1+/bNkyAEBhYWFNTQ1BEAzDCASCLVu2vPjiiwAAs9n8/vvvsyw7bsB+MHnnoJeT2bRp0/bt25OTkxcvXnz69GmO48xm84YNG2w22+bNm1NTUxmGIUny/PnzWVlZwcHBRqMxMjLy0KFDQqEwIyPjueeek0qljz76aFRU1FgWC6HKMWi4sOVj9Tf76f5+8gp4IAA0jkfOnp3y/56MWnC7VziAgHXgwAGSJA8ePJiRkeFJmAQCQWhoKPo3JiYGmR+SJMVi8bRp07Zu3UrT9PHjx9EgyBWyLEtRlCf95724UCgcjZmN6EPH28iiAIZxHDdp0qRXXnmlp6dHrVZzHBcYGJicnFxaWvr444+jaUd2a+bMmSkpKRs3bjxx4kRWVta8efNMJhNFUTU1NQEBAX5+fp5gIEdEVfPhw6eeeZbp63ciJ3TFHnIQAo5tP3y4/fDhiQ8tv+PDXKFAACAEGIYINcMwX3755WeffZaRkUHTNEEQOI7zTtrtdqNxaJr24uM4jm/evFmpVDY0NKhUqsmTJx85cuTUqVOPPfYYSZIcxyFytnr1aoZhrFbrunXr0BW97n8cVT+i3XXXXTt37mxsbLzjjju6u7v1ev26dev279+/fPlykUjEw2VoaOitt95qaGjIzs5esGDB5s2blyxZgtApFAo9mbs3sBBz0hUV4g7b4vc3MRjGsdwIHAbHIcdJcbxl19eTspeTJAmuiAvt7e3Tpk178MEHGYbxMiqYh9/0dKCIj7Ms6+/vv2rVqvb2dpVKxbJsZmZmZmamp5qCYRhBEGvXrvU818sRl5SUpKWljaFZjK2+eMkf/xcIHNrYOp2OYZjw8HCr1VpcXIzmc2hoKCQkhF84f3//TZs25eXl2Wy26dOnL1q0qKCg4OOPP9bpdEqlMjU1FRkIb2AhzjRQ33D6T39eWVF+PfdkfHfTif95Piv3A45lcYIAACiVyry8PAjhD6U+BEFACN999120osgPMgzDu0K+ud1uCKEXalFs/MYbb+Tm5nZ1dXnKfZ7g4B0lx3EozPECEAqqecvHsiyGYb96aY0giKCgII1Go9Fo3G73ihUruru7DQYDcjj8ZAoEAoIgDAYDcqArV64UCAQNDQ1ardbf35/XVEd2hYUvvQKdLodxSOgjQT4Ow3HgsTaQZQEAHMPgJGlyupr/9dm0nFUhqanIh/Km5cf5ez6uRNAkCMLlcqEPaJl5mmWz2VBMgFAiFAp37979l7/8Zfbs2cMxjRQNgiAIgnC73QzDIA3QU0fm/+WdKULe8G6/yiDx4Ycffuyxx9CRmpqat99+e/78+QEBAcONenBwMNqxLMvef//9L774otPpTE9P94Tg93I+xzAQwq6y8o8UYZ8mp3CMG15HK930Tq5YeuSJJ/kRRmsMw0AIkUsGAHz11VeIco1xCk3T27ZtS05OHhgY8Dze09OzZs2aFStWoGERCnNzc5FxSklJKS4uLiwsPHXqVFFRUWdnp+e5hw4dUqlUXV1d7e3tjz/+uEqlyszM1Ol0HMfxN7Njx44777wzIiIiLi5u2bJlFRUVyFnAX0srKjpttdqGH+c4jmEYZsx1vP52GVis2w0hLP7Lq5+ERn6SNKXjVLG+okJfUdFVVmbRd6Orom49VVXdFRVdZaX6ysr8tWvflfp9nJhkR2vPcTcILGRaDhw4sGbNmilTpqD94XA4IIQmk+mjjz568MEH0Y5ZuXIlAh/Lsg888IAXh+NbTk4OhLC0tPTll1+eM2cOAICiqA0bNnhy/Oeffx5dvaysLC0tbeLEiW+//faWLVuUSiUAwMfH58KFCxzH/WqwNRqwPFcB8ZDrGQ315IYt/WWvgRhSX3UNxDGXybJn6X0AQpwk7QMDi955a/Zz/wMZBhMIXMahPUvvdRlNOElCCHGBQCCXQ7PF0NwSkTZ3NNX0h3LJ0tLSXbt29fX14TiuUCgQnbLZbCdOnNi7dy/PCXjv+eyzz2ZnZ69YscLpdM6ZM+evf/2rw+FAav7UqVMhhGq1+vDhw9XV1QRBcBz34YcfbtmyBcfxd955Z3BwMCsrCwBw4MCB5cuXOxyOzs7OiIgIAMD8+fNnz55ts9kQY/Vkpj8zuf55wghPrzcGs/S8H3TKiD3J70eE0D5o4ADAABCIxAADOEkKRGKcFHjyIFIk5nzcGEnyOXESw2x9fZfHuWFZBUL4xhtvrFmzJjEx0Ww2i8Vi5LzDwsL27Nnz6aefPvnkk3wSFLU5c+YMDQ0hrhAeHs7bRX4iVq5cuXLlypkzZ54/f54kyYKCgqSkJGT2rFZrYGAgy7JPP/20w+GIj48PDg52u90YhiUkJAQHB7e3t7e1tf0HhYyfLTIdu2LAqxvinXzP4fLhKFsQ8/iAfBz6gxBgI/S6uY/HsqxcLpfL5Z5CKKJTcXFxaMegHCpPugcGBhiGQTEjy7I0TSO6gGQ4mqYhhDExMRBCiqICAgIYhqFpmqIohCocx7Ozs2fNmpWbm4sEMxRpIveHwoX/VLa+p7d3aMg4hvG4WebKYDAgj2Y2m41GIx/0ePV0uVwWiwXt9q6uLrPZzEc53sBC5gpgmDhAjiN53WqlrRbaaqXtVpR4JigKw3FSJHLbbLTViv5YmsYAYCH08XBMNyX6Hf48SMTij3teyzOUQ90IgiBJkiRJZKU9SyEQt0PfIpuLvt20aVNZWRmydkKhEH1rt9vHUPm/J6ojJ1ovJ++vorTDzhpxEM+DZ86U1tY38BKJ58wgAz/iONzo9zY8ZIYQVlVV/fnPf0ZGaNu2bf/85z/BsComxLr27dv33HPPHT16FMOw9evXnz59Gs0ewiJ/xcsci2NZnCSDp041VlaJ/H1/t/UTgVjCsSzAsK6zZ3Zm3UnJZKybFkolv/vi34SQgiyLk2TDrl31W/ME4WEBkxIQ/n5q+z+Gnnn923dEm89LVhiGFRUV7dy5s6SkxGw289Zx+PhjbKTR1GCv6H3EmjuvKOSepf+NzMNwKaevvz9YoRiu+gIA8Ove5CirsWPHjhUrVtTU1FAUJRaLDQYDhLCurs7tdk+fPp13fBiGHTlyZO3ata+99trUqVNlMplcLj937lxhYeEf//hHT10G93z4+N/9lmFZTEDGZiyOTE+PXrAg+vbbIQtb84/pTha35Z/oOlsWs/COqPT50QsWRs5LD0yYSLJsRFqaj0KBUPifEmOQ17sRR4DEwO3bt6tUqlWrVonF4ldeeQVBarTCN47jtNq23r4+3j7x4Ovu1jc2NRsMQ+jftnZdc4u6v38Aw7C+/oEWtaatXYfQoNf3tLSoW1o0LppGC2Gz2VvUGnQ6hNDlcul7etACtbW1NzQ22R0OlmXPnSsrLi7p6+s3DA1hGKbTdbSoNd36HrT8nZ1dLWpNd7d+bI+JUHXmzJljx44tXLjwiy++aG1tFYvFiGW++uqrOp2OV+cJgjhy5Ehvb++sWbNQjkQqlbIsm5+f/8EHH3ildK4AiyAgx0XMneM/I5XiOKfJyNK0225naRoCSEl8hX4yys9PKJW6jEaWpt02G0vTjMMJIZz+1JM/Ed/6eRguWuCenp6srKwVK1bMmzevvr7+vffey8zMRLxtuCtEMCorr3DRtFqtMZvNPJNlGObAgcMDg4Mcx+3Zs49hmKKi0wbDkL+/vFWr1XV0nDlzLiQ4WKtto2m6orLqXFlZQEAAy7G79ux1Op39AwP7Dx2SSiUCktz37cF2Xce+bw42NbU4HM6du/ZAAPr7Bw4cOuxwOLRtOtpFt2rbenv7ikvOtGg0ISHBF6tr6hsaa+vqW9RqRVBQQ2MTssRjPHhTU9PLL78cHR3tcDhqa2vT09Obm5tZli0tLcUw7J577uHLAjo7O1944QWlUllZWVlQUHDgwIFvv/327bffNhqNGzduvHDhAo7j/PYmvZZn4YYNx1fliOUBAABCKAQAkBQFGQayHGRZAKHI3x9gOPrKj6JiH1oePmsmn9K5Zth801kn78g80/X88o8obg0nNC6X65577iktLV20aBGiFwzD9Pb2egILcXxPB0cQhEajTU1Ndjic7boOiqImxCvdbrfMV5Y8VeV0uYpPlbhoukuvD4NwxvTUYIWivKLSbLZgOPabRQsHBw3nqy7cd+/SoKDAoKDAhvrG02dLbWZLWEhoeFgYACBIESSTSiup8xRFuVyu8PBwZVwsQRD1DY1SqTQ0REG73XPnzDIajadLzs6edVt//4CIErbrOgDHud2sRCrJ+M0dYxhy5F4hhK+++mpeXh7HcS+88IKvr291dTWO4zk5Oe+//z7P5HAcNxgMq1evbmtru+2225RKpY+Pj8ViWbJkSWZmpsPhQAXKI+QKMRyHHBc6LXXeW290HjuKicUMxwEMH9JocKEQsXuWpluPHSN9JIBjJQTJBgRmbf4QAji2wIP8FEr/ebJOhmGuv8jdi7qilAKvLSGtAcOw3t5etG94UoJuAPXnjT9CDDpIEMTJkydLS0sJgkhJSeE4zm63S6VSiUSCLufj4+OVncRx3Gq1kqTAZrf29w9MVSXV1tXPnnUbjuNisfiOhbc3NDYZDEMEQeAY9ptFC08WFuVt2zF37uxpqSkD/YN79n6bNDkxIMAfQiCVShDQQ8JCNGotw7jjJyg5juM4KPfzAwAQhMDlcsnlfnNm3VZb19Db2yuiKAghzTBuxs1xXGdXN8swsbExJEFEhIeJxWKjyVRwsijvqx0zZ0xPnqoaLdeOUDV58uTo6Ojc3FyKojIyMlpaWvz9/SUSidVqTU5OdrvdAoEAbdfk5GSZTPb6669v3ry5ra1NLBZXVFQYDIaysjKn0zl79uz777+fp1lXWywchywbn3Vnw65dJU/+gTObHRyHi0QiuRxASIoo2u749sGHKQAIAGKW3rXoH5uFIhFfNjN2Nkqv19fW1qJoq7Cw8KGHHvKUDK7ZkAvXarUoAEQfUBYZSQlRUVFarbampqagoACVglVVVSkUiqioKJTJbm9vR8nH2tpavm6CD6HRh/LychzHpVIpAOC9995jGIYgiPb2dgzDSktLY2NjQ0ND0dwVnCxMTUnJvv++r7Z/bTAYFmcsQiNYbbZDhw6nzZ0bGRFeX9+A4XhoSPBDyx+oulBdcLLo/mVLlyz5r+5u/bH874KDFRgGaNqN5sFiMsv9fZ1OV3//gOd2w3Hg4yM2mcz7Dx357yVZPj7iS51dGIZBDgoIEsfxwMBAIUUROI6SpzRNSyXS++65u0WtOVVyNsDfPzIy4irxE/cOF+x2O4qjIYTr1q17+eWXw8PDH3300cOHD3uW6UIIrVYrjuNLliwZGhqiKKqtre3222+fN28ey7IKhcKTk3hbC4wgIMsmPfDAg2dLkp560i8ySiIUijhOBKGI48QQ+shk4bfPz9y+bcnnW0USyRioQhvRZrNt3LgxOztbqVR2d3cjOepf//qXSqVas2bN/v37gcfLRmO0c+fOrV69eu3atchQffLJJ9nZ2UiIZ1lWKBS++eabAAC73b548eKUlJT4+Pi77757aGiIpukPPvhg/vz5Fy9eRPmHJUuWrFq16ujRo3z8v3DhwqioKJZlz5w5s3DhwpycnISEhMbGxtjYWJZlDx48OGHChIceesjpdPJu1O129/T0Wq1WlSrpUmdXc4vaZDJzHDc4aGBYKJFIdLpLOEG0tmqP5X9ntdqioiKC/P1bWjTNLerQ0BCZTJY0OTE+Lu7suVJEz7u69elpaWlzZmtatfX1jXp9T319o9FkMhrNQ0ZTc0uLzWoFAOg6Oux2e3e33tdX2qXXX+rsEgoEwcHBR47mt7Zqq2tqNRrtudKynp7euNgYihKIxWIv149UPa9aP5fLdeHChTvvvDMjIyM9PV2pVD7xxBMZGRlnzpzhFwiBxmKxKJXKGTNmqFQqX1/f+Ph4lUqVkpISHh5+VcQ9sgzDsig5Y+/r76msHGxudhgGCSHlFx0TMi1VkTz1cvEWho1hqxDSTSbTxo0bAQBhYWHBwcEURSHgd3V1DQwMJCcnP/LII8PfVrPb7ZMnT+7o6EhLS0PPdvz48RMnTkycODEgIADHcbPZ3NzcHBcX9/jjjyOjheN4QUHBp59+2tbWhuP4woULn3nmmbCwMJfL9fe//x0AMHHiRLFYzDDM4OCgVqtNTU1dvnw5mjIcxxsaGl566aXa2lqHw6FUKn//+9+vXr364sWLf/vb33p6ehITE9evXx8dHc0nNExmc3lZpUQqSZqcCCGsOF8VHhaaNDkRAHCxutbpdMTERPf3DxAEIaIom80OIYyPV2I41tTUIhJRUokkLi4WQljf0AgA5nI5o6OiFIogFFE2t7SIRGKlMhZCaDZbOJbz9ZV1XOoEAERHRV7q7Arwl8fFxV6oruFYLjExwVcmq66pNZvNcrn/VFVSt16v1/cQBBkWGhIaGuK1LrqOS2GhoUKhgH8Wg8GwdevWuLg4kiTvuusuvqYoPz/farUuW7aMZ6tarTYvL+/VV19FLnLjxo3p6enIYnm9NzXq61+Q4wCEo+X+eOT9RBkrHlgLFiwoKiq6nsKVEftc59sWfDeXyyUUCj0TYT9itFs/LXg903iDxUKjluNdVjtHef3r+lHFvwnoqQvwA6LYakS+zzAMhmEo2cwXPniN4Hk6T88RJ0XhAi8BDJeqPc/lY0nExvgtywcBKErwesNxjDzaaND0ugFka72kVK+D/JN6ch3PSUDPy3fzvMSIMB1xe6DH90zO8PPptUDXWYJ7rTpPDBvh9a8fqDD9iBdprFarxWKBEM6cOdNTwLxmLmjE5Pz13ADqzy+V58ERRxjDrvBnjdjHqyx7eB+vg8MV/BE/jHjK9Wt+I87taK92Xs+Fbrl3p9B27+zstNvtJEnee++9oz32L7qU4FffbrmKW+R0CgoKUCnLxIkT/1OFUOPthrboLfXbDYgwtra2JiQkpKWlHT9+nKKoEf3FzWLKP8JK/VAKf83+NxgT3PTTb0qMgt9SqMIw7Pjx47NmzcrOzs7PzxeLxT8SVRCCa20Y7Er7AaN6RA8/zr2iYl6vWozLTPw6k+gQevUc+X6Gdbvm7fE3dlO28S1ksZC5ev/99wMDAx9++OGbsnVQSOtJcjmOwwDAcJx2OFAAJRCJAIQYjqOvEOIgx2FXoi3M45VdAIDLYhGIxZd/ZMAj0OMjMj7cuyyl2u0CH5/huVQkBEIIGZcLJwhCKPQc0CsYHF6SxKHsMoS0wyH08eEf4fKdXN3/sniEXqSBEF7J4GEY5rLZRB7luAAA2m7HMIykKDQPl6VKz7MAAB7x6YjlUrfozxiNlj++9oksixNE65kz7adLfCMjZ65cMVrP7zb+XeTrSwgEaY8/dp2W4lJVVcikScdef/3ut966zvtpOHrMpO+em5PDMSxO4LTDXp63jbFYo9PmKtPS0MIce+ONyZmZhEAQmZo6xg7BcLxfo7n49S6H2Rwzd07K0qUAgJaThV01NXese8arv7mnx240hiYmohNHG9ak1xflfnj3mxs4hqncsdOm14dNS+2srk6+667ghIQbWUFi/fr1txp556s6f5SJghiOl33+hYASJmZlNeUfN/f19jQ00HZ7zde7CB9xR2VlQ36+b2hoR0Ulx7JB8Upr/0DtN/tkoWGNx79rOHjQTdNiX9+Sf3xkMxkBBBe/3mUdHFRMmNBaUvLda+tlERFNBQXGdl1QfHxjfn7zyUKhWFz55ZcOs8XtcPRrNCa93j40NNCqvfDV9v62dnNv76XSUpvBEKaagpPkkf//ujw84rYVD7E0rauogBB2VFQau7oZl+v05n9IgoKMly45zebBVm3budLWkjO0w9546DBBCaXBwZDjJAEB/W1aQkRNycqq3Po5JiD7NRpKKjX39jYcOiyPjqratbslP5+ghOXbtjUcOTo5MxMnCAzHO6urq7/e5RsRrjl1qm7fN5bBwYDo6HOffVa3f78kMCg+Pb1482anxZK2+okgpfLc1q2mdh1BUYSAPP/Fl4TYp1+jOb9tW79WGzZlyvmdO5uPHLVbraRQWPXVdsvAQPDEifCKdHfrAuvGf9QPw7D6I0dDJ0yQx0QbdLrjG95MvW/ZuX//O+OFPzWdONF2uoRhWNvgIACQIEmX1dpU8B0pFFoHBnSVFfHp82sPHWorK01eendEcvI3zz/vFxraXV+XmJHR29wsCw/zj4jk3Awlkw11durKy2Jnz67cvuP2NX84+++t3XV1oUlJ3TW1vU3NfeqWxKys+qNHMAASMzObTpyMn5eG4XhZXt5vX3uNpCh1UbHLZnVZrd21dZREIlMoQiZP5liWdjiMXd0Oo1FXXhYUp6z6epfEz8880B87axbrdhMCQfOJE9EzZgAINUVFA5cuiaTS7travhY163bbDAZ9bW3Ubbdpz5wR+8lT7lkaFBeHYRjLMN01tdrCIhZy7WXlsXPmaE6f1tfVhSYmYjghDQqKSEku/PDDu996U+jj47LZNKdOJy5eXHvoUGBcnPpkoW1oqLu+LkylunTxYk9DIykU+kVEtJWVa06dEvmI9Q0NiRkZvHO8deWGGwz0MBxnnM6BNq0sOtpptvQ0NysSJrksFrfTqW9qcjuchFA49Xe/lUdGuixWt90hlvsBCGLnzQtPSZYEBMqjo8T+cgCBpavLMWQkRVRATPTtf/gDAMDa3283GrvqamNmzyIEAoIkhDJZXNpct9PReupUYFysb2iIprCoo6oqZHIi5LiOygqZQuGm6dCkJFIoFPv7E0KhWCY7+89PtGfPOs3mnvqGxvzjYrkfRuAMTVv6+1k33XXhYktxsY+/XBIUFDVjOoRsaGpq0n9lVe3ajZMkAGDo0iVKKi3evNlhtUkDAq19/dIgBYZhSUuWyMMjgiZMEMnlspAQS18v63ZXf/utw2zuU6vLtuVxAgLDcbHcL2jCBLGfL0bgxkudHecrQyYlAAACY+NOvvOOuri47ey5wLhYiSIIQliWl+dw2CmZDHBc1IzppIjyCfB3O50dVVXhqimQ5fyjoxesWfMLkBtujjNlmPbSMpfVQkmlATExiF06TCZzT0/c3Lkd5eXigECZIshlt3Nud3BCQntZGYbjQUqly2oT+ogZmqZ8fDpKy6LT5jpMJoOmNWL6NLFcbh8a6mtuFsnl8vBw68AAJZHYTaaQhISB1tYBjWZSRobLZusoKxcHBvhHx1Tv3l139MjCdesCYmJkwcGmrq6QxEQAgMtm054+7RMQEDZFpSsvE8pkfmFhAEJKJuupbwibquqoqBD5+gYqlfZBg2LihI6KCpZhTHo9S7tnLM/mWLa3qSkkMbG3scluGFQkTHKazUHxyrazZ0VyuUyhQNycEAicZnNvS4u+rn7Rc89CjrtUVQU5LkippB0OH7ncbjTKw8PVRcVCqTR6xnSSoliGaS0uJigqMDYWZe04hnGYTHaDITghwWmxyEJCTN3dhEBw4etdrefOPrx1K223D7aow6dP9/GXDy9yGf/V5Bu2kcO4oKWvr/vCBWlYeETy1JsyOHKCt8Lz9jY3m3UdQYmT/KOjf0kC6U0LKll2xPifj7G/1whw/HLcfuUdOIyPz3H8sh6G45dH4CuFroyJBkRlIHwHzKMECPAX5XORKIBHisaVyBdeifuuugSOI7kEJ4jvE89Xun0vH1w9lCcr8JoQ/Ep/cOUscOUleHhF9/KsXwIe5cueT3GVVHb17/mMW6yf1owh9GC/ukwUAvT1PNo4sMbbTxPdj0/BePsp2v8C3dH/hYlQKVYAAAAASUVORK5CYII=" alt="Tjitra &amp; Associates"></div>
+    </div>
+    <div class="brand-info">
+      <div class="brand-label">AI First Program</div>
+      <div class="brand-name">Setup Claude</div>
+    </div>
+    <nav class="mod-nav" id="main-nav">
+      <a class="mnav mnav-home" href="#top"><span class="tdot"></span>Beranda</a>
+      <a class="mnav active" href="#m1" data-mod="m1"><span class="tdot tdot-1"></span><span class="mnav-num">01</span><span class="mnav-sep"> · </span><span class="mnav-label">Instructions</span></a>
+      <a class="mnav" href="#m2" data-mod="m2"><span class="tdot tdot-2"></span><span class="mnav-num">02</span><span class="mnav-sep"> · </span><span class="mnav-label">Projects</span></a>
+      <a class="mnav" href="#m3" data-mod="m3"><span class="tdot tdot-3"></span><span class="mnav-num">03</span><span class="mnav-sep"> · </span><span class="mnav-label">Templates</span></a>
+      <a class="mnav" href="#m4" data-mod="m4"><span class="tdot tdot-4"></span><span class="mnav-num">04</span><span class="mnav-sep"> · </span><span class="mnav-label">Synthesis</span></a>
+    </nav>
+
+    <!-- SUB-NAV GROUPS (IFP sidebar) -->
+    <div id="subnav-m1" class="subnav-group">
+      <a class="snavlink" href="#m1-why">Kenapa Perlu</a>
+      <a class="snavlink" href="#m1-where">Di Mana Settings</a>
+      <a class="snavlink" href="#m1-example">Contoh Sederhana</a>
+      <a class="snavlink" href="#m1-framework">4 Blok Brief</a>
+      <a class="snavlink" href="#m1-power">2 Kalimat Kunci</a>
+      <a class="snavlink" href="#m1-template">Template Persona</a>
+    </div>
+    <div id="subnav-m2" class="subnav-group">
+      <a class="snavlink" href="#m2-why">Kenapa Perlu</a>
+      <a class="snavlink" href="#m2-where">Di Mana Project</a>
+      <a class="snavlink" href="#m2-example">Contoh Sederhana</a>
+      <a class="snavlink" href="#m2-grow">Mulai Simple</a>
+      <a class="snavlink" href="#m2-ba">Before · After</a>
+    </div>
+    <div id="subnav-m3" class="subnav-group">
+      <a class="snavlink" href="#m3-why">Kenapa Perlu</a>
+      <a class="snavlink" href="#m3-tpl">3 Template</a>
+      <a class="snavlink" href="#m3-conn">Connectors</a>
+      <a class="snavlink" href="#m3-memory">Memory</a>
+    </div>
+    <div id="subnav-m4" class="subnav-group">
+      <a class="snavlink" href="#m4-week1">Minggu Pertama</a>
+    </div>
+  </div>
+  <div class="sidebar-footer">Designed by Tjitra<br>Powered by IWDemy</div>
+</header>
+
+
+<!-- FLOATING PROGRESS DOTS -->
+<nav class="float-progress" id="float-progress">
+  <a class="fp-dot active" href="#m1" data-mod="m1"><span class="fp-dot-lbl">01 · Instructions</span></a>
+  <a class="fp-dot" href="#m2" data-mod="m2"><span class="fp-dot-lbl">02 · Projects</span></a>
+  <a class="fp-dot" href="#m3" data-mod="m3"><span class="fp-dot-lbl">03 · Templates</span></a>
+  <a class="fp-dot" href="#m4" data-mod="m4"><span class="fp-dot-lbl">04 · Synthesis</span></a>
+</nav>
+
+<div class="page-content">
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="hero-ew" style="display:flex;align-items:center;gap:10px">
+      <div class="logo-bg" style="background:#fff;border-radius:4px;padding:2px 6px;display:inline-flex;align-items:center"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAKACAMAAAA7EzkRAAAALVBMVEVMaXHZd1fZdlbZd1bZd1bZdlbZdlbZd1bYdlbZd1bZc1XYd1fZdlbZd1bZd1cXaEn1AAAADnRSTlMAS+Yzf/XUZRGYBiC/rZmWQd8AAAAJcEhZcwAACxMAAAsTAQCanBgAACAASURBVHja7V3bgtsqDASDwdjY//+5Zy9tz7abbGyQkMCj93aTWNZlZiQZ05etNs1z2H10i4HB2nvf8cc+/NBuK34XWAtb4v7F+75YyMlbBEQYq9l8vLAp737DDwVjMTcfZ2y2+KlgHMVfOM7ZHPFjwegtHafN49eCkReAxwVLaIthtLbNVxzwyGiIYSIF4B9cRn0zvHm8JEMWgL8RGaf7G8X5mBMgoxELwB7gmO0T0oQLdlIATkeJqYVjVv9/RQsX7KAAzMcxkge6vwva3eER6zZf6H9H0B7+fvfsIG9GKwB/mVUf/uCC6m2Zyh0w6wt/Tz8qXFCp5aPCXA/hT2+4hlUUgJ89Zh/h7xO5BDCtsWOs8r9jXjoJfx/tMB73UAWgLmHM6jsGLu9re6X/HdPaSfj7iNcApZVZPKot9lTJZsjIehTh6wejlxlS2h4LwHAQmOuqlQctN1IBqKa3PN9KBWAxIxWAH7Z1RSYmPHjTpQhf8yPNnfPXBiL8rsHo7RpwhCRs+hThq0VifOcKCgMNVtdIzDqNouRGB9KlLPDyVwEhMlgEFE5q1/VkAYTIWA4oCu+6niUUBjKs7pGYNICQ9o4oIKkDCiIxy9y9kPaWtpA6oGBOi2ONNN/HZlIHlJMFhlHG+e5mgTYExr6aKQAxputhOD1gdJmiZwYOYwai4gST2jbQSgcDKqQ/WaDvV8NogETT2tYDDQwgelQcRgZas2Ot9bqXTcQOKAFG5zE2ihhMhPSJxBTTOdCkmt6XwqgAo0s7+QlP34wmRxBBYvIoW+VuaetM7YC5FzYHUgQzIBciUNvPB1AYFIFykWUZaLMwisAOwWjX7yg9rIJGUJPbiskcSBEGRQIbg9HxgBTBQI8gB0b7A1IEg7kQOTA6oQk2UEULNpg7pAgGolTB+ipAimCgCRR8uhOkCGDjBCv8FVIEAzZOEOXdIEUwYOME+TgHKYIBGycIRlugMAa6fMEHHCFFMGDjBMHoBCmCARsnCPQWvjzYimBGvNUgAEZnSBHQB0tWWQFSBINzIYJI24wmGEiMIB+3QopgoEgQxHo3SBHGsIUBC2xxicN1IUXY7HMDHsQHxXi1REhbKYKdcK5ERJLQgI+LHUgRIvohKTAwagWQGkoRlh31qBgYyM/Hee1N8BZwM0wQDLRKu/dmUgQ7A5SU1OZnpVTwpiurIAmzgYFOJRPXSIqwZBzulAYDd5VSxjZSBDdBny0PBm4aqeAmUoQ4Qx+rAAxMGnezNaj612v9+YQpUSYwkBeM3rSiMFvGkJQSMNArpILZu85twpCKFjCQFYy2OqUIBf6HJMwGBkZ1XRO3FGEJmFRWBAYGdRVD1uh/SMJsYKDV9rbwxpq1FEpAEmYCA7M2Jo61CV73ri493gIMdMo+qtXpf0jCXGBgUkYFb1pLaCRhHjCQbzikqF6d9bZwGFfmAQPZwGhtbbnv7tTjPcBALjB6URZm6vs3JGGefVlRExXsNeMHSMIsfQiT4tKqQmFsn/eW79GHWEWP3KmuW5CEWW4YZj05j0mPb+fuLgzcqg9xauI0TxPs5j5P7Zm78CG7GtQtCc9/qNipY+63sW3T0qxHJQJAJOG2uqykJUo77f6HJMyiy+IYDgk65NBLOOCA+nVZXgcVHPT7H25IsFDC9HzcqqLAWnPP127vBMVEFUyc1yQAxLKilpRwUNGoW/X+h11FXJSw1RChF/ULnXDFyTBRwruCLmnSf+IHMCAbFOPkHXDHlb0bQzFJPvx45Ss9m5+QMLeihDfx+svqFCBIbfA3N6OEk3iTvukl4ADCNGjzNuHoPGkmQADCPPydZ7UdXpDMb2vm8b8JLseKNDjZ/bxeu/9hPwczJbzLUsFW83lRDCW1ABucKBW8ab4xDxCmBRSTJRv0WTMArR+E2TaZ12PTGQKt2OO1bP6nGoT5wD3nKeQ9JR+tc9vaIxSTBVmapBiAVq9FffS1P90xbl1RwlauDouKAWjtWtQfv/a08zph1BgCk0z65/Q/xSDMa9zdr71AMVbKASmUdlwEiHIQ5gzumZdOKOEg1ZwHxQC0bi3qOeH35DpR51shJi4pBqB1a1GTeBNPqs4PQkOZUTEArVqLev6125cuKGErQwU7vQC0ahDmyrMProeFbRQLKwv28656AWjNIMy1126OPVDCUYKfCYoBaMU0yOUHn1b9lDBBCHStS/xlYvY/nVrUgtcubPqhmCgQkb1iAEYtCFO0+XC26inh+k0xsXHrk7j9TyUIU8r7sKRh0hwU27fli+YGWOdm1HLeJ2/KKeHqEJiaTluwNyAqabiasmOyyinh2Jqb2VU3IBpb4MrNS143FFN7ECM3/D34G5Ajr+ON5DLQIrueVz40THH8DYjG+zT135qeFqGkhCt/86kdz9WgAVEIAa4U3ytqpoR9059n0tyAqFQhkFT81HgMZTVetTh/aybEbtCApIEX5FLTIlFJCHSt/thNGxC6bEdNi2QdITC26kEaNCDb4MshadOw0xECfaMehL8BUbsPi+5J006LJBXsU2qzFOGuDUih4rLJtAjlwrbUrELOaECaXKJqQYt4DSEwtHjODRqQsN5kKRAhLUJJCadWb2dEAyL89QlpESs/h7O2qPQbNCCq1wESf39CWmQXD4FbA7XxnRsQniEsMjxmEw+Bln8gqUEDovwo0kb+hclokST9ECJ7oL15A2IKt3A3kqlSRgfXohOPChuQWf1h6qBXeBuFQ2Di9vK7NyAM93pp8ZggGwJ35qUIDRoQf7cTHbS0iJMNgYG3B0EDwrmLhAaP2UVD4Mzag7RoQJbbXQokxmMI1fmZnSeP6hqQLk7CrXzv36aqQLDcr6ZFA6KmDSaTqRIubMvcxcmCBkRPG0y21NzKBYTIOJDUoAHJq7njsV5ymWoWW83o+TrOBg3I1M1BON5ipBqPcWIhMPFlPDQgLdpgolJklwqBmc29GzQg0fRzrpwdDV21QDGWsztbNDUgXZ2kZq+HK/GYJBQCZ6YeBA1I+60kVokqJvJlhl1TA7KZroy/JK6jRbyIOM4xlboJCDTvmUD6baqrSAi0PA8dDUjr66AEMtUosbQ3sqj+GzQgu+nP7NHAvAY0OjIl/llNAxKWDh2Q+0BerUzVCYTAxMA0N2hAOkKgmzHCBGPDe/sQmBmAt4QCUOZId7VMdWsfAgP9c2/QgCTTq21zCw8sxmNS81J0JhdcN2hA+kKgBRqRYlqEbl3WSZnIQr4UoUED0hsCLdCIFOMxvnEIdNQkX4MGpDsEmnNTFjUeQ4dGn1vaa6lLr3RAA/0qR+yNPLAIj4ltn1Mk7kEaNCC76d7s3CgNO8nhlVMh0NP2IA0akGnp3wHN1igNl+AxtmkI3EnFgA3Izl4R6G+pYlabhveWITBT9iAtGpBoBrFWQfB6Gt5awrUTZfXVoAHZzTjWKgh6MTT69dKylfKbNGhAwjqQA5ot6EzDdGh0oo22VroBmTczlK1+VglK+2ZLex3d/9aAAekdgX70ABoFwWvcMB0anShb7klaaOTNeLY2YuauafVjqxAYycSADX7HvJoRrVEQvJaGQ6OuMVEFoBYI9GbGtFZB8Eoato1C4E4EwaEA7CEIXpFo7W1CYCYi4lAAVuoT0qGMmXNtlvZONGJADwS6Wp8wtUnDS3M0eqfCoYPY4qduh+AUUnOnB5bo0GhHhEMnwQJwFAmCgl7kdBr2DUKgI+lBIEHoKw2fZObo0GhH02w7uQIwmXtYI630SYFM5A+BkUAMaCFBMN0pZHzbZUqOIs0HuQJwM/exRpDgKWbOsp9uSPVxFENw1L1I0sPMZe4QmKqjtgcC3evI0glmznGHwL02DllIEPqFBE+k4cScxXIlqYwCsG9I0DbbZJOrRTcTCsARmbm1FRpta6ngDARwREjwFTNHluMeh8A6TwACOAAk+IqZi5whcKkiw1AAjgEJ/szMkaHRoVKL4LAGa1RI8Oc0bBkfpqsRA6IAHAYS/DkNZ74QaCv+NQrAkSDBn9Kw4wuBsTwYbSgAh4IEfxLIJLYQ6It7EKwhGg4S9Cs7Gm0rHNC1v7sH12sLCT5n5jxXCEylYkAUgCNCgk8FMmSAWyzWIgQUgHeABJ8xc5EpquQyMSAKwGEhwSdpmAyNtqVaBI8C8NaQoOV5rlOR51pMAY8MCT5Ow0R/eyo907U1PXZ2hylgvb3IQ2bOcWjzlxLHbXF3HgWgaBB8mIZ3hvmKrUDMte5YAzN+EHzAzBElvlwWVlNL/0MB+GMQ3IWYOSI0einqJmJD/0MBqIKa80xotC2CF107/0MBqISaywsLGp1K/sdfYsAm/ocCUEsQ/JeZo2k/p5KsHtr534QCUE8l+I9AxlIDMacZjeDfrQkEgAJQUxD8h5nLxMVlq7vJKAC7rQT/TsMkUExofzoeBWDHQfAvZs7T3m0I2vwPBaDCIPj1tgMJFBPLTrWiALxrEPyahi1pmpuV+Z+HQ6k8MPKVGyYo2/5M+K7K/C9DhK81CP5fCDpCMmQ7UAAiCF6kRdaZjgxxuhzQwpUUB8HfrYglBGLsgQIQQfBaK0Lj6ptCB0QBqD0IvrUiVFsaIvVVbNwCvkUQTIF2WaU/UAAazA5L2NZquhIFoBnw8jpVDk4oAIerBDsJgkGXGAYF4O2CoFPlgCgAb1cJek0OiDUc9wuCkyIHxB62OwbBKYSgQwyDPWx3boeBwCAI3tyQgLmC4AznQgeMIKjdMhwFQRBTIAiCdzVAgAiCUOE/sMXGlIbAh1yGm3W1B2Fx0e+/Mtc+QoGwRgTBPiCY1dk/rvenR7LY64sOhN/1NuufqX1DXLHXd1DTsAhmeyv2XnCS0wAuiCCojwR+d718LjJMfkEQBAlM2WekfG2IbO6/JUYQ/DesrEItbuH8YnIIgiCBK1rc6HPl6Gz3qAyCoAgJfKLPOP2hLYIgIJhLYS/lif+OGoIgSODvYe8bqIwlwgiC/3eVC2u1t0+80zQIgiCBn1Z7R5OtEgiCIIEbhr3RDkncPgja3sLeaBLGm+sEd7pOI88ya00MxNL3JoHf6TShn3CBWPreJPAq53tjzfHdNQjW6PBFku6wk/Q3XaAQS5Nuqz73RpOkdwyCuSjp7gGjzAiChwAJvJ2WjeKiLIIgLYz2zudO0DGyB8F0AIJRhLLccJuXnQ5AMGpQlmN8Lljk2tzRAwmsAWW55zaluwRBqx9luek6uXsEwb3LpDt0C3KvIPi9furI94ZfKLzsx60ysE6U5YYtyI2C4G8aeOkt8A0zEXJ3pWpyb/LRPUBJayDXh6EFgVwf62wQBGGHgmFSBEEYWhAEQbQgEGnBjsHn4TCzdGCdA4IgDC0I5PpY6IUgCLvLZkAEwZ6dL8UN9w5hQs5nXxR/bk8+WreNWSPea2apO+f7O0tNIadPZ1wh0oLVWfZ2qUlR85s3vofGN3fs3R8XBEGFke9akf7pjt36I4JgQ+fzdmGv0H+Fx7ds3UnteAO5vgao+S3trhJsVQ/pGkFQlfNxAhR/p2sEQTifLFn/5o9KqkcEQSXOJ4nPzuFLtm5dPW4IgrQPc/euMKRoASbe0/X/+Zo/QgKQIYx8ruJpqSWoPgrIjwabJ0aCHCawaY+1yoJ+1Jq/PfLNH0m8McJ/6nzvAsz3QzHUadh/72dqXRHyBFnf++wHu69A3sJiKWkNPEbU90bLQ1O+HBQ3eJSg7w3bDJ7Pz2hEJH3vw8ae3H7Lzz+KylAESvreh92EEngcFJGBRX3vBhHwcVD8YwiAor73GQTAisKEfG8QHAbWre+hE4TJ+t6nHAsrzOB7olr2BWXggTlxUXkmHgRmhkQNZSDEy7IGUh4SPoMyEHbf1UAOW0Sxo0DUIA9GyYcyEMaC8rkuFqgsYOZHLPk6WkaKMhAlH8pAGFHJ1+WOUcxqo+QTtRVlICBmUdtQBgJilm2Frc8gRVDyCcfBNy9EKATELFsOuphQEaLkE07Izsbofdr3HMKEoIiSTzosbm+L+z59Mu1vQ43wSUDM0i65vPmkfffJ9O6Tb3ES/oGSTzhv/3bJ9zD57pMIlHQlH5yvLlJ++CUcs8D2296YZHfM7W/HRLvzyDxcpb1jfsbMd+d8986PIvPTQd9d9GY+OiP+aXTS9/D5wEvzgF46h0y4HRvWtPj81aWP0qT/XjS3wRf7xDK3z5hpbRomLG7ojqE+kw6LbwfGI1J0X+ZGXQb7eSLy94WfC4ZIaiABlz8G9HkuDTWmwSiqhiLzlzsiONLbAsS79BY5nMdgDFDeGz9acARHgwsBCtzx96FdVI7nMzA8h7uPQWxEBpaFJy3c7Gn8AwbTREeGlPyYBYnogBEE5cxidABBUJCCQ/uLIChnG4o/BEHB3sOj+JMIghGu99l7oPiTCoKg7956D2wbEQSobx8EHcQvCILoPRAE71n8ofdQYXkD8AxDEETvgSB4o+IPvYcuCyuAZ5ikJfQendVN7zaSB1oUf12lrF+r48dZ2n2TXUujiF7Cl/sFgzjhHcrAcXqP8Pf3imlCGYji75BcTzlAJBy8DBxM9OIfnhPqOhIOXQaOBzz7Zzet+nXCvKL4G6Jm6tYJPaYth6na+3RCi95jpL5xi3tnTjhtEL30ZPt64s5pV93xaGXg6NOW+3r25POMMhCKZzEP/Di26/cZZSBEL2Ie+HnxWX9ROEoZeJtpy/1i1aSet8sAnh8/aBfH8MBPJ9TbmUzoPZ7MLWxaQ0bRkgu1nUlG7/FkfHU7hvJArZ1JAvD8ZJWT3v29uWLRz1tnoqsojBC9/PtKLuqvKOXKVVOaikKH3uPxJrtNc/MY6pedvReFGr7KAtHLo/BnVt2kSiB5bgo6kwnA89fH6rq54RWoAFxhuDpjxfj/5teOjhgGQgpBsDNJKP4ehL8uDogEYhJLRkgTATz/gp6/hD9jj5uq6doXhRbA8/d9OW6+s57zDa5u6IQbeo9vG8O26faK4macyQTg+dvi2LUjVevECePyC2lmv6D3+HY/oKuRuomZSODsTLpzP55py38vqHQmq574qSyezmROC6YtH9yQ6u6C69yETKUuCue0YdryK/PWFwAj4IG/nHC6p/sxbXoJ3x6d63GuZG6JpVEQd925H9O0Zfombl86HSxpTCfUdSbdHath2vTyPfx1BcAcwuO1pZ1Jd+7HNW3pH8z27Fj3yNyZ7A7Tls8vVVxvs+eQOx6Wa67m6s79uNb8Pb7VE4vkKNMoMn12iX9/7se16eXxoR5bNM2wzsPKs2gl/tlB9PLjqbLrAIzXNrkkv+XiaWeSLaYtf+7CrgMwn1pyfzNarqgo7M/92FaMT09+iusAzPRZcuX7QtI/w9X/C2k6dD+2FeP7s0J9L1TyLjeHpF/D1aE/93NccNz09LfwpcivPupY18bHxWHF+HPhQYUC5vehqQRIeixjmbb8dJnnqcCW31gJY+xvg7Hfl/HPn0qBAuZ3pbUNuTnmtsa3Yjz8UIoUKGCScvVqgAeqWjE++5+S0l7xfHcsXjZYMV7GvJU3wF8UyNONJ0UG6z3YHuX8MzJma6A2B5U0eo86/WNBAbjXRM+GHhjhV9LA8+unUCCBnr4U+BkqafQeRcybKZ8B/pLa1hkqady2LGHeKgpA39MIZwIk/Sr7MjIJrwfvt7nuuqM/1B+jBCAoFf5OiDDWUE7BXUjgU8zwQJ3VX5ZNPqlW7JRPBuJtvq1OX7NFxvB3BoaN1VX9dLZn8YCk9TEfjCyWP1N7F0gQwt//73L6DIvowgVA0g/7T75Hcm78agnVS4Dc+Q20laKFed/3AA/sQXT6QnhgapYgxJIcvlJA1qEyZYAUaRf+TtbcBSFpNwUyhomENQ6fmAFIERrwJcnznwUF4LSUBNFAsnc1VKsPAUm3wJ5PL14qaQq+F1LhyiGqqj7ktxu7CTr9auxZkHmrERE8SGLzJeCmpg/5g39vAZC02vB3/gcueAny9wCyXfPbNVBc9FsyIGmV2POF8FeiIZi3wv8mGhr1aiSooG8PSTNSb1c2/tMUgCdzaiRaf/nlDYj6t5nfLfxd2v5QsoY3FVPJtk5887AGsDMgaVXUm7/U4BWksLAWQ9nOUMm3vnRBFc1wBPYsIjyoKwAf/4VTTcVSqf96/CkqWhEP6k2EeatJg4+jxnrq4xFewfkahytakTtC0nzhL1+EFkpi0P7ElUuOke5kQ0YekLQ89TZfzicFH2VaKnJ5IAjATwrK8lbkZpA0H/Z8/eRJrH3qV0NQkYDhZDNU3orcCZLmo94KBq9LDsH5qmCaaG+B/f3flfNy91kdwxj+rueRAg3qIwruCp/sSYLwM0B83UGKCGHPUwmiupOGiqmwga6ig/4tSD0gaRHqrejWdjxoKLgLAyGP/r0jXXZQ/opHhL+m4a+oAPxht4Ur7mASYRKuaUU8qLeG4a+o+g9rbTzdiD7JD6hQeSvigT3zM281pde8VWsKF6pa4Adkp5yXS6DemIUHddV6rO5oZjI65qe6shzpH5UUURf+ikjY/cf/MZQQISR9yANqJsIDW1Bvc2n4M9tEvml+vqSkJ73M/uDNKOblBqTl2LDnXAzfl2hQj5+D7VYVRCu3FT1AAYpbkdFoOTbqrWblcaJvEW1dle+pk3B5KzKWB7KFv73iZ7I1Y2hVKIynlIW9iKzFlc9ItBwX9jzVEEcl+W6iWS4dSV+KVwyNv70HWj3Cg8pgY2lgRUtKTL98QUpbkVGIYTvrC38sBeDpK5mONi6/bG9KebkxPNDNipi3Kogsv4R71qOYiSPacP7YZYqb4Qj/Ixj5JfpU8+uG5ySUvBKT06+r1GKJYPfEsJs0HrpYWArAs9XuTB6bT2CM/p4euE2amLeqUj+RUcuBXB9x5j0phSL6liZERcKDumgQVrLOJpPk8ctQUWky6poY9oqYt6onPG904q6doUE/89+XtiI9e6BXIzyoLPPPtYMTSVKrvd5gqdXAHUsTkrrwVyZBOFcILUR1fWRKwsWUfL/E8K7v1nLiKgBP5/bIwtKcy/HxZh6YlQgP6p7A2Q2OkQrPqexDfvoLha1Ir8Rw0MK8VeHikbbideyZ4yfRRGEr0qkHzkqYtyoEeje0BcfGI9U5+5ELJYJdEsOrrvBXFlnCQhzv1wbwgaUfjujRAzdlJ+Y96wrv9VzYmtjUYqeVi/4u0gR3KBAeVAoTI/W3DU1ElDsH0OPvKEX1ZDh8UWG1G+oGO5smAILlEGn621HBga75Kspq00KOMCbG1+X8Jy+EY9K9HHD2qzAr4+gxJ9/ox3sRuwvhmL6IYS/PvNU9T8/Q8sdWKP6L2rkQjunKA5M881aFQGeOjiuy1qwXyodCmXRP0oRdnHmrUphMC0eItc20RDvPH+iIGM5Kwl+ZBOawLOHe8bZNl75AHNwDg8jIL1Ut4Hm+7NIOR30dwsvgmG6I4SDMvFW96Platb2c/X9bCnp3pqmxXjywbCYpLRpGQ68ezTgLuk+GG7u8VkWUwTG9EMMF3y6Qf7UiCcxhmSCn0JTMPNFHlcExvXjg5YfPcLVxb0I67fTcHsVQw4k/VwjHdCJNuPZ+BacEDc+X34OJh8xqkIRLS81OiOErCIhflQgi5stAw8L12Cx/Ei6FY3rxwLMRPnO0VmV0guXz89h6snDnW2GWRlpPPnOEv8IGJDEmetuExLn8F8vgmF6I4dRYeFDZgISV8Q+55qrKc4xiGRzTiwc+jw9z2JO3blUkx5lL3oXTAWRrP129M15R60WaEL87Xn53vEWhIjuyTr8sjZQUBWm/aIFWL8TwHw+cwu6j3RQTMayuPkuMNpyV9RRdM+jFA23+cLxVJwBUVwBeyPWTkVhxsnMeM50GO2ojK4GZHa/wLBf998vcJgmXpeGRToqID6QUEkzTwcPEUQ2InNfWlqThUQ46GPnt6Dv3BH4SWvO0s94UhwcSdY5h4W63fVNGpwwAL0nDES5HETEcO94YpUZcrwy4lKRhD5+r13dEfne3YrsWr1QXJWkYHlgNnO2Gfw2dayyrKPX9gjSc4Hd1z2paGixh2uQ2vl/7fgXqhK4POshLYCqC04X6bG283KY8RBWkYXhgDW/gW0Des5G8u2e57zx3fNBBvAHJa4uWO4ieXblaZFxPwwG0XGEDMlW8u+t88DJxQkm4JA3DAwvvI9o2i2B3I7ty1rLDj3cnhguDhG/EOifh22fXA/3lNHxzD0zNC8BLf9PLvF81b8DlNOwhgWkiwjclK3Ci+N53y/6jZgMJTMMC8No1FCt+/7Gk27qWhucVEpimHJJrAnYLJuGrafi2RWCZBr+yALyWoTYFty8sd/dzW2mWlygAryVFiuwkkYQvpeEEBLqplPJCTpyMXKFR6yDn03AwkMA0FBFd6UGCjgNUlrnWWCCBYZ7CLO1Bso5D9KW849k0bCGBaVYAXutBkmi3X/85Tm579GhAGjZsuwBJEIWS8Mm/nNGANIxIQYKlkkrC59LwbCCBYZ3CLFqNSoqQVQ+IJNalyw4SGMY1HBWx1+q5hGs5y50ICUyzeOSFSKosloTfXroJUDRBNNhN82psEYc9aZzkVRr2kMDwhoDSc2SqztFbtsCfV0hgWqXDSz3IZHTcIqV4A39Iw/MGCUyzhvRSDxI0cI9UldrzNBzRgLQqAC/2ILvRAL6TNeW+ybccswGZFglEOKlAn+h+hYdpeFoggWkIyAXJcZ3qAZHEcAnQQgLT0BMW2S2O0kn4wSfwkMC0JMutTNxVk4S/peGwQgLT8q6AP2SnddwsnIT/ScP3QmDsIVwAXg3Bm5p3kPLHWP1NEZhCCQxplXLtIyxqlmHTNq3rZn3K080QmDXI+9+1HmTW9BoyYEOrW4BAt8XirhUBk9FUiNx7gqNzCUxZBZZVvYk3RY6F2z/iLca7oPPLLuswOIQksYWjrgdJul5GJOHmEphAnGwWJYvzPJJwFw0Itf9drf+jssNkSMJtGxD6txjiaQAAA8xJREFUw8peS6arxmJw8Ze/5mE47L2recoWVaB2CQzH7uyLcWfTh4ri2mqr33pm8L+LPcixKuSFUAS2yTYsJ70vfpJZIzB6Sxm9AAJoFaAfzHsbq7CYDMdi1aBGDR8lqzwSz0lTIwHzltiTrjRXhcXg0CpjAmZiIDZthX4NFoMrl3wJOCl53l6rQg1ItOGkQJKWqj+q1egCiWacAuY7I7/re8blWIyHd/H0eYyLmiaFWc4DidaVgDOf0GhTWednINGaEnBYFPWcq+ZRwQD/Yni5Of3vcrabVA9LA4lmKG+mTdP7EHRPCwKJJk/AvP53uQfJuuelgURTv9gzb9e5qS3zHYBADRmP2f+u11pe984mSFIN4SbIBm+0Vwz1lmAxQKJf2Kwso2TFIaYEiwESbSjl71HbC9G2yLJAomVrfq+w0ne652aARBO+014jLbjo3l0HJFrdXXLiEGOUz04DiaZqOneNTXnzCOOBRAtFnH3V1xNJ1FgZSLSRUH+2udRo9XeZV7EYINEk73NYlJINSfsAISIgRc3VyP8KhqO8cvocMIwhwH2nVpX01APXegmLQQAkKPqb+d9lKYzMA76AxQSgMPXEw+wUT6dY3eAVWpD6grqd/5WojjfVvduEAFjtgLNVrXdaVOvIEQBfemBQlOPW6/N5s2oOHQGw3gWjtopUCdefoEYliztxUpJDYkcbIM9s1M64E1Lrgl77jq5dLYAQPGQI1S7YmOfqS/H+ExYzwfsupxT/rQMIUbM6W77KejsnvT9KxFPCVsB6F5x328OaYHGcY3Ex5S8/3JwsWt96Fwx+6WFJiBqq9VcwfHtr4X11P2Sa319i18uaQlUrcBcH76NwwSgEHqwzVq/AjHJhBEZ+YEbRpvQZPxvMCC7gg94YZsQmMnGLDSY6kYnNKzAjvIQZu6dgRnL9I/ROMCN5iQOKY5iRWgyIoUeYkZXC4BglzEjC0GDiYEb2DgyYOJiRg6GxfhRGZeuBU4Aw05kUBkwcjMqWGUwcrLsmBEwczEjigGDiYEZwKh1MHMyIqmHAxMGMJBIIJg5mJMk4LP+B0dk6KT/TBTNAYsDEwYwaJAZMHMxIIjEgQmBGEokBEQIzkkgMiBCYkURiQITAjCQSAyIEZgSHg1ECwowgEpMxEAIzckhMAA8HM3LS/AkTmTAjt6FjhhAGxtMIJyAwMFGLMyBomGgdGEACwyRt2QHAwPSm4R0ADIw9DU+4ggpTl4YFLijCII35/3wsci9MKg3jCC+sfRr+Q4tknEGFGSl5lsjxYhjs3WxA6qW1/wCJHMj5YHJnwQAAAABJRU5ErkJggg==" alt="Claude" style="height:18px;width:auto"></div>
+      <span>Panduan Setup Claude</span>
+    </div>
+    <h1>Claude mulai dari nol.<br><span style="color:var(--gold)">Tiga setup ini mengubah itu.</span></h1>
+    <p class="hero-sub">
+      Tidak ada memori lintas sesi. Tidak ada konteks yang tersimpan. Claude tidak tahu siapa Anda — sampai Anda memberi tahu. Tiga setup ini melakukan itu.
+    </p>
+    <div class="hero-steps">
+      <div class="hero-step">
+        <div class="hero-step-num">01</div>
+        <span>Custom Instructions — identitas Anda di setiap sesi</span>
+      </div>
+      <div class="hero-step">
+        <div class="hero-step-num">02</div>
+        <span>Projects — konteks yang tersimpan per area kerja</span>
+      </div>
+      <div class="hero-step">
+        <div class="hero-step-num">03</div>
+        <span>Templates — pola kerja yang bisa dipakai ulang</span>
+      </div>
+      <div class="hero-step" style="opacity:.55">
+        <div class="hero-step-num" style="border-style:dashed">04</div>
+        <span>Synthesis — bawa masalah nyata, selesaikan sekarang</span>
+      </div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <svg width="340" height="242" viewBox="0 0 340 242" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- ── BEFORE panel ── -->
+      <rect x="0" y="0" width="150" height="225" rx="10" fill="#262320" stroke="rgba(255,255,255,.09)" stroke-width="1"/>
+      <!-- Tag -->
+      <rect x="10" y="10" width="76" height="16" rx="3" fill="rgba(200,92,80,.12)" stroke="rgba(200,92,80,.3)" stroke-width="1"/>
+      <text x="18" y="21" font-family="JetBrains Mono" font-size="6.5" fill="rgba(200,92,80,.8)" letter-spacing=".08em">TANPA SETUP</text>
+      <!-- Chat bubble — user -->
+      <rect x="30" y="36" width="108" height="22" rx="5" fill="rgba(255,255,255,.06)"/>
+      <text x="38" y="49" font-family="Inter" font-size="6.5" fill="rgba(255,255,255,.88)">Review email ini sebelum saya kirim.</text>
+      <!-- Claude avatar -->
+      <circle cx="18" cy="78" r="8" fill="rgba(212,168,75,.08)" stroke="rgba(212,168,75,.2)" stroke-width="1"/>
+      <text x="18" y="81.5" font-family="JetBrains Mono" font-size="7.5" fill="rgba(212,168,75,.85)" text-anchor="middle">C</text>
+      <!-- Claude response — generic gray bars -->
+      <rect x="32" y="68" width="106" height="5" rx="2.5" fill="rgba(255,255,255,.08)"/>
+      <rect x="32" y="78" width="90" height="5" rx="2.5" fill="rgba(255,255,255,.06)"/>
+      <rect x="32" y="88" width="106" height="5" rx="2.5" fill="rgba(255,255,255,.05)"/>
+      <rect x="32" y="98" width="74" height="5" rx="2.5" fill="rgba(255,255,255,.05)"/>
+      <rect x="32" y="110" width="106" height="5" rx="2.5" fill="rgba(255,255,255,.04)"/>
+      <rect x="32" y="120" width="80" height="5" rx="2.5" fill="rgba(255,255,255,.04)"/>
+      <!-- Warning label -->
+      <rect x="10" y="162" width="130" height="36" rx="5" fill="rgba(200,92,80,.06)" stroke="rgba(200,92,80,.2)" stroke-width="1"/>
+      <text x="22" y="177" font-family="Inter" font-size="6.5" fill="rgba(200,92,80,.95)">Generic. Tidak tahu jabatan,</text>
+      <text x="22" y="189" font-family="Inter" font-size="6.5" fill="rgba(200,92,80,.85)">konteks, atau prioritas Anda.</text>
+
+      <!-- ── ARROW ── -->
+      <path d="M162 110 L180 110" stroke="#D4A84B" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M175 105 L181 110 L175 115" stroke="#D4A84B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <!-- ── AFTER panel ── -->
+      <rect x="188" y="0" width="150" height="225" rx="10" fill="rgba(212,168,75,.06)" stroke="rgba(212,168,75,.32)" stroke-width="1.5"/>
+      <!-- Tag -->
+      <rect x="198" y="10" width="80" height="16" rx="3" fill="rgba(212,168,75,.15)" stroke="rgba(212,168,75,.4)" stroke-width="1"/>
+      <text x="206" y="21" font-family="JetBrains Mono" font-size="6.5" fill="#D4A84B" letter-spacing=".08em">DENGAN SETUP</text>
+      <!-- Chat bubble — user -->
+      <rect x="218" y="36" width="110" height="22" rx="5" fill="rgba(255,255,255,.07)"/>
+      <text x="226" y="49" font-family="Inter" font-size="6.5" fill="rgba(255,255,255,.92)">Review email ini sebelum saya kirim.</text>
+      <!-- Claude avatar — gold -->
+      <circle cx="200" cy="78" r="8" fill="rgba(212,168,75,.15)" stroke="rgba(212,168,75,.5)" stroke-width="1"/>
+      <text x="200" y="81.5" font-family="JetBrains Mono" font-size="7.5" fill="#D4A84B" text-anchor="middle">C</text>
+      <!-- Claude response — specific, high-value -->
+      <rect x="214" y="66" width="114" height="7" rx="3" fill="rgba(212,168,75,.22)"/>
+      <rect x="214" y="79" width="100" height="5" rx="2.5" fill="rgba(255,255,255,.18)"/>
+      <rect x="214" y="89" width="114" height="5" rx="2.5" fill="rgba(255,255,255,.15)"/>
+      <rect x="214" y="99" width="88" height="5" rx="2.5" fill="rgba(255,255,255,.12)"/>
+      <!-- Gold highlight row (key insight) -->
+      <rect x="210" y="112" width="122" height="18" rx="4" fill="rgba(212,168,75,.08)" stroke="rgba(212,168,75,.25)" stroke-width="1"/>
+      <text x="218" y="124" font-family="JetBrains Mono" font-size="6.5" fill="#D4A84B">→ Risiko: Finance baca sebagai komitmen</text>
+      <rect x="214" y="138" width="100" height="5" rx="2.5" fill="rgba(255,255,255,.12)"/>
+      <rect x="214" y="148" width="114" height="5" rx="2.5" fill="rgba(255,255,255,.10)"/>
+      <!-- Green check label -->
+      <rect x="198" y="174" width="132" height="44" rx="5" fill="rgba(78,158,106,.07)" stroke="rgba(78,158,106,.25)" stroke-width="1"/>
+      <circle cx="212" cy="188" r="5" fill="rgba(78,158,106,.2)" stroke="rgba(78,158,106,.5)" stroke-width="1"/>
+      <path d="M209 188l2 2 4-4" stroke="#4E9E6A" stroke-width="1.2" stroke-linecap="round"/>
+      <text x="222" y="191" font-family="Inter" font-size="6.5" fill="rgba(255,255,255,.92)">Tahu siapa Anda.</text>
+      <text x="222" y="203" font-family="Inter" font-size="6.5" fill="rgba(78,158,106,.8)">Langsung ke inti. Relevan.</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ═══ MODUL 01: CUSTOM INSTRUCTIONS ═══ -->
+
+<!-- ═══ MODULE OVERVIEW NAVIGATOR ═══ -->
+<div class="mod-overview">
+  <a class="mov-card" href="#m1">
+    <div class="mov-num">Modul 01</div>
+    <div class="mov-ico"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" stroke="#D4A84B" stroke-width="1.2" stroke-opacity=".3"/><circle cx="16" cy="12" r="4.5" stroke="#D4A84B" stroke-width="1.3"/><path d="M7 28c0-4.97 4.03-9 9-9s9 4.03 9 9" stroke="#D4A84B" stroke-width="1.3" stroke-linecap="round"/><circle cx="24.5" cy="8" r="3" fill="rgba(212,168,75,.15)" stroke="#D4A84B" stroke-width="1"/><path d="M23.3 8l.9.9L26 7" stroke="#D4A84B" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="mov-title">Custom Instructions</div>
+    <div class="mov-sub">Identitas Anda di setiap sesi</div>
+    <div class="mov-cta"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M6 3l2 2-2 2" stroke="#D4A84B" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Mulai setup</div>
+  </a>
+  <a class="mov-card" href="#m2">
+    <div class="mov-num">Modul 02</div>
+    <div class="mov-ico"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M4 13a3 3 0 013-3h5l2.5 2.5H25a3 3 0 013 3v9a3 3 0 01-3 3H7a3 3 0 01-3-3V13z" stroke="#D4A84B" stroke-width="1.3"/><path d="M4 10a3 3 0 013-3h5l2.5 2.5" stroke="#D4A84B" stroke-width="1.2" stroke-linecap="round" stroke-opacity=".4"/><line x1="11" y1="21" x2="21" y2="21" stroke="#D4A84B" stroke-width="1.2" stroke-linecap="round" stroke-opacity=".6"/><line x1="11" y1="24" x2="17" y2="24" stroke="#D4A84B" stroke-width="1.2" stroke-linecap="round" stroke-opacity=".35"/></svg></div>
+    <div class="mov-title">Projects</div>
+    <div class="mov-sub">Konteks per area kerja</div>
+    <div class="mov-cta"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M6 3l2 2-2 2" stroke="#D4A84B" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Buat project</div>
+  </a>
+  <a class="mov-card" href="#m3">
+    <div class="mov-num">Modul 03</div>
+    <div class="mov-ico"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><rect x="3" y="3" width="11.5" height="11.5" rx="2.5" stroke="#D4A84B" stroke-width="1.3"/><rect x="17.5" y="3" width="11.5" height="11.5" rx="2.5" stroke="#D4A84B" stroke-width="1.3" stroke-opacity=".5"/><rect x="3" y="17.5" width="11.5" height="11.5" rx="2.5" stroke="#D4A84B" stroke-width="1.3" stroke-opacity=".5"/><rect x="17.5" y="17.5" width="11.5" height="11.5" rx="2.5" stroke="#D4A84B" stroke-width="1.3" stroke-opacity=".25"/><path d="M7.5 8.75h4M9.5 6.75v4" stroke="#D4A84B" stroke-width="1.1" stroke-linecap="round" stroke-opacity=".7"/></svg></div>
+    <div class="mov-title">Templates</div>
+    <div class="mov-sub">Pola kerja siap pakai</div>
+    <div class="mov-cta"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M6 3l2 2-2 2" stroke="#D4A84B" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Copy template</div>
+  </a>
+  <a class="mov-card" href="#m4">
+    <div class="mov-num">Modul 04</div>
+    <div class="mov-ico"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M16 5l10.5 6.5-10.5 6.5L5.5 11.5z" stroke="#D4A84B" stroke-width="1.3" stroke-linejoin="round"/><path d="M5.5 19.5l10.5 6.5 10.5-6.5" stroke="#D4A84B" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".5"/><path d="M5.5 12.5l10.5 6.5 10.5-6.5" stroke="#D4A84B" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".75"/></svg></div>
+    <div class="mov-title">Synthesis</div>
+    <div class="mov-sub">Semua layer aktif sekarang</div>
+    <div class="mov-cta"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M6 3l2 2-2 2" stroke="#D4A84B" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Selesaikan</div>
+  </a>
+</div>
+
+<section class="module" id="m1">
+  <div class="mod-header">
+    <div class="mod-tag">Modul 01</div>
+    <div class="sec-deco">01</div>
+    <h2>Custom Instructions</h2>
+    <p class="lead">Ceritakan sekali siapa Anda. Claude ingat di setiap percakapan baru.</p>
+  </div>
+
+  <!-- WHY -->
+  <div class="mod-chips" id="chips-m2">
+    <a class="chip active" href="#m2-why">Kenapa Perlu</a>
+    <a class="chip" href="#m2-where">Di Mana</a>
+    <a class="chip" href="#m2-example">Contoh</a>
+    <a class="chip" href="#m2-grow">Mulai Simple</a>
+    <a class="chip" href="#m2-ba">Before · After</a>
+  </div>
+  <div class="slabel" id="m2-why">Kenapa Perlu</div>
+  <div class="why-card">
+    <div>
+      <h3>Tanpa ini, Claude tidak tahu siapa Anda.</h3>
+      <p style="margin-top:8px">Bayangkan setiap hari Anda harus memperkenalkan diri ulang ke asisten yang sama — nama, pekerjaan, cara kerja Anda. Buang waktu. Custom Instructions mengisi informasi itu sekali untuk semua sesi.</p>
+    </div>
+    <div class="why-analogy">
+      <div class="analogy-tag">Analoginya</div>
+      <div class="analogy-body">"Ini seperti briefing 15 menit ke asisten baru — tapi cukup dilakukan sekali."</div>
+    </div>
+  </div>
+
+  <!-- WHERE (UI mockup) -->
+  <div class="slabel" id="m1-where">Di Mana Settingnya</div>
+  <div class="where-wrap">
+    <div class="where-card">
+      <div class="where-head">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="#D4A84B" stroke-width="1.2"/><path d="M5 3v2.5l1.5 1" stroke="#D4A84B" stroke-width="1" stroke-linecap="round"/></svg>
+        Cara Akses — Desktop App
+      </div>
+      <div class="where-body">
+        <div class="ui-mockup">
+          <div class="ui-mockup-bar">
+            <div class="ui-dot" style="background:#C85C50"></div>
+            <div class="ui-dot" style="background:#D4A84B"></div>
+            <div class="ui-dot" style="background:#4E9E6A"></div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,.5);margin-left:8px">Settings → General</span>
+          </div>
+          <div class="ui-frame">
+            <svg width="100%" height="168" viewBox="0 0 320 168" fill="none">
+              <!-- Sidebar bg -->
+              <rect x="0" y="0" width="76" height="168" fill="rgba(0,0,0,.22)"/>
+              <!-- Sidebar items -->
+              <rect x="5" y="5" width="66" height="18" rx="3" fill="rgba(212,168,75,.14)" stroke="rgba(212,168,75,.35)" stroke-width="1"/>
+              <text x="38" y="17.5" font-family="Inter" font-size="7.5" font-weight="600" fill="#D4A84B" text-anchor="middle">General</text>
+              <rect x="5" y="27" width="66" height="14" rx="3" fill="rgba(255,255,255,.03)"/>
+              <text x="38" y="37.5" font-family="Inter" font-size="7" fill="rgba(255,255,255,.3)" text-anchor="middle">Account</text>
+              <rect x="5" y="45" width="66" height="14" rx="3" fill="rgba(255,255,255,.03)"/>
+              <text x="38" y="55.5" font-family="Inter" font-size="7" fill="rgba(255,255,255,.25)" text-anchor="middle">Capabilities</text>
+              <rect x="5" y="63" width="66" height="14" rx="3" fill="rgba(255,255,255,.03)"/>
+              <text x="38" y="73.5" font-family="Inter" font-size="7" fill="rgba(255,255,255,.2)" text-anchor="middle">Claude Code</text>
+              <text x="5" y="92" font-family="Inter" font-size="5.5" fill="rgba(255,255,255,.18)" letter-spacing="1">CUSTOMIZE</text>
+              <rect x="5" y="96" width="66" height="14" rx="3" fill="rgba(255,255,255,.03)"/>
+              <text x="38" y="106.5" font-family="Inter" font-size="7" fill="rgba(255,255,255,.2)" text-anchor="middle">Skills</text>
+              <rect x="5" y="114" width="66" height="14" rx="3" fill="rgba(255,255,255,.03)"/>
+              <text x="38" y="124.5" font-family="Inter" font-size="7" fill="rgba(255,255,255,.2)" text-anchor="middle">Connectors</text>
+              <rect x="5" y="132" width="66" height="14" rx="3" fill="rgba(255,255,255,.03)"/>
+              <text x="38" y="142.5" font-family="Inter" font-size="7" fill="rgba(255,255,255,.2)" text-anchor="middle">Memory</text>
+              <!-- Main panel -->
+              <rect x="80" y="0" width="240" height="168" fill="rgba(255,255,255,.015)"/>
+              <!-- Full name row -->
+              <text x="88" y="16" font-family="Inter" font-size="7.5" fill="rgba(255,255,255,.35)">Full name</text>
+              <rect x="178" y="6" width="132" height="16" rx="3" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
+              <text x="185" y="17.5" font-family="Inter" font-size="7" fill="rgba(255,255,255,.45)">Tjitra | IWDemy</text>
+              <!-- Divider -->
+              <line x1="84" y1="30" x2="314" y2="30" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+              <!-- Instructions for Claude — HIGHLIGHTED -->
+              <text x="88" y="46" font-family="Inter" font-size="9" font-weight="700" fill="#FFFFFF">Instructions for Claude</text>
+              <text x="88" y="57" font-family="Inter" font-size="6.5" fill="rgba(255,255,255,.3)">Claude will keep these in mind across chats within Anthropic's guidelines.</text>
+              <!-- Text box with gold highlight -->
+              <rect x="88" y="63" width="216" height="64" rx="4" fill="rgba(212,168,75,.05)" stroke="rgba(212,168,75,.4)" stroke-width="1.5"/>
+              <text x="96" y="77" font-family="JetBrains Mono" font-size="7" fill="rgba(212,168,75,.75)">⚙ Operational Framework</text>
+              <text x="96" y="89" font-family="Inter" font-size="6.5" fill="rgba(255,255,255,.45)">5-Step Execution Flow</text>
+              <text x="96" y="100" font-family="Inter" font-size="6.5" fill="rgba(255,255,255,.3)">Understand Intent: Identifikasi tujuan utama.</text>
+              <text x="96" y="111" font-family="Inter" font-size="6.5" fill="rgba(255,255,255,.2)">Ajukan pertanyaan klarifikasi jika ada...</text>
+              <!-- Gold pointer -->
+              <circle cx="308" cy="95" r="7" fill="rgba(212,168,75,.18)" stroke="rgba(212,168,75,.5)" stroke-width="1.2"/>
+              <text x="308" y="98" font-family="JetBrains Mono" font-size="8" fill="#D4A84B" text-anchor="middle">!</text>
+              <!-- Preferences label below -->
+              <line x1="84" y1="138" x2="314" y2="138" stroke="rgba(255,255,255,.06)" stroke-width="1"/>
+              <text x="88" y="152" font-family="Inter" font-size="8.5" font-weight="700" fill="rgba(255,255,255,.35)">Preferences</text>
+            </svg>
+          </div>
+        </div>
+        <div class="where-step"><span class="wstep-n">1</span><span>Buka <strong style="color:var(--t1)">Claude desktop app</strong></span></div>
+        <div class="where-step"><span class="wstep-n">2</span><span>Klik nama profil → pilih <strong style="color:var(--t1)">Settings</strong></span></div>
+        <div class="where-step"><span class="wstep-n">3</span><span>Tab <strong style="color:var(--t1)">General</strong> → cari <strong style="color:var(--t1)">"Instructions for Claude"</strong></span></div>
+        <div class="where-step"><span class="wstep-n">4</span><span>Isi kotak teks — tersimpan otomatis</span></div>
+      </div>
+    </div>
+    <div class="where-card">
+      <div class="where-head">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="1" width="8" height="8" rx="2" stroke="#D4A84B" stroke-width="1.2"/><path d="M3 5h4M5 3v4" stroke="#D4A84B" stroke-width="1" stroke-linecap="round"/></svg>
+        Isi dua kolom ini
+      </div>
+      <div class="where-body">
+        <div class="ui-mockup">
+          <div class="ui-mockup-bar">
+            <div class="ui-dot" style="background:#C85C50"></div>
+            <div class="ui-dot" style="background:#D4A84B"></div>
+            <div class="ui-dot" style="background:#4E9E6A"></div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,.5);margin-left:8px">Instructions for Claude — isi dengan ini</span>
+          </div>
+          <div class="ui-frame">
+            <svg width="100%" height="150" viewBox="0 0 320 150" fill="none">
+              <!-- Field label -->
+              <text x="0" y="14" font-family="Inter" font-size="9" font-weight="600" fill="#FFFFFF">Instructions for Claude</text>
+              <!-- Single textarea with gold border -->
+              <rect x="0" y="20" width="320" height="118" rx="6" fill="rgba(212,168,75,.04)" stroke="rgba(212,168,75,.5)" stroke-width="1.5"/>
+              <!-- Block 1: Siapa -->
+              <text x="10" y="38" font-family="JetBrains Mono" font-size="7" fill="#D4A84B" letter-spacing=".08em">// SIAPA ANDA</text>
+              <text x="10" y="50" font-family="JetBrains Mono" font-size="6.5" fill="rgba(255,255,255,.65)">Saya [NAMA], [JABATAN] di [INDUSTRI].</text>
+              <text x="10" y="61" font-family="JetBrains Mono" font-size="6.5" fill="rgba(255,255,255,.55)">Audience: direksi, C-suite, klien korporat.</text>
+              <!-- Block 2: Cara kerja -->
+              <text x="10" y="78" font-family="JetBrains Mono" font-size="7" fill="#D4A84B" letter-spacing=".08em">// CARA CLAUDE MERESPONS</text>
+              <text x="10" y="90" font-family="JetBrains Mono" font-size="6.5" fill="rgba(255,255,255,.55)">→ Langsung ke risiko paling kritis</text>
+              <text x="10" y="101" font-family="JetBrains Mono" font-size="6.5" fill="rgba(255,255,255,.45)">→ Review komunikasi: risiko makna, bukan grammar</text>
+              <!-- Block 3: Jangan -->
+              <text x="10" y="118" font-family="JetBrains Mono" font-size="7" fill="#D4A84B" letter-spacing=".08em">// JANGAN</text>
+              <text x="10" y="130" font-family="JetBrains Mono" font-size="6.5" fill="rgba(255,255,255,.35)">Feedback generic · Lebih dari 1 pertanyaan · Basa-basi</text>
+              <!-- Cursor blink indicator -->
+              <rect x="10" y="133" width="2" height="9" rx="1" fill="rgba(212,168,75,.7)"/>
+            </svg>
+          </div>
+        </div>
+        <p>Satu kotak teks. Isi dengan 3 bagian: <strong style="color:var(--t1)">Siapa Anda</strong>, <strong style="color:var(--t1)">cara Claude merespons</strong>, dan <strong style="color:var(--t1)">apa yang tidak Anda inginkan</strong>. Pakai template di bawah.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple example first -->
+  <div class="slabel" id="m1-example">Contoh Sederhana — Kehidupan Sehari-hari</div>
+  <div class="callout">
+    Pertanyaan: <strong>"Buatkan cerita pendek untuk anak tidur malam ini."</strong><br>
+    Tanpa Custom Instructions, Claude tidak tahu apakah anak Anda berusia 3 tahun atau 10 tahun, suka dinosaurus atau putri, butuh cerita 2 menit atau 10 menit.
+  </div>
+  <div class="ba-wrap">
+    <div class="ba-box ba-before">
+      <div class="ba-head">
+        <span class="ba-badge">Tanpa Setup</span>
+        <span class="ba-context">tidak ada custom instructions</span>
+      </div>
+      <div class="ba-body">
+        <div class="cmsg cu"><div class="cav">A</div><div class="cbub" style="color:#fff">Buatkan cerita pendek untuk anak tidur malam ini.</div></div>
+        <div class="cmsg cc"><div class="cav">C</div><div class="cbub">Tentu! Berikut cerita pendek untuk anak:
+
+"Si Kelinci dan Bintang"
+
+Di sebuah hutan yang damai, hiduplah seekor kelinci bernama Kiki. Setiap malam, Kiki suka memandang bintang sebelum tidur...
+
+[cerita berlanjut 300 kata, generic, tidak disesuaikan]</div></div>
+      </div>
+    </div>
+    <div class="ba-box ba-after">
+      <div class="ba-head">
+        <span class="ba-badge">Dengan Setup</span>
+        <span class="ba-context">CI: "anak perempuan 5 tahun, suka kucing"</span>
+      </div>
+      <div class="ba-body">
+        <div class="cmsg cu"><div class="cav">A</div><div class="cbub" style="color:#fff">Buatkan cerita pendek untuk anak tidur malam ini.</div></div>
+        <div class="cmsg cc"><div class="cav">C</div><div class="cbub">"Mimi si Kucing dan Bulan"
+
+Mimi, kucing oranye berbulu lembut, punya satu kebiasaan malam: bertanya pada bulan.
+
+"Bulan, kenapa kamu bulat?" tanya Mimi.
+
+"Supaya bisa menyinari semua rumah sekaligus," jawab bulan pelan.
+
+Mimi mengangguk. Lalu melingkar di selimut, dan tidur.
+
+— 2 menit baca, cocok untuk usia 5 tahun —</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Framework -->
+  <div class="slabel" id="m1-framework">Framework — 4 Blok Brief</div>
+  <div class="blok-grid">
+    <div class="blok">
+      <div class="blok-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="9" r="4" stroke="#D4A84B" stroke-width="1.5"/><path d="M5 22c0-4 3.58-7 8-7s8 3 8 7" stroke="#D4A84B" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      <div class="blok-n">Blok 01 · Siapa</div>
+      <h4>Identitas</h4>
+      <p>Jabatan, industri, skala tanggung jawab, siapa yang sering Anda hadapi.</p>
+      <div class="blok-detail">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Contoh isian</div>
+        <div class="blok-detail-item">Direktur Operasional, logistik FMCG, 200 karyawan</div>
+        <div class="blok-detail-item">Audience: direksi, klien korporat, ops manager</div>
+        <div class="blok-detail-item">Tanggung jawab: 3 divisi, P&amp;L, vendor relations</div>
+      </div>
+    </div>
+    <div class="blok">
+      <div class="blok-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="4" y="7" width="18" height="13" rx="2.5" stroke="#D4A84B" stroke-width="1.5"/><path d="M8 12h10M8 16h6" stroke="#D4A84B" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      <div class="blok-n">Blok 02 · Kerja</div>
+      <h4>Fokus Kerja</h4>
+      <p>Apa yang paling sering dikerjakan dan cara Anda berpikir tentangnya.</p>
+      <div class="blok-detail">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Contoh isian</div>
+        <div class="blok-detail-item">Review kontrak, negosiasi vendor, keputusan operasional cepat</div>
+        <div class="blok-detail-item">Sering kerja dengan data tidak lengkap</div>
+        <div class="blok-detail-item">Judgment &gt; analisis panjang</div>
+      </div>
+    </div>
+    <div class="blok">
+      <div class="blok-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M7 13h12M7 9h8M7 17h5" stroke="#D4A84B" stroke-width="1.5" stroke-linecap="round"/><rect x="3" y="4" width="20" height="18" rx="3" stroke="#D4A84B" stroke-width="1.5"/></svg></div>
+      <div class="blok-n">Blok 03 · Gaya</div>
+      <h4>Format Output</h4>
+      <p>Panjang, tone, bahasa, dan urutan penyajian yang paling cocok untuk Anda.</p>
+      <div class="blok-detail">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Contoh isian</div>
+        <div class="blok-detail-item">Jawaban maks 5 poin. Daftar, bukan paragraf.</div>
+        <div class="blok-detail-item">Bahasa Indonesia. Formal tapi tidak kaku.</div>
+        <div class="blok-detail-item">Kesimpulan dulu, detail kalau diminta.</div>
+      </div>
+    </div>
+    <div class="blok">
+      <div class="blok-ico"><svg width="26" height="26" viewBox="0 0 26 26" fill="none"><circle cx="13" cy="13" r="8" stroke="#D4A84B" stroke-width="1.5"/><path d="M9.5 9.5l7 7M16.5 9.5l-7 7" stroke="#D4A84B" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+      <div class="blok-n">Blok 04 · Batas</div>
+      <h4>Yang Tidak Mau</h4>
+      <p>Hal-hal yang membuat output terasa tidak relevan atau membuang waktu Anda.</p>
+      <div class="blok-detail">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px">Contoh isian</div>
+        <div class="blok-detail-item">Jangan: feedback grammar, lebih dari 1 pertanyaan</div>
+        <div class="blok-detail-item">Jangan: basa-basi pembuka atau "Tentu saja!"</div>
+        <div class="blok-detail-item">Jangan: jawaban 500 kata untuk pertanyaan singkat</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 kalimat impactful -->
+  <div class="slabel" id="m1-power">2 Kalimat yang Mengubah</div>
+  <div class="power-grid" style="margin-bottom:48px">
+    <div class="power-card">
+      <div class="power-q">"Kalau saya minta review email atau dokumen, fokus pada risiko makna dan kejelasan pesan — bukan grammar."</div>
+      <div class="power-effect">Claude berhenti komentar typo dan tata bahasa. Langsung ke <strong>apa yang benar-benar penting</strong>: apakah pesan sampai dengan benar.</div>
+    </div>
+    <div class="power-card">
+      <div class="power-q">"Jawaban panjang artinya kamu belum cukup berpikir. Ringkas dulu — elaborasi hanya kalau saya minta."</div>
+      <div class="power-effect">Claude berhenti memberi respons 500 kata untuk pertanyaan yang jawabannya <strong>3 kalimat</strong>.</div>
+    </div>
+  </div>
+
+  <!-- Persona templates -->
+  <div class="slabel" id="m1-template">Template — Pilih Persona</div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#fff;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px">Pilih yang paling dekat dengan peran Anda:</div>
+  <div class="ppills">
+    <button class="ppill on" onclick="selectPersona('corporate', this)">Corporate Leader</button>
+    <button class="ppill" onclick="selectPersona('yayasan', this)">Kepala Yayasan</button>
+    <button class="ppill" onclick="selectPersona('owner', this)">Business Owner</button>
+    <button class="ppill" onclick="selectPersona('admin', this)">Admin Leader</button>
+  </div>
+
+  <div class="ci-zone">
+    <div class="ci-box">
+      <div class="ci-head">
+        <span class="ci-label">Custom Instructions — Template</span>
+        <button class="copy-btn" onclick="copyCi(this)" id="ci-copy-btn">Salin</button>
+      </div>
+      <div class="ci-body" id="ci-text"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="ba-box ba-before">
+        <div class="ba-head">
+          <span class="ba-badge">Tanpa Setup</span>
+          <span class="ba-context" id="ba-ctx"></span>
+        </div>
+        <div class="ba-body">
+          <div class="cmsg cu"><div class="cav">A</div><div class="cbub" id="ba-prompt" style="color:#fff"></div></div>
+          <div class="cmsg cc"><div class="cav">C</div><div class="cbub" id="ba-before-txt"></div></div>
+        </div>
+      </div>
+      <div class="ba-box ba-after">
+        <div class="ba-head">
+          <span class="ba-badge">Dengan Setup</span>
+        </div>
+        <div class="ba-body">
+          <div class="cmsg cu"><div class="cav">A</div><div class="cbub" id="ba-prompt2" style="color:#fff"></div></div>
+          <div class="cmsg cc"><div class="cav">C</div><div class="cbub" id="ba-after-txt"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exercise M1 -->
+  <div class="exercise">
+    <div class="ex-tag"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#D4A84B" stroke-width="1.6" stroke-linecap="round"/></svg>Exercise · Modul 01</div>
+    <h3>Setup Custom Instructions Anda</h3>
+    <div class="ex-steps">
+      <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">1</div><div class="ex-txt">Pilih persona yang paling dekat di atas. Klik Salin.</div></div>
+      <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">2</div><div class="ex-txt">Edit bagian <strong>[NAMA], [JABATAN], [INDUSTRI]</strong> dengan data nyata Anda. Hapus yang tidak relevan.</div></div>
+      <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">3</div><div class="ex-txt">Buka Claude desktop app → klik nama profil → <strong>Settings</strong> → tab General → <strong>"Instructions for Claude"</strong> → paste → keluar tersimpan.</div></div>
+      <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">4</div><div class="ex-txt">Mulai chat baru. Kirim pertanyaan yang biasa Anda gunakan. Perhatikan perbedaannya.</div></div>
+    </div>
+  </div>
+
+  <!-- Next Module -->
+  <a class="next-mod" href="#m2">
+    <div class="next-mod-meta">
+      <div class="next-mod-label">Selanjutnya</div>
+      <div class="next-mod-title">Projects <span class="next-mod-tag">Modul 02</span></div>
+    </div>
+    <div class="next-mod-arr">→</div>
+  </a>
+</section>
+
+<!-- ═══ MODUL 02: PROJECTS ═══ -->
+<section class="module" id="m2">
+  <div class="mod-header">
+    <div class="mod-tag">Modul 02</div>
+    <div class="sec-deco">02</div>
+    <h2>Projects</h2>
+    <p class="lead">Custom Instructions bilang siapa Anda. Projects bilang <span style="color:var(--gold)">apa yang sedang Anda kerjakan.</span></p>
+  </div>
+
+  <!-- WHY -->
+  <div class="mod-chips" id="chips-m3">
+    <a class="chip active" href="#m3-why">Kenapa Perlu</a>
+    <a class="chip" href="#m3-tpl">3 Template</a>
+    <a class="chip" href="#m3-conn">Connectors</a>
+    <a class="chip" href="#m3-memory">Memory</a>
+  </div>
+  <div class="slabel" id="m3-why">Kenapa Perlu</div>
+  <div class="why-card">
+    <div>
+      <h3>Setiap chat baru = Claude lupa konteks.</h3>
+      <p style="margin-top:8px">Claude tidak menyimpan isi percakapan dari satu chat ke chat lain. Jadi kalau Anda punya proyek yang sedang berjalan — rekrutmen, strategi, klien tertentu — Anda harus menjelaskan konteksnya ulang di setiap chat baru. Projects menghilangkan itu.</p>
+      <div class="callout" style="margin-top:16px;margin-bottom:0">
+        <strong>Tanpa Projects, pilihan Anda:</strong><br>
+        (a) Tulis panjang konteks di setiap prompt<br>
+        (b) Pakai satu chat panjang yang makin berantakan<br>
+        (c) Lupakan detailnya — hasilnya tidak optimal
+      </div>
+    </div>
+    <div class="why-analogy">
+      <div class="analogy-tag">Bedanya dengan CI</div>
+      <div class="analogy-body">"CI = kartu identitas Anda. Projects = folder kerja dengan semua dokumen dan konteks yang Anda butuhkan untuk area kerja tertentu."</div>
+    </div>
+  </div>
+
+  <!-- WHERE -->
+  <div class="slabel" id="m2-where">Di Mana Membuat Project</div>
+  <div class="where-wrap">
+    <div class="where-card">
+      <div class="where-head">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="#D4A84B" stroke-width="1.2"/><path d="M5 3v2.5l1.5 1" stroke="#D4A84B" stroke-width="1" stroke-linecap="round"/></svg>
+        Cara Buat Project Baru
+      </div>
+      <div class="where-body">
+        <div class="ui-mockup">
+          <div class="ui-mockup-bar">
+            <div class="ui-dot" style="background:#C85C50"></div>
+            <div class="ui-dot" style="background:#D4A84B"></div>
+            <div class="ui-dot" style="background:#4E9E6A"></div>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:8px;color:rgba(255,255,255,.5);margin-left:8px">Projects → New project</span>
+          </div>
+          <div class="ui-frame">
+            <svg width="100%" height="168" viewBox="0 0 320 168" fill="none">
+              <!-- Background (blurred app) -->
+              <rect x="0" y="0" width="320" height="168" fill="rgba(20,20,20,.9)"/>
+              <!-- Sidebar hint -->
+              <rect x="0" y="0" width="68" height="168" fill="rgba(0,0,0,.3)"/>
+              <rect x="5" y="8" width="58" height="13" rx="3" fill="rgba(255,255,255,.05)"/>
+              <text x="34" y="18" font-family="Inter" font-size="6.5" fill="rgba(255,255,255,.3)" text-anchor="middle">Home</text>
+              <rect x="5" y="25" width="58" height="13" rx="3" fill="rgba(212,168,75,.12)" stroke="rgba(212,168,75,.3)" stroke-width="1"/>
+              <text x="34" y="35" font-family="Inter" font-size="6.5" font-weight="600" fill="#D4A84B" text-anchor="middle">Projects</text>
+              <rect x="5" y="42" width="58" height="13" rx="3" fill="rgba(255,255,255,.03)"/>
+              <text x="34" y="52" font-family="Inter" font-size="6.5" fill="rgba(255,255,255,.2)" text-anchor="middle">Artifacts</text>
+              <!-- Dialog box — white/light on dark -->
+              <rect x="74" y="12" width="230" height="148" rx="8" fill="#FFFFFF" opacity="0.97"/>
+              <!-- Dialog title -->
+              <text x="90" y="36" font-family="Inter" font-size="10.5" font-weight="700" fill="#000000">Create a project</text>
+              <!-- Field 1 label -->
+              <text x="90" y="56" font-family="Inter" font-size="7.5" fill="rgba(0,0,0,.65)">What are you working on?</text>
+              <!-- Field 1 input -->
+              <rect x="90" y="60" width="198" height="22" rx="4" fill="#FFFFFF" stroke="rgba(99,102,241,.6)" stroke-width="1.5"/>
+              <text x="98" y="74.5" font-family="Inter" font-size="7.5" fill="rgba(0,0,0,.4)">Name your project</text>
+              <!-- Field 2 label -->
+              <text x="90" y="97" font-family="Inter" font-size="7.5" fill="rgba(0,0,0,.65)">What are you trying to achieve?</text>
+              <!-- Field 2 textarea -->
+              <rect x="90" y="101" width="198" height="32" rx="4" fill="rgba(0,0,0,.03)" stroke="rgba(0,0,0,.12)" stroke-width="1"/>
+              <text x="98" y="113" font-family="JetBrains Mono" font-size="6.5" fill="rgba(0,0,0,.35)">Describe your project, goals, subject, etc...</text>
+              <!-- Use a folder -->
+              <text x="90" y="145" font-family="Inter" font-size="7" fill="rgba(0,0,0,.45)">&#128193; Use a folder</text>
+              <!-- Buttons -->
+              <rect x="218" y="135" width="70" height="20" rx="4" fill="#000000"/>
+              <text x="253" y="149" font-family="Inter" font-size="7.5" font-weight="600" fill="#FFFFFF" text-anchor="middle">Create project</text>
+              <rect x="144" y="135" width="70" height="20" rx="4" fill="rgba(0,0,0,.06)" stroke="rgba(0,0,0,.1)" stroke-width="1"/>
+              <text x="179" y="149" font-family="Inter" font-size="7.5" fill="rgba(0,0,0,.6)" text-anchor="middle">Cancel</text>
+            </svg>
+          </div>
+        </div>
+        <div class="where-step"><span class="wstep-n">1</span><span>Klik <strong style="color:var(--t1)">Projects</strong> di sidebar kiri</span></div>
+        <div class="where-step"><span class="wstep-n">2</span><span>Tombol <strong style="color:var(--t1)">New project</strong> pojok kanan atas</span></div>
+        <div class="where-step"><span class="wstep-n">3</span><span>Isi nama project + deskripsi tujuan → <strong style="color:var(--t1)">Create project</strong></span></div>
+        <div class="where-step"><span class="wstep-n">4</span><span>Di dalam project: tambah <strong style="color:var(--t1)">Instructions</strong> dan upload dokumen</span></div>
+      </div>
+    </div>
+    <div class="where-card">
+      <div class="where-head">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="3" width="8" height="6" rx="1.5" stroke="#D4A84B" stroke-width="1.2"/><path d="M3 3V2a2 2 0 014 0v1" stroke="#D4A84B" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Apa yang bisa dimasukkan
+      </div>
+      <div class="where-body">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+          <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--t2)">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Project Instructions</div>
+            Konteks tetap: nama project, tujuan, constraint, cara Anda ingin Claude membantu di area ini. Pakai 4 Blok Brief.
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--t2)">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--gold);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Dokumen Upload</div>
+            File yang sering Anda rujuk: JD, brief klien, data, template, OKR. Claude bisa membaca dan menjawab berdasarkan isinya.
+          </div>
+        </div>
+        <div class="callout" style="margin-bottom:0">
+          <strong>Aturan upload:</strong> Masukkan hanya yang perlu dibaca anggota tim baru di hari pertama untuk langsung bisa membantu.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Simple example first -->
+  <div class="slabel" id="m2-example">Contoh Sederhana — Rencana Liburan</div>
+  <div class="ba-wrap">
+    <div class="ba-box ba-before">
+      <div class="ba-head">
+        <span class="ba-badge">Tanpa Project</span>
+        <span class="ba-context">chat baru, mulai dari nol</span>
+      </div>
+      <div class="ba-body">
+        <div class="cmsg cu"><div class="cav">A</div><div class="cbub" style="color:#fff">Rekomendasikan resto untuk makan malam besok.</div></div>
+        <div class="cmsg cc"><div class="cav">C</div><div class="cbub">Di mana lokasinya? Berapa budget per orang? Preferensi makanan apa? Ada yang alergi? Untuk berapa orang?
+
+Mohon berikan informasinya agar saya bisa membantu...</div></div>
+      </div>
+    </div>
+    <div class="ba-box ba-after">
+      <div class="ba-head">
+        <span class="ba-badge">Dengan Project "Liburan Bali"</span>
+      </div>
+      <div class="ba-body">
+        <div class="cmsg cu"><div class="cav">A</div><div class="cbub" style="color:#fff">Rekomendasikan resto untuk makan malam besok.</div></div>
+        <div class="cmsg cc"><div class="cav">C</div><div class="cbub">Untuk 4 orang di Seminyak malam Sabtu, budget ~Rp 300rb/orang:
+
+Sarong Restaurant — fine dining tapi worth it, book dulu.
+Métis — French-Indonesian, ambience bagus, cocok untuk anniversary.
+Sea Circus — lebih santai, seafood fresh, cocok kalau ada anak.
+
+Sarong paling sesuai brief kalian. Mau saya bantu reservasi?</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Professional use cases -->
+  <div class="slabel" id="m2-grow">Mulai Simple, Tumbuh Sesuai Kebutuhan</div>
+  <div class="uc-grid">
+    <div class="uc-card">
+      <div class="uc-lvl">Simple · 5 menit setup</div>
+      <div class="uc-title">Project "Tim Saya"</div>
+      <div class="uc-setup">Instructions: nama + area kerja tiap anggota.<br>Dokumen: 1 template 1-on-1.</div>
+      <div class="uc-use">"Bantu saya prep 1-on-1 dengan Budi besok."</div>
+    </div>
+    <div class="uc-card hl">
+      <div class="uc-lvl">Medium · 15 menit setup</div>
+      <div class="uc-title">Project "Rekrutmen Q3"</div>
+      <div class="uc-setup">Instructions: posisi, kriteria, timeline, panel interviewer.<br>Dokumen: JD, rubrik, shortlist CV.</div>
+      <div class="uc-use">"Kita interview Dian besok jam 2. Siapkan saya."</div>
+    </div>
+    <div class="uc-card">
+      <div class="uc-lvl">Complex · 30 menit setup</div>
+      <div class="uc-title">Project "Strategi 2026"</div>
+      <div class="uc-setup">Instructions: OKR, konteks bisnis, stakeholder map.<br>Dokumen: strategic deck, data kompetitor.</div>
+      <div class="uc-use">"Kita mau masuk segmen B2B. Validasi apa yang paling perlu dulu?"</div>
+    </div>
+  </div>
+
+  <!-- Before/After professional -->
+  <div class="slabel" id="m2-ba">Before · After — Konteks Kerja</div>
+  <div class="ba-wrap">
+    <div class="ba-box ba-before">
+      <div class="ba-head">
+        <span class="ba-badge">Tanpa Project</span>
+        <span class="ba-context">chat baru</span>
+      </div>
+      <div class="ba-body">
+        <div class="cmsg cu"><div class="cav">A</div><div class="cbub" style="color:#fff">Siapkan pertanyaan interview untuk kandidat senior manager besok.</div></div>
+        <div class="cmsg cc"><div class="cav">C</div><div class="cbub">Berikut 10 pertanyaan interview untuk posisi senior manager:
+1. Ceritakan pengalaman memimpin tim besar
+2. Bagaimana menghadapi konflik tim?
+3. Apa pencapaian terbesar Anda?
+...</div></div>
+      </div>
+    </div>
+    <div class="ba-box ba-after">
+      <div class="ba-head">
+        <span class="ba-badge">Dengan Project "Rekrutmen Q3" + CV Dian</span>
+      </div>
+      <div class="ba-body">
+        <div class="cmsg cu"><div class="cav">A</div><div class="cbub" style="color:#fff">Siapkan pertanyaan interview untuk kandidat senior manager besok.</div></div>
+        <div class="cmsg cc"><div class="cav">C</div><div class="cbub">Dari CV Dian, dua hal perlu dikonfirmasi:
+
+Gap kritis: Semua pengalaman single-site. Posisi ini butuh multi-site.
+→ "Di [perusahaan], koordinasi tim lintas lokasi seperti apa?"
+
+Ada 8 bulan 2022 tidak dijelaskan.
+→ "Di periode itu, Anda fokus di mana?"
+
+Culture fit:
+→ "Keputusan apa yang Anda buat dengan data tidak lengkap?"
+
+Mau saya siapkan untuk interviewer lain juga?</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exercise M2 -->
+  <div class="exercise">
+    <div class="ex-tag"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#D4A84B" stroke-width="1.6" stroke-linecap="round"/></svg>Exercise · Modul 02</div>
+    <h3>Buat Project Pertama</h3>
+    <div class="ex-steps">
+      <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">1</div><div class="ex-txt">Pilih satu area kerja yang paling sering Anda gunakan Claude — tim, rekrutmen, klien, atau project aktif.</div></div>
+      <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">2</div><div class="ex-txt">Di Claude, klik <strong>Projects</strong> → <strong>+ New Project</strong>. Beri nama yang spesifik.</div></div>
+      <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">3</div><div class="ex-txt">Isi Project Instructions dengan 4 Blok Brief — tapi tentang konteks area kerja ini, bukan tentang Anda.</div></div>
+      <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">4</div><div class="ex-txt">Upload 1 dokumen yang paling sering Anda rujuk dalam pekerjaan ini.</div></div>
+      <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">5</div><div class="ex-txt">Test: tanya sesuatu yang butuh konteks dari dokumen itu. Perhatikan bedanya.</div></div>
+    </div>
+  </div>
+
+  <!-- Next Module -->
+  <a class="next-mod" href="#m3">
+    <div class="next-mod-meta">
+      <div class="next-mod-label">Selanjutnya</div>
+      <div class="next-mod-title">Templates &amp; Connectors <span class="next-mod-tag">Modul 03</span></div>
+    </div>
+    <div class="next-mod-arr">→</div>
+  </a>
+</section>
+
+<!-- ═══ MODUL 03: TEMPLATES + CONNECTORS ═══ -->
+<section class="module" id="m3">
+  <div class="mod-header">
+    <div class="mod-tag">Modul 03</div>
+    <div class="sec-deco">03</div>
+    <h2>Templates</h2>
+    <p class="lead">Simpan pola kerja yang berulang. Hubungkan Claude ke data Anda.</p>
+  </div>
+
+  <!-- WHY -->
+  <div class="mod-chips" id="chips-m1">
+    <a class="chip active" href="#m1-why">Kenapa Perlu</a>
+    <a class="chip" href="#m1-where">Di Mana</a>
+    <a class="chip" href="#m1-example">Contoh</a>
+    <a class="chip" href="#m1-framework">4 Blok</a>
+    <a class="chip" href="#m1-power">2 Kalimat</a>
+    <a class="chip" href="#m1-template">Template</a>
+  </div>
+  <div class="slabel" id="m1-why">Kenapa Perlu</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:48px">
+    <div class="why-card" style="margin-bottom:0;grid-template-columns:1fr">
+      <div>
+        <h3 style="font-size:17px">Pola kerja yang sama, mulai dari nol terus.</h3>
+        <p style="margin-top:8px">Setiap kali bikin meeting summary, rekap notulen, atau draft komunikasi — Anda tulis instruksi yang hampir sama. Template menyimpan instruksi itu. Tinggal paste konten, hasilnya konsisten.</p>
+      </div>
+    </div>
+    <div class="why-card" style="margin-bottom:0;grid-template-columns:1fr">
+      <div>
+        <h3 style="font-size:17px">Claude tidak bisa akses data Anda — kecuali dihubungkan.</h3>
+        <p style="margin-top:8px">Tanpa Connector, Anda harus copy-paste dari Notion, Drive, atau Gmail ke Claude. Dengan Connector, Claude langsung membaca dari sumber Anda.</p>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.1em;text-transform:uppercase">
+          <svg width="6" height="6" viewBox="0 0 6 6" fill="none"><circle cx="3" cy="3" r="3" fill="#D4A84B"/></svg>
+          Butuh desktop app (gratis)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Template section -->
+  <div class="slabel" id="m3-tpl">3 Template Siap Copy-Paste</div>
+  <div class="tpl-grid">
+    <div class="tpl-card">
+      <div class="tpl-head">
+        <span class="tpl-name">Meeting Summary</span>
+        <button class="copy-btn" onclick="copyTpl(this, 'tpl1')">Salin</button>
+      </div>
+      <div class="tpl-body" id="tpl1">Ini notulen/rekaman rapat saya:
+[paste atau upload]
+
+Buat:
+1. Keputusan yang diambil (hanya yang final)
+2. Action items: SIAPA — APA — KAPAN
+3. Yang masih terbuka dan perlu follow up
+
+Format: singkat, langsung bisa dikirim ke peserta.</div>
+    </div>
+    <div class="tpl-card">
+      <div class="tpl-head">
+        <span class="tpl-name">Analisis Keputusan</span>
+        <button class="copy-btn" onclick="copyTpl(this, 'tpl2')">Salin</button>
+      </div>
+      <div class="tpl-body" id="tpl2">Saya perlu memutuskan:
+[deskripsi keputusan]
+
+Konteks:
+- Situasi saat ini: [isi]
+- Pilihan yang ada: [isi]
+- Batasan: [budget / waktu / SDM]
+- Siapa yang terdampak: [isi]
+
+Bantu saya:
+1. Asumsi tersembunyi yang mungkin terlewat
+2. Risiko terbesar tiap pilihan
+3. Satu pertanyaan yang perlu dijawab sebelum memutuskan</div>
+    </div>
+    <div class="tpl-card">
+      <div class="tpl-head">
+        <span class="tpl-name">Draft Komunikasi</span>
+        <button class="copy-btn" onclick="copyTpl(this, 'tpl3')">Salin</button>
+      </div>
+      <div class="tpl-body" id="tpl3">Saya perlu kirim [email / pesan / memo] ke:
+[nama penerima + jabatan]
+
+Poin yang perlu disampaikan:
+[isi]
+
+Tone: [tegas / update rutin / minta persetujuan / bad news]
+Panjang: [singkat &lt;150 kata / sedang / detail]
+
+Satu draft terbaik.
+Saya akan edit yang perlu disesuaikan.</div>
+    </div>
+  </div>
+
+  <!-- Connectors -->
+  <div class="slabel" id="m3-conn">Connectors — Before · After</div>
+  <div class="conn-split">
+    <div class="conn-panel">
+      <h4>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#C85C50" stroke-width="1.2"/><path d="M4.5 4.5l5 5M9.5 4.5l-5 5" stroke="#C85C50" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Tanpa Connector
+      </h4>
+      <p><span style="color:#fff">"Siapkan saya untuk rapat dengan PT Maju Bersama besok."</span></p>
+      <div style="margin-top:14px;background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:14px;font-size:13px;color:#fff;line-height:1.65">
+        Mohon berikan konteksnya: siapa PT Maju Bersama, apa agendanya, dokumen apa yang relevan, history meeting sebelumnya?
+      </div>
+      <p style="margin-top:10px;font-size:12px;color:#fff">Claude tidak tahu kliennya siapa, dokumen di mana, isu apa yang belum selesai.</p>
+    </div>
+    <div class="conn-panel after">
+      <h4>
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#4E9E6A" stroke-width="1.2"/><path d="M4 7l2.5 2.5L10 4.5" stroke="#4E9E6A" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Dengan Drive + Notion Connected
+      </h4>
+      <p><span style="color:var(--t1)">"Siapkan saya untuk rapat dengan PT Maju Bersama besok."</span></p>
+      <div style="margin-top:14px;background:rgba(26,24,20,.4);border:1px solid var(--goldB);border-radius:8px;padding:14px;font-size:13px;color:var(--t1);line-height:1.65">
+        Dari proposal di Drive dan notulen Notion terakhir:<br><br>
+        Mereka raise soal timeline Juli — belum ada jawaban. Siapkan jawaban konkret.<br>
+        Gap Rp 50jt antara budget disetujui dan angka proposal — perlu konfirmasi.<br><br>
+        Mau saya draft 3 poin pembuka yang langsung address kedua concern ini?
+      </div>
+      <div class="conn-tags">
+        <span class="conn-tag">Notion</span>
+        <span class="conn-tag">Google Drive</span>
+        <span class="conn-tag">Gmail</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exercise M3 -->
+  <div class="exercise">
+    <div class="ex-tag"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#D4A84B" stroke-width="1.6" stroke-linecap="round"/></svg>Exercise · Modul 03</div>
+    <h3>Simpan Template, Hubungkan Claude</h3>
+    <div class="ex-steps">
+      <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">1</div><div class="ex-txt">Copy salah satu template di atas. Paste ke Project Anda → buat file bernama <strong>prompt-templates.md</strong>.</div></div>
+      <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">2</div><div class="ex-txt">Sesuaikan isinya untuk konteks kerja Anda. Simpan.</div></div>
+      <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">3</div><div class="ex-txt">Gunakan template itu dalam percakapan nyata hari ini. Catat apa yang perlu disesuaikan.</div></div>
+      <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">4</div><div class="ex-txt"><strong>(Bonus — butuh desktop app)</strong> Sambungkan satu Connector: Notion, Drive, atau Gmail — mana yang paling sering Anda buka saat kerja.</div></div>
+    </div>
+  </div>
+
+  <!-- Next Module -->
+  <a class="next-mod" href="#m4">
+    <div class="next-mod-meta">
+      <div class="next-mod-label">Terakhir</div>
+      <div class="next-mod-title">Synthesis — Masalah Nyata <span class="next-mod-tag">Modul 04</span></div>
+    </div>
+    <div class="next-mod-arr">→</div>
+  </a>
+</section>
+
+
+  <!-- Memory section -->
+  <div class="module-memory">
+  <div class="slabel" id="m3-memory">Memory — Ingatan Lintas Sesi</div>
+  <div style="background:var(--bg1);border:1px solid var(--goldB);border-radius:var(--r);padding:28px 32px;margin-bottom:48px">
+    <div class="memory-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start">
+      <div>
+        <h3 style="font-size:18px;margin-bottom:10px">Template bisa hidup di tiga tempat</h3>
+        <p style="font-size:14px;color:var(--t2);line-height:1.7;margin-bottom:16px">Template yang Anda buat tidak harus disimpan manual setiap kali. Claude punya tiga cara menyimpan konteks.</p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px 16px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">01 · File MD di Project</div>
+            <p style="font-size:13px;color:var(--t1);line-height:1.6">Buat file <code style="background:var(--bg3);padding:1px 6px;border-radius:4px;font-size:11px;color:var(--gold)">prompt-templates.md</code> di dalam Project. Template tersimpan permanen dan bisa diakses dari chat mana pun dalam project itu.</p>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px 16px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">02 · Memory (Desktop App)</div>
+            <p style="font-size:13px;color:var(--t1);line-height:1.6">Di akhir percakapan yang menghasilkan sesuatu berguna — minta Claude: <span style="background:var(--bg3);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold)">"Simpan ini ke Memory."</span> Claude akan ingat di sesi berikutnya.</p>
+          </div>
+          <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px 16px">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">03 · Upload MD ke Chat Baru</div>
+            <p style="font-size:13px;color:var(--t1);line-height:1.6">Export hasil kerja sebagai file <code style="background:var(--bg3);padding:1px 6px;border-radius:4px;font-size:11px;color:var(--gold)">.md</code>, lalu upload ke sesi berikutnya. Cara paling portabel — bisa dibawa ke Claude versi apapun.</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:12px;overflow:hidden">
+          <div style="padding:12px 16px;border-bottom:1px solid var(--bd);font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold)">Cara Pakai Memory</div>
+          <div style="padding:16px">
+            <div style="display:flex;align-items:flex-start;gap:9px;margin-bottom:14px">
+              <div style="width:24px;height:24px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;color:#fff;flex-shrink:0;margin-top:2px">A</div>
+              <div style="font-size:12.5px;color:var(--t1);line-height:1.65;padding:10px 13px;border-radius:9px;background:var(--bg3);border:1px solid var(--bd)">Simpan ke Memory: cara saya menulis email ke klien korporat — to the point, tanpa basa-basi, bullet bila perlu.</div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:9px;margin-bottom:14px">
+              <div style="width:24px;height:24px;border-radius:50%;background:var(--goldS);border:1px solid var(--goldB);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;color:var(--gold);flex-shrink:0;margin-top:2px">C</div>
+              <div style="font-size:12.5px;color:var(--t1);line-height:1.65;padding:10px 13px;border-radius:9px;background:rgba(212,168,75,.05);border:1px solid var(--goldB)">Tersimpan. Di sesi berikutnya, saya akan otomatis menulis email Anda dengan gaya ini.</div>
+            </div>
+            <div style="border-top:1px solid var(--bd);padding-top:14px">
+              <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px">Akses Memory</div>
+              <div style="font-size:12.5px;color:var(--t2);line-height:1.65">Settings → <strong style="color:var(--t1)">Memory</strong> → lihat dan kelola semua yang Claude ingat tentang Anda.</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px;background:var(--goldS);border:1px solid var(--goldB);border-radius:10px;padding:14px 16px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--gold);text-transform:uppercase;letter-spacing:.12em;margin-bottom:8px">Aturan Praktis</div>
+          <div style="font-size:13px;color:var(--t1);line-height:1.7">Gunakan <strong>Project</strong> untuk konteks pekerjaan spesifik. Gunakan <strong>Memory</strong> untuk preferensi gaya kerja yang berlaku di semua chat. Gunakan <strong>file .md</strong> bila ingin portabel atau berbagi dengan orang lain.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div><!-- .module-memory -->
+
+<!-- ═══ MODUL 04: SYNTHESIS ═══ -->
+<section class="module" id="m4">
+  <div class="mod-header">
+    <div class="mod-tag">Modul 04</div>
+    <div class="sec-deco">04</div>
+    <h2>Synthesis</h2>
+    <p class="lead">Semua layer aktif. Bawa satu masalah kerja nyata — selesaikan sekarang.</p>
+  </div>
+
+  <div class="synth-card">
+    <div style="margin-bottom:24px;display:flex;justify-content:center">
+      <svg width="300" height="118" viewBox="0 0 300 118" fill="none">
+        <!-- Layer 3: Templates — widest, dimmest -->
+        <rect x="4" y="88" width="292" height="26" rx="7" fill="rgba(212,168,75,.06)" stroke="rgba(212,168,75,.18)" stroke-width="1"/>
+        <circle cx="22" cy="101" r="6" fill="rgba(212,168,75,.1)" stroke="rgba(212,168,75,.3)" stroke-width="1"/>
+        <path d="M19.5 101.5l2 2 3.5-3.5" stroke="rgba(212,168,75,.6)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="36" y="106" font-family="JetBrains Mono" font-size="8" fill="rgba(212,168,75,.55)" letter-spacing=".07em">M3 · TEMPLATES</text>
+        <!-- Layer 2: Projects — medium -->
+        <rect x="20" y="55" width="260" height="26" rx="7" fill="rgba(212,168,75,.10)" stroke="rgba(212,168,75,.30)" stroke-width="1"/>
+        <circle cx="38" cy="68" r="6" fill="rgba(212,168,75,.18)" stroke="rgba(212,168,75,.45)" stroke-width="1"/>
+        <path d="M35.5 68.5l2 2 3.5-3.5" stroke="rgba(212,168,75,.85)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="52" y="73" font-family="JetBrains Mono" font-size="8" fill="rgba(212,168,75,.75)" letter-spacing=".07em">M2 · PROJECTS</text>
+        <!-- Layer 1: Custom Instructions — narrowest, brightest, active -->
+        <rect x="38" y="20" width="224" height="28" rx="7" fill="rgba(212,168,75,.20)" stroke="#D4A84B" stroke-width="1.5"/>
+        <circle cx="58" cy="34" r="7" fill="rgba(212,168,75,.28)" stroke="#D4A84B" stroke-width="1.3"/>
+        <path d="M55 34l2.5 2.5 5-5" stroke="#D4A84B" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="74" y="39" font-family="JetBrains Mono" font-size="8" fill="#D4A84B" letter-spacing=".07em">M1 · CUSTOM INSTRUCTIONS</text>
+        <!-- Connection lines between layers -->
+        <line x1="20" y1="81" x2="4" y2="88" stroke="rgba(212,168,75,.12)" stroke-width="1"/>
+        <line x1="280" y1="81" x2="296" y2="88" stroke="rgba(212,168,75,.12)" stroke-width="1"/>
+        <line x1="38" y1="48" x2="20" y2="55" stroke="rgba(212,168,75,.12)" stroke-width="1"/>
+        <line x1="262" y1="48" x2="280" y2="55" stroke="rgba(212,168,75,.12)" stroke-width="1"/>
+      </svg>
+    </div>
+    <h2>Tiga layer sudah berjalan.<br>Bawa masalah nyata.</h2>
+    <p>Pilih satu keputusan atau masalah kerja yang sedang Anda hadapi. Selesaikan dengan semua yang sudah Anda setup.</p>
+    <div class="synth-pills">
+      <span class="synth-pill">CI aktif → Claude kenal Anda</span>
+      <span class="synth-pill">Project aktif → konteks sudah ada</span>
+      <span class="synth-pill">Template siap → langsung ke substansi</span>
+    </div>
+  </div>
+
+  <div style="margin-top:24px">
+    <div class="exercise">
+      <div class="ex-tag"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#D4A84B" stroke-width="1.6" stroke-linecap="round"/></svg>Exercise Akhir</div>
+      <h3>Selesaikan 1 Keputusan Nyata</h3>
+      <div class="ex-steps">
+        <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">1</div><div class="ex-txt">Pilih satu keputusan atau masalah yang sedang ada di pekerjaan Anda — yang nyata.</div></div>
+        <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">2</div><div class="ex-txt">Buka Project yang paling relevan. Gunakan template "Analisis Keputusan" sebagai titik awal.</div></div>
+        <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">3</div><div class="ex-txt">Lanjutkan sampai ada satu arah jelas, risiko yang dipahami, dan langkah pertama yang konkret.</div></div>
+        <div class="ex-step" onclick="toggleStep(this)"><div class="ex-n">4</div><div class="ex-txt">Output hari ini = satu dokumen kerja yang bisa langsung dipakai besok.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MINGGU PERTAMA -->
+  <div style="margin-top:40px">
+    <div class="mod-chips" id="chips-m4">
+    <a class="chip active" href="#m4-week1">Minggu Pertama</a>
+  </div>
+  <div class="slabel" id="m4-week1">Minggu Pertama Setelah Setup</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:40px">
+      <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:24px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:16px">Fokus Minggu 1</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--t2);line-height:1.55">
+            <span style="color:var(--gold);font-weight:700;flex-shrink:0">→</span>
+            Pakai Custom Instructions di setiap sesi. Perhatikan respons Claude berubah.
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--t2);line-height:1.55">
+            <span style="color:var(--gold);font-weight:700;flex-shrink:0">→</span>
+            Buka Project yang Anda buat tadi setiap kali kerja di area itu.
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--t2);line-height:1.55">
+            <span style="color:var(--gold);font-weight:700;flex-shrink:0">→</span>
+            Gunakan template sekali sehari — apa pun yang relevan saat itu.
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:10px;font-size:13px;color:#fff;line-height:1.55">
+            <span style="color:var(--t4);font-weight:700;flex-shrink:0">·</span>
+            Jangan optimasi dulu. Gunakan dulu. Revisi minggu depan.
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--goldS);border:1px solid var(--goldB);border-radius:12px;padding:24px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:16px">Checklist — Sudah Selesai?</div>
+        <div style="display:flex;flex-direction:column;gap:8px" id="final-checklist">
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);cursor:pointer">
+            <input type="checkbox" style="accent-color:var(--gold);width:14px;height:14px">
+            Custom Instructions terisi dan tersimpan
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);cursor:pointer">
+            <input type="checkbox" style="accent-color:var(--gold);width:14px;height:14px">
+            Minimal 1 Project aktif dengan instructions
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);cursor:pointer">
+            <input type="checkbox" style="accent-color:var(--gold);width:14px;height:14px">
+            Minimal 1 template sudah dicoba
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);cursor:pointer">
+            <input type="checkbox" style="accent-color:var(--gold);width:14px;height:14px">
+            Exercise M4 selesai — ada output nyata
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--t2);cursor:pointer">
+            <input type="checkbox" style="accent-color:var(--gold);width:14px;height:14px">
+            Satu keputusan atau output sudah dibuat hari ini
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Langkah selanjutnya -->
+    <div style="background:var(--bg1);border:1px solid var(--bd);border-radius:16px;padding:32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">Langkah Selanjutnya</div>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;color:var(--t1);margin-bottom:6px">Ini baru awalnya.</div>
+        <div style="font-size:13.5px;color:var(--t2);line-height:1.65;max-width:420px">Fondasi sudah terpasang. Program AI First melanjutkan dari sini — lebih dalam, lebih spesifik ke cara kerja Anda sebagai leader.</div>
+      </div>
+      <a href="https://aifirst26.iwdemy.com/journey.html" target="_blank" style="display:inline-flex;align-items:center;gap:10px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13.5px;font-weight:700;color:#1A1814;background:var(--gold);padding:14px 24px;border-radius:100px;text-decoration:none;white-space:nowrap;transition:.2s;flex-shrink:0">
+        Lanjut ke AI First
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-in">
+    <div class="footer-logos">
+      <div class="footer-logo-bg"><img src="data:image/png;base64,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" alt="IWDemy" style="height:18px;width:auto;opacity:.7"></div>
+      <div style="width:1px;height:16px;background:var(--bd)"></div>
+      <div class="footer-logo-bg"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAAvCAIAAAApexLzAAAfhUlEQVR42u18eXxTVdr/uUtykyZp0yXd1xRKKaEtIFspgkzpW5l5FUUtCjpSFf05MKKv47jMKJ/5KcooLpURR2dELQKyKTvFQlso0I1C9yVp2pS26ZpmX27uvef948A1pAso6KBvz6d/pDfnnnvvOd/zPN/n+zw3GIQQjLfxdrMbPj4F420cWONtHFjj7ZfZrkmNIISefUbrj41zrP+D0MEwbDSs4DgOAOA4zvNfvnEcxx/xHGf4mD8JsFiWRcPyF/O66nCwo884jns9yXj7mZvD4RCLxWMg0m63sywrk8kQziwWi5+f3y/JYiF0ekENQsiyLACAIIgRwTrertkuXKyenDhJJBLxWOnv71er1QRByGSyDRs2PPDAA5GRkTRNC4XCadOmoXmGEHIc19nZuXfvXrlcnpOTYzAY1Gr1J598smnTJoZh/Pz8BAIBfxXy2naT4zzBh+E4NrpRQaZy9+7d3d3dMTExEokEwzAMwwQCAUVRFEWRJAkhdLvdLpeLpmm3281xHMdxNputra1t5syZCxYsQIMQBDHCPsAwkiTHwXEjbWjIyLKc5xGDwVBVVSWTyYqLi/fv369Wqx955BGRSCQSiVJTU3lgEQSRm5vb29s7bdq0urq6vXv3mkym+vr6LVu2OByOtWvXKhQK3ieSY0MKIwiMILBRvhpx4VmWfemll1pbW9GRgIAAhUIhEAjsdrtWq70MZ5KcNGkSMj+Dg4MDAwPo+FNPPbVgwQKWZXEc37dv34kTJ55++ukpU6ZwHIdul2GYd99912az/elPf5LJZMNd+3i7Zhu+MydNmoTjeHl5uUKh0Ol0JSUlTU1NKpUqKSmJdxc4jtvt9ra2NqvVeuzYMV9f36VLlzY3N9fX12dnZ9vtdofDcdVVRgYVyyJIuUzmvosXDc0tjiEDQVF+UVHBKSnyCfEYQUCOAxjmua7I0qjVap1OR5JkTk5OTk6OSqWSSCQAALfbnZ6eXl5eDgB48803n3/+ed6pNzU15ebmfv75552dnQAAgUBQX1+/bNkyAEBhYWFNTQ1BEAzDCASCLVu2vPjiiwAAs9n8/vvvsyw7bsB+MHnnoJeT2bRp0/bt25OTkxcvXnz69GmO48xm84YNG2w22+bNm1NTUxmGIUny/PnzWVlZwcHBRqMxMjLy0KFDQqEwIyPjueeek0qljz76aFRU1FgWC6HKMWi4sOVj9Tf76f5+8gp4IAA0jkfOnp3y/56MWnC7VziAgHXgwAGSJA8ePJiRkeFJmAQCQWhoKPo3JiYGmR+SJMVi8bRp07Zu3UrT9PHjx9EgyBWyLEtRlCf95724UCgcjZmN6EPH28iiAIZxHDdp0qRXXnmlp6dHrVZzHBcYGJicnFxaWvr444+jaUd2a+bMmSkpKRs3bjxx4kRWVta8efNMJhNFUTU1NQEBAX5+fp5gIEdEVfPhw6eeeZbp63ciJ3TFHnIQAo5tP3y4/fDhiQ8tv+PDXKFAACAEGIYINcMwX3755WeffZaRkUHTNEEQOI7zTtrtdqNxaJr24uM4jm/evFmpVDY0NKhUqsmTJx85cuTUqVOPPfYYSZIcxyFytnr1aoZhrFbrunXr0BW97n8cVT+i3XXXXTt37mxsbLzjjju6u7v1ev26dev279+/fPlykUjEw2VoaOitt95qaGjIzs5esGDB5s2blyxZgtApFAo9mbs3sBBz0hUV4g7b4vc3MRjGsdwIHAbHIcdJcbxl19eTspeTJAmuiAvt7e3Tpk178MEHGYbxMiqYh9/0dKCIj7Ms6+/vv2rVqvb2dpVKxbJsZmZmZmamp5qCYRhBEGvXrvU818sRl5SUpKWljaFZjK2+eMkf/xcIHNrYOp2OYZjw8HCr1VpcXIzmc2hoKCQkhF84f3//TZs25eXl2Wy26dOnL1q0qKCg4OOPP9bpdEqlMjU1FRkIb2AhzjRQ33D6T39eWVF+PfdkfHfTif95Piv3A45lcYIAACiVyry8PAjhD6U+BEFACN999120osgPMgzDu0K+ud1uCKEXalFs/MYbb+Tm5nZ1dXnKfZ7g4B0lx3EozPECEAqqecvHsiyGYb96aY0giKCgII1Go9Fo3G73ihUruru7DQYDcjj8ZAoEAoIgDAYDcqArV64UCAQNDQ1ardbf35/XVEd2hYUvvQKdLodxSOgjQT4Ow3HgsTaQZQEAHMPgJGlyupr/9dm0nFUhqanIh/Km5cf5ez6uRNAkCMLlcqEPaJl5mmWz2VBMgFAiFAp37979l7/8Zfbs2cMxjRQNgiAIgnC73QzDIA3QU0fm/+WdKULe8G6/yiDx4Ycffuyxx9CRmpqat99+e/78+QEBAcONenBwMNqxLMvef//9L774otPpTE9P94Tg93I+xzAQwq6y8o8UYZ8mp3CMG15HK930Tq5YeuSJJ/kRRmsMw0AIkUsGAHz11VeIco1xCk3T27ZtS05OHhgY8Dze09OzZs2aFStWoGERCnNzc5FxSklJKS4uLiwsPHXqVFFRUWdnp+e5hw4dUqlUXV1d7e3tjz/+uEqlyszM1Ol0HMfxN7Njx44777wzIiIiLi5u2bJlFRUVyFnAX0srKjpttdqGH+c4jmEYZsx1vP52GVis2w0hLP7Lq5+ERn6SNKXjVLG+okJfUdFVVmbRd6Orom49VVXdFRVdZaX6ysr8tWvflfp9nJhkR2vPcTcILGRaDhw4sGbNmilTpqD94XA4IIQmk+mjjz568MEH0Y5ZuXIlAh/Lsg888IAXh+NbTk4OhLC0tPTll1+eM2cOAICiqA0bNnhy/Oeffx5dvaysLC0tbeLEiW+//faWLVuUSiUAwMfH58KFCxzH/WqwNRqwPFcB8ZDrGQ315IYt/WWvgRhSX3UNxDGXybJn6X0AQpwk7QMDi955a/Zz/wMZBhMIXMahPUvvdRlNOElCCHGBQCCXQ7PF0NwSkTZ3NNX0h3LJ0tLSXbt29fX14TiuUCgQnbLZbCdOnNi7dy/PCXjv+eyzz2ZnZ69YscLpdM6ZM+evf/2rw+FAav7UqVMhhGq1+vDhw9XV1QRBcBz34YcfbtmyBcfxd955Z3BwMCsrCwBw4MCB5cuXOxyOzs7OiIgIAMD8+fNnz55ts9kQY/Vkpj8zuf55wghPrzcGs/S8H3TKiD3J70eE0D5o4ADAABCIxAADOEkKRGKcFHjyIFIk5nzcGEnyOXESw2x9fZfHuWFZBUL4xhtvrFmzJjEx0Ww2i8Vi5LzDwsL27Nnz6aefPvnkk3wSFLU5c+YMDQ0hrhAeHs7bRX4iVq5cuXLlypkzZ54/f54kyYKCgqSkJGT2rFZrYGAgy7JPP/20w+GIj48PDg52u90YhiUkJAQHB7e3t7e1tf0HhYyfLTIdu2LAqxvinXzP4fLhKFsQ8/iAfBz6gxBgI/S6uY/HsqxcLpfL5Z5CKKJTcXFxaMegHCpPugcGBhiGQTEjy7I0TSO6gGQ4mqYhhDExMRBCiqICAgIYhqFpmqIohCocx7Ozs2fNmpWbm4sEMxRpIveHwoX/VLa+p7d3aMg4hvG4WebKYDAgj2Y2m41GIx/0ePV0uVwWiwXt9q6uLrPZzEc53sBC5gpgmDhAjiN53WqlrRbaaqXtVpR4JigKw3FSJHLbbLTViv5YmsYAYCH08XBMNyX6Hf48SMTij3teyzOUQ90IgiBJkiRJZKU9SyEQt0PfIpuLvt20aVNZWRmydkKhEH1rt9vHUPm/J6ojJ1ovJ++vorTDzhpxEM+DZ86U1tY38BKJ58wgAz/iONzo9zY8ZIYQVlVV/fnPf0ZGaNu2bf/85z/BsComxLr27dv33HPPHT16FMOw9evXnz59Gs0ewiJ/xcsci2NZnCSDp041VlaJ/H1/t/UTgVjCsSzAsK6zZ3Zm3UnJZKybFkolv/vi34SQgiyLk2TDrl31W/ME4WEBkxIQ/n5q+z+Gnnn923dEm89LVhiGFRUV7dy5s6SkxGw289Zx+PhjbKTR1GCv6H3EmjuvKOSepf+NzMNwKaevvz9YoRiu+gIA8Ove5CirsWPHjhUrVtTU1FAUJRaLDQYDhLCurs7tdk+fPp13fBiGHTlyZO3ata+99trUqVNlMplcLj937lxhYeEf//hHT10G93z4+N/9lmFZTEDGZiyOTE+PXrAg+vbbIQtb84/pTha35Z/oOlsWs/COqPT50QsWRs5LD0yYSLJsRFqaj0KBUPifEmOQ17sRR4DEwO3bt6tUqlWrVonF4ldeeQVBarTCN47jtNq23r4+3j7x4Ovu1jc2NRsMQ+jftnZdc4u6v38Aw7C+/oEWtaatXYfQoNf3tLSoW1o0LppGC2Gz2VvUGnQ6hNDlcul7etACtbW1NzQ22R0OlmXPnSsrLi7p6+s3DA1hGKbTdbSoNd36HrT8nZ1dLWpNd7d+bI+JUHXmzJljx44tXLjwiy++aG1tFYvFiGW++uqrOp2OV+cJgjhy5Ehvb++sWbNQjkQqlbIsm5+f/8EHH3ildK4AiyAgx0XMneM/I5XiOKfJyNK0225naRoCSEl8hX4yys9PKJW6jEaWpt02G0vTjMMJIZz+1JM/Ed/6eRguWuCenp6srKwVK1bMmzevvr7+vffey8zMRLxtuCtEMCorr3DRtFqtMZvNPJNlGObAgcMDg4Mcx+3Zs49hmKKi0wbDkL+/vFWr1XV0nDlzLiQ4WKtto2m6orLqXFlZQEAAy7G79ux1Op39AwP7Dx2SSiUCktz37cF2Xce+bw42NbU4HM6du/ZAAPr7Bw4cOuxwOLRtOtpFt2rbenv7ikvOtGg0ISHBF6tr6hsaa+vqW9RqRVBQQ2MTssRjPHhTU9PLL78cHR3tcDhqa2vT09Obm5tZli0tLcUw7J577uHLAjo7O1944QWlUllZWVlQUHDgwIFvv/327bffNhqNGzduvHDhAo7j/PYmvZZn4YYNx1fliOUBAABCKAQAkBQFGQayHGRZAKHI3x9gOPrKj6JiH1oePmsmn9K5Zth801kn78g80/X88o8obg0nNC6X65577iktLV20aBGiFwzD9Pb2egILcXxPB0cQhEajTU1Ndjic7boOiqImxCvdbrfMV5Y8VeV0uYpPlbhoukuvD4NwxvTUYIWivKLSbLZgOPabRQsHBw3nqy7cd+/SoKDAoKDAhvrG02dLbWZLWEhoeFgYACBIESSTSiup8xRFuVyu8PBwZVwsQRD1DY1SqTQ0REG73XPnzDIajadLzs6edVt//4CIErbrOgDHud2sRCrJ+M0dYxhy5F4hhK+++mpeXh7HcS+88IKvr291dTWO4zk5Oe+//z7P5HAcNxgMq1evbmtru+2225RKpY+Pj8ViWbJkSWZmpsPhQAXKI+QKMRyHHBc6LXXeW290HjuKicUMxwEMH9JocKEQsXuWpluPHSN9JIBjJQTJBgRmbf4QAji2wIP8FEr/ebJOhmGuv8jdi7qilAKvLSGtAcOw3t5etG94UoJuAPXnjT9CDDpIEMTJkydLS0sJgkhJSeE4zm63S6VSiUSCLufj4+OVncRx3Gq1kqTAZrf29w9MVSXV1tXPnnUbjuNisfiOhbc3NDYZDEMEQeAY9ptFC08WFuVt2zF37uxpqSkD/YN79n6bNDkxIMAfQiCVShDQQ8JCNGotw7jjJyg5juM4KPfzAwAQhMDlcsnlfnNm3VZb19Db2yuiKAghzTBuxs1xXGdXN8swsbExJEFEhIeJxWKjyVRwsijvqx0zZ0xPnqoaLdeOUDV58uTo6Ojc3FyKojIyMlpaWvz9/SUSidVqTU5OdrvdAoEAbdfk5GSZTPb6669v3ry5ra1NLBZXVFQYDIaysjKn0zl79uz777+fp1lXWywchywbn3Vnw65dJU/+gTObHRyHi0QiuRxASIoo2u749sGHKQAIAGKW3rXoH5uFIhFfNjN2Nkqv19fW1qJoq7Cw8KGHHvKUDK7ZkAvXarUoAEQfUBYZSQlRUVFarbampqagoACVglVVVSkUiqioKJTJbm9vR8nH2tpavm6CD6HRh/LychzHpVIpAOC9995jGIYgiPb2dgzDSktLY2NjQ0ND0dwVnCxMTUnJvv++r7Z/bTAYFmcsQiNYbbZDhw6nzZ0bGRFeX9+A4XhoSPBDyx+oulBdcLLo/mVLlyz5r+5u/bH874KDFRgGaNqN5sFiMsv9fZ1OV3//gOd2w3Hg4yM2mcz7Dx357yVZPj7iS51dGIZBDgoIEsfxwMBAIUUROI6SpzRNSyXS++65u0WtOVVyNsDfPzIy4irxE/cOF+x2O4qjIYTr1q17+eWXw8PDH3300cOHD3uW6UIIrVYrjuNLliwZGhqiKKqtre3222+fN28ey7IKhcKTk3hbC4wgIMsmPfDAg2dLkp560i8ySiIUijhOBKGI48QQ+shk4bfPz9y+bcnnW0USyRioQhvRZrNt3LgxOztbqVR2d3cjOepf//qXSqVas2bN/v37gcfLRmO0c+fOrV69eu3atchQffLJJ9nZ2UiIZ1lWKBS++eabAAC73b548eKUlJT4+Pi77757aGiIpukPPvhg/vz5Fy9eRPmHJUuWrFq16ujRo3z8v3DhwqioKJZlz5w5s3DhwpycnISEhMbGxtjYWJZlDx48OGHChIceesjpdPJu1O129/T0Wq1WlSrpUmdXc4vaZDJzHDc4aGBYKJFIdLpLOEG0tmqP5X9ntdqioiKC/P1bWjTNLerQ0BCZTJY0OTE+Lu7suVJEz7u69elpaWlzZmtatfX1jXp9T319o9FkMhrNQ0ZTc0uLzWoFAOg6Oux2e3e33tdX2qXXX+rsEgoEwcHBR47mt7Zqq2tqNRrtudKynp7euNgYihKIxWIv149UPa9aP5fLdeHChTvvvDMjIyM9PV2pVD7xxBMZGRlnzpzhFwiBxmKxKJXKGTNmqFQqX1/f+Ph4lUqVkpISHh5+VcQ9sgzDsig5Y+/r76msHGxudhgGCSHlFx0TMi1VkTz1cvEWho1hqxDSTSbTxo0bAQBhYWHBwcEURSHgd3V1DQwMJCcnP/LII8PfVrPb7ZMnT+7o6EhLS0PPdvz48RMnTkycODEgIADHcbPZ3NzcHBcX9/jjjyOjheN4QUHBp59+2tbWhuP4woULn3nmmbCwMJfL9fe//x0AMHHiRLFYzDDM4OCgVqtNTU1dvnw5mjIcxxsaGl566aXa2lqHw6FUKn//+9+vXr364sWLf/vb33p6ehITE9evXx8dHc0nNExmc3lZpUQqSZqcCCGsOF8VHhaaNDkRAHCxutbpdMTERPf3DxAEIaIom80OIYyPV2I41tTUIhJRUokkLi4WQljf0AgA5nI5o6OiFIogFFE2t7SIRGKlMhZCaDZbOJbz9ZV1XOoEAERHRV7q7Arwl8fFxV6oruFYLjExwVcmq66pNZvNcrn/VFVSt16v1/cQBBkWGhIaGuK1LrqOS2GhoUKhgH8Wg8GwdevWuLg4kiTvuusuvqYoPz/farUuW7aMZ6tarTYvL+/VV19FLnLjxo3p6enIYnm9NzXq61+Q4wCEo+X+eOT9RBkrHlgLFiwoKiq6nsKVEftc59sWfDeXyyUUCj0TYT9itFs/LXg903iDxUKjluNdVjtHef3r+lHFvwnoqQvwA6LYakS+zzAMhmEo2cwXPniN4Hk6T88RJ0XhAi8BDJeqPc/lY0nExvgtywcBKErwesNxjDzaaND0ugFka72kVK+D/JN6ch3PSUDPy3fzvMSIMB1xe6DH90zO8PPptUDXWYJ7rTpPDBvh9a8fqDD9iBdprFarxWKBEM6cOdNTwLxmLmjE5Pz13ADqzy+V58ERRxjDrvBnjdjHqyx7eB+vg8MV/BE/jHjK9Wt+I87taK92Xs+Fbrl3p9B27+zstNvtJEnee++9oz32L7qU4FffbrmKW+R0CgoKUCnLxIkT/1OFUOPthrboLfXbDYgwtra2JiQkpKWlHT9+nKKoEf3FzWLKP8JK/VAKf83+NxgT3PTTb0qMgt9SqMIw7Pjx47NmzcrOzs7PzxeLxT8SVRCCa20Y7Er7AaN6RA8/zr2iYl6vWozLTPw6k+gQevUc+X6Gdbvm7fE3dlO28S1ksZC5ev/99wMDAx9++OGbsnVQSOtJcjmOwwDAcJx2OFAAJRCJAIQYjqOvEOIgx2FXoi3M45VdAIDLYhGIxZd/ZMAj0OMjMj7cuyyl2u0CH5/huVQkBEIIGZcLJwhCKPQc0CsYHF6SxKHsMoS0wyH08eEf4fKdXN3/sniEXqSBEF7J4GEY5rLZRB7luAAA2m7HMIykKDQPl6VKz7MAAB7x6YjlUrfozxiNlj++9oksixNE65kz7adLfCMjZ65cMVrP7zb+XeTrSwgEaY8/dp2W4lJVVcikScdef/3ut966zvtpOHrMpO+em5PDMSxO4LTDXp63jbFYo9PmKtPS0MIce+ONyZmZhEAQmZo6xg7BcLxfo7n49S6H2Rwzd07K0qUAgJaThV01NXese8arv7mnx240hiYmohNHG9ak1xflfnj3mxs4hqncsdOm14dNS+2srk6+667ghIQbWUFi/fr1txp556s6f5SJghiOl33+hYASJmZlNeUfN/f19jQ00HZ7zde7CB9xR2VlQ36+b2hoR0Ulx7JB8Upr/0DtN/tkoWGNx79rOHjQTdNiX9+Sf3xkMxkBBBe/3mUdHFRMmNBaUvLda+tlERFNBQXGdl1QfHxjfn7zyUKhWFz55ZcOs8XtcPRrNCa93j40NNCqvfDV9v62dnNv76XSUpvBEKaagpPkkf//ujw84rYVD7E0rauogBB2VFQau7oZl+v05n9IgoKMly45zebBVm3budLWkjO0w9546DBBCaXBwZDjJAEB/W1aQkRNycqq3Po5JiD7NRpKKjX39jYcOiyPjqratbslP5+ghOXbtjUcOTo5MxMnCAzHO6urq7/e5RsRrjl1qm7fN5bBwYDo6HOffVa3f78kMCg+Pb1482anxZK2+okgpfLc1q2mdh1BUYSAPP/Fl4TYp1+jOb9tW79WGzZlyvmdO5uPHLVbraRQWPXVdsvAQPDEifCKdHfrAuvGf9QPw7D6I0dDJ0yQx0QbdLrjG95MvW/ZuX//O+OFPzWdONF2uoRhWNvgIACQIEmX1dpU8B0pFFoHBnSVFfHp82sPHWorK01eendEcvI3zz/vFxraXV+XmJHR29wsCw/zj4jk3Awlkw11durKy2Jnz67cvuP2NX84+++t3XV1oUlJ3TW1vU3NfeqWxKys+qNHMAASMzObTpyMn5eG4XhZXt5vX3uNpCh1UbHLZnVZrd21dZREIlMoQiZP5liWdjiMXd0Oo1FXXhYUp6z6epfEz8880B87axbrdhMCQfOJE9EzZgAINUVFA5cuiaTS7travhY163bbDAZ9bW3Ubbdpz5wR+8lT7lkaFBeHYRjLMN01tdrCIhZy7WXlsXPmaE6f1tfVhSYmYjghDQqKSEku/PDDu996U+jj47LZNKdOJy5eXHvoUGBcnPpkoW1oqLu+LkylunTxYk9DIykU+kVEtJWVa06dEvmI9Q0NiRkZvHO8deWGGwz0MBxnnM6BNq0sOtpptvQ0NysSJrksFrfTqW9qcjuchFA49Xe/lUdGuixWt90hlvsBCGLnzQtPSZYEBMqjo8T+cgCBpavLMWQkRVRATPTtf/gDAMDa3283GrvqamNmzyIEAoIkhDJZXNpct9PReupUYFysb2iIprCoo6oqZHIi5LiOygqZQuGm6dCkJFIoFPv7E0KhWCY7+89PtGfPOs3mnvqGxvzjYrkfRuAMTVv6+1k33XXhYktxsY+/XBIUFDVjOoRsaGpq0n9lVe3ajZMkAGDo0iVKKi3evNlhtUkDAq19/dIgBYZhSUuWyMMjgiZMEMnlspAQS18v63ZXf/utw2zuU6vLtuVxAgLDcbHcL2jCBLGfL0bgxkudHecrQyYlAAACY+NOvvOOuri47ey5wLhYiSIIQliWl+dw2CmZDHBc1IzppIjyCfB3O50dVVXhqimQ5fyjoxesWfMLkBtujjNlmPbSMpfVQkmlATExiF06TCZzT0/c3Lkd5eXigECZIshlt3Nud3BCQntZGYbjQUqly2oT+ogZmqZ8fDpKy6LT5jpMJoOmNWL6NLFcbh8a6mtuFsnl8vBw68AAJZHYTaaQhISB1tYBjWZSRobLZusoKxcHBvhHx1Tv3l139MjCdesCYmJkwcGmrq6QxEQAgMtm054+7RMQEDZFpSsvE8pkfmFhAEJKJuupbwibquqoqBD5+gYqlfZBg2LihI6KCpZhTHo9S7tnLM/mWLa3qSkkMbG3scluGFQkTHKazUHxyrazZ0VyuUyhQNycEAicZnNvS4u+rn7Rc89CjrtUVQU5LkippB0OH7ncbjTKw8PVRcVCqTR6xnSSoliGaS0uJigqMDYWZe04hnGYTHaDITghwWmxyEJCTN3dhEBw4etdrefOPrx1K223D7aow6dP9/GXDy9yGf/V5Bu2kcO4oKWvr/vCBWlYeETy1JsyOHKCt8Lz9jY3m3UdQYmT/KOjf0kC6U0LKll2xPifj7G/1whw/HLcfuUdOIyPz3H8sh6G45dH4CuFroyJBkRlIHwHzKMECPAX5XORKIBHisaVyBdeifuuugSOI7kEJ4jvE89Xun0vH1w9lCcr8JoQ/Ep/cOUscOUleHhF9/KsXwIe5cueT3GVVHb17/mMW6yf1owh9GC/ukwUAvT1PNo4sMbbTxPdj0/BePsp2v8C3dH/hYlQKVYAAAAASUVORK5CYII=" alt="Tjitra" style="height:18px;width:auto;opacity:.7"></div>
+    </div>
+    <div class="footer-attr">Designed by Tjitra &nbsp;·&nbsp; Powered by IWDemy</div>
+    <div class="footer-links">
+      <a href="https://sinau.tech" target="_blank">sinau.tech</a>
+      <span style="color:var(--bd)">·</span>
+      <a href="https://aifirst26.iwdemy.com" target="_blank">aifirst26.iwdemy.com</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const PERSONAS = {
+  corporate: {
+    label: 'Corporate Leader',
+    prompt: 'Review email ini sebelum saya kirim ke Finance Director.',
+    ci: `Saya [NAMA], [JABATAN] di perusahaan [INDUSTRI].
+Audience utama: board, C-suite, klien korporat.
+
+Cara kerja: keputusan dengan data tidak lengkap adalah hal biasa. Judgment adalah bagian dari pekerjaan saya.
+
+Yang saya minta:
+→ Langsung ke risiko paling kritis — bukan daftar lengkap
+→ Review komunikasi: fokus risiko makna dan kejelasan pesan, bukan grammar
+→ Tunjukkan asumsi tersembunyi dalam tulisan atau keputusan saya
+
+Jangan: feedback generic, lebih dari satu pertanyaan sekaligus, basa-basi pembuka.`,
+    before: `Email Anda sudah cukup baik. Beberapa saran:
+• Gunakan kalimat yang lebih formal
+• Paragraf kedua bisa diperpendek
+• Pastikan tidak ada typo
+• Tambahkan salam penutup yang sopan`,
+    after: `Satu hal sebelum kirim: "kami akan selesaikan bulan ini" bisa dibaca sebagai komitmen oleh Finance. Ganti ke "kami targetkan" kalau timeline belum pasti.
+
+Tone sudah tepat. Yang kurang: tidak ada pesan jelas di akhir — penerima tidak tahu perlu reply, approve, atau hanya FYI.
+
+Mau saya revisi langsung?`
+  },
+  yayasan: {
+    label: 'Kepala Yayasan',
+    prompt: 'Bantu saya tulis laporan perkembangan untuk donatur utama.',
+    ci: `Saya [NAMA], Kepala Yayasan dengan [X] unit sekolah.
+Saya kelola kepala sekolah — bukan guru langsung.
+Stakeholder: donatur, Dinas Pendidikan, orang tua, board yayasan.
+
+Posisi saya: misi pendidikan sekaligus keberlanjutan finansial. Keduanya tidak bisa dikompromikan.
+
+Yang saya minta:
+→ Komunikasi ke donor/board: dampak nyata, bukan daftar aktivitas
+→ Keputusan/kebijakan: tunjukkan implikasi ke kepala sekolah di lapangan
+→ Singkat — saya koordinasi banyak hal sekaligus
+
+Jangan: solusi yang bagus di atas kertas tapi tidak bisa dijalankan kepala sekolah.`,
+    before: `Laporan Perkembangan Program
+
+Dengan bangga kami melaporkan kegiatan yang telah terlaksana:
+• Pelatihan guru: 12 sesi
+• Renovasi kelas: 3 unit sekolah
+• Penerima beasiswa: 45 siswa
+
+Terima kasih atas kepercayaan Bapak/Ibu donatur...`,
+    after: `Sebelum draft — data dampak apa yang tersedia?
+
+Jumlah sesi pelatihan bukan yang paling kuat untuk donatur. Yang lebih persuasif: angka hasil — nilai ujian naik, angka kelulusan, siswa lanjut ke jenjang berikutnya.
+
+Kalau datanya ada, saya tulis: satu dampak konkret → apa yang membuatnya terjadi → rencana ke depan.
+
+Donatur butuh bukti uangnya bekerja — bukan bukti kita sibuk. Data terkuat yang ada?`
+  },
+  owner: {
+    label: 'Business Owner',
+    prompt: 'Perlu hire karyawan baru atau tidak?',
+    ci: `Saya [NAMA], founder/pemilik [NAMA BISNIS] di bidang [INDUSTRI].
+Tim saya [JUMLAH] orang. Pengambil keputusan tunggal — tidak ada approval layer.
+
+Cara kerja: cepat, langsung, pragmatis. Saya butuh clarity, bukan comprehensiveness.
+
+Yang saya minta:
+→ Saran yang bisa dijalankan minggu ini — bukan best practice korporat
+→ Analisis: fokus ke impact bisnis saya, bukan teori umum
+→ Ada dua pilihan? Bantu saya pilih — jangan sajikan keduanya tanpa rekomendasi
+
+Jangan: saran yang butuh tim besar untuk dieksekusi.`,
+    before: `Berikut faktor yang perlu dipertimbangkan dalam keputusan hiring:
+1. Analisis kebutuhan dan beban kerja saat ini
+2. Evaluasi kapasitas finansial perusahaan
+3. Pertimbangan pertumbuhan jangka panjang
+4. Assessment budaya organisasi
+
+Disarankan melakukan workforce planning terlebih dahulu...`,
+    after: `Tiga pertanyaan dulu:
+1. Pekerjaan tidak selesai karena kapasitas — atau proses yang kurang efisien?
+2. Revenue yang hilang per bulan karena tidak bisa handle lebih = berapa?
+3. Kalau hire, break-even-nya di bulan keberapa?
+
+Kalau nomor 2 > cost hire dan nomor 3 < 6 bulan → hire.
+Kalau tidak → perbaiki proses dulu.
+
+Angkanya ada?`
+  },
+  admin: {
+    label: 'Admin Leader',
+    prompt: 'Buat undangan rapat Senin jam 9, agenda review budget Q3, untuk semua kepala departemen.',
+    ci: `Saya [NAMA], [EA / Senior Admin / Office Manager] untuk [JABATAN YANG DIDUKUNG].
+Saya produce dokumen dan komunikasi yang langsung siap kirim atau cetak.
+
+Yang saya minta:
+→ Satu draft terbaik langsung — bukan pilihan atau outline
+→ Format bersih, minimal [ISIAN] yang tersisa
+→ Kalau perlu tanya sesuatu, tanya setelah draft jadi
+
+Jangan: template terlalu generik, bahasa kaku, lebih dari dua pertanyaan sekaligus.`,
+    before: `Kepada Yth.
+Bapak/Ibu Kepala Departemen
+
+Dengan hormat, bersama ini kami mengundang Bapak/Ibu untuk hadir dalam rapat:
+Hari/Tanggal: Senin, [tanggal]
+Waktu: 09.00 WIB
+Tempat: [lokasi]
+Agenda: Review Budget Q3
+
+Atas perhatian Bapak/Ibu, kami ucapkan terima kasih.
+[Nama]`,
+    after: `UNDANGAN RAPAT — Review Budget Q3
+Senin, [tanggal] · 09.00–10.00 WIB · [Ruang/Link]
+
+Kepada seluruh Kepala Departemen,
+
+Mohon hadir dalam rapat review budget Q3.
+Siapkan update realisasi anggaran departemen per akhir Juli.
+
+Konfirmasi ke [nama/kontak] paling lambat Jumat ini.
+
+Salam, [Pengirim]
+
+---
+Tinggal isi: tanggal, ruang, dan kontak konfirmasi.
+Perlu lampirkan template realisasi anggaran?`
+  }
+};
+
+let curPersona = 'corporate';
+
+function selectPersona(key, el) {
+  curPersona = key;
+  const p = PERSONAS[key];
+  document.querySelectorAll('.ppill').forEach(b => b.classList.remove('on'));
+  if (el) el.classList.add('on');
+  document.getElementById('ci-text').textContent = p.ci;
+  document.getElementById('ba-prompt').textContent = p.prompt;
+  document.getElementById('ba-prompt2').textContent = p.prompt;
+  document.getElementById('ba-before-txt').textContent = p.before;
+  document.getElementById('ba-after-txt').textContent = p.after;
+  document.getElementById('ba-ctx').textContent = 'tidak ada custom instructions';
+  const btn = document.getElementById('ci-copy-btn');
+  btn.textContent = 'Salin';
+  btn.className = 'copy-btn';
+}
+
+// Nav active via Intersection Observer — accurate section tracking
+const navObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      document.querySelectorAll('.mnav').forEach(a => {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+['m1','m2','m3','m4'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) navObserver.observe(el);
+});
+
+// Sync bottom-nav active state
+const syncBottomNav = (id) => {
+  document.querySelectorAll('.bottom-nav-item').forEach(a => {
+    a.classList.toggle('active', a.dataset.target === id);
+  });
+};
+const bottomNavObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => { if (entry.isIntersecting) syncBottomNav(entry.target.id); });
+}, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+['m1','m2','m3','m4'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) bottomNavObserver.observe(el);
+});
+
+// ─── Sub-nav accordion (IFP) + chip strip active state ───────────
+const sectionMap = {
+  'm1-why':1,'m1-where':1,'m1-example':1,'m1-framework':1,'m1-power':1,'m1-template':1,
+  'm2-why':2,'m2-where':2,'m2-example':2,'m2-grow':2,'m2-ba':2,
+  'm3-why':3,'m3-tpl':3,'m3-conn':3,'m3-memory':3,
+  'm4-week1':4
+};
+
+// Open sub-nav group for active module
+function openSubnav(modId) {
+  ['m1','m2','m3','m4'].forEach(m => {
+    const g = document.getElementById('subnav-' + m);
+    if (g) g.classList.toggle('open', m === modId);
+  });
+}
+// Init: open m1
+openSubnav('m1');
+
+// Observe module sections
+const mainNavObserver2 = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) openSubnav(entry.target.id);
+  });
+}, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+['m1','m2','m3','m4'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) mainNavObserver2.observe(el);
+});
+
+// Observe slabel sections for chip + snavlink active
+const allSections = Object.keys(sectionMap);
+const secObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const id = entry.target.id;
+    // Update snavlinks
+    document.querySelectorAll('.snavlink').forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+    });
+    // Update chips in same module
+    const modNum = sectionMap[id];
+    if (modNum) {
+      const chips = document.querySelectorAll('#chips-m' + modNum + ' .chip');
+      chips.forEach(c => {
+        c.classList.toggle('active', c.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { rootMargin: '-15% 0px -75% 0px', threshold: 0 });
+
+allSections.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) secObserver.observe(el);
+});
+
+function copyCi(btn) {
+  navigator.clipboard.writeText(document.getElementById('ci-text').textContent).then(() => {
+    btn.textContent = 'Tersalin';
+    btn.classList.add('done');
+    setTimeout(() => { btn.textContent = 'Salin'; btn.className = 'copy-btn'; }, 2000);
+  });
+}
+
+function copyTpl(btn, id) {
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+    btn.textContent = 'Tersalin';
+    btn.classList.add('done');
+    setTimeout(() => { btn.textContent = 'Salin'; btn.className = 'copy-btn'; }, 2000);
+  });
+}
+
+function toggleStep(el) { el.classList.toggle('checked'); }
+// ─── Floating Progress Sync ───────────────────────────────
+(function(){
+  const fpDots = document.querySelectorAll('#float-progress .fp-dot');
+  if (!fpDots.length) return;
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        fpDots.forEach(d => d.classList.toggle('active', d.getAttribute('data-mod') === id));
+      }
+    });
+  }, { rootMargin:'-20% 0px -70% 0px', threshold:0 });
+  ['m1','m2','m3','m4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) obs.observe(el);
+  });
+})();
+
+
+window.addEventListener('DOMContentLoaded', () => {
+  selectPersona('corporate', document.querySelector('.ppill.on'));
+  const modules = ['m1','m2','m3','m4'];
+  const navLinks = document.querySelectorAll('.mnav');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
+      }
+    });
+  }, {threshold: 0.25});
+  modules.forEach(id => { const el = document.getElementById(id); if(el) obs.observe(el); });
+});
+</script>
+</div><!-- .page-content -->
+
+<!-- HP BOTTOM NAV -->
+<nav class="bottom-nav" id="bottom-nav">
+  <a class="bottom-nav-item active" href="#m1" data-target="m1">
+    <span class="bottom-nav-icon"><span class="bn-dot bn-dot-1"></span></span>
+    <span class="bottom-nav-lbl">Instructions</span>
+  </a>
+  <a class="bottom-nav-item" href="#m2" data-target="m2">
+    <span class="bottom-nav-icon"><span class="bn-dot bn-dot-2"></span></span>
+    <span class="bottom-nav-lbl">Projects</span>
+  </a>
+  <a class="bottom-nav-item" href="#m3" data-target="m3">
+    <span class="bottom-nav-icon"><span class="bn-dot bn-dot-3"></span></span>
+    <span class="bottom-nav-lbl">Templates</span>
+  </a>
+  <a class="bottom-nav-item" href="#m4" data-target="m4">
+    <span class="bottom-nav-icon"><span class="bn-dot bn-dot-4"></span></span>
+    <span class="bottom-nav-lbl">Synthesis</span>
+  </a>
+</nav>
+
+</body>
+</html>
