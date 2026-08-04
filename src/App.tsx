@@ -20,13 +20,13 @@ import aifPkmHtml from '../materi/Prompt day2/aif-pkm-level2-day2.html?raw';
 import aifWritingHtml from '../materi/Prompt day2/aif-writing-level2-day2.html?raw';
 import level3Day1Html from './Level 3/Level 3 day 1.html?raw';
 import level3Day1_1Html from './Level 3/Level 3 day 1.1.html?raw';
-import twcHtml1 from '../ThinkingWithClaude/02 setup-claude-modul 1.html?raw';
-import twcHtml2 from '../ThinkingWithClaude/01 thinking-with-claude-ai.html?raw';
+import twcHtml1 from '../ThinkingWithClaude/setup.html?raw';
+import twcHtml2 from '../ThinkingWithClaude/thinking.html?raw';
 import aptAssessmentHtml from './Strategize/apt-assessment.html?raw';
-import stratImg1 from './Strategize/image (1).png';
-import stratImg2 from './Strategize/image (2).png';
-import stratImg3 from './Strategize/image (3).png';
-import stratImg4 from './Strategize/image (4).png';
+import stratImg1 from './Strategize/image1.png';
+import stratImg2 from './Strategize/image2.png';
+import stratImg3 from './Strategize/image3.png';
+import stratImg4 from './Strategize/image4.png';
 
 function Eyebrow({ children, variant = 'light' }: { children: ReactNode, variant?: 'light' | 'dark' | 'flat' }) {
   return (
@@ -951,7 +951,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
     const tier = sinadAccess.tier; // This is the user's tier for the portal
 
 
-    if (moduleId === '01') return true; // Strategize available to all
+    if (moduleId === '01') return true; // Strategize available to all, including TWC
     
     if (moduleId === '02') { // Prompt
       return tier === 'Professional' || tier === 'Leaders' || tier === 'Internal';
@@ -1568,8 +1568,14 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   <iframe src={selectedHtmlData.htmls[selectedHtmlData.activeIndex].url} className="w-full h-full min-h-[70vh] border-0" title="Materi" />
                 ) : selectedHtmlData.htmls[selectedHtmlData.activeIndex].images ? (
                   <div className="w-full h-full min-h-[70vh] overflow-auto p-4 bg-[#F6F4EF] flex flex-col items-center gap-6">
+                    {selectedHtmlData.htmls[selectedHtmlData.activeIndex].images?.length === 0 && (
+                      <div className="p-8 text-black">Images array is empty!</div>
+                    )}
                     {selectedHtmlData.htmls[selectedHtmlData.activeIndex].images?.map((img, idx) => (
-                      <img key={idx} src={img} className="max-w-full rounded-lg shadow-md" alt="Materi" />
+                      <div key={idx} className="w-full flex justify-center">
+                        {!img && <div className="text-red-500">Image {idx} is undefined!</div>}
+                        {img && <img src={typeof img === 'object' ? (img as any).default || img : img} className="max-w-full rounded-lg shadow-md" alt={`Materi ${idx + 1}`} />}
+                      </div>
                     ))}
                   </div>
                 ) : (
