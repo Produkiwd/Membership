@@ -1221,7 +1221,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Module 01 - Strategize */}
             {canAccessModule("01") ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", [{ title: "Materi Sesi Penuh", htmls: [{ title: "Materi Visual", images: ['/1.png', '/2.png', '/3.png', '/4.png'] }, { title: "APT Assessment", content: aptAssessmentHtml }] }])}>
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", [{ title: "Materi Sesi Penuh", htmls: [{ title: "Materi Visual", images: ['/Strategize/1.png', '/Strategize/2.png', '/Strategize/3.png', '/Strategize/4.png'] }, { title: "APT Assessment", content: aptAssessmentHtml }] }])}>
                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">01</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Strategize</div>
