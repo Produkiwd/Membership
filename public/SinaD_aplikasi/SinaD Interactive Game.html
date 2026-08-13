@@ -12,6 +12,7 @@
   
   <!-- CDN Scripts for Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <style>
     /* ── TOKENS & SYSTEM VARIABLES (LIGHT MODE PREMIUM) ── */
@@ -1183,10 +1184,12 @@
   </div>
 
   <script>
-    /* ===== OPENROUTER AI CONFIGURATION ===== */
-    let API_KEY = sessionStorage.getItem("openrouterApiKey") || "";
-    const API_URL = "https://openrouter.ai/api/v1/chat/completions";
-    const AI_MODEL = "google/gemini-2.5-flash"; // Cheapest and highly accurate multimodal model
+    /* ===== SECURE AI CONFIGURATION (SUPABASE EDGE FUNCTION) ===== */
+    const SUPABASE_URL = "https://uyqgionbubycyfdmweai.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_sIwVmVabfvh8s2aTIXpzUQ_p_JkiGLL";
+    const sinadSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
+    });
 
     /* ===== GAME CONFIGURATION & DATABASE ===== */
     const DB_TARGETS = {
@@ -1745,98 +1748,49 @@
       
       if (!canvas || !targetObj) return;
 
-      if (!API_KEY) {
-        const enteredKey = window.prompt("Masukkan OpenRouter API key untuk penilaian AI sesi ini:");
-        if (!enteredKey) {
-          alert("Penilaian AI dibatalkan karena API key belum diisi.");
-          return;
-        }
-        API_KEY = enteredKey.trim();
-        sessionStorage.setItem("openrouterApiKey", API_KEY);
-      }
-
       if (loader) loader.classList.add('active');
 
-      // Customize prompt grading strictness based on selectedDifficulty level
-      let difficultyPromptRule = "";
-      if (selectedDifficulty === 'easy') {
-        difficultyPromptRule = `Kamu sangat ramah dan sangat toleran. Jika ada kemiripan siluet dasar, bentuk garis melengkung sederhana, atau goresan yang sekilas menyerupai '${targetObj}', berikan kelulusan (matched: true).`;
-      } else if (selectedDifficulty === 'medium') {
-        difficultyPromptRule = `Kamu adil dan seimbang. Gambar harus memiliki bentuk dasar dan elemen penting yang dikenali secara umum sebagai '${targetObj}'. Jangan loloskan coretan asal-asalan yang tidak membentuk objek.`;
-      } else {
-        // PRO / Mirip Banget (Strict mode)
-        difficultyPromptRule = `Kamu adalah juri yang SANGAT KETAT, DETAIL, DAN TELITI. Gambar harus benar-benar mirip, proporsional, dan merepresentasikan '${targetObj}' dengan jelas dan bagus. Jangan loloskan coretan asal-asalan, garis acak tidak jelas, atau gambar yang terlalu kasar/abstrak. Jika tidak mirip atau terlalu sederhana, kembalikan 'matched: false' dan berikan kritik ramah tentang apa yang kurang agar siswa dapat memperbaiki gambarnya.`;
-      }
-
       try {
+        const { data: sessionData, error: sessionError } = await sinadSupabase.auth.getSession();
+        const session = sessionData?.session;
+        if (sessionError || !session?.access_token) {
+          throw new Error("Sesi login tidak ditemukan. Tutup game, login kembali ke portal, lalu coba lagi.");
+        }
+
         const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
 
-        const response = await fetch(API_URL, {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/openrouter-vision`, {
           method: "POST",
           headers: {
-            "Authorization": `Bearer ${API_KEY}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://insightwebacademy.com",
-            "X-Title": "SinD Interactive Game"
+            "Authorization": `Bearer ${session.access_token}`,
+            "apikey": SUPABASE_PUBLISHABLE_KEY,
+            "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            model: AI_MODEL,
-            messages: [
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "text",
-                    text: `Kamu adalah juri game edukasi. Gambar/sketsa putih di atas latar belakang hitam di bawah ini diklaim oleh siswa sebagai gambar '${targetObj}'. 
-                    Tolong nilai apakah coretan/gambar tersebut cukup menyerupai objek '${targetObj}' tersebut. 
-                    Aturan penilaian: ${difficultyPromptRule}
-                    Kembalikan respon HANYA dalam format JSON murni: {"matched": true/false, "feedback": "umpan balik pendek dalam bahasa Indonesia yang ramah"}.`
-                  },
-                  {
-                    type: "image_url",
-                    image_url: {
-                      url: dataUrl
-                    }
-                  }
-                ]
-              }
-            ],
-            response_format: { "type": "json_object" }
+            target: targetObj,
+            difficulty: selectedDifficulty,
+            imageDataUrl: dataUrl
           })
         });
 
         const data = await response.json();
-        
         if (loader) loader.classList.remove('active');
 
-        if (data.choices && data.choices[0] && data.choices[0].message) {
-          const replyText = data.choices[0].message.content.trim();
-          console.log("AI Vision Response:", replyText);
-          
-          let result;
-          try {
-            result = JSON.parse(replyText);
-          } catch (e) {
-            const cleanJson = replyText.replace(/```json|```/g, "").trim();
-            result = JSON.parse(cleanJson);
-          }
+        if (!response.ok) {
+          throw new Error(data.error || "Layanan penilaian AI sedang tidak tersedia.");
+        }
 
-          if (result.matched) {
-            handleTargetGuessedSuccess(pId, result.feedback);
-          } else {
-            playBeep('fail');
-            window.alert(`Evaluasi AI (${selectedDifficulty.toUpperCase()}): ${result.feedback || "Gambar kurang mirip dengan " + targetObj + ". Silakan hapus kanvas dan coba gambar lagi!"}`);
-          }
+        if (data.matched) {
+          handleTargetGuessedSuccess(pId, data.feedback);
         } else {
-          throw new Error("Invalid API response format");
+          playBeep('fail');
+          window.alert(`Evaluasi AI (${selectedDifficulty.toUpperCase()}): ${data.feedback || "Gambar kurang mirip dengan " + targetObj + ". Silakan hapus kanvas dan coba gambar lagi!"}`);
         }
 
       } catch (err) {
-        console.error("OpenRouter Vision Evaluation Error:", err);
+        console.error("AI Vision Evaluation Error:", err);
         if (loader) loader.classList.remove('active');
-        
-        console.log("Simulating matching fallback...");
-        handleTargetGuessedSuccess(pId, "Bagus! Gambar sketsa Anda terlihat menyerupai " + targetObj + "!");
+        window.alert(err.message || "Penilaian AI gagal. Silakan coba lagi.");
       }
     }
 
