@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LucideIcon, ArrowRight, ChevronDown, MonitorUp, BookOpen, Presentation, Sparkles, ExternalLink, Users, BrainCircuit, Compass, ClipboardCheck, FileQuestion, PenTool, Hand, ScreenShare } from 'lucide-react';
+import { LucideIcon, ArrowRight, MonitorUp, BookOpen, Presentation, Sparkles, ExternalLink, Users, BrainCircuit, Compass, ClipboardCheck, FileQuestion, PenTool, Hand, ScreenShare } from 'lucide-react';
 
 export default function SinadPortal() {
   const [activePage, setActivePage] = useState<'home' | 'materials' | 'apps'>('home');
@@ -48,7 +48,7 @@ export default function SinadPortal() {
         #sinad-ecosystem .se-video-wall { position: absolute; inset: 0; z-index: -3; overflow: hidden; background: var(--se-blue-dark); }
         #sinad-ecosystem .se-site-video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: contain; object-position: center; }
         #sinad-ecosystem .se-site-overlay { position: absolute; inset: 0; z-index: -2; background: linear-gradient(180deg, rgba(245,248,250,.84), rgba(245,248,250,.93) 45%, rgba(245,248,250,.88)); pointer-events: none; }
-        #sinad-ecosystem .se-topbar { min-height: 68px; padding: 0 26px; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 26px; background: var(--se-surface); border-bottom: 1px solid var(--se-border); }
+        #sinad-ecosystem .se-topbar { min-height: 68px; padding: 0 26px; display: grid; grid-template-columns: 1fr; align-items: center; background: var(--se-surface); border-bottom: 1px solid var(--se-border); }
         #sinad-ecosystem .se-logo { display: flex; align-items: center; gap: 8px; font-weight: 500; letter-spacing: -.03em; font-size: 18px; }
         #sinad-ecosystem .se-logo-dot { width: 8px; height: 8px; background: var(--se-gold); border-radius: 50%; }
         #sinad-ecosystem .se-nav { display: flex; justify-content: center; gap: 4px; }
@@ -196,9 +196,8 @@ export default function SinadPortal() {
         #sinad-ecosystem .se-ai-mark svg { width: 20px; height: 20px; }
         #sinad-ecosystem .se-page-head .se-eyebrow { color: var(--se-blue); }
         @media (max-width: 800px) {
-          #sinad-ecosystem .se-topbar { grid-template-columns: auto 1fr; padding: 0 18px; }
-          #sinad-ecosystem .se-nav { order: 3; grid-column: 1 / -1; justify-content: flex-start; overflow-x: auto; padding-bottom: 9px; }
-          #sinad-ecosystem .se-user { justify-self: end; }
+          #sinad-ecosystem .se-topbar { padding: 0 18px; }
+          #sinad-ecosystem .se-nav { justify-content: flex-start; overflow-x: auto; }
           #sinad-ecosystem .se-main { padding: 23px 17px 32px; }
           #sinad-ecosystem .se-hero, #sinad-ecosystem .se-layout { grid-template-columns: 1fr; }
           #sinad-ecosystem .se-partners { grid-template-columns: repeat(2,1fr); }
@@ -206,7 +205,6 @@ export default function SinadPortal() {
           #sinad-ecosystem .se-ifp-strip { grid-template-columns: 1fr; }
         }
         @media (max-width: 480px) {
-          #sinad-ecosystem .se-user-copy { display: none; }
           #sinad-ecosystem .se-welcome { padding: 21px; }
           #sinad-ecosystem .se-course { grid-template-columns: 38px 1fr; }
           #sinad-ecosystem .se-course-state { grid-column: 2; }
@@ -220,17 +218,11 @@ export default function SinadPortal() {
         </div>
         <div className="se-site-overlay" aria-hidden="true"></div>
         <header className="se-topbar">
-          <div className="se-logo">SinaD <span className="se-logo-dot" aria-hidden="true"></span></div>
           <nav className="se-nav" aria-label="Navigasi utama">
             <button type="button" className={activePage === 'home' ? 'is-current' : ''} onClick={() => setActivePage('home')}>Beranda</button>
             <button type="button" className={activePage === 'materials' ? 'is-current' : ''} onClick={() => setActivePage('materials')}>Materi</button>
             <button type="button" className={activePage === 'apps' ? 'is-current' : ''} onClick={() => setActivePage('apps')}>Aplikasi AI</button>
           </nav>
-          <div className="se-user">
-            <div className="se-avatar">ST</div>
-            <div className="se-user-copy"><strong>Stephen</strong><span>Peserta pelatihan</span></div>
-            <ChevronDown className="w-4 h-4" aria-hidden="true" />
-          </div>
         </header>
 
         <main className="se-main">
