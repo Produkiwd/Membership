@@ -23,6 +23,7 @@ import level3Day1_1Html from './Level 3/Level 3 day 1.1.html?raw';
 import twcHtml1 from '../ThinkingWithClaude/setup.html?raw';
 import twcHtml2 from '../ThinkingWithClaude/thinking.html?raw';
 import aptAssessmentHtml from './Strategize/apt-assessment.html?raw';
+import SinadPortal from './components/SinadPortal';
 
 function Eyebrow({ children, variant = 'light' }: { children: ReactNode, variant?: 'light' | 'dark' | 'flat' }) {
   return (
@@ -1671,109 +1672,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
             )}
 
             {currentPortal === 'sinad' && (
-              <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
-                <Eyebrow variant="flat">SinaD Learning</Eyebrow>
-                <div className="h-6"></div>
-                <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-12">
-                  SinaD Portal
-                </h1>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Materi Access */}
-                  {(sinadAccess.tier === 'Teacher' || (sinadAccess.tier === 'Student' && sinadAccess.materi) || isAdmin) ? (
-                    <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-center gap-3 mb-4">
-                           <BookOpen className="w-6 h-6 text-gold" />
-                           <div className="font-sans font-bold text-2xl text-light-hi">Materi</div>
-                        </div>
-                        <p className="font-body text-sm text-light-md mt-4">Akses semua materi pembelajaran yang tersedia di platform SinaD.</p>
-                      </div>
-                      <div className="mt-8 flex flex-col gap-3">
-                        <button onClick={() => setIframeModalUrl({ url: '/SinaD support.html', title: 'Materi 1' })} className="flex w-full items-center justify-between p-4 rounded-lg border border-border-light-subtle bg-bg-light hover:border-gold/30 group transition-colors text-left">
-                          <span className="font-sans font-semibold text-light-hi group-hover:text-gold transition-colors">Materi 1</span>
-                          <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
-                        </button>
-                        <button onClick={() => {}} className="flex w-full items-center justify-between p-4 rounded-lg border border-border-light-subtle bg-bg-light hover:border-gold/30 group transition-colors text-left opacity-50 cursor-not-allowed">
-                          <span className="font-sans font-semibold text-light-hi group-hover:text-gold transition-colors">Materi 2</span>
-                          <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-center gap-3 mb-4">
-                           <Lock className="w-6 h-6 text-light-lo" />
-                           <div className="font-sans font-bold text-2xl text-light-md">Materi</div>
-                        </div>
-                        <p className="font-body text-sm text-light-md mt-4">Anda belum memiliki akses ke materi. Hubungi pengajar Anda.</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Exercise Access */}
-                  {(sinadAccess.tier === 'Teacher' || (sinadAccess.tier === 'Student' && sinadAccess.exercise) || isAdmin) ? (
-                    <a href="https://papan-penilaian-sinad.ai.studio" target="_blank" rel="noopener noreferrer" className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
-                      <div>
-                        <div className="flex items-center gap-3 mb-4">
-                           <FileText className="w-6 h-6 text-gold" />
-                           <div className="font-sans font-bold text-2xl text-light-hi group-hover:text-gold transition-colors">Exercise</div>
-                        </div>
-                        <p className="font-body text-sm text-light-md mt-4">Kerjakan latihan soal dan ujian kompetensi Anda di sini.</p>
-                      </div>
-                      <div className="mt-8 flex justify-end">
-                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
-                      </div>
-                    </a>
-                  ) : (
-                    <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-center gap-3 mb-4">
-                           <Lock className="w-6 h-6 text-light-lo" />
-                           <div className="font-sans font-bold text-2xl text-light-md">Exercise</div>
-                        </div>
-                        <p className="font-body text-sm text-light-md mt-4">Anda belum memiliki akses ke latihan soal. Hubungi pengajar Anda.</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Informasi Interaktif Flat Panel (IFP) */}
-                  <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center gap-3 mb-4">
-                         <Monitor className="w-6 h-6 text-gold" />
-                         <div className="font-sans font-bold text-2xl text-light-hi">Informasi Interaktif Flat Panel (IFP)</div>
-                      </div>
-                      <p className="font-body text-sm text-light-md mt-4">Panduan, spesifikasi, dan informasi terkini mengenai Interaktif Flat Panel (IFP).</p>
-                    </div>
-                    <div className="mt-8 flex flex-col gap-3">
-                      <button onClick={() => setIframeModalUrl({ url: '/ifp-panduan.html', title: 'Buku Panduan IFP' })} className="flex w-full items-center justify-between p-4 rounded-lg border border-border-light-subtle bg-bg-light hover:border-gold/30 group transition-colors text-left">
-                        <span className="font-sans font-semibold text-light-hi group-hover:text-gold transition-colors">Buku Panduan IFP</span>
-                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
-                      </button>
-                      <button onClick={() => setIframeModalUrl({ url: '/ifp-spesifikasi.html', title: 'Spesifikasi IFP' })} className="flex w-full items-center justify-between p-4 rounded-lg border border-border-light-subtle bg-bg-light hover:border-gold/30 group transition-colors text-left">
-                        <span className="font-sans font-semibold text-light-hi group-hover:text-gold transition-colors">Spesifikasi IFP</span>
-                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Informasi AI */}
-                  <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
-                    <div>
-                      <div className="flex items-center gap-3 mb-4">
-                         <Sparkles className="w-6 h-6 text-gold" />
-                         <div className="font-sans font-bold text-2xl text-light-hi group-hover:text-gold transition-colors">Informasi AI</div>
-                      </div>
-                      <p className="font-body text-sm text-light-md mt-4">Pelajari perkembangan terbaru dan wawasan seputar teknologi Artificial Intelligence (AI).</p>
-                    </div>
-                    <div className="mt-8 flex justify-end">
-                      <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
-                    </div>
-                  </div>
-                </div>
-              </main>
+              <SinadPortal />
             )}
 
             {/* Generic Iframe Modal */}
