@@ -23,7 +23,13 @@ import level3Day1_1Html from './Level 3/Level 3 day 1.1.html?raw';
 import twcHtml1 from '../ThinkingWithClaude/setup.html?raw';
 import twcHtml2 from '../ThinkingWithClaude/thinking.html?raw';
 import aptAssessmentHtml from './Strategize/apt-assessment.html?raw';
+import strategizeImage1 from '../Strategize/1.png';
+import strategizeImage2 from '../Strategize/2.png';
+import strategizeImage3 from '../Strategize/3.png';
+import strategizeImage4 from '../Strategize/4.png';
 import SinadPortal from './components/SinadPortal';
+
+const strategizeImages = [strategizeImage1, strategizeImage2, strategizeImage3, strategizeImage4];
 
 function Eyebrow({ children, variant = 'light' }: { children: ReactNode, variant?: 'light' | 'dark' | 'flat' }) {
   return (
@@ -1222,7 +1228,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Module 01 - Strategize */}
             {canAccessModule("01") ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", [{ title: "Materi Sesi Penuh", htmls: [{ title: "Materi Visual", images: ['/Strategize/1.png', '/Strategize/2.png', '/Strategize/3.png', '/Strategize/4.png'] }, { title: "APT Assessment", content: aptAssessmentHtml }] }])}>
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", [{ title: "Materi Sesi Penuh", htmls: [{ title: "Materi Visual", images: strategizeImages }, { title: "APT Assessment", content: aptAssessmentHtml }] }])}>
                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">01</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Strategize</div>
@@ -1568,15 +1574,11 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                     {selectedHtmlData.htmls[selectedHtmlData.activeIndex].images?.length === 0 && (
                       <div className="p-8 text-black">Images array is empty!</div>
                     )}
-                    {selectedHtmlData.htmls[selectedHtmlData.activeIndex].images?.map((img, idx) => {
-                      console.log("Image", idx, typeof img, img);
-                      return (
-                        <div key={idx} className="w-full flex justify-center">
-                          {!img && <div className="text-red-500">Image {idx} is undefined!</div>}
-                          {img && <img src={typeof img === 'object' ? (img as any).default || img : img} className="max-w-full rounded-lg shadow-md" alt={`Materi ${idx + 1}`} />}
-                        </div>
-                      );
-                    })}
+                    {selectedHtmlData.htmls[selectedHtmlData.activeIndex].images?.map((img, idx) => (
+                      <div key={img} className="w-full flex justify-center">
+                        <img src={img} className="max-w-full rounded-lg shadow-md" alt={`Materi Strategize ${idx + 1}`} />
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <iframe srcDoc={selectedHtmlData.htmls[selectedHtmlData.activeIndex].content} className="w-full h-full min-h-[70vh] border-0" title="Materi" />
