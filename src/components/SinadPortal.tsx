@@ -236,7 +236,7 @@ export default function SinadPortal() {
                   <p className="se-lead">Pelajari penggunaan IFP, rancang aktivitas kelas interaktif, dan manfaatkan AI dalam satu ekosistem pembelajaran guru.</p>
                   <div className="se-actions">
                     <button type="button" className="se-primary" onClick={() => setActivePage('materials')}>Mulai belajar IFP <ArrowRight className="w-4 h-4" aria-hidden="true" /></button>
-                    <button type="button" className="se-secondary" onClick={() => setActivePage('apps')}>Coba Asisten AI</button>
+                    <button type="button" className="se-secondary" onClick={() => setActivePage('apps')}>Coba Digital Teacher</button>
                   </div>
                 </div>
                 <div className="se-ifp-wrap" aria-label="Simulasi tampilan Interactive Flat Panel">
@@ -272,9 +272,19 @@ export default function SinadPortal() {
                     <button type="button" className="se-text-action" onClick={() => setActivePage('materials')}>Lihat semua</button>
                   </div>
                   <div className="se-course-list">
-                    <button type="button" className="se-course" onClick={() => window.open('/SinaD_materi/sinadsj43.html', '_blank')}>
+                    <button type="button" className="se-course" onClick={() => window.open('/SinaD_materi/workshop-ai-pendidik-ifp.html', '_blank')}>
+                      <span className="se-icon"><Presentation aria-hidden="true" /></span>
+                      <span><strong>Workshop AI Pendidik</strong><span className="se-course-info"><span className="se-source">SinaD</span><span>Materi interaktif untuk pendidik</span></span></span>
+                      <span className="se-course-state">Buka →</span>
+                    </button>
+                    <button type="button" className="se-course" onClick={() => window.open('/SinaD_materi/sinad-sj43-ypii-workshop.html', '_blank')}>
                       <span className="se-icon"><MonitorUp aria-hidden="true" /></span>
-                      <span><strong>SinaD 7</strong><span className="se-course-info"><span className="se-source">SinaD</span><span>Materi pembelajaran terbaru</span></span></span>
+                      <span><strong>SinaD SJ 43</strong><span className="se-course-info"><span className="se-source">SinaD</span><span>Simulasi pembelajaran digital</span></span></span>
+                      <span className="se-course-state">Buka →</span>
+                    </button>
+                    <button type="button" className="se-course" onClick={() => window.open('/SinaD_materi/sinad-guru-digital.html', '_blank')}>
+                      <span className="se-icon"><Users aria-hidden="true" /></span>
+                      <span><strong>SinaD Guru Digital</strong><span className="se-course-info"><span className="se-source">SinaD</span><span>Materi kompetensi digital guru</span></span></span>
                       <span className="se-course-state">Buka →</span>
                     </button>
                     <button type="button" className="se-course" onClick={() => window.open('/SinaD_materi/SinaD L 1 - 2.html', '_blank')}>
@@ -300,7 +310,7 @@ export default function SinadPortal() {
               <aside className="se-stack">
                 <section className="se-panel se-ai">
                   <div className="se-ai-mark"><Sparkles aria-hidden="true" /></div>
-                  <h2>Asisten Guru AI</h2>
+                  <h2>Digital Teacher</h2>
                   <p>Buat rancangan pembelajaran dan ide aktivitas kelas lebih cepat melalui AIS.</p>
                   <button type="button" className="se-primary se-ai-button" onClick={() => window.open('https://chatgpt.com/g/g-68a6bdafe47881918b71fa838bba1870-how-who-digital-teacher-berkarya-berkembang', '_blank')}>Buka aplikasi <ExternalLink className="w-4 h-4" aria-hidden="true" /></button>
                 </section>
@@ -333,7 +343,9 @@ export default function SinadPortal() {
               <p className="se-lead">Materi dari Sinad dan berbagai program mitra, tersusun dalam satu katalog.</p>
             </div>
             <div className="se-catalog">
-              <article className="se-catalog-item"><div className="se-thumb"><MonitorUp aria-hidden="true" /></div><div className="se-catalog-body"><span className="se-source">SinaD</span><strong>SinaD 7</strong><p>Materi pembelajaran terbaru.</p><button type="button" onClick={() => window.open('/SinaD_materi/sinadsj43.html', '_blank')}>Mulai belajar →</button></div></article>
+              <article className="se-catalog-item"><div className="se-thumb"><Presentation aria-hidden="true" /></div><div className="se-catalog-body"><span className="se-source">SinaD</span><strong>Workshop AI Pendidik</strong><p>Materi interaktif untuk pendidik.</p><button type="button" onClick={() => window.open('/SinaD_materi/workshop-ai-pendidik-ifp.html', '_blank')}>Mulai belajar →</button></div></article>
+              <article className="se-catalog-item"><div className="se-thumb"><MonitorUp aria-hidden="true" /></div><div className="se-catalog-body"><span className="se-source">SinaD</span><strong>SinaD SJ 43</strong><p>Simulasi pembelajaran digital.</p><button type="button" onClick={() => window.open('/SinaD_materi/sinad-sj43-ypii-workshop.html', '_blank')}>Mulai belajar →</button></div></article>
+              <article className="se-catalog-item"><div className="se-thumb"><Users aria-hidden="true" /></div><div className="se-catalog-body"><span className="se-source">SinaD</span><strong>SinaD Guru Digital</strong><p>Materi kompetensi digital guru.</p><button type="button" onClick={() => window.open('/SinaD_materi/sinad-guru-digital.html', '_blank')}>Mulai belajar →</button></div></article>
               <article className="se-catalog-item"><div className="se-thumb"><BookOpen aria-hidden="true" /></div><div className="se-catalog-body"><span className="se-source">SinaD</span><strong>SinaD 1 &amp; 2</strong><p>Materi pembelajaran dasar.</p><button type="button" onClick={() => window.open('/SinaD_materi/SinaD L 1 - 2.html', '_blank')}>Mulai belajar →</button></div></article>
               <article className="se-catalog-item"><div className="se-thumb"><Presentation aria-hidden="true" /></div><div className="se-catalog-body"><span className="se-source">SinaD</span><strong>SinaD 3 &amp; 4</strong><p>Materi pembelajaran lanjutan.</p><button type="button" onClick={() => window.open('https://sinau-digital-level-3-4.ai.studio/', '_blank')}>Mulai belajar →</button></div></article>
               <article className="se-catalog-item" style={{ opacity: 0.6 }}><div className="se-thumb"><Compass aria-hidden="true" /></div><div className="se-catalog-body"><span className="se-source">SinaD</span><strong>SinaD 5 &amp; 6</strong><p>Materi pembelajaran tambahan.</p><button type="button" disabled style={{ cursor: 'not-allowed', color: '#999', borderColor: '#ccc' }}>🔒 Terkunci</button></div></article>
@@ -351,7 +363,7 @@ export default function SinadPortal() {
             <div className="se-app-grid">
               <article className="se-app">
                 <div className="se-ai-mark"><Sparkles aria-hidden="true" /></div>
-                <strong>Asisten Guru AI</strong>
+                <strong>Digital Teacher</strong>
                 <p>Buat rancangan pembelajaran dan ide aktivitas kelas lebih cepat melalui AIS.</p>
                 <button type="button" className="se-primary se-launch" onClick={() => window.open('https://chatgpt.com/g/g-68a6bdafe47881918b71fa838bba1870-how-who-digital-teacher-berkarya-berkembang', '_blank')}>Buka aplikasi <ExternalLink className="w-4 h-4 ml-1" aria-hidden="true" /></button>
               </article>
