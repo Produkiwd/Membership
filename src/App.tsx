@@ -1,4 +1,4 @@
-import { Monitor, Sparkles, BookOpen, Calendar, ChevronRight, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2 } from 'lucide-react';
+import { Monitor, Sparkles, BookOpen, Calendar, ChevronRight, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2, ExternalLink } from 'lucide-react';
 import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent, type ChangeEvent } from 'react';
 import { cn } from './lib/utils';
 import {
@@ -1479,13 +1479,24 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                 </div>
               )}
               {sinadAccess.tier !== 'Community' || isAdmin ? (
-                <a href="https://prompt-database-v2-0-849022455337.us-west1.run.app" target="_blank" rel="noopener noreferrer" className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.setItem('appToken', 'iwdemy123');
+                    setSelectedHtmlData({
+                      activeIndex: 0,
+                      htmls: [{ title: "Prompt Database v2", url: "/PromptsDatabase.html" }]
+                    });
+                    setIsFullscreen(true);
+                  }}
+                  className="w-full text-left flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group cursor-pointer"
+                >
                   <div className="flex items-center gap-4">
                     <BookOpen className="w-4 h-4 text-gold-muted" />
                     <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Prompt Database v2</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
-                </a>
+                </button>
               ) : (
                 <div className="flex justify-between p-5 bg-bg-light border border-border-light-subtle opacity-60 rounded-lg">
                   <div className="flex items-center gap-4">
@@ -1542,8 +1553,21 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
             <div className={`bg-[#161412] border border-border-dark-subtle/30 shadow-2xl w-full overflow-hidden p-0 transform transition-all relative z-[61] flex flex-col ${isFullscreen ? 'fixed inset-0 rounded-none max-w-none max-h-none h-screen' : 'rounded-2xl max-w-5xl max-h-[90vh]'}`}>
               <div className="flex flex-col border-b border-border-dark-subtle/30">
                 <div className="flex justify-between items-center p-4">
-                  <h3 className="text-xl font-bold font-sans text-dark-hi">Materi AI First</h3>
-                  <div className="flex items-center space-x-4">
+                  <h3 className="text-xl font-bold font-sans text-dark-hi">
+                    {selectedHtmlData.htmls[selectedHtmlData.activeIndex]?.title || "Materi AI First"}
+                  </h3>
+                  <div className="flex items-center space-x-3">
+                    {selectedHtmlData.htmls[selectedHtmlData.activeIndex]?.url && (
+                      <a 
+                        href={selectedHtmlData.htmls[selectedHtmlData.activeIndex].url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-dark-md hover:text-gold-muted transition-colors p-1" 
+                        title="Buka di tab baru"
+                      >
+                        <ExternalLink className="w-5 h-5" />
+                      </a>
+                    )}
                     <button onClick={() => setIsFullscreen(!isFullscreen)} className="text-dark-md hover:text-gold-muted transition-colors p-1" title={isFullscreen ? 'Kecilkan' : 'Layar Penuh'}>
                       {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
                     </button>
