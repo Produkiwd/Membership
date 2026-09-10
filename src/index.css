@@ -27,6 +27,24 @@
   --color-border-light-eyebrow: rgba(212,168,75,0.22);
 
   --shadow-card: 0 2px 8px rgba(0,0,0,0.04);
+
+  --color-brand-dark: #0E0E0E;
+  --color-brand-light: #F8F6F2;
+  --color-brand-gold: #D4A84B;
+  --color-brand-gold-muted: #8B7340;
+
+  --color-text-hi-dark: rgba(248, 246, 242, 0.92);
+  --color-text-md-dark: rgba(248, 246, 242, 0.68);
+  --color-text-lo-dark: rgba(248, 246, 242, 0.45);
+  
+  --color-text-hi-light: rgba(14, 14, 14, 0.90);
+  --color-text-md-light: rgba(30, 28, 24, 0.65);
+  --color-text-lo-light: rgba(30, 28, 24, 0.52);
+  
+  --color-border-subtle: rgba(0, 0, 0, 0.08);
+  --color-border-light: rgba(30, 28, 24, 0.12);
+  --color-border-gold: rgba(212, 168, 75, 0.22);
+  --color-bg-gold-subtle: rgba(212, 168, 75, 0.08);
 }
 
 @layer utilities {

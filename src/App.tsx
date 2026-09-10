@@ -28,6 +28,7 @@ import strategizeImage2 from '../Strategize/2.png';
 import strategizeImage3 from '../Strategize/3.png';
 import strategizeImage4 from '../Strategize/4.png';
 import SinadPortal from './components/SinadPortal';
+import PromptDatabaseView from './components/PromptDatabaseView';
 
 const strategizeImages = [strategizeImage1, strategizeImage2, strategizeImage3, strategizeImage4];
 
@@ -1123,6 +1124,28 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               Kembali ke Hub
             </button>
           )}
+          {sinadAccess.tier !== 'Community' || isAdmin ? (
+            <button 
+              onClick={() => {
+                setActiveTab(activeTab === 'prompts' ? 'dashboard' : 'prompts');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }} 
+              className={cn("hidden sm:inline-block transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow", activeTab === 'prompts' ? 'text-gold-muted font-black' : 'text-light-lo hover:text-light-hi')}
+            >
+              Prompt Database
+            </button>
+          ) : null}
+          {activeTab !== 'dashboard' && (
+            <button 
+              onClick={() => {
+                setActiveTab('dashboard');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }} 
+              className="transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow text-light-lo hover:text-light-hi"
+            >
+              Dashboard
+            </button>
+          )}
           {isAdmin && (
             <div className="hidden sm:flex items-center gap-4">
               <button 
@@ -1137,14 +1160,6 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               >
                 Member Panel
               </button>
-              {activeTab !== 'dashboard' && (
-                <button 
-                  onClick={() => setActiveTab('dashboard')} 
-                  className="transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow text-light-lo hover:text-light-hi"
-                >
-                  Dashboard
-                </button>
-              )}
             </div>
           )}
           <span className="hidden md:inline-block font-body text-sm font-semibold text-light-md">{user.user_metadata?.name || user.email}</span>
@@ -1721,36 +1736,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
             )}
           </>
         ) : activeTab === 'prompts' ? (
-          <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 md:px-8 py-6 flex-1 flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <button 
-                onClick={() => {
-                  setActiveTab('dashboard');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }} 
-                className="flex items-center gap-2 text-light-hi hover:text-gold-muted transition-colors font-sans font-bold text-sm bg-white border border-border-light-card px-4 py-2.5 rounded-xl shadow-sm hover:border-gold/30"
-              >
-                <ChevronLeft className="w-4 h-4" /> Kembali ke Dashboard
-              </button>
-              <a 
-                href="/PromptsDatabase.html" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="flex items-center gap-1.5 text-xs font-mono font-bold text-gold-muted hover:text-light-hi bg-white border border-border-light-card px-3.5 py-2.5 rounded-xl shadow-sm transition-colors"
-                title="Buka di tab browser baru"
-              >
-                <span>Buka Tab Penuh</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            </div>
-            <div className="w-full flex-1 min-h-[85vh] rounded-2xl overflow-hidden border border-border-light-subtle shadow-card bg-white">
-              <iframe 
-                src="/PromptsDatabase.html" 
-                className="w-full h-full min-h-[85vh] border-0" 
-                title="Prompt Database v2" 
-              />
-            </div>
-          </main>
+          <PromptDatabaseView onBack={() => { setActiveTab('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
         ) : activeTab === 'admin' ? (
           <AdminView />
         ) : (
