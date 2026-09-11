@@ -5,6 +5,7 @@ export type Materi = {
   module_id: string;
   title: string;
   url: string;
+  section?: string | null;
   stored_url?: string;
   content?: string;
   created_at: string;
@@ -62,10 +63,10 @@ export const getMateriByModule = async (moduleId: string): Promise<Materi[]> => 
   return Promise.all((data || []).map(resolveMaterialUrl));
 };
 
-export const addMateri = async (moduleId: string, title: string, url: string): Promise<Materi | null> => {
+export const addMateri = async (moduleId: string, title: string, url: string, section?: string | null): Promise<Materi | null> => {
   const { data, error } = await supabase
     .from('module_materials')
-    .insert([{ module_id: moduleId, title, url }])
+    .insert([{ module_id: moduleId, title, url, section: section || null }])
     .select()
     .single();
     

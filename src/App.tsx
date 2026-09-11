@@ -397,6 +397,7 @@ function MateriView() {
   const [materiTitle, setMateriTitle] = useState('');
   const [materiLink, setMateriLink] = useState('');
   const [materiFile, setMateriFile] = useState<File | null>(null);
+  const [materiSection, setMateriSection] = useState('umum');
   const [materiList, setMateriList] = useState<Materi[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [materiError, setMateriError] = useState('');
@@ -409,6 +410,12 @@ function MateriView() {
     { id: '05', name: 'Build' },
     { id: '06', name: 'ACT' },
     { id: '07', name: 'AI OS' },
+  ];
+
+  const STRATEGIZE_SECTIONS = [
+    { id: 'thinking-with-claude', name: 'Thinking and Working with Claude' },
+    { id: 'responsible-ethic-safety', name: 'Responsible, Ethic dan Safety' },
+    { id: 'umum', name: 'Umum' },
   ];
 
   useEffect(() => {
@@ -467,7 +474,7 @@ function MateriView() {
       const materialUrl = materiFile
         ? await uploadMateriFile(selectedModule, materiFile)
         : materiLink.trim();
-      await addMateri(selectedModule, materiTitle.trim(), materialUrl);
+      await addMateri(selectedModule, materiTitle.trim(), materialUrl, selectedModule === '01' ? materiSection : null);
       setMateriList(await getMateriByModule(selectedModule));
       setMateriTitle('');
       setMateriLink('');
@@ -497,8 +504,8 @@ function MateriView() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Ukuran file terlalu besar. Maksimal 5MB.");
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Ukuran file terlalu besar. Maksimal 10MB.");
       return;
     }
 
@@ -534,11 +541,25 @@ function MateriView() {
         </div>
         
         <h3 className="font-sans font-bold text-lg text-light-hi mb-2">Tambah/Ubah Materi: {MODULES.find(m => m.id === selectedModule)?.name}</h3>
-        <p className="font-body text-sm text-light-md mb-6">Tambah link materi atau unggah file (HTML/PDF, max 5MB). Materi akan tersimpan di Supabase dan tersedia untuk semua member yang memiliki akses.</p>
+        <p className="font-body text-sm text-light-md mb-6">Tambah link materi atau unggah file (HTML/PDF/gambar, max 10MB). Materi akan tersimpan di Supabase dan tersedia untuk semua member yang memiliki akses.</p>
         {materiError && (
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{materiError}</div>
         )}
         <form onSubmit={handleSaveMateri} className="flex flex-col gap-4">
+          {selectedModule === '01' && (
+            <div className="flex-1 w-full min-w-[200px]">
+              <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Subbagian Strategize</label>
+              <select
+                value={materiSection}
+                onChange={(e) => setMateriSection(e.target.value)}
+                className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted bg-white"
+              >
+                {STRATEGIZE_SECTIONS.map((section) => (
+                  <option key={section.id} value={section.id}>{section.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
             <div className="flex-1 w-full min-w-[200px]">
               <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Judul Materi</label>
@@ -588,6 +609,9 @@ function MateriView() {
               <div key={m.id} className="flex justify-between items-center p-4 border border-border-light-subtle rounded-lg bg-bg-light">
                  <div>
                     <div className="font-sans font-bold text-light-hi text-sm">{m.title}</div>
+                    {selectedModule === '01' && (
+                      <div className="font-body text-xs text-light-md">{STRATEGIZE_SECTIONS.find((section) => section.id === (m.section || 'umum'))?.name || 'Umum'}</div>
+                    )}
                     <div className="font-mono text-[10px] text-light-lo truncate max-w-xs sm:max-w-md">{m.stored_url?.startsWith('storage:') ? 'File Supabase Storage' : m.url}</div>
                  </div>
                  <button onClick={() => handleDeleteMateri(m)} disabled={isLoading} className="text-red-500 hover:text-red-700 transition-colors p-2 disabled:opacity-50" aria-label={`Hapus ${m.title}`}>
@@ -951,7 +975,28 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
       }
     }
     const additionalMaterials = materials.filter((materi) => !builtInTitles.has(materi.title) && !/^Materi Visual \d+$/.test(materi.title));
-    if (additionalMaterials.length > 0) {
+    if (moduleId === '01' && additionalMaterials.length > 0) {
+      const sectionTitles: Record<string, string> = {
+        'thinking-with-claude': 'Thinking and Working with Claude',
+        'responsible-ethic-safety': 'Responsible, Ethic dan Safety',
+        umum: 'Umum',
+      };
+      finalMaterials = finalMaterials.map((section) => {
+        const sectionId = Object.entries(sectionTitles).find(([, title]) => title === section.title)?.[0];
+        if (!sectionId) return section;
+        const sectionMaterials = additionalMaterials.filter((materi) => (materi.section || 'umum') === sectionId);
+        if (sectionMaterials.length === 0) return section;
+        return {
+          ...section,
+          htmls: [
+            ...(section.htmls || []),
+            ...sectionMaterials.map((materi) => materi.content
+              ? { title: materi.title, content: materi.content }
+              : { title: materi.title, url: materi.url }),
+          ],
+        };
+      });
+    } else if (additionalMaterials.length > 0) {
       finalMaterials.push({
         title: "Materi Tambahan",
         htmls: additionalMaterials.map((materi) => materi.content
