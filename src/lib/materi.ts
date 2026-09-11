@@ -5,7 +5,31 @@ export type Materi = {
   module_id: string;
   title: string;
   url: string;
+  stored_url?: string;
   created_at: string;
+};
+
+const MATERIAL_BUCKET = 'module-materials';
+const MATERIAL_FOLDERS: Record<string, string> = {
+  '01': 'strategize',
+  '02': 'prompt',
+  '03': 'create',
+  '04': 'think',
+  '05': 'build',
+  '06': 'act',
+  '07': 'ai-os',
+};
+
+const resolveMaterialUrl = async (materi: Materi): Promise<Materi> => {
+  if (!materi.url.startsWith('storage:')) return materi;
+
+  const storagePath = materi.url.slice('storage:'.length);
+  const { data, error } = await supabase.storage
+    .from(MATERIAL_BUCKET)
+    .createSignedUrl(storagePath, 60 * 60);
+
+  if (error) throw error;
+  return { ...materi, stored_url: materi.url, url: data.signedUrl };
 };
 
 export const getMateriByModule = async (moduleId: string): Promise<Materi[]> => {
@@ -17,9 +41,9 @@ export const getMateriByModule = async (moduleId: string): Promise<Materi[]> => 
     
   if (error) {
     console.error('Error fetching materials:', error);
-    return [];
+    throw error;
   }
-  return data || [];
+  return Promise.all((data || []).map(resolveMaterialUrl));
 };
 
 export const addMateri = async (moduleId: string, title: string, url: string): Promise<Materi | null> => {
@@ -36,14 +60,35 @@ export const addMateri = async (moduleId: string, title: string, url: string): P
   return data;
 };
 
-export const deleteMateri = async (id: string): Promise<void> => {
+export const uploadMateriFile = async (moduleId: string, file: File): Promise<string> => {
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-');
+  const moduleFolder = MATERIAL_FOLDERS[moduleId] || `module-${moduleId}`;
+  const storagePath = `${moduleFolder}/${crypto.randomUUID()}-${safeName}`;
+  const { error } = await supabase.storage
+    .from(MATERIAL_BUCKET)
+    .upload(storagePath, file, { contentType: file.type || 'application/octet-stream' });
+
+  if (error) throw error;
+  return `storage:${storagePath}`;
+};
+
+export const deleteMateri = async (materi: Materi): Promise<void> => {
   const { error } = await supabase
     .from('module_materials')
     .delete()
-    .eq('id', id);
+    .eq('id', materi.id);
     
   if (error) {
     console.error('Error deleting material:', error);
     throw error;
+  }
+
+  const storedUrl = materi.stored_url || materi.url;
+  if (storedUrl.startsWith('storage:')) {
+    const storagePath = storedUrl.slice('storage:'.length);
+    const { error: storageError } = await supabase.storage
+      .from(MATERIAL_BUCKET)
+      .remove([storagePath]);
+    if (storageError) console.error('Error deleting material file:', storageError);
   }
 };

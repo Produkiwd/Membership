@@ -1,6 +1,3 @@
--- Run this SQL once in the Supabase SQL Editor.
--- It stores shared material metadata in Postgres and uploaded HTML/PDF files in Storage.
-
 CREATE TABLE IF NOT EXISTS public.module_materials (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   module_id TEXT NOT NULL,

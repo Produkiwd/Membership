@@ -14,6 +14,7 @@ import {
   updateMemberPassword,
   type User,
 } from './lib/membership';
+import { addMateri, deleteMateri, getMateriByModule, uploadMateriFile, type Materi } from './lib/materi';
 import aifPromptingHtml from '../materi/Prompt day1/aif-prompting-level2-day1.html?raw';
 import aifReadingHtml from '../materi/Prompt day1/aif-reading-level2-day1.html?raw';
 import aifPkmHtml from '../materi/Prompt day2/aif-pkm-level2-day2.html?raw';
@@ -27,14 +28,9 @@ import responsibleAiUntukPemimpinHtml from '../materi/Strategize/responsible-ai-
 import petaUsecaseAi2026Html from '../materi/Strategize/peta-usecase-ai-2026-v0.html?raw';
 import formatDataUntukAiHtml from '../materi/Strategize/Format-Data-untuk-AI-v0.html?raw';
 import aifWithClaudeHtml from '../materi/Strategize/aif-with-claude-v0.html?raw';
-import strategizeImage1 from '../Strategize/1.png';
-import strategizeImage2 from '../Strategize/2.png';
-import strategizeImage3 from '../Strategize/3.png';
-import strategizeImage4 from '../Strategize/4.png';
+import aiKnowledgeOperatingSystemHtml from '../materi/ACT/AI_Knowledge_Operating_System_v0.html?raw';
 import SinadPortal from './components/SinadPortal';
 import PromptDatabaseView from './components/PromptDatabaseView';
-
-const strategizeImages = [strategizeImage1, strategizeImage2, strategizeImage3, strategizeImage4];
 
 function Eyebrow({ children, variant = 'light' }: { children: ReactNode, variant?: 'light' | 'dark' | 'flat' }) {
   return (
@@ -400,8 +396,10 @@ function MateriView() {
   const [selectedModule, setSelectedModule] = useState('04');
   const [materiTitle, setMateriTitle] = useState('');
   const [materiLink, setMateriLink] = useState('');
-  const [materiList, setMateriList] = useState<{title: string, url: string}[]>([]);
+  const [materiFile, setMateriFile] = useState<File | null>(null);
+  const [materiList, setMateriList] = useState<Materi[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [materiError, setMateriError] = useState('');
 
   const MODULES = [
     { id: '01', name: 'Strategize' },
@@ -410,54 +408,88 @@ function MateriView() {
     { id: '04', name: 'Think' },
     { id: '05', name: 'Build' },
     { id: '06', name: 'ACT' },
+    { id: '07', name: 'AI OS' },
   ];
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(`materi_module_${selectedModule}`);
-      if (stored) {
-        setMateriList(JSON.parse(stored));
-      } else if (selectedModule === '04') {
-        // Fallback for older data
-        const legacyStored = localStorage.getItem('thinking_with_claude_materials');
-        if (legacyStored) {
-          setMateriList(JSON.parse(legacyStored));
-        } else {
-          const oldLink = localStorage.getItem('thinking_with_claude_link');
-          if (oldLink) setMateriList([{title: 'Thinking with Claude', url: oldLink}]);
-          else setMateriList([]);
+    let cancelled = false;
+    setIsLoading(true);
+    setMateriError('');
+    const loadAndMigrateMaterials = async () => {
+      try {
+        let items = await getMateriByModule(selectedModule);
+        const migrationKey = `materi_supabase_migrated_${selectedModule}`;
+        if (!localStorage.getItem(migrationKey)) {
+          const legacyItems: { title: string; url: string }[] = [];
+          const stored = localStorage.getItem(`materi_module_${selectedModule}`);
+          if (stored) legacyItems.push(...JSON.parse(stored));
+          if (selectedModule === '04') {
+            const thinkingStored = localStorage.getItem('thinking_with_claude_materials');
+            if (thinkingStored) legacyItems.push(...JSON.parse(thinkingStored));
+            const oldLink = localStorage.getItem('thinking_with_claude_link');
+            if (oldLink) legacyItems.push({ title: 'Thinking with Claude', url: oldLink });
+          }
+
+          for (const legacyItem of legacyItems) {
+            const alreadyExists = items.some((item) => item.title === legacyItem.title && (item.stored_url || item.url) === legacyItem.url);
+            if (!alreadyExists && legacyItem.title && legacyItem.url) {
+              await addMateri(selectedModule, legacyItem.title, legacyItem.url);
+            }
+          }
+          localStorage.setItem(migrationKey, 'true');
+          if (legacyItems.length > 0) items = await getMateriByModule(selectedModule);
         }
-      } else {
-        setMateriList([]);
+        if (!cancelled) setMateriList(items);
+      } catch {
+        if (!cancelled) {
+          setMateriList([]);
+          setMateriError('Materi belum dapat dimuat dari Supabase. Pastikan tabel dan Storage sudah disiapkan.');
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
       }
-    } catch {
-      setMateriList([]);
-    }
+    };
+    loadAndMigrateMaterials();
+    return () => {
+      cancelled = true;
+    };
   }, [selectedModule]);
 
-  const handleSaveMateri = (e: FormEvent) => {
+  const handleSaveMateri = async (e: FormEvent) => {
     e.preventDefault();
-    if (!materiTitle || !materiLink) {
-      alert("Judul dan link materi harus diisi.");
+    if (!materiTitle || (!materiLink && !materiFile)) {
+      alert("Judul dan link atau file materi harus diisi.");
       return;
     }
-    const newList = [...materiList, { title: materiTitle, url: materiLink }];
-    setMateriList(newList);
-    localStorage.setItem(`materi_module_${selectedModule}`, JSON.stringify(newList));
-    if (selectedModule === '04') {
-      localStorage.setItem('thinking_with_claude_materials', JSON.stringify(newList));
+    setIsLoading(true);
+    setMateriError('');
+    try {
+      const materialUrl = materiFile
+        ? await uploadMateriFile(selectedModule, materiFile)
+        : materiLink.trim();
+      await addMateri(selectedModule, materiTitle.trim(), materialUrl);
+      setMateriList(await getMateriByModule(selectedModule));
+      setMateriTitle('');
+      setMateriLink('');
+      setMateriFile(null);
+      alert('Materi berhasil ditambahkan ke Supabase!');
+    } catch {
+      setMateriError('Materi gagal disimpan. Periksa koneksi dan konfigurasi Supabase.');
+    } finally {
+      setIsLoading(false);
     }
-    setMateriTitle('');
-    setMateriLink('');
-    alert('Materi berhasil ditambahkan!');
   };
 
-  const handleDeleteMateri = (index: number) => {
-    const newList = materiList.filter((_, i) => i !== index);
-    setMateriList(newList);
-    localStorage.setItem(`materi_module_${selectedModule}`, JSON.stringify(newList));
-    if (selectedModule === '04') {
-      localStorage.setItem('thinking_with_claude_materials', JSON.stringify(newList));
+  const handleDeleteMateri = async (materi: Materi) => {
+    setIsLoading(true);
+    setMateriError('');
+    try {
+      await deleteMateri(materi);
+      setMateriList((current) => current.filter((item) => item.id !== materi.id));
+    } catch {
+      setMateriError('Materi gagal dihapus dari Supabase.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -473,14 +505,7 @@ function MateriView() {
     if (!materiTitle) {
       setMateriTitle(file.name);
     }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        setMateriLink(event.target.result as string);
-      }
-    };
-    reader.readAsDataURL(file);
+    setMateriFile(file);
   };
 
   return (
@@ -509,7 +534,10 @@ function MateriView() {
         </div>
         
         <h3 className="font-sans font-bold text-lg text-light-hi mb-2">Tambah/Ubah Materi: {MODULES.find(m => m.id === selectedModule)?.name}</h3>
-        <p className="font-body text-sm text-light-md mb-6">Tambah link materi atau unggah file (HTML/PDF, max 5MB) yang akan ditampilkan pada modul ini.</p>
+        <p className="font-body text-sm text-light-md mb-6">Tambah link materi atau unggah file (HTML/PDF, max 5MB). Materi akan tersimpan di Supabase dan tersedia untuk semua member yang memiliki akses.</p>
+        {materiError && (
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{materiError}</div>
+        )}
         <form onSubmit={handleSaveMateri} className="flex flex-col gap-4">
           <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
             <div className="flex-1 w-full min-w-[200px]">
@@ -538,28 +566,31 @@ function MateriView() {
           <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
              <div className="flex-1 w-full min-w-[200px]">
                 <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Upload File Materi</label>
-                <input 
-                  type="file" 
-                  accept=".html,.pdf"
+                <input
+                  type="file"
+                  accept=".html,.pdf,.png,.jpg,.jpeg,.webp"
                   onChange={handleFileUpload}
                   className="w-full px-4 py-2 border border-border-light-subtle rounded text-light-hi file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gold-muted/10 file:text-gold-muted hover:file:bg-gold-muted/20 transition-all cursor-pointer"
                 />
              </div>
-             <Button type="submit" variant="primary" className="py-3 px-8 border border-transparent w-full sm:w-auto mt-4 sm:mt-0">
-                Tambah Materi
+             <Button type="submit" variant="primary" disabled={isLoading} className="py-3 px-8 border border-transparent w-full sm:w-auto mt-4 sm:mt-0 disabled:opacity-60 disabled:cursor-not-allowed">
+                {isLoading ? 'Menyimpan...' : 'Tambah Materi'}
              </Button>
           </div>
         </form>
+        {isLoading && materiList.length === 0 && (
+          <p className="mt-8 font-body text-sm text-light-md">Memuat materi dari Supabase...</p>
+        )}
         {materiList.length > 0 && (
           <div className="mt-8 space-y-3">
             <h4 className="font-sans font-bold text-sm text-light-hi tracking-eyebrow uppercase mb-4 border-b border-border-light-subtle pb-2">Daftar Materi</h4>
-            {materiList.map((m, idx) => (
-              <div key={idx} className="flex justify-between items-center p-4 border border-border-light-subtle rounded-lg bg-bg-light">
+            {materiList.map((m) => (
+              <div key={m.id} className="flex justify-between items-center p-4 border border-border-light-subtle rounded-lg bg-bg-light">
                  <div>
                     <div className="font-sans font-bold text-light-hi text-sm">{m.title}</div>
-                    <div className="font-mono text-[10px] text-light-lo truncate max-w-xs sm:max-w-md">{m.url.startsWith('data:') ? 'File Terunggah' : m.url}</div>
+                    <div className="font-mono text-[10px] text-light-lo truncate max-w-xs sm:max-w-md">{m.stored_url?.startsWith('storage:') ? 'File Supabase Storage' : m.url}</div>
                  </div>
-                 <button onClick={() => handleDeleteMateri(idx)} className="text-red-500 hover:text-red-700 transition-colors p-2">
+                 <button onClick={() => handleDeleteMateri(m)} disabled={isLoading} className="text-red-500 hover:text-red-700 transition-colors p-2 disabled:opacity-50" aria-label={`Hapus ${m.title}`}>
                     <Trash2 className="w-4 h-4" />
                  </button>
               </div>
@@ -891,31 +922,37 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [iframeModalUrl, setIframeModalUrl] = useState<{url: string, title: string} | null>(null);
 
-  const handleModuleClick = (moduleId: string, defaultTitle: string, defaultSubtitle: string, defaultMaterials: any[]) => {
-    let materials: any[] = [];
+  const handleModuleClick = async (moduleId: string, defaultTitle: string, defaultSubtitle: string, defaultMaterials: any[]) => {
+    let materials: Materi[] = [];
     try {
-      const stored = localStorage.getItem(`materi_module_${moduleId}`);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.length > 0) materials = parsed.map((m: any) => ({ title: m.title, url: m.url }));
-      }
-      if (materials.length === 0 && moduleId === '04') {
-        const legacyStored = localStorage.getItem('thinking_with_claude_materials');
-        if (legacyStored) {
-          const parsed = JSON.parse(legacyStored);
-          if (parsed.length > 0) materials = parsed.map((m: any) => ({ title: m.title, url: m.url }));
-        }
-        if (materials.length === 0) {
-          const oldLink = localStorage.getItem('thinking_with_claude_link');
-          if (oldLink) materials = [{title: 'Thinking with Claude', url: oldLink}];
-        }
-      }
-    } catch {}
+      materials = await getMateriByModule(moduleId);
+    } catch (error) {
+      console.error('Materi Supabase belum dapat dimuat:', error);
+    }
 
     let finalMaterials = [...defaultMaterials];
-    
-    if (materials.length > 0) {
-      finalMaterials.push({ day: "Tambahan", title: "Materi Tambahan", htmls: materials });
+
+    const remoteVisuals = materials
+      .filter((materi) => /^Materi Visual \d+$/.test(materi.title))
+      .sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }))
+      .map((materi) => materi.url);
+    if (remoteVisuals.length > 0) {
+      finalMaterials = finalMaterials.map((section) => ({
+        ...section,
+        htmls: section.htmls?.map((item: any) => item.title === 'Materi Visual' ? { ...item, images: remoteVisuals } : item),
+      }));
+    }
+
+    const builtInTitles = new Set<string>();
+    for (const section of defaultMaterials) {
+      if (section.title) builtInTitles.add(section.title);
+      for (const item of section.htmls || []) {
+        if (item.title) builtInTitles.add(item.title);
+      }
+    }
+    const additionalMaterials = materials.filter((materi) => !builtInTitles.has(materi.title) && !/^Materi Visual \d+$/.test(materi.title));
+    if (additionalMaterials.length > 0) {
+      finalMaterials.push({ title: "Materi Tambahan", htmls: additionalMaterials.map((m) => ({ title: m.title, url: m.url })) });
     }
 
     setSelectedModule({
@@ -966,7 +1003,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
       return tier === 'Professional' || tier === 'Leaders' || tier === 'Internal';
     }
 
-    if (moduleId === '03' || moduleId === '05' || moduleId === '06') { // Create, Build, ACT
+    if (moduleId === '03' || moduleId === '05' || moduleId === '06' || moduleId === '07') { // Create, Build, ACT, AI OS
       return tier === 'Leaders' || tier === 'Internal';
     }
 
@@ -1248,7 +1285,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Module 01 - Strategize */}
             {canAccessModule("01") ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", [{ title: "Thinking and Working with Claude", htmls: [{ title: "Thinking and Working with Claude", content: aifWithClaudeHtml }] }, { title: "Responsible, Ethic dan Safety", htmls: [{ title: "Responsible, Ethic dan Safety", content: responsibleAiUntukPemimpinHtml }] }, { title: "Umum", htmls: [{ title: "Materi Visual", images: strategizeImages }, { title: "APT Assessment", content: aptAssessmentHtml }, { title: "Peta Use Case AI 2026", content: petaUsecaseAi2026Html }, { title: "Format Data untuk AI", content: formatDataUntukAiHtml }] }])}>
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", [{ title: "Thinking and Working with Claude", htmls: [{ title: "Thinking and Working with Claude", content: aifWithClaudeHtml }] }, { title: "Responsible, Ethic dan Safety", htmls: [{ title: "Responsible, Ethic dan Safety", content: responsibleAiUntukPemimpinHtml }] }, { title: "Umum", htmls: [{ title: "Materi Visual", images: [] }, { title: "APT Assessment", content: aptAssessmentHtml }, { title: "Peta Use Case AI 2026", content: petaUsecaseAi2026Html }, { title: "Format Data untuk AI", content: formatDataUntukAiHtml }] }])}>
                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">01</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Strategize</div>
@@ -1392,7 +1429,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
             {/* Module 06 - ACT */}
             {canAccessModule('06') ? (
-              <div className="order-6 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("06", "ACT", "Action & Transformation", [{ title: "Materi ACT" }])}>
+              <div className="order-6 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("06", "ACT", "Action & Transformation", [{ title: "AI Knowledge Operating System", htmls: [{ title: "AI Knowledge Operating System", content: aiKnowledgeOperatingSystemHtml }] }])}>
                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">06</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">ACT</div>
@@ -1411,6 +1448,35 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-sans font-bold text-lg text-light-md">ACT</div>
+                    <Lock className="w-4 h-4 text-light-lo" />
+                  </div>
+                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
+                  <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
+                </div>
+              </div>
+            )}
+
+            {/* Module 07 - AI OS */}
+            {canAccessModule('07') ? (
+              <div className="order-7 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("07", "AI OS", "AI Operating System", [])}>
+                <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">07</span>
+                <div>
+                  <div className="font-sans font-bold text-lg text-light-hi mb-2">AI OS</div>
+                  <p className="font-body text-sm text-light-md">AI Operating System</p>
+                  <div className="mt-6 flex items-center gap-3">
+                    <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
+                      <div className="bg-gold h-full rounded-full w-[100%]"></div>
+                    </div>
+                    <span className="font-mono text-xs text-light-lo">100%</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="order-7 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
+                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">07</span>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-sans font-bold text-lg text-light-md">AI OS</div>
                     <Lock className="w-4 h-4 text-light-lo" />
                   </div>
                   <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
@@ -1582,6 +1648,11 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                     <ChevronRight className="w-5 h-5 text-dark-md group-hover:text-gold-muted transition-colors" />
                   </div>
                 ))}
+                {selectedModule.materials.length === 0 && (
+                  <div className="p-4 border border-border-dark-subtle/30 rounded-xl bg-bg-dark text-center">
+                    <p className="font-body text-sm text-dark-md">Materi belum tersedia.</p>
+                  </div>
+                )}
               </div>
 
               <button 

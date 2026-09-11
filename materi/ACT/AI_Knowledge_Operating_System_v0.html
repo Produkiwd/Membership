@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Knowledge Operating System · AI First by IWDemy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Inter:wght@500;600;700&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold-d:#D4A84B; --gold-m:#8B7340; --ink:#1A1814; --cream:#F5F0E8;
+  --ff-h:'Plus Jakarta Sans',system-ui,sans-serif;
+  --ff-b:'Inter',system-ui,sans-serif;
+  --ff-m:'JetBrains Mono',ui-monospace,monospace;
+  --r:10px; --side:292px; --tap:48px;
+}
+[data-theme=dark]{
+  --bg:#1A1814; --side-bg:#131110; --surf:#23201B; --surf-2:#2B2721;
+  --h:#FFFFFF; --t:rgba(255,255,255,.74); --mut:rgba(255,255,255,.52);
+  --gold:#D4A84B; --on-gold:#1A1814; --line:rgba(255,255,255,.14);
+  --gold-soft:rgba(212,168,75,.10); --gold-line:rgba(212,168,75,.32);
+  --ok:#8FC79A; --no:#E39A8B; --ok-bg:rgba(143,199,154,.10); --no-bg:rgba(227,154,139,.10);
+}
+[data-theme=light]{
+  --bg:#F5F0E8; --side-bg:#ECE5D8; --surf:#FBF8F3; --surf-2:#F1EBE0;
+  --h:#1A1814; --t:rgba(30,28,24,.78); --mut:rgba(30,28,24,.58);
+  --gold:#8B7340; --on-gold:#F5F0E8; --line:rgba(30,28,24,.16);
+  --gold-soft:rgba(139,115,64,.09); --gold-line:rgba(139,115,64,.35);
+  --ok:#2F6B3C; --no:#9A3B2A; --ok-bg:rgba(47,107,60,.08); --no-bg:rgba(154,59,42,.08);
+}
+*{box-sizing:border-box}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+@media (min-width:1600px){html{font-size:19px} :root{--side:340px;--tap:60px}}
+@media (min-width:2400px){html{font-size:23px} :root{--side:400px}}
+body{margin:0;background:var(--bg);color:var(--t);font-family:var(--ff-b);font-weight:500;line-height:1.6;min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+h1,h2,h3{font-family:var(--ff-h);color:var(--h);margin:0;letter-spacing:-.02em}
+h1{font-size:clamp(1.9rem,4.4vw,3rem);font-weight:800;line-height:1.1}
+h2{font-size:clamp(1.45rem,3vw,2.1rem);font-weight:700;line-height:1.18}
+h3{font-size:1.08rem;font-weight:700;line-height:1.3}
+p{margin:.5rem 0}
+.mono{font-family:var(--ff-m)}
+
+/* ---------- top bar ---------- */
+.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;background:var(--side-bg);border-bottom:1px solid var(--line)}
+.logos{display:inline-flex;align-items:center;gap:.6rem;background:#fff;border-radius:6px;padding:4px 10px}
+.logos img{display:block;height:30px;width:auto}
+.logos img.tj{height:22px}
+.logos i{width:1px;height:24px;background:#d9d2c3}
+.pill{display:inline-block;font-family:var(--ff-m);font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:var(--gold-soft);border:1px solid var(--gold-line);border-radius:999px;padding:.28rem .75rem;white-space:nowrap}
+.top .sp{flex:1}
+.ibtn{min-width:var(--tap);height:var(--tap);display:inline-flex;align-items:center;justify-content:center;gap:.4rem;background:transparent;border:1px solid var(--line);border-radius:var(--r);padding:0 .75rem;color:var(--h);font-size:.85rem;font-weight:600}
+.ibtn svg{width:20px;height:20px}
+#menuBtn{display:none}
+
+/* ---------- layout ---------- */
+.wrap{display:grid;grid-template-columns:var(--side) 1fr;min-height:calc(100vh - 62px)}
+.side{background:var(--side-bg);border-right:1px solid var(--line);padding:1rem .8rem 2rem;position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto}
+.side .lbl{font-family:var(--ff-m);font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:1rem .5rem .4rem}
+.nmod{margin-bottom:.2rem}
+.nmod>button{width:100%;text-align:left;display:flex;align-items:center;gap:.6rem;background:none;border:0;border-radius:8px;padding:.55rem .5rem;min-height:var(--tap);color:var(--h);font-family:var(--ff-h);font-weight:700;font-size:.92rem}
+.nmod>button .no{font-family:var(--ff-m);font-size:.72rem;color:var(--gold);min-width:1.6rem}
+.nmod>button .dn{margin-left:auto;font-size:.72rem;color:var(--mut);font-family:var(--ff-m)}
+.nmod.cur>button{background:var(--gold-soft)}
+.nsub{display:none;padding:0 0 .4rem 2.6rem}
+.nmod.cur .nsub{display:block}
+.nsub button{display:block;width:100%;text-align:left;background:none;border:0;padding:.35rem .4rem;font-size:.84rem;color:var(--mut);border-radius:6px;min-height:36px}
+.nsub button.on{color:var(--h);background:var(--surf)}
+.nsub button.seen::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-right:.45rem;vertical-align:middle}
+.lo{margin:.3rem .5rem;padding:0;list-style:none;font-size:.82rem;color:var(--t)}
+.lo li{padding:.4rem 0;border-bottom:1px solid var(--line)}
+.lo b{color:var(--h);font-family:var(--ff-h)}
+.side .meta{font-size:.74rem;color:var(--mut);margin:.4rem .5rem}
+.linkbtn{background:none;border:0;color:var(--gold);font-weight:600;padding:.3rem .5rem;text-decoration:underline;text-underline-offset:3px;font-size:.84rem}
+
+.main{min-width:0;display:flex;flex-direction:column}
+.stage{flex:1;width:100%;max-width:900px;margin:0 auto;padding:1.6rem 1.25rem 1rem}
+@media (min-width:1600px){.stage{max-width:1240px;padding:2.2rem 2.5rem 1rem}}
+.screen{display:none}
+.screen.on{display:block;animation:in .28s ease-out}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.screen.on{animation:none}}
+
+/* ---------- screen parts ---------- */
+.kick{display:flex;align-items:center;gap:.6rem;margin-bottom:.9rem;flex-wrap:wrap}
+.kick .step{font-family:var(--ff-m);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.kick .tag{font-size:.74rem;font-weight:600;color:var(--mut);border:1px solid var(--line);border-radius:999px;padding:.1rem .6rem}
+.kick .tag.adapt{color:var(--gold);border-color:var(--gold-line)}
+.lead{font-size:1.12rem;color:var(--t);max-width:40em;margin-top:.8rem}
+.big{font-family:var(--ff-h);font-weight:800;color:var(--h);font-size:clamp(1.7rem,4.6vw,3.2rem);line-height:1.12;letter-spacing:-.025em;max-width:18em}
+.case{margin-top:1.4rem;border-left:3px solid var(--gold);background:var(--gold-soft);padding:.85rem 1rem;border-radius:0 var(--r) var(--r) 0;font-size:.95rem;max-width:44em}
+.case b{font-family:var(--ff-m);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:.15rem}
+.ilu{font-family:var(--ff-m);font-size:.66rem;letter-spacing:.08em;color:var(--gold);border:1px solid var(--gold-line);border-radius:4px;padding:0 .35rem;margin-left:.3rem;vertical-align:middle;white-space:nowrap}
+.note{font-size:.86rem;color:var(--mut);margin-top:1rem}
+
+.viz{margin:1.4rem 0 .6rem;width:100%}
+.viz svg{width:100%;height:auto;display:block}
+svg text{font-family:var(--ff-b)}
+
+.grid{display:grid;gap:.75rem;margin-top:1.2rem;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);padding:1rem 1.05rem;text-align:left;width:100%;display:block;min-height:var(--tap)}
+.card h3{margin-bottom:.25rem}
+.card p{margin:0;font-size:.92rem}
+button.card{position:relative;padding-right:2.4rem}
+button.card::after{content:"+";position:absolute;right:.9rem;top:.8rem;font-family:var(--ff-m);font-weight:700;color:var(--gold);font-size:1.1rem}
+button.card:active{transform:scale(.99)}
+.card .k{font-family:var(--ff-m);font-size:.7rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:.3rem}
+
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:1rem}
+.chip{border:1px solid var(--line);background:var(--surf);border-radius:999px;padding:.35rem .8rem;font-size:.88rem;color:var(--h)}
+
+.quote{font-family:var(--ff-h);font-weight:800;color:var(--h);font-size:clamp(1.35rem,3.4vw,2.2rem);line-height:1.25;letter-spacing:-.02em;border-left:4px solid var(--gold);padding:.2rem 0 .2rem 1.1rem;margin:1.4rem 0;max-width:22em}
+.quote small{display:block;font-family:var(--ff-b);font-weight:500;font-size:.9rem;color:var(--mut);margin-top:.6rem;letter-spacing:0}
+
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:.4rem;margin-top:1.2rem;counter-reset:f}
+.flow>div{flex:1 1 120px;background:var(--surf);border:1px solid var(--line);border-radius:var(--r);padding:.7rem .8rem;position:relative}
+.flow>div b{display:block;font-family:var(--ff-m);font-size:.78rem;letter-spacing:.08em;color:var(--gold)}
+.flow>div span{font-size:.86rem;color:var(--h)}
+
+.ladder{display:grid;gap:.35rem;margin-top:.8rem}
+.ladder div{display:flex;gap:.8rem;align-items:baseline;padding:.5rem .8rem;border-radius:8px;background:var(--surf);border:1px solid var(--line);font-size:.92rem}
+.ladder div b{font-family:var(--ff-m);color:var(--gold);min-width:6.6rem;font-size:.8rem}
+.ladder div.hl{border-color:var(--gold);background:var(--gold-soft)}
+.two{display:grid;gap:1.2rem;grid-template-columns:1fr}
+@media (min-width:760px){.two{grid-template-columns:1fr 1fr}}
+
+table.map{width:100%;border-collapse:collapse;margin-top:1rem;font-size:.92rem}
+table.map th{font-family:var(--ff-m);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);text-align:left;padding:.5rem;border-bottom:1px solid var(--gold-line)}
+table.map td{padding:.65rem .5rem;border-bottom:1px solid var(--line);vertical-align:top;color:var(--t)}
+table.map td:first-child{color:var(--h);font-weight:600}
+
+ol.steps{margin:1rem 0 0;padding:0;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;display:flex;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--line);font-size:.96rem}
+ol.steps li::before{content:counter(s);font-family:var(--ff-m);font-weight:700;color:var(--on-gold);background:var(--gold);min-width:1.6rem;height:1.6rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.78rem;flex-shrink:0;margin-top:.1rem}
+ol.steps li b{color:var(--h)}
+
+.more{margin-top:1rem;background:none;border:1px solid var(--gold-line);color:var(--gold);border-radius:999px;padding:.5rem 1rem;min-height:44px;font-weight:600;font-size:.88rem}
+.more::before{content:"+ "}
+.copy{background:var(--gold);color:var(--on-gold);border:0;border-radius:8px;padding:.5rem .9rem;font-weight:700;font-size:.84rem;min-height:40px}
+
+/* ---------- decision ---------- */
+.q{background:var(--surf);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem;margin-top:1rem}
+.q .qt{color:var(--h);font-weight:600;font-size:1rem;margin-bottom:.7rem}
+.opts{display:flex;flex-wrap:wrap;gap:.5rem}
+.opt{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:.6rem .95rem;min-height:var(--tap);text-align:left;font-size:.92rem;font-weight:600;color:var(--h);flex:1 1 auto}
+.opts.col{flex-direction:column}
+.opts.col .opt{width:100%}
+.opt[aria-pressed=true]{border-color:var(--gold);background:var(--gold-soft)}
+.opt.ok{border-color:var(--ok);background:var(--ok-bg)}
+.opt.no{border-color:var(--no);background:var(--no-bg)}
+.opt.miss{border-color:var(--ok);border-style:dashed}
+.opt small{display:block;font-weight:500;color:var(--mut);font-size:.82rem}
+.fb{display:none;margin-top:.8rem;padding:.75rem .9rem;border-radius:8px;font-size:.93rem;border-left:3px solid var(--gold);background:var(--gold-soft);color:var(--t)}
+.fb.show{display:block}
+.fb.ok{border-color:var(--ok);background:var(--ok-bg)}
+.fb.no{border-color:var(--no);background:var(--no-bg)}
+.fb strong{color:var(--h)}
+.check{margin-top:.8rem;background:var(--gold);color:var(--on-gold);border:0;border-radius:10px;padding:.6rem 1.2rem;min-height:var(--tap);font-weight:700}
+.dq-lead{font-size:1.02rem}
+
+/* ---------- takeaway ---------- */
+.take{padding:2rem 0 1rem}
+.take .kw{font-family:var(--ff-m);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+
+/* ---------- cover ---------- */
+.cover{--h:#fff;--t:rgba(255,255,255,.74);--mut:rgba(255,255,255,.52);--gold:#D4A84B;--line:rgba(255,255,255,.14);--gold-line:rgba(212,168,75,.32);--gold-soft:rgba(212,168,75,.10);--surf:#23201B;--on-gold:#1A1814;
+  background:#1A1814;color:var(--t);border-radius:16px;padding:clamp(1.6rem,5vw,3.6rem);position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+.cover .ctitle{font-family:var(--ff-h);font-weight:800;color:#fff;font-size:clamp(2.6rem,9vw,6.2rem);line-height:.98;letter-spacing:-.045em;margin:1.2rem 0 1rem;max-width:10ch}
+.cover .csub{font-family:var(--ff-h);font-weight:600;font-size:clamp(1.1rem,2.6vw,1.6rem);color:rgba(255,255,255,.86);max-width:24ch;line-height:1.3}
+.cover .cmeta{font-family:var(--ff-m);font-size:.8rem;color:rgba(212,168,75,.8);margin-top:2rem;letter-spacing:.04em}
+.cover .cloop{position:absolute;right:-6%;bottom:-8%;width:min(58%,520px);opacity:.9;pointer-events:none}
+.cover .cta{margin-top:1.6rem;display:flex;gap:.6rem;flex-wrap:wrap;position:relative}
+.btn{background:var(--gold);color:var(--on-gold);border:0;border-radius:10px;padding:.7rem 1.4rem;min-height:var(--tap);font-weight:700;font-size:.98rem}
+.btn.gh{background:transparent;color:var(--h);border:1px solid var(--line)}
+@media (max-width:640px){.cover .cloop{position:relative;right:auto;bottom:auto;width:100%;margin-top:1rem;opacity:.85}}
+
+/* ---------- bottom nav & footer ---------- */
+.bnav{position:sticky;bottom:0;z-index:20;background:var(--bg);border-top:1px solid var(--line);display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem calc(.6rem + env(safe-area-inset-bottom))}
+.bnav .prog{flex:1;display:flex;flex-direction:column;gap:.3rem;min-width:0}
+.bnav .prog span{font-size:.78rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar{height:3px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--gold);width:0;transition:width .3s}
+.foot{border-top:1px solid var(--line);padding:1.4rem 1.25rem 1.8rem;display:flex;flex-wrap:wrap;align-items:center;gap:1rem;justify-content:space-between;font-size:.8rem;color:var(--mut)}
+.foot .att{color:var(--gold);opacity:.75}
+
+/* ---------- sheet ---------- */
+dialog.sheet{border:0;padding:0;background:var(--surf);color:var(--t);border-radius:16px;max-width:680px;width:calc(100% - 2rem);max-height:84vh;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+dialog.sheet::backdrop{background:rgba(10,9,8,.6)}
+.sheet-in{padding:1.3rem 1.3rem 1.6rem;overflow-y:auto;max-height:84vh}
+.sheet-h{display:flex;align-items:flex-start;gap:1rem;margin-bottom:.6rem}
+.sheet-h h3{flex:1;font-size:1.2rem}
+.sheet pre{white-space:pre-wrap;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.8rem;font-family:var(--ff-m);font-size:.8rem;color:var(--h);margin:.6rem 0}
+.sheet ul{padding-left:1.1rem;margin:.4rem 0}
+.sheet li{margin:.25rem 0}
+@media (max-width:700px){
+  dialog.sheet{margin:auto 0 0;width:100%;max-width:none;border-radius:16px 16px 0 0;max-height:88vh}
+  .sheet-in{max-height:88vh}
+}
+
+/* ---------- action card ---------- */
+.acard{background:var(--surf);border:1px solid var(--gold-line);border-radius:16px;padding:1.3rem;margin-top:1.2rem}
+.act{display:flex;gap:.9rem;align-items:flex-start;padding:.85rem 0;border-bottom:1px solid var(--line)}
+.act:last-of-type{border-bottom:0}
+.act input{width:26px;height:26px;accent-color:var(--gold);margin-top:.15rem;flex-shrink:0}
+.act label{cursor:pointer}
+.act .when{font-family:var(--ff-m);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);display:block}
+.act .what{color:var(--h);font-weight:600}
+.tree{font-family:var(--ff-m);font-size:.8rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.8rem 1rem;color:var(--h);white-space:pre;overflow-x:auto;margin-top:1rem}
+
+
+/* ---------- v0.3 components ---------- */
+.timeline{list-style:none;margin:1.2rem 0 0;padding:0 0 0 1.1rem;border-left:2px solid var(--gold-line)}
+.timeline li{position:relative;display:grid;grid-template-columns:5.6rem 1fr;gap:.8rem;padding:.7rem 0;font-size:.96rem}
+.timeline li::before{content:"";position:absolute;left:-1.52rem;top:1.05rem;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--gold)}
+.timeline li.hl::before{background:var(--gold)}
+.timeline b{font-family:var(--ff-m);font-size:.8rem;color:var(--gold);padding-top:.15rem}
+.timeline strong{color:var(--h)}
+@media (max-width:520px){.timeline li{grid-template-columns:1fr;gap:.1rem}}
+.abs{background:var(--surf);border:1px solid var(--line);border-radius:var(--r);padding:.9rem 1.1rem;margin-top:1rem;max-width:46em}
+.abs p{margin:.35rem 0;font-size:.97rem}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem;margin-top:1.2rem}
+.chain span{background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:.55rem .85rem;color:var(--h);font-weight:600;font-size:.92rem}
+.chain i{font-style:normal;color:var(--gold);font-weight:700}
+.chain .frag{border-style:dashed;border-color:var(--gold-line);color:var(--gold)}
+.bmap{display:grid;gap:.6rem;margin-top:1.2rem;grid-template-columns:1fr}
+@media (min-width:760px){.bmap{grid-template-columns:1fr auto 1fr;align-items:center}}
+.bmap .col{display:grid;gap:.5rem}
+.bmap .br{display:flex;justify-content:space-between;align-items:center;gap:.6rem;background:var(--surf);border:1px solid var(--line);border-radius:10px;padding:.6rem .8rem;color:var(--h);font-weight:600;font-size:.92rem}
+.bmap .br em{font-style:normal;font-family:var(--ff-m);font-size:.7rem;color:var(--gold);border:1px solid var(--gold-line);background:var(--gold-soft);border-radius:6px;padding:.1rem .4rem}
+.bmap .arr{color:var(--gold);font-weight:800;text-align:center;font-size:1.3rem}
+.bmap .arr .ad{display:none}
+@media (min-width:760px){.bmap .arr .ad{display:inline}.bmap .arr .am{display:none}}
+.bmap .main{background:var(--surf);border:2px solid var(--gold);border-radius:12px;padding:1rem;text-align:center}
+.bmap .main b{display:block;color:var(--h);font-family:var(--ff-h)}
+.bmap .main span{font-size:.86rem;color:var(--mut)}
+
+/* ---------- mobile ---------- */
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr}
+  #menuBtn{display:inline-flex}
+  .side{position:fixed;top:0;left:0;bottom:0;width:min(86vw,340px);height:100vh;z-index:50;transform:translateX(-102%);transition:transform .25s;box-shadow:0 0 40px rgba(0,0,0,.4)}
+  .side.open{transform:none}
+  .scrim{position:fixed;inset:0;background:rgba(10,9,8,.55);z-index:40;display:none}
+  .scrim.open{display:block}
+  .top .pill{display:none}
+  .logos img{height:26px}.logos img.tj{height:19px}
+  .ibtn .tx{display:none}
+}
+@media (min-width:901px){.scrim{display:none!important} .side .xbtn{display:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="ibtn" id="menuBtn" aria-label="Buka menu" aria-controls="side" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <span class="logos"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMDAgQDAwMEBAQFBgoGBgUFBgwICQcKDgwPDg4MDQ0PERYTDxAVEQ0NExoTFRcYGRkZDxIbHRsYHRYYGRj/2wBDAQQEBAYFBgsGBgsYEA0QGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBj/wAARCABwAM8DASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD7+ooqnqWqWOk2Rur+4WKMcDPJY+gHUms6tWFKDqVGlFbt6JFRjKbUYq7ZcqteajYafH5l9eQW6+srhc/nXF3XiDXtbcppqNploekjDdM49h0X/PNJZ+D0kk8+eJp5W5Mtyxdj+deMs0xOL/3CleP883yxforOT9bJPozs+rU6X8eevZav5vZfj6G3J478LxttGp+Z7xxOw/MCiPx14WkbadUEZ/6aROo/MiiPwyirjKr7KoFEvhmN1IO1h6MoNX7PNrX9rT9OSX58/wCgufCfyS/8CX/yJtWmoWN/H5lleQXC+sThv5VZrgLvwbHHL58ELW8o5EtsxjYflRb614m0RwlyP7XtR1DfJOo+vRqh5nisL/vtH3f5oPmXzVlJfJNeY/q1Kr/Anr2lo/k9vxR39FZej+INM1uAtZT5kX78Mg2yJ9V/r0rUr16GIpYimqtGSlF7Nao5KlOVOThNWaCiiitiAooooAKKKKACiiigAooooAKKKKACiiigAooooAz9duJbTw5eXEDlJUiJRh2PrXG6Xodxqk0d/e3M95LtBElw24Jnn5R0FdZ4m/5FO+/6503wyB/wj9ucf8s1/lXz2Jw1PFZrGFdc0Yw5kne1+be2zfqjup1ZU8M3B2bdvO1u+5Zs9Mt7VM7QzeprG1TxLcG6ksNBgjlkjO2W6lz5UZ9Bj7zew4Fa+rvObE29s7JJKdm8dUHcj3x098VBpmjwW1uiiMKqjCr6V6OJhWrz9jTk4RW8lv6K+3m+mltdVhSlCmueSu+i6er/AEX3+fMnS9a1A777WtSlJ/hhfyE/ALTl8PXtud9vqerwN6rdFv0bINddqWqaRoWmPf6vqFnp1nH9+4u5VijX6sxAFZ+h+NfBvie4e38O+KdF1eVBueOxvY52UepCkkD3rnWR4Fbxu+7lJv727/ibrF4lq6enklb8rFG01nVdNYJrIW8te91Gm2SMeroOCPdfyremsbS+gDqFYMMqynII9alns4pRkABuxFMsLb7JEYU+WMHKqOi+w9q7MPQnQfKpOUPN3a+e7Xrqu7W3PUqRqK9rPy2fy6fLT9eS1fwsROLyBpYZkOVuIG2uPx71o+C7+9utPnivruS6eKZkWSTGcADriuiugDaPx2rlfBPW+/6+HryquFpYfNKM6K5XNT5raJ2Ss2tr+drnVGrOphpxm78treW+z3Owooor6E88KKKKACiiigAooooAKKKKACiiigAooooAKKKKAMnxN/yKV9/1zNN8M/8AIvW//XNf5U7xN/yKV9/1zNN8M/8AIvW//XNf5V4v/M3/AO4X/t51/wDML/29+hqtErsCwp3RcCloPSvaOQ+UdN+InwU+L+v3lv8AFy3t7vUP7dlsdBsJ4blkjtSUjiP7v5N7tuJY8/NjoBXT+LfCf7MXwj1ywuNS0Gy0DWmRrrT57WO6MilDjcrRk4wSOvX6Vyc/wf8Ahz8OrfXdU8V3q23iS1vrm/8ADskt66LOiBZbf92PlciT5Sp6kc8EVkeB73w98cIZ7j456jA+u2jra6PBbyNZPKjqGYBI/vneBz2ryvbNe7O3O/61/Q+6lgqUv32HlU9hHdLrfblWzX81z6F+B3j28+JHwQ0fxLqiKupkPbXuxdqtNExRnA7BsBsdt2O1d/d3dtYWE97eXEVvbwRtLLNKwVI0UZLMTwAACSa8p8B2ui/AP9m21k8b6rb6bHah7q+ldshZpW3eUoH3m5CgDJJHFfGX7QX7Rviv4r61qvhPQp/7M8D2ly0BFux36lsY4eVv7pxuEY4HBO44rreI9lSTqb2PCjlf13G1IYX+HzOz6Wv0/Q+7vhv8RLD4ofDmbxZpUe3T5L66trViCDLFFM0aSEHpuChsds1b8E9b7/r5f+dcr+z14Tn8Gfsr+FtGu4TFdNaG8nQ9Vad2lwfcBwPwrqvBPW+/6+X/AJ15mJbePwje9p/lE5asIQjiIU9k0l97Owqrdalp9i8aXt9bW7ScIs0qoW+mTz1FWq8J+PyI3i3wZuRWxO+MgHH7yKvcbsrnmpXPbJdT06C/Symv7WO5kxsheVQ7Z6YUnJqeWaKCB555EjjQFmd2ChQO5J6V4Z+0NpL2z6D4ytIl+0Wc3kmTaMgg+bGc/wC8rfnW18YdeGqfCrSNL0zDyeJp4I4lPIaM4kP4Z2A/WlzbhY9Xt7m3u7ZLi1njnhcZWSJgyt9CODUS6jp76i1gl9bNdLy0AlUuO/K5z3FeS/ArUH0vQvEPhDUykU2h3ruy9AqNndgem9HP/Aqo/AqzOteKPFHj25hUS3ly0cb7Rn5m8xufpsH4Uc2wWPXz4j8PqxDa5poIOCDdR8frV22ura8txPaXEU8TdHicMp/EcV80/Cz4feGPG+s+JF12zdza3AMRhfy/vPJnOOvQVo+NfCs3wU1nT/GHga8uYrOWbyrqwkfMcuAW2MBwwKhgCRuU4IPahS6j5T6LorjPFXxK0Hwr4Y0/VrhLm7l1JVaxs7dQZZ8qGzycAAMuSfUAZJArmbX41y2ur2lv4x8D6t4ctLuQRRX0z+ZGGJwN+VUgc8kZx1PGSHdCses0VxHxA+I9r4AuNIF3pVxew38rI7wOA0KqVy20j5+GzgenvXNN8cksNct08R+CtZ0TR7liIdSuuTjGQzRBeB/uliMjjrgugsz1yivG7v48T6e0N/qHw81210OZv3d9KwDsvXcI8YJxztD59M10njL4o2vg+40S4l0mS90nVQrLqEMwVY1JXJKkZOFYN15GfSi6CzPQKK47x94+g8D2OnONNl1O61C4+zwW0MgQnjJbJzxkqP8AgQrroWke3jaaMRyFQWQNu2nHIz3+tF+gjM8T/wDIpX3/AFyNM8Mf8i9b/wDXNf5U/wAT/wDIpX3/AFzNM8M/8i9b/wDXNf5V43/M3/7hf+3nX/zC/wDb36GzSAgk4PSl7VzNzqM2l+LoA3NreHypAf4JB91h9RwfoK9DF4qOFiqk/huk32u7J/e0n2vfoY0qTqNxW9n+BtanpOmazYNY6tp9tfWzcmG5iEin3we9eUfFLxZ8Ov2dvhzceL7bwvpsepTt9lsLS1iWKW6mIJC78ZVAASx7AdyQD69NPFb2j3MzhI40Lux7ADJP5V+WPj7xRqXxC8eaj8SfFhluoNQuHbQtFmdhEtuhKJJIoPEShccYMj7ucBjSxVSFNczWp7GS4OpjJunzPkW6T38vwMrxz49+Inxp1qLxB4+1eVdLWQixsLZCsKsTjy7aHPzuehc5/wBpugr3L4FfBKw8W+MoNF1jSpzo+iOLrVzC4EJu8fu7EvjL7FJMmOrOwyAFBtfs5/A3UvF2vzeM/GMl7bvHFtsWKCOSIEYEsSldqYz+7G3aMFgOBX2p4Y8L6H4O8L2vh/w9YR2dhbLhI1JJYnlmZjyzE5JY8knJrxsHGWPrOo3+7g7f4pLf5L8/Q9/Nszp4Cm8Lh9J26bRv+v8Aw/ro3ChbJlUAADAArlfBH/L9/wBfL11d1/x6P9K5TwR/y/f9fL11Y3/kY4X0qflE+Po/7vV/7d/U7GvC/j5/yNvg3/ru/wD6Mir3SuS8YfD7SfGmo6XealdXkL6c5eIW7KA2WU/NkH+6OlezJXRyRdmN+Juh/wDCQfCvV7JEDTJCbiH/AH4zvGPrgj8a8W+FU914z8d+FrS6jc2nhewkILHIZt52MPwMY/4Aa+l2VWQqwBB4IPeuS8F/DvQ/A1xqE2lSXMrXrAsZyp2AEkKuAOOe9TJXY0zxz4pXF34F+K+t31lEfJ8R6PJAxXja7AKW/Arn/gdeu/CnQv8AhH/hNpNq0eyaaP7VKP8Aak+b9BtH4VP42+Hui+OxYf2tLcxGzdmRrcqCwbGVbIPHArq440iiWONQqKAqgdgOlCTuDeh4Z+z8QNd8XjcM+fGcZ/25ad8ctct/ENzo/gDQpUvtSluxLNHAd/lfKVVWI6E7i2OoC5PUVrT/ALPPhKe6luG1XWQ0js5w8fGST/c966zwf8MfCXgmVrjR7FmumBX7TcNvcA9QOABn2FFnaw7q9zyf4vafc6D438EzDU2061tbWK0j1EoHW3dHGZCp4IAKsfYe1bnij4e+K9b0OC18W/Fexl06SZDELi0ihV5CCF2sCMk7jgZ5zXqviXwvo3i3Q30nW7UTwMdykHa0bdmU9jXBaV8APBFhqMdzdm+1OKJsxW126mJB6bQBke3AosK5g/HiL7Pd+CIQ7N5dwy7j1ODEM1d/aN48B6UR1+3n/wBFPXdeMfAGk+NJ9Ll1G5u4DpshkiFuygMSVOGyD/dHSpPG/gbS/Hmj2+napc3cEcE3nK1sygk7SuDkHjBocdwT2OL+Nv8AyQe2/wCu9t/I1L4k8MDxR+zHp9rHFvubXTILqADqSkQyo+q7h+Vdn4r8F6b4u8IJ4dv7i6htkeNw8BUPlBgdQR+lM1u+tvAPwrmnhSS5TTLJYYI2G5pWACIpx6nGfxo5QueO/D69u/iX8Q/DVxfxSG38MaWgmaTpLcZwHH1wh/4Ca+ia80+CPhuXRPh0NRvYtl9qshupfl2kL0QY7DGTj/ar0uiGurCXYzfEERm8N3cQ6smBVLwfOs/hi3IPzKNjD0I4rZuovOs5I/UVxmi3Z0PxTJptwdtteNuiJ6LJ3X8a8XHS+q4+jipfBJOm32bacX6Npx9WjroL2tGdJbr3l8t/w1+R3Nc54nszLAkyD5o3Vx+BFdGORmq92sZty8gJVRkgLuP4DvXp43DxxOHnRltJNenn8jmpTcJqS6HLePtfh0X4fSQnTZdVvtVP9mWGmROY2vJ5VYCPePuKFDMz/wAKKzdq4PwP+z74G8FRR+JfFVtba74hjiVnuJ0xa2uxcLHbQH5UjRQFXdlsAHOTXX6t418MvNHFJp19dT2rMIzsMJjYgqcEkEHBI+hNczLd2ep3BeDwpLISeGknZj+ua+bxvEuD9r7OjOE5dFeT19Iwke5hcJiadFq0oJ7vRX8tZLT8/uOy8FvNeJc6hKx3XUzSv/ID6AcV2VYPhW3MGjrutPspOf3W4Nj8RW9Xt5NhnhsFSpSd2lq9VdvVvVJ6tt6pM8jGVFUrSktr/h02K1/IsWnyyOcKqkk+wrmfAysdPkuCMedI0g+hPFO8ZaizpFoNo2bi65kI/gj7k/Xp+dbOh2a2emIirgAAAe1cyl9azO8fhoxab/vTtp8orX/EjRr2WGs95u/yV/zb/A1K5Pxx4vfwsmkQWzaSt1qd2baN9VvDawIFheVmLhWOcIABjksK6yuN8ZeENV8Q+IdH1XTNR0iA6dHcRtb6rprXsUhl8vDgCWPayiMgdeHNe1K9tDno8nN7+2v5afiVtA+I0N34b+361aKkz3k1taro/m6it+keMzQBI97R8kE7cAjqcgnRj8cadcavEtmDc6a2lf2o15CjyNtaQJGqxqpYlsSHGMgrjHpzE3weUWujvZ6xALyyjuo5nuLR/Kl+0TCeQpHFLH5WHX5V3FQvBBwCNO/+GiS2Fxa6bqcdnC0VlbxWpti0HlW7O5ikUOC6SGRtw3Dt15BhOdjdrD3dn+ff/LU1rXxzpOoz2EWml2kub2Wylhu4pbaWBo4WlfMbpuyAE4OAQ4IJ4BT/AIWJ4WW1vp7i5vbUWIgaZLnT7iJys0nlxMiMgZ1ZwVBUHkGuT0/4f341O/0uJbnTLaK31BYtVhWOLM92Y9rW8auxVYo02Zbac9PWtLTPhfHY3ouWv7SLddWVzLb2FmYISLbeyqqtIxGZH3kkk5HfrSUp9hyp4dfa/q/+X/BNnxd4xj8O+CrfW4Ut1e7uLa2t11ORrONWmkVQZSy7kABJIK54xjNZfh/4jG6ttUl12GwEVpdR2ltdaJcSahFfSMm8xxBYwzSJyGABA65GGxqeN/C2oeJ7XSRp2oafbSaffC9KajYm8hnxFJGFZBIh4Mm4HPVRxXMXHwhNxpVvI2rWf9rR6nJqbuti0VmzSQCBkWCOVWRfLVcESZ3Ali24guXPfQmmqHJ72/z/AK/4c62Px34am/sxYrq5eXU5JYreBbKYyb4nCSK6bMxlGYBt4GOc1U0X4haNqOhi+vpUsnFs19KnzOsNuXYRO7gYUuoDKp5OTgHGaNL8DrpEsMtjfRwNDp09oqxQEL500iyST4LEklkXgk9Otc/bfBqw07wVqXhTTNWkt9LvY7SXyWiMmy8gKHz8l8sr+VEGTI+5wwzQ3O+wKOHtZt9P1v8AhY6f/hYXhcWsk01zewPHcx2jW0+n3EdwJJATGPJKbyGAJBAxweeDinH8UfCdzYzXFncXjmOyub0CaxngVlt+Jk3OgAdDwyfeHpUWi/DuHTLrTr2e4szd2959sne1t5EWciCSKNf3ksjAL5rsMseT2qvc/DOa48Mx6QniGSLbpFzphnW3BO64kR5ZgCcZOwjacj5j16UNz7DjHD3V2/6v5en3mpoPxB0XWdNZpRd2l/BYxX1zZSWc6uqOPvRBow0y7gy7kByR7ipB8QvDJsFuTLqCu142ni1bTrgXAnEXnbDDs3g+XhgcYII55FZOofD/AFfWLW/udV8SwzarceRCksVkYrdbeKXzPIaLzCzLIc+Z843cAYAwbHh/4dw6Dq9tfJfowguru7EENv5Ue+ZY0UKNx2qkaFQOc57YovPsJxoau/8AVvTuXH+I/hNNKsdQW8u5o7yJ5444LCeWVI0ba7yRqheNVbIJcDBGOtdDpuoWmr6NaarYSGW0u4UuIXKldyOoZTg4IyCODXk+r+DvF2jtDo/hRryX7Voi6TdX7wQGFmDyN5u5pg8LhppGOEkDBgAMrmvWrGzh0/S7awt12xW8SwoPRVAA/QU4Sk3qia0KUVem7/5FiuZ8TaIl9aswBz1yvVT2IrpqRlDqVYZBqcRh6eIpSo1VeMlZoxp1JU5KcHZo5Xw14jeSUaLrDBL9BiOQ8C4X1H+16iuivlZ7GRUJyQQCK53XvDMd5GWUEYO5WXhlPYg+tZ9h4rvNJRbTXybm2IxHqMI3cdvMA/mP/r14cMXUyz9xjnen9mp5dp9n/e2fWzO50Y4r36CtLrH9Y9/TddLo4bVLR9IvTFHPEkhPRxlvrjB/OpLS+8QbgYLpG9N0SkfqKl8SfZx4ga7sbqGRro+YGUB/bg0+ys9cdww1ARKOSxRSB+lfm9LD1KeNqYbBurCMX8NJ8ys9m5OaSutdUfTzqReHhUrcjbW81Z+luW+nqem+GLi9n0SM6ikK3HOTD0I7HHY0eIfENvotqqKPPvZuILdTy59T6KO5rAbxb5dnHpuhot/fBQslyV2woe5OOp9hx707RfDstxdNqV7cm7uJeXuG7+y+g7cV+jQx1TEQWEy+Tk0rSqSs1HvqtJT8lonu+j+alQjTk6uIVr6qK0v+qXrr2HeHdHuJ7yTUdQfzbqZt8snb2UewrtVUKoUdBTIIEgiCIAAKkr2sFg6eDpKjS2Xfdt7tvq29WzhrVpVpucv68kFFFFdRkFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB5h8d9H+JfiP4WSeHPhi1rBf38oiu7qe68gxW2CXVGAJ3PwmRyFLYIODXnUGs/tL6TboviL4MeGNZs41CEeHNUW3kVAMALHIzBsAAYwOlfSlHWsp0uZt3O2ljFCmqbpxfW7vf700eB+HtT0HxlezaZb2GpaBrsaeZNoesWptLtF7uqHiVP9uMkeuK0/Ej6V4S0aC68Ya1dukjeVa2EMbSzXbgfcihQF5W+g46kgc167faTp2pmBr6zine3kEsEjL80Lj+JG6qe2R2yOlImkaamtPrAs4jfvGIjcsMyBBzsDHkLnnAwM89a8L/AFXy5TdSNNK+6Tai/WKfK/usdP8Aa1XRXdl6Nr0k1dHz2fE3xz1KPHgD4GR6dZD/AFd14rv0tnPv9mRgy/QsTXQ/BHRfjhonjTxLN8S7XQ4tI1Z/t9vBplyXSzuflWRURslUkHzkbiA4J/iNe4YA7UV7VPDxppRjolslZL7kjCpjlKEoKmlfrq397YUUUV0HAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB/9k=" alt="IWDemy"><i></i><img class="tj" src="data:image/jpeg;base64,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" alt="Tjitra &amp; Associates"></span>
+  <span class="pill">AI First Program</span>
+  <span class="sp"></span>
+  <button class="ibtn" id="themeBtn" aria-label="Ganti tema terang/gelap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg><span class="tx" id="themeTx">Terang</span></button>
+</header>
+<div class="scrim" id="scrim"></div>
+<div class="wrap">
+<aside class="side" id="side" aria-label="Menu modul">
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <div class="lbl" style="margin-top:.4rem">Learning Journey</div>
+    <button class="ibtn xbtn" id="closeBtn" aria-label="Tutup menu">✕</button>
+  </div>
+  <nav id="nav"></nav>
+  <div class="lbl">Learning Outcome</div>
+  <ul class="lo">
+    <li><b>Extract</b> — ubah diskusi AI penting jadi Knowledge Packet + Decision Log.</li>
+    <li><b>Protect</b> — jalankan Confidentiality Gate sebelum upload.</li>
+    <li><b>Operate</b> — mulai Minimum Viable Knowledge OS di platform Anda.</li>
+  </ul>
+  <div class="lbl">Versi</div>
+  <p class="meta">Vers 0.3 · 11 September 2026 · Dr. Hora Tjitra</p>
+  <button class="linkbtn" data-sheet="d-sources">Catatan versi &amp; sumber</button>
+</aside>
+
+<main class="main" id="main">
+<div class="stage" id="stage">
+
+<!-- ================= COVER ================= -->
+<section class="screen" data-mod="0" data-t="Cover" id="s-cover">
+  <div class="cover">
+    <span class="pill">AI First Program</span>
+    <div class="ctitle">AI Knowledge Operating System</div>
+    <div class="csub">Chat itu sementara. Pengetahuan harus bertahan.</div>
+    <div class="cta">
+      <button class="btn" data-go="next">Mulai</button>
+      <button class="btn gh" data-sheet="d-lo">Apa yang akan Anda kuasai</button>
+    </div>
+    <div class="cmeta">Vers 0.3 · 11 September 2026 · Dr. Hora Tjitra</div>
+    <svg class="cloop" viewBox="0 0 400 400" aria-hidden="true">
+      <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(212,168,75,.35)" stroke-width="1.5" stroke-dasharray="4 7"/>
+      <circle cx="200" cy="200" r="96" fill="none" stroke="rgba(255,255,255,.07)"/>
+      <g font-family="JetBrains Mono, monospace" font-size="15" font-weight="700" fill="#D4A84B" text-anchor="middle">
+        <circle cx="200" cy="50" r="7" fill="#D4A84B"/><text x="200" y="30">THINK</text>
+        <circle cx="330" cy="125" r="7" fill="#D4A84B"/><text x="352" y="110">KNOW</text>
+        <circle cx="330" cy="275" r="7" fill="#D4A84B"/><text x="356" y="302">DECIDE</text>
+        <circle cx="200" cy="350" r="7" fill="#D4A84B"/><text x="200" y="382">DO</text>
+        <circle cx="70" cy="275" r="7" fill="#D4A84B"/><text x="46" y="302">LEARN</text>
+        <circle cx="70" cy="125" r="7" fill="#D4A84B"/><text x="48" y="110">UPDATE</text>
+      </g>
+      <text x="200" y="196" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-weight="800" font-size="34" fill="#fff">KOS</text>
+      <text x="200" y="222" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="rgba(255,255,255,.55)">knowledge loop</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ================= LO ================= -->
+<section class="screen" data-mod="0" data-t="Tiga outcome" id="s-lo">
+  <div class="kick"><span class="step">Sebelum mulai</span></div>
+  <h2>Setelah modul ini, Anda bisa melakukan tiga hal.</h2>
+  <div class="grid">
+    <div class="card"><span class="k">1 · Extract</span><h3>Menyimpan hasil pikir</h3><p>Ubah satu diskusi AI penting jadi Knowledge Packet dan satu entri Decision Log — lengkap dengan Status dan Evidence Level.</p></div>
+    <div class="card"><span class="k">2 · Protect</span><h3>Menjaga data</h3><p>Jalankan AI Confidentiality Gate: tentukan Klasifikasi Level 1–4, putuskan boleh/tidak masuk AI, lakukan pseudonymization.</p></div>
+    <div class="card"><span class="k">3 · Operate</span><h3>Menjalankan sistem</h3><p>Pilih setup untuk ChatGPT atau Claude, tentukan lokasi source of truth, mulai Minimum Viable Knowledge OS minggu ini.</p></div>
+  </div>
+  <div class="case"><b>Running case</b>Client D — distributor FMCG regional <span class="ilu">ilustrasi</span>. Satu cerita yang menemani Anda dari Modul 1 sampai 6.</div>
+</section>
+
+<!-- ================= M1 ================= -->
+<section class="screen" data-mod="1" data-t="Why it matters" id="s-1a">
+  <div class="kick"><span class="step">Modul 1 · Why it matters</span></div>
+  <div class="big">Di mana keputusan penting tim Anda minggu lalu?</div>
+  <p class="lead">Kalau jawabannya "ada di salah satu chat", keputusan itu praktis hilang.</p>
+  <div class="case"><b>Client D</b>Diskusi strategi pertumbuhan tersebar di puluhan chat. Tim terus membahas ulang pertanyaan yang sama.</div>
+</section>
+
+<section class="screen" data-mod="1" data-t="Pola fragmentasi" id="s-1b">
+  <div class="kick"><span class="step">Modul 1 · Content</span></div>
+  <h2>Setiap chat berguna. Kumpulan chat justru memecah pengetahuan.</h2>
+  <div class="chain" role="img" aria-label="Alur: pertanyaan, chat, jawaban bagus, chat lain, pengetahuan terfragmentasi">
+    <span>Pertanyaan</span><i>→</i><span>Chat</span><i>→</i><span>Jawaban bagus</span><i>→</i><span>Chat lain…</span><i>→</i><span class="frag">terfragmentasi</span>
+  </div>
+  <div class="chips">
+    <span class="chip">Pertanyaan sama dibahas berulang</span>
+    <span class="chip">Kesimpulan saling bertentangan</span>
+    <span class="chip">Keputusan terkubur di percakapan</span>
+    <span class="chip">Tidak jelas versi mana yang berlaku</span>
+  </div>
+  <button class="more" data-sheet="d-frag">Lihat 9 gejala lengkap</button>
+</section>
+
+<section class="screen" data-mod="1" data-t="Prinsip inti" id="s-1c">
+  <div class="kick"><span class="step">Modul 1 · Content</span></div>
+  <h2>Pisahkan tempat berpikir dari tempat menyimpan.</h2>
+  <div class="quote">Chats are working memory. Markdown files are organizational memory. The Knowledge Base is the source of truth.</div>
+  <div class="grid">
+    <div class="card"><span class="k">Reasoning engine</span><h3>ChatGPT · Claude · Gemini</h3><p>Tempat menganalisis, menantang, menyusun.</p></div>
+    <div class="card"><span class="k">Knowledge repository</span><h3>Obsidian · Notion</h3><p>Tempat knowledge yang sudah disetujui disimpan dan dirawat.</p></div>
+    <div class="card"><span class="k">Temporary workspace</span><h3>Chat</h3><p>Ruang kerja sementara, bukan arsip.</p></div>
+  </div>
+  <button class="more" data-sheet="d-memory">Bukankah AI sekarang punya memory?</button>
+</section>
+
+<section class="screen" data-mod="1" data-t="Decision: maturity" id="s-1d">
+  <div class="kick"><span class="step">Modul 1 · Decision</span></div>
+  <h2>Tim Anda sekarang di Maturity Level berapa?</h2>
+  <p class="dq-lead">Pilih yang paling jujur. Feedback muncul setelah Anda memilih.</p>
+  <div class="q" data-type="single" data-neutral="1">
+    <div class="opts col">
+      <button class="opt" data-fb="<strong>Level 1 — Chat User.</strong> Knowledge masih terfragmentasi. Langkah berikutnya: simpan satu hasil diskusi penting sebagai file Markdown minggu ini.">Level 1 · Chat User<small>Questions → Chats</small></button>
+      <button class="opt" data-fb="<strong>Level 2 — Structured User.</strong> Sebagian knowledge sudah durable. Langkah berikutnya: buat Index dan Decision Log agar file saling terhubung.">Level 2 · Structured User<small>Chats → Summaries → Files</small></button>
+      <button class="opt" data-fb="<strong>Level 3 — Knowledge OS.</strong> Sistem sudah reusable. Langkah berikutnya: jalankan AI roles — Researcher, Challenger, Knowledge Editor — di atas Knowledge Base.">Level 3 · Knowledge OS<small>Chats → MD → Index → Decision Log → Linked Knowledge</small></button>
+      <button class="opt" data-fb="<strong>Level 4 — AI-Augmented.</strong> AI sudah jadi operating layer. Langkah berikutnya: agent — tapi hanya dengan human approval gate (Modul 4).">Level 4 · AI-Augmented Knowledge OS<small>Knowledge Base → multiple AI roles</small></button>
+      <button class="opt" data-fb="<strong>Level 5 — Agentic.</strong> Sistem terus belajar. Fokus Anda sekarang governance: satu agent satu klien, least privilege, approval sebelum aksi.">Level 5 · Agentic Knowledge OS<small>Inputs → Agents → Validation → Human approval → KB</small></button>
+    </div>
+    <div class="fb" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="screen" data-mod="1" data-t="Takeaway" id="s-1e">
+  <div class="take">
+    <div class="kw">Modul 1 · Takeaway</div>
+    <div class="quote">Knowledge belongs in the knowledge base, not inside AI conversations.<small>Chat untuk berpikir. File untuk mengingat.</small></div>
+  </div>
+</section>
+
+<!-- ================= M2 ================= -->
+<section class="screen" data-mod="2" data-t="Why it matters" id="s-2a">
+  <div class="kick"><span class="step">Modul 2 · Why it matters</span></div>
+  <div class="big">Kapan ide menarik berubah jadi kebijakan — tanpa ada yang memutuskan?</div>
+  <p class="lead">Saat hipotesis di chat terbaca seperti keputusan. Struktur mencegah itu terjadi.</p>
+</section>
+
+<section class="screen" data-mod="2" data-t="4 Layers" id="s-2b">
+  <div class="kick"><span class="step">Modul 2 · Content</span></div>
+  <h2>Empat layer. Satu loop.</h2>
+  <div class="grid">
+    <button class="card" data-sheet="d-l1"><span class="k">Layer 1 · Thinking</span><h3>Conversation</h3><p>Chat, branch, brainstorming, riset.</p></button>
+    <button class="card" data-sheet="d-l2"><span class="k">Layer 2 · Knowing</span><h3>Knowledge</h3><p>Markdown, research brief, framework.</p></button>
+    <button class="card" data-sheet="d-l3"><span class="k">Layer 3 · Deciding</span><h3>Decisions</h3><p>Decision Log, asumsi, prioritas, kebijakan.</p></button>
+    <button class="card" data-sheet="d-l4"><span class="k">Layer 4 · Doing</span><h3>Execution</h3><p>Proyek, task, dashboard, presentasi.</p></button>
+  </div>
+  <div class="flow">
+    <div><b>THINK</b></div><div><b>KNOW</b></div><div><b>DECIDE</b></div><div><b>DO</b></div><div><b>LEARN</b></div><div><b>UPDATE</b></div>
+  </div>
+  <button class="more" data-sheet="d-roles">Siapa mengerjakan apa? AI roles</button>
+</section>
+
+<section class="screen" data-mod="2" data-t="5 prinsip" id="s-2c">
+  <div class="kick"><span class="step">Modul 2 · Content</span></div>
+  <h2>Lima aturan yang membuat sistem ini dipercaya.</h2>
+  <div class="grid">
+    <button class="card" data-sheet="d-ssot"><span class="k">1</span><h3>Single Source of Truth</h3><p>Satu master note per topik.</p></button>
+    <div class="card"><span class="k">2</span><h3>Atomic Knowledge</h3><p>Satu file, satu konsep. Bukan Everything.md.</p></div>
+    <div class="card"><span class="k">3</span><h3>Source of truth eksplisit</h3><p>Chat lama berbeda? File MD terbaru yang menang.</p></div>
+    <div class="card"><span class="k">4</span><h3>Keputusan diperlakukan khusus</h3><p>Knowledge ≠ decision. Ada Decision Log.</p></div>
+    <div class="card"><span class="k">5</span><h3>Human Accountability</h3><p>AI menganalisis dan merekomendasikan. Manusia memutuskan.</p></div>
+  </div>
+</section>
+
+<section class="screen" data-mod="2" data-t="Di mana disimpan?" id="s-2c2">
+  <div class="kick"><span class="step">Modul 2 · Content</span><span class="tag adapt">Adaptasi</span></div>
+  <h2>Source of truth adalah file-nya, bukan aplikasinya.</h2>
+  <div class="ladder">
+    <div class="hl"><b>Format</b>Markdown (.md) — ini yang menjadi source of truth. Portabel, lolos AI Transfer Test.</div>
+    <div><b>Editor</b>Obsidian, atau editor teks lain — cara Anda membaca dan menulis.</div>
+    <div><b>Storage</b>Local · iCloud · Google Drive · Obsidian Sync — tempat file tinggal.</div>
+  </div>
+  <div class="grid">
+    <button class="card" data-sheet="d-st-local"><span class="k">Paling privat</span><h3>Local folder</h3><p>Satu komputer. Wajib backup.</p></button>
+    <button class="card" data-sheet="d-st-icloud"><span class="k">Ekosistem Apple</span><h3>iCloud</h3><p>Mac + iPhone/iPad. Tidak untuk Android.</p></button>
+    <button class="card" data-sheet="d-st-drive"><span class="k">Lintas platform</span><h3>Google Drive</h3><p>Mac/PC + Android. Tidak langsung di iPad.</p></button>
+    <button class="card" data-sheet="d-st-osync"><span class="k">Resmi, berbayar</span><h3>Obsidian Sync</h3><p>Semua perangkat, terenkripsi.</p></button>
+  </div>
+  <p class="note">Notion tetap team layer: knowledge yang sudah approved dan sanitized.</p>
+</section>
+
+<section class="screen" data-mod="2" data-t="Tiga aturan storage" id="s-2c3">
+  <div class="kick"><span class="step">Modul 2 · Content</span><span class="tag adapt">Adaptasi</span></div>
+  <h2>Simpan di mana saja — asal tiga aturan ini dijaga.</h2>
+  <ol class="steps">
+    <li><span><b>Satu lokasi canonical.</b> Jangan taruh vault yang sama di dua layanan sync. Hasilnya "conflicted copy" — masalah Final-V7 dalam wujud baru.</span></li>
+    <li><span><b>Backup bukan source of truth.</b> Salinan cadangan hanya dibaca, tidak diedit.</span></li>
+    <li><span><b>Simpan .md, bukan Google Docs.</b> Google Docs untuk deliverable klien, bukan untuk note canonical.</span></li>
+  </ol>
+  <div class="case"><b>Governance</b>Data Level 3 butuh approved storage. Folder Client Restricted jangan ikut ke storage yang bisa dijangkau AI connector.</div>
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+    <button class="more" data-sheet="d-travel">Vault di komputer, Anda sedang travel?</button>
+    <button class="more" data-sheet="d-noconn">Obsidian tanpa connector resmi — masih layak?</button>
+  </div>
+</section>
+
+<section class="screen" data-mod="2" data-t="Status & Evidence" id="s-2d">
+  <div class="kick"><span class="step">Modul 2 · Content</span></div>
+  <h2>Setiap dokumen punya status. Setiap klaim punya bobot bukti.</h2>
+  <div class="two">
+    <div><h3>Knowledge Status</h3>
+      <div class="ladder"><div><b>DRAFT</b></div><div><b>DISCUSSION</b></div><div><b>PROPOSED</b></div><div><b>VALIDATED</b></div><div class="hl"><b>APPROVED</b>baru boleh jadi acuan</div><div><b>SUPERSEDED</b></div><div><b>ARCHIVED</b></div></div></div>
+    <div><h3>Evidence Levels</h3>
+      <div class="ladder"><div><b>E1</b>Direct evidence</div><div><b>E2</b>Reliable secondary evidence</div><div><b>E3</b>Expert interpretation</div><div class="hl"><b>E4</b>Working hypothesis</div><div><b>E5</b>Speculation</div></div></div>
+  </div>
+  <div class="case"><b>Client D</b>Klaim: "AI bisa mengurangi beban administrasi 20%" <span class="ilu">ilustrasi</span> → <strong>E4 · Working hypothesis · belum divalidasi.</strong> Penting saat AI menghasilkan kesimpulan yang masuk akal tapi belum terbukti.</div>
+</section>
+
+<section class="screen" data-mod="2" data-t="Decision: sortir" id="s-2e">
+  <div class="kick"><span class="step">Modul 2 · Decision</span></div>
+  <h2>Tiga kalimat dari rapat Client D. Masuk ke mana?</h2>
+  <div class="q" data-type="single">
+    <div class="qt">"Opsi A tampak punya economics paling kuat."</div>
+    <div class="opts">
+      <button class="opt" data-ok="1" data-fb="<strong>Tepat.</strong> Ini temuan analisis. Masuk Knowledge (research brief). Status tertingginya VALIDATED — belum keputusan.">Knowledge</button>
+      <button class="opt" data-ok="0" data-fb="<strong>Belum.</strong> Kata &quot;tampak&quot; menandai temuan, bukan pilihan. Kalau dicatat sebagai keputusan, tim bisa mengeksekusi sesuatu yang belum disetujui siapa pun.">Decision</button>
+    </div><div class="fb" aria-live="polite"></div>
+  </div>
+  <div class="q" data-type="single">
+    <div class="qt">"Kami memilih Opsi A."</div>
+    <div class="opts">
+      <button class="opt" data-ok="0" data-fb="<strong>Belum.</strong> Ada kata kerja memilih — ini pilihan yang sudah diambil. Tempatnya Decision Log, bukan sekadar catatan.">Knowledge</button>
+      <button class="opt" data-ok="1" data-fb="<strong>Tepat.</strong> Masuk Decision Log: ID, tanggal, context, opsi, rationale, owner, status APPROVED.">Decision</button>
+    </div><div class="fb" aria-live="polite"></div>
+  </div>
+  <div class="q" data-type="single">
+    <div class="qt">"AI bisa mengurangi beban administrasi 20%." <span class="ilu">ilustrasi</span></div>
+    <div class="opts">
+      <button class="opt" data-ok="0" data-fb="<strong>Hati-hati.</strong> Belum ada data langsung. Kalau ditulis E1, angka ini bisa masuk business case sebagai fakta.">E1 · Direct evidence</button>
+      <button class="opt" data-ok="1" data-fb="<strong>Tepat.</strong> E4 — Working hypothesis. Tulis apa adanya, lalu tentukan cara mengujinya sebelum dipakai untuk keputusan.">E4 · Working hypothesis</button>
+    </div><div class="fb" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="screen" data-mod="2" data-t="Takeaway" id="s-2f">
+  <div class="take">
+    <div class="kw">Modul 2 · Takeaway</div>
+    <div class="quote">Knowledge dan decision itu berbeda.<small>Catat terpisah. Beri status. Beri bobot bukti.</small></div>
+  </div>
+</section>
+
+<!-- ================= M3 ================= -->
+<section class="screen" data-mod="3" data-t="Why it matters" id="s-3a">
+  <div class="kick"><span class="step">Modul 3 · Why it matters</span></div>
+  <div class="big">Dua jam diskusi dengan AI. Apa yang tersisa besok pagi?</div>
+  <p class="lead">Tanpa prosedur: satu chat panjang yang tidak akan dibuka lagi. Ini prosedur operasi paling penting di seluruh sistem.</p>
+</section>
+
+<section class="screen" data-mod="3" data-t="Pipeline" id="s-3b">
+  <div class="kick"><span class="step">Modul 3 · Content</span></div>
+  <h2>Chat-to-Knowledge Pipeline</h2>
+  <div class="flow">
+    <div><b>1 CHAT</b><span>diskusi</span></div><div><b>2 EXTRACT</b><span>pilah</span></div><div><b>3 STRUCTURE</b><span>susun MD</span></div><div><b>4 CHALLENGE</b><span>uji</span></div><div><b>5 VALIDATE</b><span>setujui</span></div><div><b>6 PUBLISH</b><span>simpan</span></div>
+  </div>
+  <p class="lead">Jangan minta "Summarize this chat." Minta AI memilah jenis knowledge-nya.</p>
+  <div class="chips">
+    <span class="chip">New facts</span><span class="chip">Insights</span><span class="chip">Decisions</span><span class="chip">Assumptions</span><span class="chip">Hypotheses</span><span class="chip">Recommendations</span><span class="chip">Open questions</span><span class="chip">Risks</span><span class="chip">Changes to existing knowledge</span>
+  </div>
+  <button class="more" data-sheet="d-p-extract">Lihat &amp; salin Extract prompt</button>
+</section>
+
+<section class="screen" data-mod="3" data-t="Knowledge Packet" id="s-3c">
+  <div class="kick"><span class="step">Modul 3 · Content</span></div>
+  <h2>Yang dipindahkan antar chat: Knowledge Packet, bukan transcript.</h2>
+  <div class="bmap">
+    <div class="col">
+      <div class="br">Branch A · Organic Growth <em>PACKET</em></div>
+      <div class="br">Branch B · Acquisition <em>PACKET</em></div>
+      <div class="br">Branch C · Partnership <em>PACKET</em></div>
+    </div>
+    <div class="arr"><span class="ad">→</span><span class="am">↓</span></div>
+    <div class="main"><b>Main Strategy</b><span>merge + cek konflik</span></div>
+  </div>
+  <div class="case"><b>Client D</b>Tiga opsi dieksplorasi di tiga branch. Yang kembali ke chat utama hanya kesimpulan, bukti, implikasi keputusan, dan perubahan yang direkomendasikan.</div>
+  <button class="more" data-sheet="d-packet">Isi Knowledge Packet + Merge prompt</button>
+</section>
+
+<section class="screen" data-mod="3" data-t="Delta" id="s-3d">
+  <div class="kick"><span class="step">Modul 3 · Content</span></div>
+  <h2>Update yang berubah saja: knowledge delta.</h2>
+  <div class="two">
+    <div class="ladder">
+      <div><b>BEFORE</b>Ekspansi mulai 2029.</div>
+      <div class="hl"><b>DELTA</b>Keputusan baru: persiapan ekspansi mulai 2028.</div>
+      <div><b>IMPACT</b>Update file terkait saja.</div>
+    </div>
+    <div><h3>Enam pertanyaan delta</h3>
+      <div class="chips"><span class="chip">Apa yang berubah?</span><span class="chip">Apa yang baru?</span><span class="chip">Apa yang usang?</span><span class="chip">Apa yang bertentangan?</span><span class="chip">Keputusan apa yang berubah?</span><span class="chip">Dokumen apa yang perlu di-update?</span></div>
+    </div>
+  </div>
+  <button class="more" data-sheet="d-dec027">Contoh entri Decision Log: DEC-027</button>
+</section>
+
+<section class="screen" data-mod="3" data-t="Ritme" id="s-3e">
+  <div class="kick"><span class="step">Modul 3 · Content</span></div>
+  <h2>Tidak perlu mendokumentasikan semua. Cukup ritme.</h2>
+  <div class="grid">
+    <button class="card" data-sheet="d-daily"><span class="k">Saat penting</span><h3>Extract</h3><p>Di akhir diskusi besar: buat Knowledge Packet.</p></button>
+    <button class="card" data-sheet="d-weekly"><span class="k">Mingguan</span><h3>Maintenance</h3><p>Collect → Classify → Deduplicate → Validate → Update → Link → Archive.</p></button>
+    <button class="card" data-sheet="d-monthly"><span class="k">Bulanan</span><h3>Knowledge Audit</h3><p>Coverage, consistency, freshness, decision integrity.</p></button>
+  </div>
+  <div class="case"><b>AI Transfer Test</b>Berikan file MD Anda ke AI lain. Bisakah ia memahami strategi, keputusan, asumsi, risiko, dan pertanyaan terbuka — tanpa membaca chat lama? Kalau tidak, Knowledge OS Anda belum lengkap.</div>
+</section>
+
+<section class="screen" data-mod="3" data-t="Decision: delta" id="s-3f">
+  <div class="kick"><span class="step">Modul 3 · Decision</span></div>
+  <h2>Keputusan baru di Client D: persiapan ekspansi dimulai 2028, bukan 2029. File mana yang harus di-update?</h2>
+  <p class="dq-lead">Pilih semua yang menurut Anda perlu, lalu cek.</p>
+  <div class="q" data-type="multi" data-fb-ok="<strong>Empat file.</strong> Roadmap, Expansion-Strategy, dan Organization adalah dampak langsung. Decision-Log wajib ikut — aturan merge: update Decision Log setiap kali keputusan berubah, dan tandai keputusan lama SUPERSEDED. Vision dan Glossary tidak tersentuh: tanggal persiapan tidak mengubah arah atau istilah." data-fb-no="<strong>Belum pas.</strong> Merah = tidak perlu di-update. Garis putus-putus = file yang terlewat. Kuncinya: update hanya file yang isinya berubah — dan jangan pernah lupa Decision Log saat keputusan berubah.">
+    <div class="opts">
+      <button class="opt" data-ok="1">Roadmap.md</button>
+      <button class="opt" data-ok="1">Expansion-Strategy.md</button>
+      <button class="opt" data-ok="1">Organization.md</button>
+      <button class="opt" data-ok="1">Decision-Log.md</button>
+      <button class="opt" data-ok="0">Vision.md</button>
+      <button class="opt" data-ok="0">Glossary.md</button>
+    </div>
+    <button class="check">Cek jawaban</button>
+    <div class="fb" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="screen" data-mod="3" data-t="Takeaway" id="s-3g">
+  <div class="take">
+    <div class="kw">Modul 3 · Takeaway</div>
+    <div class="quote">Merge the knowledge, not the transcript.<small>Update delta-nya. Jangan tulis ulang semuanya.</small></div>
+  </div>
+</section>
+
+<!-- ================= M4 ================= -->
+<section class="screen" data-mod="4" data-t="Why it matters" id="s-4a">
+  <div class="kick"><span class="step">Modul 4 · Why it matters</span></div>
+  <div class="big">Data klien siapa yang Anda tempel ke chat AI minggu ini?</div>
+  <p class="lead">Knowledge OS hanya seaman titik terlemahnya — storage, sharing, atau akses. Governance AI setara seriusnya dengan governance keuangan dan kerahasiaan klien.</p>
+</section>
+
+<section class="screen" data-mod="4" data-t="Klasifikasi 1–4" id="s-4b">
+  <div class="kick"><span class="step">Modul 4 · Content</span></div>
+  <h2>Empat level informasi. Empat aturan berbeda.</h2>
+  <div class="grid">
+    <button class="card" data-sheet="d-c1"><span class="k">Klasifikasi Level 1</span><h3>Public</h3><p>Website, laporan publik, artikel terbit. Boleh di AI yang disetujui.</p></button>
+    <button class="card" data-sheet="d-c2"><span class="k">Klasifikasi Level 2</span><h3>Internal</h3><p>Materi internal, SOP umum, ringkasan anonim. Akun AI bisnis.</p></button>
+    <button class="card" data-sheet="d-c3"><span class="k">Klasifikasi Level 3</span><h3>Confidential</h3><p>Strategi klien, harga, desain organisasi. Business/Enterprise + pseudonymization.</p></button>
+    <button class="card" data-sheet="d-c4"><span class="k">Klasifikasi Level 4</span><h3>Restricted</h3><p>Asesmen psikologis mentah, data kesehatan, password. Jangan ke AI chat umum.</p></button>
+  </div>
+</section>
+
+<section class="screen" data-mod="4" data-t="Confidentiality Gate" id="s-4c">
+  <div class="kick"><span class="step">Modul 4 · Content</span></div>
+  <h2>AI Confidentiality Gate: delapan pertanyaan sebelum upload.</h2>
+  <ol class="steps">
+    <li>Siapa pemilik informasi ini?</li>
+    <li>Ada data personal, confidential, privileged, atau restricted?</li>
+    <li>Saya punya wewenang memprosesnya di AI eksternal?</li>
+    <li>Nama, angka, lokasi, dan identitas bisa dihapus?</li>
+    <li>Saya hanya membagikan yang minimum diperlukan?</li>
+    <li>Platform dan akun ini disetujui untuk klasifikasi ini?</li>
+    <li>Kombinasi detailnya masih bisa mengidentifikasi klien atau orang?</li>
+    <li>Output-nya aman disimpan, dibagikan, dipublikasikan?</li>
+  </ol>
+  <div class="case"><b>Aturan default</b>Jika ragu, jangan upload data mentahnya.</div>
+</section>
+
+<section class="screen" data-mod="4" data-t="Pseudonymization" id="s-4d">
+  <div class="kick"><span class="step">Modul 4 · Content</span></div>
+  <h2>Pseudonymization: kode stabil, peta disimpan terpisah.</h2>
+  <table class="map">
+    <thead><tr><th>Asli</th><th>Kode</th></tr></thead>
+    <tbody>
+      <tr><td>Nama perusahaan</td><td class="mono">Client D</td></tr>
+      <tr><td>Nama principal</td><td class="mono">Principal P1</td></tr>
+      <tr><td>CEO</td><td class="mono">Executive E1</td></tr>
+      <tr><td>Nama karyawan</td><td class="mono">Participant 07</td></tr>
+      <tr><td>Kota</td><td class="mono">Region R1</td></tr>
+      <tr><td>Revenue aktual</td><td class="mono">Revenue Index 100</td></tr>
+    </tbody>
+  </table>
+  <div class="case"><b>Dua catatan</b>Peta identitas disimpan di file restricted dan tidak pernah di-upload ke AI. Pseudonymization mengurangi risiko — tidak menjamin anonim.</div>
+</section>
+
+<section class="screen" data-mod="4" data-t="Agentic governance" id="s-4e">
+  <div class="kick"><span class="step">Modul 4 · Content</span></div>
+  <h2>Agent bisa bertindak sendiri. Karena itu aksesnya dipersempit.</h2>
+  <div class="flow">
+    <div><b>1</b><span>One agent</span></div><div><b>2</b><span>One purpose</span></div><div><b>3</b><span>One client</span></div><div><b>4</b><span>One approved repository</span></div><div><b>5</b><span>Minimum access</span></div><div><b>6</b><span>Human approval</span></div>
+  </div>
+  <div class="grid">
+    <div class="card"><span class="k">Default</span><h3>Read-only</h3><p>Tidak ada akses universal ke semua klien.</p></div>
+    <div class="card"><span class="k">Wajib approval</span><h3>Sebelum aksi</h3><p>Kirim email, publish, hapus, pindah file, update database, share eksternal.</p></div>
+  </div>
+  <button class="more" data-sheet="d-agents">Arsitektur agent yang disarankan</button>
+</section>
+
+<section class="screen" data-mod="4" data-t="Decision: klasifikasi" id="s-4f">
+  <div class="kick"><span class="step">Modul 4 · Decision</span></div>
+  <h2>Empat berkas di meja Anda. Level berapa masing-masing? <span class="ilu">ilustrasi</span></h2>
+  <div class="q" data-type="single"><div class="qt">Laporan tahunan yang sudah dipublikasikan sebuah perusahaan energi</div>
+    <div class="opts"><button class="opt" data-ok="1" data-fb="<strong>Level 1 · Public.</strong> Laporan publik. Boleh diproses di AI yang disetujui.">Level 1</button><button class="opt" data-ok="0" data-fb="<strong>Terlalu ketat.</strong> Sudah dipublikasikan — Level 1 Public.">Level 2</button><button class="opt" data-ok="0" data-fb="<strong>Terlalu ketat.</strong> Laporan yang sudah terbit adalah Level 1 Public.">Level 3</button><button class="opt" data-ok="0" data-fb="<strong>Terlalu ketat.</strong> Tidak ada data restricted di laporan publik.">Level 4</button></div><div class="fb" aria-live="polite"></div></div>
+  <div class="q" data-type="single"><div class="qt">SOP penerimaan barang di gudang Client D (tanpa data klien)</div>
+    <div class="opts"><button class="opt" data-ok="0" data-fb="<strong>Terlalu longgar.</strong> SOP internal belum tentu untuk publik — Level 2 Internal.">Level 1</button><button class="opt" data-ok="1" data-fb="<strong>Level 2 · Internal.</strong> SOP umum non-sensitif. Pakai akun AI bisnis dan workspace tim yang disetujui.">Level 2</button><button class="opt" data-ok="0" data-fb="<strong>Terlalu ketat.</strong> Tidak ada harga, strategi, atau data orang — Level 2 Internal.">Level 3</button><button class="opt" data-ok="0" data-fb="<strong>Terlalu ketat.</strong> Level 2 Internal.">Level 4</button></div><div class="fb" aria-live="polite"></div></div>
+  <div class="q" data-type="single"><div class="qt">Struktur harga dan diskon Client D ke principal</div>
+    <div class="opts"><button class="opt" data-ok="0" data-fb="<strong>Berisiko.</strong> Pricing adalah Level 3 Confidential.">Level 1</button><button class="opt" data-ok="0" data-fb="<strong>Berisiko.</strong> Pricing adalah Level 3 Confidential — butuh akun Business/Enterprise dan pseudonymization.">Level 2</button><button class="opt" data-ok="1" data-fb="<strong>Level 3 · Confidential.</strong> Boleh dengan akun Business/Enterprise, data minimization, pseudonymization, dan izin klien bila perlu.">Level 3</button><button class="opt" data-ok="0" data-fb="<strong>Cukup Level 3.</strong> Pricing masuk Confidential; masih bisa diproses dengan syarat ketat.">Level 4</button></div><div class="fb" aria-live="polite"></div></div>
+  <div class="q" data-type="single"><div class="qt">Berkas klaim nasabah asuransi berisi riwayat kesehatan</div>
+    <div class="opts"><button class="opt" data-ok="0" data-fb="<strong>Berbahaya.</strong> Informasi kesehatan adalah Level 4 Restricted.">Level 1</button><button class="opt" data-ok="0" data-fb="<strong>Berbahaya.</strong> Level 4 Restricted.">Level 2</button><button class="opt" data-ok="0" data-fb="<strong>Belum cukup.</strong> Informasi kesehatan teridentifikasi adalah Level 4 Restricted, bukan Confidential.">Level 3</button><button class="opt" data-ok="1" data-fb="<strong>Level 4 · Restricted.</strong> Jangan upload ke AI chat umum. Pakai sanitized excerpt, contoh sintetis, lingkungan privat yang disetujui klien — atau analisis manusia.">Level 4</button></div><div class="fb" aria-live="polite"></div></div>
+</section>
+
+<section class="screen" data-mod="4" data-t="Takeaway" id="s-4g">
+  <div class="take">
+    <div class="kw">Modul 4 · Takeaway</div>
+    <div class="quote">If uncertain, do not upload the raw information.<small>AI merekomendasikan. Manusia memutuskan, menyetujui, dan tetap bertanggung jawab.</small></div>
+  </div>
+</section>
+
+<!-- ================= M5 ================= -->
+<section class="screen" data-mod="5" data-t="Why it matters" id="s-5a">
+  <div class="kick"><span class="step">Modul 5 · Case A: ChatGPT · Why it matters</span></div>
+  <div class="big">Tiga AI, tiga versi strategi. Mana yang final?</div>
+  <p class="lead">Tanpa pembagian peran, tidak ada. Case ini menjalankan sistem generik dengan ChatGPT sebagai pemimpin.</p>
+</section>
+
+<section class="screen" data-mod="5" data-t="Peta ekosistem" id="s-5b">
+  <div class="kick"><span class="step">Modul 5 · Content</span></div>
+  <h2>Satu memimpin, satu menantang, satu mengeksekusi.</h2>
+  <div class="grid">
+    <button class="card" data-sheet="d-gpt"><span class="k">Lead</span><h3>ChatGPT</h3><p>Thinking partner utama dan integration engine.</p></button>
+    <button class="card" data-sheet="d-claude-rev"><span class="k">Challenge</span><h3>Claude</h3><p>Reviewer independen: logika, celah, red-team.</p></button>
+    <button class="card" data-sheet="d-gemini"><span class="k">Operationalize</span><h3>Gemini</h3><p>Asisten tim di Google Workspace.</p></button>
+    <button class="card" data-sheet="d-obs"><span class="k">Personal canonical</span><h3>Obsidian</h3><p>Knowledge pribadi dan strategis yang disetujui.</p></button>
+    <button class="card" data-sheet="d-notion"><span class="k">Team execution</span><h3>Notion</h3><p>Wiki tim, SOP, PMO, proyek.</p></button>
+    <button class="card" data-sheet="d-keep"><span class="k">Capture &amp; delivery</span><h3>Keep · iCloud · Drive</h3><p>Tangkap ide, sinkronisasi, kirim ke klien.</p></button>
+  </div>
+</section>
+
+<section class="screen" data-mod="5" data-t="Tiga alur" id="s-5c">
+  <div class="kick"><span class="step">Modul 5 · Content</span></div>
+  <h2>Tiga alur kerja, sesuai taruhannya.</h2>
+  <div class="ladder">
+    <div><b>Standard</b>ChatGPT → Obsidian</div>
+    <div class="hl"><b>High-stakes</b>ChatGPT → Claude Review → ChatGPT Integration → Obsidian canonical note</div>
+    <div><b>Team</b>Obsidian → versi approved &amp; sanitized → Notion → Gemini &amp; tim</div>
+  </div>
+  <div class="case"><b>Hindari</b>Meminta semua model membuat versi strategi lengkap masing-masing — kecuali memang sengaja triangulasi.</div>
+</section>
+
+<section class="screen" data-mod="5" data-t="Fitur kunci" id="s-5d">
+  <div class="kick"><span class="step">Modul 5 · Content</span></div>
+  <h2>Empat fitur ChatGPT yang menjalankan sistem ini.</h2>
+  <div class="grid">
+    <div class="card"><span class="k">Pemisahan klien</span><h3>Projects</h3><p>Satu project per klien. Pilih project-only memory agar konteks tidak bocor antar klien.</p></div>
+    <div class="card"><span class="k">Specialist thinking room</span><h3>Branch in new chat</h3><p>Eksplorasi opsi tanpa mengganggu diskusi utama.</p></div>
+    <div class="card"><span class="k">Artifact-centric</span><h3>ChatGPT Work</h3><p>Agent yang bekerja di atas file dan apps untuk tugas multi-langkah.</p></div>
+    <div class="card"><span class="k">Implementasi</span><h3>Codex</h3><p>Saat KOS terhubung ke software: dashboard, search, automation.</p></div>
+  </div>
+  <div class="quote" style="font-size:clamp(1.1rem,2.6vw,1.5rem)">The file is the persistent object; the conversation is the working interface.</div>
+  <button class="more" data-sheet="d-work">Struktur folder kerja</button>
+</section>
+
+<section class="screen" data-mod="5" data-t="Prompt library" id="s-5e">
+  <div class="kick"><span class="step">Modul 5 · Content</span></div>
+  <h2>Enam prompt yang Anda pakai berulang.</h2>
+  <div class="grid">
+    <button class="card" data-sheet="d-p-extract"><span class="k">Extract</span><p>Ambil knowledge yang durable dari diskusi.</p></button>
+    <button class="card" data-sheet="d-p-merge"><span class="k">Merge</span><p>Gabungkan Knowledge Packet tanpa menimpa keputusan.</p></button>
+    <button class="card" data-sheet="d-p-challenge"><span class="k">Challenge</span><p>Serang asumsi dan cari bukti yang hilang.</p></button>
+    <button class="card" data-sheet="d-p-update"><span class="k">Update</span><p>Hasilkan knowledge delta.</p></button>
+    <button class="card" data-sheet="d-p-audit"><span class="k">Audit</span><p>Cek kontradiksi, duplikat, file usang.</p></button>
+    <button class="card" data-sheet="d-p-transfer"><span class="k">Transfer</span><p>Packet mandiri untuk sesi atau AI lain.</p></button>
+  </div>
+</section>
+
+<section class="screen" data-mod="5" data-t="Decision: routing" id="s-5f">
+  <div class="kick"><span class="step">Modul 5 · Decision</span></div>
+  <h2>Empat tugas Client D minggu ini. Ke mana masing-masing?</h2>
+  <div class="q" data-type="single"><div class="qt">Menguji celah logika draft Growth-Strategy sebelum dibawa ke direksi</div>
+    <div class="opts"><button class="opt" data-ok="0" data-fb="<strong>Kurang independen.</strong> ChatGPT yang menyusun draft; ia bukan penantang terbaik untuk draft-nya sendiri.">ChatGPT</button><button class="opt" data-ok="1" data-fb="<strong>Claude.</strong> Independent challenge. Kirim hanya draft terstruktur yang perlu direview — bukan seluruh percakapan mentah.">Claude</button><button class="opt" data-ok="0" data-fb="<strong>Bukan perannya.</strong> Gemini untuk eksekusi tim di Workspace.">Gemini</button><button class="opt" data-ok="0" data-fb="<strong>Terlalu dini.</strong> Notion untuk knowledge yang sudah approved.">Notion</button></div><div class="fb" aria-live="polite"></div></div>
+  <div class="q" data-type="single"><div class="qt">Merangkum rapat mingguan tim di Google Meet dan menindaklanjuti lewat Gmail</div>
+    <div class="opts"><button class="opt" data-ok="0" data-fb="<strong>Bisa, tapi bukan jalur utamanya.</strong> Tugas Workspace = Gemini.">ChatGPT</button><button class="opt" data-ok="0" data-fb="<strong>Bukan perannya.</strong> Claude untuk review independen.">Claude</button><button class="opt" data-ok="1" data-fb="<strong>Gemini.</strong> Team productivity di Workspace — dengan akun Workspace yang dikelola, bukan akun personal.">Gemini</button><button class="opt" data-ok="0" data-fb="<strong>Belum.</strong> Rangkuman dibuat dulu, baru hasil yang disetujui masuk Notion.">Notion</button></div><div class="fb" aria-live="polite"></div></div>
+  <div class="q" data-type="single"><div class="qt">SOP gudang yang sudah disetujui, siap dipakai tim</div>
+    <div class="opts"><button class="opt" data-ok="0" data-fb="<strong>Chat bukan arsip.</strong> Knowledge approved harus hidup di repository tim.">ChatGPT</button><button class="opt" data-ok="0" data-fb="<strong>Bukan perannya.</strong> Claude tidak boleh jadi second repository.">Claude</button><button class="opt" data-ok="0" data-fb="<strong>Bukan source of truth.</strong> Gemini mendukung eksekusi, bukan menyimpan.">Gemini</button><button class="opt" data-ok="1" data-fb="<strong>Notion.</strong> Approved team knowledge, di permission zone yang tepat.">Notion</button></div><div class="fb" aria-live="polite"></div></div>
+  <div class="q" data-type="single"><div class="qt">Menggabungkan hasil review ke versi master strategi</div>
+    <div class="opts"><button class="opt" data-ok="1" data-fb="<strong>ChatGPT.</strong> Integrator menghasilkan versi final, lalu disimpan sebagai canonical note di Obsidian.">ChatGPT</button><button class="opt" data-ok="0" data-fb="<strong>Belum.</strong> Output Claude dikembalikan ke integrator.">Claude</button><button class="opt" data-ok="0" data-fb="<strong>Bukan perannya.</strong> Integrasi strategi di ChatGPT.">Gemini</button><button class="opt" data-ok="0" data-fb="<strong>Terlalu dini.</strong> Integrasi dulu, simpan di Obsidian, baru versi sanitized ke Notion.">Notion</button></div><div class="fb" aria-live="polite"></div></div>
+</section>
+
+<section class="screen" data-mod="5" data-t="Takeaway" id="s-5g">
+  <div class="take">
+    <div class="kw">Modul 5 · Takeaway</div>
+    <div class="quote">One model leads, another challenges, and the third operationalizes.<small>Knowledge tetap tinggal di Obsidian dan Notion — bukan di ketiga AI itu.</small></div>
+  </div>
+</section>
+
+<!-- ================= M6 ================= -->
+<section class="screen" data-mod="6" data-t="Why it matters" id="s-6a">
+  <div class="kick"><span class="step">Modul 6 · Case B: Claude · Why it matters</span><span class="tag adapt">Adaptasi prinsip canon</span></div>
+  <div class="big">Organisasi Anda memakai Claude. Apa yang berubah?</div>
+  <p class="lead">Arsitekturnya tidak berubah. Yang berubah hanya siapa yang memimpin.</p>
+  <div class="case"><b>Dasar dari canon</b>"One model leads, another challenges." · "The knowledge must remain independent of any single AI provider."</div>
+</section>
+
+<section class="screen" data-mod="6" data-t="Peran baru" id="s-6b">
+  <div class="kick"><span class="step">Modul 6 · Content</span><span class="tag adapt">Adaptasi</span></div>
+  <h2>Claude memimpin. Penantang tetap wajib ada.</h2>
+  <div class="grid">
+    <div class="card"><span class="k">Lead</span><h3>Claude</h3><p>Thinking partner utama dan integrator versi final.</p></div>
+    <button class="card" data-sheet="d-challenger"><span class="k">Challenge</span><h3>Model lain — atau konteks terpisah</h3><p>ChatGPT/Gemini, atau Claude di Project "Critic" terpisah.</p></button>
+    <div class="card"><span class="k">Operationalize</span><h3>Gemini &amp; tim</h3><p>Tetap di Workspace, untuk eksekusi tim.</p></div>
+    <div class="card"><span class="k">Tidak berubah</span><h3>Obsidian → Notion</h3><p>Source of truth tetap di luar AI.</p></div>
+  </div>
+  <div class="case"><b>Catatan jujur</b>Penantang dari model yang sama kurang independen dibanding model berbeda. Untuk keputusan berisiko tinggi, pakai model lain.</div>
+</section>
+
+<section class="screen" data-mod="6" data-t="Peta padanan" id="s-6c">
+  <div class="kick"><span class="step">Modul 6 · Content</span><span class="tag adapt">Adaptasi</span></div>
+  <h2>Setiap fungsi di Case A punya padanan di Claude.</h2>
+  <table class="map">
+    <thead><tr><th>Fungsi</th><th>Case A · ChatGPT</th><th>Case B · Claude</th></tr></thead>
+    <tbody>
+      <tr><td>Pemisahan klien</td><td>Projects + project-only memory</td><td>Projects: instructions, project knowledge, memory per project</td></tr>
+      <tr><td>Thinking room</td><td>Branch in new chat</td><td>Chat baru di Project yang sama + Knowledge Packet</td></tr>
+      <tr><td>Eksekusi berbasis file</td><td>ChatGPT Work</td><td>Claude Cowork</td></tr>
+      <tr><td>Implementasi software</td><td>Codex</td><td>Claude Code</td></tr>
+      <tr><td>Prompt library</td><td>Prompt tersimpan</td><td>Skills</td></tr>
+      <tr><td>Diskusi sensitif</td><td>Temporary Chat</td><td>Incognito chat</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="screen" data-mod="6" data-t="Tiga mode" id="s-6d">
+  <div class="kick"><span class="step">Modul 6 · Content</span></div>
+  <h2>Chat untuk berpikir. Cowork untuk mendelegasikan. Code untuk membangun.</h2>
+  <div class="grid">
+    <button class="card" data-sheet="d-chat"><span class="k">Berpikir bersama</span><h3>Chat</h3><p>Brainstorming, analisis, menulis, riset web. Anda di dalam loop setiap langkah.</p></button>
+    <button class="card" data-sheet="d-cowork"><span class="k">Mendelegasikan</span><h3>Cowork</h3><p>Beri tugas, Claude mengerjakan di atas file dan connectors, di sandbox.</p></button>
+    <button class="card" data-sheet="d-code"><span class="k">Membangun</span><h3>Code</h3><p>Menjalankan perintah langsung di mesin Anda. Wilayah tim teknis.</p></button>
+  </div>
+  <div class="case"><b>Untuk pemimpin no-code</b>Fokus di Chat dan Cowork. Cukup tahu posisi Code.</div>
+  <p class="note">Data produk per 11 September 2026.</p>
+</section>
+
+<section class="screen" data-mod="6" data-t="Pilih model" id="s-6e">
+  <div class="kick"><span class="step">Modul 6 · Content</span></div>
+  <h2>Mulai dari Sonnet. Naik ke Opus hanya kalau Sonnet jelas kurang.</h2>
+  <div class="ladder">
+    <div class="hl"><b>Sonnet 5</b>Default untuk mayoritas pekerjaan.</div>
+    <div><b>Opus 5</b>Penalaran berlapis, akurasi berkonsekuensi besar: proposal klien, materi legal/finansial.</div>
+    <div><b>Haiku 4.5</b>Volume tinggi, tugas ringan: ekstraksi, klasifikasi, merapikan teks.</div>
+  </div>
+  <div class="case"><b>Di langganan</b>Anda tidak bayar per token, tapi ada batas pemakaian. Opus menghabiskan kuota lebih cepat — simpan untuk yang berat.</div>
+  <p class="note">Nama model berganti. Aturannya tetap. Data per 11 September 2026.</p>
+</section>
+
+<section class="screen" data-mod="6" data-t="Setup langkah demi langkah" id="s-6f">
+  <div class="kick"><span class="step">Modul 6 · Content</span><span class="tag adapt">Adaptasi</span></div>
+  <h2>Menjalankan Knowledge OS di Claude: lima langkah.</h2>
+  <ol class="steps">
+    <li><span><b>Satu Project per klien.</b> Instructions berisi aturan KOS: pakai Status dan Evidence Level, jangan menimpa keputusan diam-diam. Project knowledge: README, Knowledge-Map, Decision-Log.</span></li>
+    <li><span><b>Simpan enam prompt sebagai Skills</b> — Extract, Merge, Challenge, Update, Audit, Transfer.</span></li>
+    <li><span><b>Pisahkan vault</b> jadi Personal Knowledge · Client Sanitized · Client Restricted. Arahkan Cowork hanya ke Client Sanitized. Vault di komputer lain? Sesi dari HP hanya menjangkaunya saat Claude Desktop di komputer itu terbuka.</span></li>
+    <li><span><b>Connectors minimum:</b> Notion dan Drive read-only secara default. Approval sebelum update, kirim, atau share.</span></li>
+    <li><span><b>Weekly Maintenance:</b> Cowork menyiapkan delta di folder; Anda yang menyetujui.</span></li>
+  </ol>
+  <div class="case"><b>Tetap berlaku</b>Level 4 Restricted tidak masuk ke Claude — Incognito sekalipun.</div>
+</section>
+
+<section class="screen" data-mod="6" data-t="Decision: mode + model" id="s-6g">
+  <div class="kick"><span class="step">Modul 6 · Decision</span></div>
+  <h2>Tiga tugas Client D. Mode dan model mana? <span class="ilu">ilustrasi</span></h2>
+  <div class="q" data-type="single"><div class="qt">Folder berisi 30 notulen rapat (sudah disanitasi) → ekstrak jadi Knowledge Packet per topik</div>
+    <div class="opts col"><button class="opt" data-ok="0" data-fb="<strong>Kurang pas.</strong> Mengunggah 30 file satu per satu ke Chat itu lambat, dan Opus berlebihan untuk ekstraksi terstruktur.">Chat + Opus 5</button><button class="opt" data-ok="1" data-fb="<strong>Cowork + Sonnet 5.</strong> Banyak file lokal = delegasi ke Cowork. Ekstraksi terstruktur = pekerjaan default Sonnet. Cowork cukup diberi akses ke folder Client Sanitized.">Cowork + Sonnet 5</button><button class="opt" data-ok="0" data-fb="<strong>Bukan wilayahnya.</strong> Tidak ada software yang dibangun di sini.">Code + Sonnet 5</button></div><div class="fb" aria-live="polite"></div></div>
+  <div class="q" data-type="single"><div class="qt">Red-team draft Growth-Strategy sebelum dikirim ke direksi</div>
+    <div class="opts col"><button class="opt" data-ok="1" data-fb="<strong>Chat di Project &quot;Critic&quot; + Opus 5.</strong> Taruhan tinggi, penalaran berlapis. Lebih independen lagi: minta model lain ikut menantang.">Chat (Project Critic) + Opus 5</button><button class="opt" data-ok="0" data-fb="<strong>Kurang pas.</strong> Red-team butuh Anda di dalam loop, dan Haiku bukan untuk penalaran berat.">Cowork + Haiku 4.5</button><button class="opt" data-ok="0" data-fb="<strong>Berisiko.</strong> Menantang draft di chat yang sama dengan penyusunnya mengurangi independensi.">Chat yang sama tempat draft disusun + Sonnet 5</button></div><div class="fb" aria-live="polite"></div></div>
+  <div class="q" data-type="single"><div class="qt">Membangun dashboard internal yang membaca Decision-Log</div>
+    <div class="opts col"><button class="opt" data-ok="0" data-fb="<strong>Belum cukup.</strong> Cowork membuat dokumen; dashboard yang terus berjalan adalah software.">Cowork + Sonnet 5</button><button class="opt" data-ok="1" data-fb="<strong>Code.</strong> Ini membangun software. Untuk pemimpin no-code: delegasikan ke tim teknis — Knowledge Base tetap source of truth, Code hanya mesin implementasi.">Code + Sonnet 5</button><button class="opt" data-ok="0" data-fb="<strong>Kurang pas.</strong> Chat bisa merancang konsepnya, tapi tidak menjalankan aplikasinya.">Chat + Opus 5</button></div><div class="fb" aria-live="polite"></div></div>
+</section>
+
+<section class="screen" data-mod="6" data-t="Takeaway" id="s-6h">
+  <div class="take">
+    <div class="kw">Modul 6 · Takeaway</div>
+    <div class="quote">AI models may change.<small>Arsitektur knowledge, prinsip governance, dan tanggung jawab profesional harus tetap bertahan.</small></div>
+  </div>
+</section>
+
+<!-- ================= M7 · AKAR KOS ================= -->
+<section class="screen" data-mod="7" data-t="Why it matters" id="s-7a">
+  <div class="kick"><span class="step">Modul 7 · Akar KOS · Why it matters</span><span class="tag adapt">Referensi eksternal</span></div>
+  <div class="big">Tren AI terbaru — atau praktik yang sudah teruji?</div>
+  <p class="lead">Keduanya. AI KOS berdiri di atas empat gagasan yang lahir antara 1950-an dan 2026. Kenali akarnya agar Anda bisa menjelaskan sistem ini ke tim — dan memilih bacaan lanjutan.</p>
+</section>
+
+<section class="screen" data-mod="7" data-t="Garis waktu" id="s-7b">
+  <div class="kick"><span class="step">Modul 7 · Content</span></div>
+  <h2>Empat gagasan, tujuh dekade.</h2>
+  <ol class="timeline">
+    <li><b>1950-an</b><span><strong>Zettelkasten</strong> — Niklas Luhmann mulai membangun kotak kartunya.</span></li>
+    <li><b>1999</b><span><strong>Personal Knowledge Management</strong> — Frand &amp; Hixon, UCLA, memberi nama bidangnya.</span></li>
+    <li><b>2022</b><span><strong>Building a Second Brain</strong> — Tiago Forte membawanya ke khalayak luas.</span></li>
+    <li><b>Apr 2026</b><span><strong>LLM Wiki</strong> — Andrej Karpathy: AI yang merawat knowledge base.</span></li>
+    <li class="hl"><b>2026</b><span><strong>AI KOS</strong> — sintesis keempatnya, plus lapisan governance.</span></li>
+  </ol>
+</section>
+
+<section class="screen" data-mod="7" data-t="Zettelkasten" id="s-7c">
+  <div class="kick"><span class="step">Modul 7 · Content · 1950-an</span></div>
+  <h2>Zettelkasten — ide yang saling menjaring.</h2>
+  <div class="abs">
+    <p>Niklas Luhmann (1927–1998), sosiolog Jerman, menulis satu gagasan per kartu. Tiap kartu bernomor unik dan merujuk kartu lain lewat nomor itu.</p>
+    <p>Ia tidak menyusun kartu per folder. Ia menjaringnya lewat tautan. Saat wafat, koleksinya berisi sekitar 90.000 kartu — kini diarsipkan dan didigitalkan Universitas Bielefeld.</p>
+    <p>Metodenya dipopulerkan ulang oleh Sönke Ahrens lewat <i>How to Take Smart Notes</i> (2017).</p>
+  </div>
+  <div class="chips"><span class="chip">Satu note, satu gagasan</span><span class="chip">ID unik</span><span class="chip">Tautan antar note</span><span class="chip">Kata-kata sendiri</span></div>
+  <div class="grid">
+    <div class="card"><span class="k">Diambil AI KOS</span><p>Atomic Knowledge, tautan [[antar file]], Knowledge Map.</p></div>
+    <div class="card"><span class="k">Belum dijawab</span><p>Keputusan, status, dan kerahasiaan klien. Perawatannya manual.</p></div>
+  </div>
+  <button class="more" data-sheet="d-src-zk">Sumber &amp; catatan</button>
+</section>
+
+<section class="screen" data-mod="7" data-t="PKM · UCLA" id="s-7d">
+  <div class="kick"><span class="step">Modul 7 · Content · 1999</span></div>
+  <h2>Personal Knowledge Management — tanggung jawab ada pada individu.</h2>
+  <div class="abs">
+    <p>Jason Frand dan Carol Hixon dari UCLA Anderson School of Management memperkenalkan istilah PKM dalam working paper tahun 1999.</p>
+    <p>PKM adalah sistem yang dirancang individu untuk dipakai sendiri — awalnya untuk mahasiswa MBA. Knowledge worker bertanggung jawab atas pengetahuannya sendiri.</p>
+    <p>Posisinya: pendekatan bottom-up terhadap knowledge management organisasi.</p>
+  </div>
+  <div class="chips"><span class="chip">Mencari</span><span class="chip">Mengkategorikan</span><span class="chip">Memberi nama &amp; membedakan</span><span class="chip">Menilai</span><span class="chip">Mengintegrasikan</span></div>
+  <div class="grid">
+    <div class="card"><span class="k">Diambil AI KOS</span><p>Human Accountability dan kebiasaan menilai bukti — Evidence Level E1–E5.</p></div>
+    <div class="card"><span class="k">Belum dijawab</span><p>Lahir sebelum era LLM. Tidak mengatur alur keputusan tim.</p></div>
+  </div>
+  <button class="more" data-sheet="d-src-pkm">Sumber &amp; catatan</button>
+</section>
+
+<section class="screen" data-mod="7" data-t="Second Brain" id="s-7e">
+  <div class="kick"><span class="step">Modul 7 · Content · 2022</span></div>
+  <h2>Building a Second Brain — catatan harus jadi karya.</h2>
+  <div class="abs">
+    <p>Tiago Forte (Forte Labs) berangkat dari satu premis: otak untuk menghasilkan ide, bukan menyimpannya. Sistem digital eksternal yang menyimpan.</p>
+    <p>Metodenya CODE — Capture, Organize, Distill, Express. Express paling penting; tiga langkah lain ada untuk melayaninya.</p>
+    <p>Penyimpanannya PARA — Projects, Areas, Resources, Archives — diurutkan menurut seberapa actionable.</p>
+  </div>
+  <div class="flow"><div><b>C</b><span>Capture</span></div><div><b>O</b><span>Organize</span></div><div><b>D</b><span>Distill</span></div><div><b>E</b><span>Express</span></div></div>
+  <div class="grid">
+    <div class="card"><span class="k">Diambil AI KOS</span><p>Orientasi output, folder Projects dan Archive, ritme review.</p></div>
+    <div class="card"><span class="k">Belum dijawab</span><p>Keputusan dan governance. Capture dan organize masih berat dikerjakan manual.</p></div>
+  </div>
+  <button class="more" data-sheet="d-src-basb">Sumber &amp; catatan</button>
+</section>
+
+<section class="screen" data-mod="7" data-t="LLM Wiki" id="s-7f">
+  <div class="kick"><span class="step">Modul 7 · Content · April 2026</span></div>
+  <h2>LLM Wiki — AI yang merawat knowledge base.</h2>
+  <div class="abs">
+    <p>Andrej Karpathy menerbitkan sebuah GitHub gist berisi pola, bukan produk. Idenya: LLM tidak sekadar menjawab dari dokumen, tapi menyusun dan merawat wiki Markdown yang terus bertambah.</p>
+    <p>Sumber mentah tidak diubah. LLM menulis halaman wiki. Sebuah schema memberi aturan kerja pada agent.</p>
+    <p>Bagian mahal dari knowledge base adalah bookkeeping — rangkuman, tautan, konsistensi. Itu yang diserahkan ke LLM.</p>
+  </div>
+  <div class="chips"><span class="chip">raw/ — sumber mentah</span><span class="chip">wiki/ — halaman buatan LLM</span><span class="chip">schema — aturan agent</span><span class="chip">ingest · query · lint</span></div>
+  <div class="grid">
+    <div class="card"><span class="k">Diambil AI KOS</span><p>Markdown sebagai source of truth yang dibaca AI. AI mengerjakan Extract, Merge, Audit.</p></div>
+    <div class="card"><span class="k">Belum dijawab</span><p>Dirancang untuk riset pribadi. Tidak mengatur keputusan dan data klien.</p></div>
+  </div>
+  <button class="more" data-sheet="d-src-llmwiki">Sumber &amp; catatan</button>
+</section>
+
+<section class="screen" data-mod="7" data-t="Perbandingan" id="s-7g">
+  <div class="kick"><span class="step">Modul 7 · Content</span></div>
+  <h2>Setiap gagasan menjawab satu pertanyaan.</h2>
+  <table class="map">
+    <thead><tr><th>Gagasan</th><th>Pertanyaan inti</th><th>Diambil AI KOS</th></tr></thead>
+    <tbody>
+      <tr><td>Zettelkasten</td><td>Bagaimana ide saling terhubung?</td><td>Atomic note, tautan</td></tr>
+      <tr><td>PKM · UCLA</td><td>Siapa bertanggung jawab atas knowledge?</td><td>Human Accountability, menilai bukti</td></tr>
+      <tr><td>Second Brain</td><td>Bagaimana catatan jadi karya?</td><td>Orientasi output, ritme</td></tr>
+      <tr><td>LLM Wiki</td><td>Siapa mengerjakan bookkeeping?</td><td>AI merawat Markdown</td></tr>
+    </tbody>
+  </table>
+  <div class="case"><b>Yang tidak ada di keempatnya</b>Lapisan governance: Decision Log, Klasifikasi Level 1–4, Confidentiality Gate, pseudonymization, dan agentic governance. Inilah kontribusi AI KOS.</div>
+</section>
+
+<section class="screen" data-mod="7" data-t="Decision: pilih gagasan" id="s-7h">
+  <div class="kick"><span class="step">Modul 7 · Decision</span></div>
+  <h2>Lima keluhan dari tim Anda. Gagasan mana yang paling menolong?</h2>
+  <div class="q" data-type="single"><div class="qt">"Catatan kami banyak, tapi jarang jadi laporan atau keputusan."</div>
+    <div class="opts"><button class="opt" data-ok="0" data-fb="<strong>Belum tepat.</strong> Tautan membantu berpikir, tapi masalahnya di output.">Zettelkasten</button><button class="opt" data-ok="0" data-fb="<strong>Belum tepat.</strong> PKM memberi dasar tanggung jawab, bukan dorongan ke output.">PKM</button><button class="opt" data-ok="1" data-fb="<strong>Second Brain.</strong> Express adalah tujuan; Capture, Organize, Distill ada untuk melayaninya. Di AI KOS: Knowledge Packet menjadi bahan dokumen.">Second Brain</button><button class="opt" data-ok="0" data-fb="<strong>Belum tepat.</strong> LLM Wiki merawat pengetahuan, tapi tidak memaksa lahirnya karya.">LLM Wiki</button></div><div class="fb" aria-live="polite"></div></div>
+  <div class="q" data-type="single"><div class="qt">"Temuan kami terpisah-pisah; tidak ada yang melihat hubungannya."</div>
+    <div class="opts"><button class="opt" data-ok="1" data-fb="<strong>Zettelkasten.</strong> Satu gagasan per note, lalu ditautkan. Di AI KOS: atomic file dan [[tautan]] di Knowledge Map.">Zettelkasten</button><button class="opt" data-ok="0" data-fb="<strong>Belum tepat.</strong> Masalahnya koneksi antar ide — itu kekuatan Zettelkasten.">PKM</button><button class="opt" data-ok="0" data-fb="<strong>Belum tepat.</strong> PARA mengelompokkan menurut actionability, bukan menautkan gagasan.">Second Brain</button><button class="opt" data-ok="0" data-fb="<strong>Mendekati.</strong> LLM bisa membantu menautkan, tapi prinsip dasarnya dari Zettelkasten.">LLM Wiki</button></div><div class="fb" aria-live="polite"></div></div>
+  <div class="q" data-type="single"><div class="qt">"Knowledge base kami selalu usang; tidak ada yang sempat merawatnya."</div>
+    <div class="opts"><button class="opt" data-ok="0" data-fb="<strong>Belum tepat.</strong> Zettelkasten justru menuntut perawatan manual yang tinggi.">Zettelkasten</button><button class="opt" data-ok="0" data-fb="<strong>Belum tepat.</strong> Masalahnya beban kerja, bukan kesadaran tanggung jawab.">PKM</button><button class="opt" data-ok="0" data-fb="<strong>Belum tepat.</strong> Ritme review membantu, tapi tetap dikerjakan manusia.">Second Brain</button><button class="opt" data-ok="1" data-fb="<strong>LLM Wiki.</strong> Serahkan bookkeeping ke AI. Di AI KOS: Weekly Maintenance dan Audit prompt — Anda tetap menyetujui.">LLM Wiki</button></div><div class="fb" aria-live="polite"></div></div>
+  <div class="q" data-type="single"><div class="qt">"Tim sulit membedakan informasi yang layak dipercaya."</div>
+    <div class="opts"><button class="opt" data-ok="0" data-fb="<strong>Belum tepat.</strong> Tautan tidak menilai kualitas bukti.">Zettelkasten</button><button class="opt" data-ok="1" data-fb="<strong>PKM.</strong> Menilai informasi adalah keterampilan inti PKM. Di AI KOS: Evidence Level E1–E5.">PKM</button><button class="opt" data-ok="0" data-fb="<strong>Belum tepat.</strong> Distill meringkas, tapi tidak memberi bobot bukti.">Second Brain</button><button class="opt" data-ok="0" data-fb="<strong>Hati-hati.</strong> LLM bisa terdengar yakin tanpa bukti. Penilaian tetap tugas manusia.">LLM Wiki</button></div><div class="fb" aria-live="polite"></div></div>
+  <div class="q" data-type="single"><div class="qt">"Data klien ikut tertempel ke chat AI."</div>
+    <div class="opts col"><button class="opt" data-ok="0" data-fb="<strong>Tidak ada di keempatnya.</strong> Zettelkasten, PKM, Second Brain, dan LLM Wiki tidak dirancang untuk kerahasiaan data klien.">Salah satu dari empat gagasan di atas</button><button class="opt" data-ok="1" data-fb="<strong>Governance AI KOS.</strong> Klasifikasi Level 1–4, Confidentiality Gate, pseudonymization. Inilah lapisan yang ditambahkan AI KOS.">Lapisan governance AI KOS</button></div><div class="fb" aria-live="polite"></div></div>
+</section>
+
+<section class="screen" data-mod="7" data-t="Takeaway" id="s-7i">
+  <div class="take">
+    <div class="kw">Modul 7 · Takeaway</div>
+    <div class="quote">Alat berganti. Prinsipnya diwariskan.<small>Atomic note dari Zettelkasten. Tanggung jawab dari PKM. Orientasi karya dari Second Brain. AI perawat Markdown dari LLM Wiki. Governance dari AI KOS.</small></div>
+  </div>
+</section>
+
+<!-- ================= ACTION CARD ================= -->
+<section class="screen" data-mod="8" data-t="Action Card" id="s-action">
+  <div class="kick"><span class="step">Action Card</span></div>
+  <h2>Mulai minggu ini dengan Minimum Viable Knowledge OS.</h2>
+  <div class="acard" id="acard">
+    <div class="act"><input type="checkbox" id="a1"><label for="a1"><span class="when">Hari ini</span><span class="what">Buat README.md, Knowledge-Map.md, dan Decision-Log.md di platform yang disetujui organisasi Anda.</span></label></div>
+    <div class="act"><input type="checkbox" id="a2"><label for="a2"><span class="when">Minggu ini</span><span class="what">Ubah satu diskusi AI penting jadi Knowledge Packet. Catat keputusannya di Decision Log.</span></label></div>
+    <div class="act"><input type="checkbox" id="a3"><label for="a3"><span class="when">Sebelum upload data klien berikutnya</span><span class="what">Jalankan delapan pertanyaan AI Confidentiality Gate.</span></label></div>
+    <div class="case" style="margin-top:1rem"><b>Refleksi</b>Siapa Librarian manusia di tim Anda — orang yang menjalankan review mingguan?</div>
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem"><button class="copy" id="copyAct">Salin Action Card</button><button class="more" data-sheet="d-mvkos">Struktur MVKOS &amp; 3 habits</button></div>
+  </div>
+</section>
+
+</div><!-- /stage -->
+<nav class="bnav" aria-label="Navigasi layar">
+  <button class="ibtn" id="prevBtn" aria-label="Layar sebelumnya"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <div class="prog"><span id="progTx">1 / 1</span><div class="bar"><i id="progBar"></i></div></div>
+  <button class="ibtn" id="nextBtn" aria-label="Layar berikutnya" style="background:var(--gold);color:var(--on-gold);border-color:var(--gold)"><span class="tx">Lanjut</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></button>
+</nav>
+<footer class="foot">
+  <span class="logos"><img src="data:image/jpeg;base64,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" alt="IWDemy"><i></i><img class="tj" src="data:image/jpeg;base64,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" alt="Tjitra &amp; Associates"></span>
+  <span>AI First by IWDemy · Vers 0.3 · 11 September 2026</span>
+  <span class="att">Designed by Tjitra | Powered by IWDemy</span>
+</footer>
+</main>
+</div>
+
+<!-- ================= DETAIL SHEETS (Layer 2) ================= -->
+<template id="d-lo" data-title="Tiga learning outcome">
+<ul><li><b>Extract</b> — ubah satu diskusi AI penting jadi Knowledge Packet + satu entri Decision Log; pisahkan fact, insight, decision, assumption; beri Status dan Evidence Level.</li>
+<li><b>Protect</b> — jalankan AI Confidentiality Gate sebelum upload: tentukan Klasifikasi Level 1–4, putuskan boleh/tidak masuk AI, lakukan pseudonymization.</li>
+<li><b>Operate</b> — pilih setup untuk platform yang disetujui organisasi Anda (ChatGPT atau Claude), tentukan lokasi source of truth, mulai Minimum Viable Knowledge OS dengan 3 habits.</li></ul>
+</template>
+
+<template id="d-sources" data-title="Catatan versi &amp; sumber">
+<p><b>Vers 0.3 · 11 September 2026 · Dr. Hora Tjitra</b></p>
+<p>Canon: <i>AI Knowledge Operating System</i> v1.0 (26 Jul 2026) dan <i>Building a ChatGPT-Based Knowledge Operating System</i> v1.0 (11 Sep 2026).</p>
+<p><b>Adaptasi di luar canon</b> (ditandai di layar): Case B Claude, catatan memory AI, tabel padanan AI roles, drill ilustrasi Energy &amp; Insurance, layar storage (Modul 2), dan Modul 7 Akar KOS (referensi eksternal).</p>
+<p><b>Data produk</b> diverifikasi via web per 11 Sep 2026: ChatGPT Work (rilis 9 Jul 2026), ChatGPT Projects &amp; project-only memory, Branch in new chat, Gemini di Google Workspace, model Claude (Sonnet 5, Opus 5, Haiku 4.5), ketersediaan Cowork, instalasi Claude Code, memory &amp; chat search Claude.</p>
+<p>Sumber utama: anthropic.com/news · support.claude.com · code.claude.com/docs · help.openai.com · support.google.com. Fitur dan nama produk berubah cepat — cek ulang sebelum dipakai untuk keputusan pembelian.</p>
+<p>Semua angka berlabel <span class="ilu">ilustrasi</span> bukan data nyata.</p>
+<p><b>Akar intelektual.</b> "Knowledge Operating System" bukan nama standar dengan satu author. AI KOS adalah sintesis Dr. Hora Tjitra (2026) dari beberapa tradisi:</p>
+<ul><li>Knowledge management organisasi — Nonaka &amp; Takeuchi, model SECI (1995)</li>
+<li>Personal Knowledge Management — istilah dari Frand &amp; Hixon (1999)</li>
+<li>Building a Second Brain &amp; PARA — Tiago Forte</li>
+<li>Zettelkasten &amp; atomic notes — Niklas Luhmann; Sönke Ahrens</li>
+<li>Decision Log — Architecture Decision Records, Michael Nygard (2011)</li>
+<li>LLM Wiki — Andrej Karpathy (April 2026)</li></ul>
+<p>Yang khas di AI KOS: lapisan governance — klasifikasi informasi, Confidentiality Gate, pseudonymization, dan agentic governance. Abstrak empat gagasan utama ada di Modul 7.</p>
+<p><b>Vers 0.3:</b> tambah Modul 7 "Akar KOS" (Zettelkasten, PKM UCLA, Second Brain, LLM Wiki); catatan gejala Dispatch di sheet travel; diagram Modul 1 dan 3 dibuat responsif untuk HP.</p>
+<p><b>Vers 0.3:</b> tambah layar storage source of truth (Modul 2), catatan akses Cowork saat travel, posisi Obsidian tanpa connector resmi, dan akar intelektual.</p>
+</template>
+
+<template id="d-frag" data-title="Sembilan gejala knowledge terfragmentasi">
+<ul><li>Pertanyaan yang sama dibahas berulang</li><li>Kesimpulan bertentangan di chat berbeda</li><li>Keputusan penting terkubur di percakapan</li><li>Sulit tahu versi mana yang berlaku</li><li>Riset terpisah dari keputusan yang diinformasikannya</li><li>File tersimpan tanpa relasi jelas</li><li>Knowledge bergantung pada riwayat chat</li><li>Sulit memindahkan kerja antar sesi ChatGPT</li><li>Sulit menyerahkan knowledge ke orang atau AI lain</li></ul>
+</template>
+
+<template id="d-memory" data-title="Bukankah AI sekarang punya memory?">
+<p><span class="ilu">catatan adaptasi</span></p>
+<p>Ya. ChatGPT dan Claude kini bisa merujuk chat sebelumnya, dan memory bisa dibatasi per project.</p>
+<p>Tapi memory <b>bukan source of truth</b>: tidak ada Status, Evidence Level, atau jejak keputusan — dan Anda tidak selalu bisa melihat semua yang diingatnya.</p>
+<p>Pakai memory untuk kenyamanan. Simpan knowledge di file. Untuk governance: satu project per klien, dan Incognito/Temporary Chat untuk diskusi sensitif.</p>
+</template>
+
+<template id="d-l1" data-title="Layer 1 · Conversation"><p>Purpose: <b>thinking</b>.</p><ul><li>ChatGPT / AI chat</li><li>Branches</li><li>Specialist discussions</li><li>Brainstorming</li><li>Research</li></ul></template>
+<template id="d-l2" data-title="Layer 2 · Knowledge"><p>Purpose: <b>knowing</b>.</p><ul><li>Markdown</li><li>Research briefs</li><li>Frameworks &amp; models</li><li>Definitions</li><li>Evidence</li></ul></template>
+<template id="d-l3" data-title="Layer 3 · Decisions"><p>Purpose: <b>deciding</b>.</p><ul><li>Decision Log <span class="ilu">di AIKOS: Decision Register</span></li><li>Assumptions</li><li>Priorities</li><li>Policies</li><li>Approved strategy</li></ul></template>
+<template id="d-l4" data-title="Layer 4 · Execution"><p>Purpose: <b>doing</b>.</p><ul><li>Projects &amp; tasks</li><li>Dashboards</li><li>Presentations</li><li>Applications</li><li>Automation</li></ul></template>
+
+<template id="d-roles" data-title="AI roles: satu fungsi, dua nama">
+<p><span class="ilu">padanan: adaptasi</span> Nama asli dari kedua dokumen tidak diubah.</p>
+<table class="map"><thead><tr><th>AI KOS (Agent)</th><th>ChatGPT KOS (Role)</th></tr></thead><tbody>
+<tr><td>Research Agent</td><td>Researcher</td></tr>
+<tr><td>Strategy Agent</td><td>Analyst · Strategist</td></tr>
+<tr><td>Critic Agent</td><td>Challenger</td></tr>
+<tr><td>Editor Agent</td><td>Knowledge Editor</td></tr>
+<tr><td>Librarian Agent</td><td>Librarian</td></tr>
+<tr><td>Presentation Agent</td><td>—</td></tr>
+<tr><td>—</td><td>Decision Agent (alur agentic)</td></tr></tbody></table>
+<p>Anda tidak butuh AI terpisah untuk tiap fungsi. Cukup peran yang bisa dipanggil berulang.</p>
+</template>
+
+<template id="d-ssot" data-title="Single Source of Truth">
+<p>Satu file otoritatif per topik.</p>
+<pre>Baik:    Growth-Strategy.md
+
+Hindari: Growth-Strategy-Final.md
+         Growth-Strategy-Final-V7.md
+         Growth-Strategy-Final-Final.md</pre>
+<p>Laporan, presentasi, dan proposal dirakit dari note yang sudah divalidasi — bukan dibuat ulang dari potongan chat.</p>
+</template>
+
+<template id="d-p-extract" data-title="Extract prompt">
+<pre>From this discussion, extract:
+
+1. New facts
+2. Insights
+3. Decisions
+4. Assumptions
+5. Hypotheses
+6. Recommendations
+7. Open questions
+8. Risks
+9. Changes to existing knowledge
+
+Then identify which existing MD files should be created or updated.</pre>
+<button class="copy" data-copy>Salin prompt</button>
+</template>
+
+<template id="d-packet" data-title="Knowledge Packet + Merge prompt">
+<p>Isi Packet: Topic · Source · Executive Summary (5–10 baris) · Key Findings · Decisions · Assumptions · Recommendations · Open Questions · Risks · Changes to Existing Knowledge · New Documents Recommended · Related Knowledge · Confidence (High/Medium/Low) · Date.</p>
+<p>Tempel Packet ke chat utama, lalu:</p>
+<pre>Integrate this Knowledge Packet into the current Knowledge Base.
+
+1. Identify conflicts with existing knowledge.
+2. Do not silently overwrite existing decisions.
+3. Distinguish new information from changed information.
+4. Update the relevant MD documents.
+5. Update the Decision Log if a decision has changed.
+6. Identify unresolved conflicts.
+7. Produce the revised documents.</pre>
+<button class="copy" data-copy>Salin Merge prompt</button>
+</template>
+
+<template id="d-dec027" data-title="Contoh entri Decision Log">
+<pre>## DEC-027
+
+### Decision
+Adopt a three-center organizational model.
+
+### Rationale
+Separates governance, operational excellence,
+and growth responsibilities.
+
+### Impact
+Requires revised reporting lines and role definitions.
+
+### Status
+APPROVED
+
+### Related
+[[Organization-Design]] [[Governance]] [[Roadmap]]</pre>
+<p>Field minimum: Decision ID · Date · Decision · Context · Options · Rationale · Owner · Impact · Dependencies · Status · Supersedes · Related Documents.</p>
+</template>
+
+<template id="d-daily" data-title="Ritme harian">
+<ul><li><b>Selama kerja:</b> pakai AI seperti biasa. Jangan interupsi setiap percakapan untuk dokumentasi.</li>
+<li><b>Saat sesuatu jadi penting:</b> jalankan Extract — pisahkan facts, insights, decisions, assumptions, open questions; tentukan file yang perlu dibuat atau di-update.</li>
+<li><b>Di akhir diskusi besar:</b> buat Knowledge Packet.</li></ul>
+</template>
+<template id="d-weekly" data-title="Weekly Knowledge Maintenance">
+<pre>COLLECT → CLASSIFY → DEDUPLICATE → VALIDATE → UPDATE → LINK → ARCHIVE</pre>
+<ul><li>Knowledge baru apa yang tercipta?</li><li>Keputusan apa yang diambil?</li><li>Dokumen mana yang berubah?</li><li>Ada kontradiksi?</li><li>Asumsi mana yang belum divalidasi?</li><li>Dokumen mana yang usang — perlu diarsip?</li><li>Apa yang harus jadi proyek atau aksi?</li></ul>
+<p>Hasilnya: Knowledge Base yang lebih bersih — bukan sekadar lebih banyak dokumen.</p>
+</template>
+<template id="d-monthly" data-title="Monthly Knowledge Audit">
+<ul><li><b>Coverage</b> — domain penting sudah terwakili?</li><li><b>Consistency</b> — ada dokumen yang saling bertentangan?</li><li><b>Freshness</b> — mana yang usang?</li><li><b>Decision integrity</b> — Decision Log cocok dengan strategi saat ini?</li><li><b>Evidence quality</b> — asumsi penting mana yang belum berbukti?</li><li><b>Usability</b> — orang baru bisa cepat paham?</li><li><b>AI readiness</b> — AI lain bisa paham tanpa membaca chat lama?</li></ul>
+<p>Plus: review hak akses, konten klien confidential, dan AI mana yang punya akses ke data apa.</p>
+</template>
+
+<template id="d-c1" data-title="Level 1 · Public"><p>Contoh: website publik, laporan publik, materi marketing, artikel terbit, lowongan kerja publik.</p><p>Boleh: AI personal atau bisnis yang disetujui.</p></template>
+<template id="d-c2" data-title="Level 2 · Internal"><p>Contoh: materi workshop internal, SOP umum, informasi operasional non-sensitif, ringkasan anonim.</p><p>Boleh: akun AI bisnis yang dikelola, workspace tim yang disetujui.</p></template>
+<template id="d-c3" data-title="Level 3 · Confidential"><p>Contoh: strategi klien, keuangan non-publik, desain organisasi, pricing, ringkasan asesmen kepemimpinan, diskusi akuisisi, informasi kinerja.</p><p>Syarat: akun Business/Enterprise · data minimization · pseudonymization · izin klien bila perlu · sharing terbatas · storage yang disetujui.</p></template>
+<template id="d-c4" data-title="Level 4 · Restricted"><p>Contoh: asesmen psikologis mentah, transkrip wawancara teridentifikasi, informasi kesehatan, data keuangan pribadi, legal privilege, password, API key, dokumen identitas, file kompensasi mentah, kasus disipliner, data-room M&amp;A.</p><p><b>Default: jangan upload ke AI chat umum.</b> Pakai sanitized excerpt, contoh sintetis, local AI, lingkungan privat yang disetujui klien, enterprise deployment terkontrol — atau analisis manusia.</p></template>
+
+<template id="d-agents" data-title="Arsitektur agent yang disarankan">
+<pre>Personal Research Agent   → public &amp; personal knowledge saja
+Client A Strategy Agent   → folder sanitized Client A saja
+Client B Strategy Agent   → folder sanitized Client B saja
+Team Knowledge Agent      → halaman Notion approved saja
+Presentation Agent        → konten &amp; gambar approved saja</pre>
+<p>Hindari satu agent universal dengan akses ke semua sistem personal, tim, dan klien.</p>
+<p>Risiko agent: mengambil informasi berlebihan, menggabungkan data lintas sumber, bertindak tanpa review, mengirim keluar, meninggalkan log permanen, mengubah atau menghapus konten.</p>
+</template>
+
+<template id="d-gpt" data-title="ChatGPT · Lead"><p>Strategic thinking, analisis masalah, pengembangan framework, decision support, sintesis riset, executive writing, produksi Markdown, infografis, integrasi lintas topik, konversi chat jadi knowledge terstruktur.</p><p>Normalnya menghasilkan versi final yang terintegrasi.</p><p>Untuk kerja klien: ChatGPT Business/Enterprise, data sanitized, connector terbatas, project terpisah per klien.</p></template>
+<template id="d-claude-rev" data-title="Claude · Challenge"><p>Review dokumen panjang, cek logika, cari celah, tantang asumsi, interpretasi alternatif, red-team, deteksi inkonsistensi.</p><p>Bukan second knowledge repository — output-nya kembali ke integrator atau langsung ke canonical note.</p><p>Untuk kerja klien: Claude Team/Enterprise, kirim hanya draft terstruktur yang perlu direview.</p></template>
+<template id="d-gemini" data-title="Gemini · Operationalize"><p>Gmail, Calendar, Drive, ringkasan meeting, bantuan dokumen, kolaborasi tim.</p><p>Mendukung eksekusi, bukan source of truth. Pakai di Google Workspace yang dikelola — hindari akun Gemini personal untuk kerja klien.</p></template>
+<template id="d-obs" data-title="Obsidian · Personal canonical"><p>Evergreen knowledge, strategi, riset, client thinking, intellectual capital pribadi, decision history, knowledge graph.</p><p>Jangan buka seluruh vault ke AI connector. Pisahkan: Personal Knowledge · Client Sanitized · Client Restricted.</p><p>Tidak ada connector resmi — dan tidak perlu: vault adalah folder Markdown. Lihat Modul 2.</p></template>
+<template id="d-notion" data-title="Notion · Team execution"><p>Team wiki, SOP, project management, PMO, roadmap, task, catatan meeting, knowledge bersama yang sudah approved.</p><p>Permission zone: Team General · Project Confidential · Leadership Restricted. Jangan simpan data mentah klien di ruang yang aksesnya luas.</p></template>
+<template id="d-keep" data-title="Keep · iCloud · Drive"><ul><li><b>Google Keep</b> — capture cepat, storyboard, referensi visual. Bukan repository jangka panjang, bukan tempat data restricted.</li><li><b>iCloud</b> — sinkronisasi vault Obsidian dan arsip Markdown pribadi.</li><li><b>Google Drive</b> — kolaborasi eksternal dan deliverable klien: folder per klien, sharing terbatas, akses dicabut saat selesai.</li></ul><p>Opsi storage untuk vault (local, iCloud, Drive, Obsidian Sync) dibahas di Modul 2.</p><p>Perangkat: HP untuk capture &amp; review cepat, tablet untuk membaca &amp; anotasi, laptop/PC untuk integrasi &amp; maintenance. Sistem harus tetap jalan tanpa komputer.</p></template>
+<template id="d-work" data-title="Struktur folder kerja">
+<pre>01_Source
+02_Working
+03_Validated
+04_Approved
+05_Output
+99_Archive</pre>
+<p>Jangan campur riset mentah dengan knowledge organisasi yang sudah approved.</p>
+</template>
+
+<template id="d-p-merge" data-title="Merge prompt"><pre>Integrate this Knowledge Packet with the current Knowledge Base.
+Identify conflicts before making changes.
+Do not silently overwrite existing decisions.</pre><button class="copy" data-copy>Salin prompt</button></template>
+<template id="d-p-challenge" data-title="Challenge prompt"><pre>Act as a critical reviewer.
+Identify unsupported assumptions, contradictions, missing evidence,
+second-order effects, and important questions we have not considered.</pre><button class="copy" data-copy>Salin prompt</button></template>
+<template id="d-p-update" data-title="Update prompt"><pre>Compare the current MD with this new discussion.
+Produce a knowledge delta showing:
+- additions
+- modifications
+- deletions
+- contradictions
+- documents requiring updates</pre><button class="copy" data-copy>Salin prompt</button></template>
+<template id="d-p-audit" data-title="Audit prompt"><pre>Audit this Knowledge Base for:
+- contradictions
+- duplicates
+- outdated information
+- orphan documents
+- missing decisions
+- unsupported assumptions
+- broken links
+- unclear ownership</pre><button class="copy" data-copy>Salin prompt</button></template>
+<template id="d-p-transfer" data-title="Transfer prompt"><pre>Create a self-contained Knowledge Packet that another ChatGPT session
+can use without access to this conversation.
+Prioritize decisions, current state, assumptions, evidence, risks,
+open questions, and required actions.</pre><button class="copy" data-copy>Salin prompt</button></template>
+
+<template id="d-challenger" data-title="Dua pilihan penantang">
+<p><span class="ilu">adaptasi</span></p>
+<ul><li><b>Model lain</b> (ChatGPT atau Gemini) — paling independen. Kirim hanya draft terstruktur, sesuai Klasifikasi Level-nya.</li>
+<li><b>Claude di konteks terpisah</b> — Project "Critic" dengan instruksi Challenge prompt, atau Incognito chat tanpa riwayat. Praktis bila organisasi hanya menyetujui satu platform.</li></ul>
+<p>Aturan tetap: output penantang kembali ke integrator. Penantang bukan tempat menyimpan.</p>
+</template>
+<template id="d-chat" data-title="Chat"><p>Web, desktop, dan mobile. Tersedia di semua plan, termasuk Free.</p><p>Cocok untuk: brainstorming, analisis, menulis, tanya-jawab, riset web.</p><p>Anda di dalam loop setiap langkah. Tidak mengakses file lokal sendiri — Anda yang mengunggah.</p></template>
+<template id="d-cowork" data-title="Cowork"><p>Paid plan. Desktop macOS &amp; Windows; juga web dan mobile (beta) untuk Pro, Max, dan Team. Enterprise sesuai pengaturan admin.</p><p>Mengakses folder lokal yang Anda izinkan, membuat dokumen nyata (Excel, PDF, Word, PowerPoint), terhubung ke layanan lewat connectors. Berjalan di VM terisolasi.</p><p>Sesi dari web/mobile berjalan di cloud. Folder lokal hanya terjangkau saat Claude Desktop di komputer itu terbuka dan online.</p><p>Aturan KOS: beri akses hanya ke folder Client Sanitized.</p></template>
+<template id="d-code" data-title="Code"><p>Paid plan. Lewat terminal atau Claude Desktop app. Instalasi disarankan lewat native installer (npm sudah deprecated).</p><p>Bisa membaca dan menulis file, menjalankan perintah langsung di mesin Anda, dan deploy.</p><p>Posisi di KOS: mesin implementasi — dashboard, search, automation — di atas Knowledge Base yang tetap jadi source of truth.</p></template>
+
+<template id="d-mvkos" data-title="Minimum Viable Knowledge OS">
+<pre>Knowledge OS/
+├── README.md
+├── Knowledge-Map.md
+├── Decision-Log.md
+├── Glossary.md
+├── Strategy/
+├── Organization/
+├── AI/
+├── Projects/
+├── Research/
+├── Templates/
+└── Archive/</pre>
+<p><b>Tiga habits:</b></p>
+<ol><li>Important conversations produce Knowledge Packets.</li><li>Important decisions enter the Decision Log.</li><li>Authoritative knowledge lives in MD, not only in chats.</li></ol>
+<p>Tiga kebiasaan ini menghasilkan sebagian besar nilainya.</p>
+</template>
+
+<template id="d-st-local" data-title="Local folder">
+<p>Paling privat. Cowork membaca folder yang Anda izinkan; Claude Code bekerja langsung di file.</p>
+<ul><li>Hanya ada di satu komputer — wajib backup terpisah.</li>
+<li>Akses dari luar bergantung pada komputer itu: menyala, tidak sleep, dan Claude Desktop terbuka.</li></ul>
+</template>
+<template id="d-st-icloud" data-title="iCloud">
+<p>Sudah dipakai di canon untuk sinkronisasi vault Obsidian.</p>
+<ul><li>Mulus untuk Mac + iPhone/iPad.</li><li>Tidak bisa dipakai di Android; di Windows rawan file duplikat.</li>
+<li>Akun iCloud personal: cek apakah memenuhi syarat approved storage untuk data klien Level 3.</li></ul>
+</template>
+<template id="d-st-drive" data-title="Google Drive">
+<ul><li>Mac/Windows dan Android (file diset offline). iPhone/iPad tidak didukung langsung untuk vault Obsidian.</li>
+<li>Google Workspace yang dikelola organisasi punya kontrol admin — lebih mudah memenuhi syarat approved storage Level 3.</li>
+<li>Risiko: AI connector dan Gemini bisa menjangkau Drive. Batasi folder yang dibuka.</li></ul>
+<p><span class="ilu">adaptasi</span> Canon memposisikan Drive untuk kolaborasi eksternal dan deliverable, bukan pengganti knowledge base. Menyimpan folder .md di Drive adalah pilihan storage, bukan pengganti KB.</p>
+</template>
+<template id="d-st-osync" data-title="Obsidian Sync">
+<ul><li>Layanan resmi Obsidian, berbayar.</li><li>Menjangkau semua perangkat, termasuk Android dan iPad.</li><li>Enkripsi end-to-end dan version history.</li></ul>
+<p>File tetap tersimpan lokal di tiap perangkat. AI membacanya lewat folder lokal itu.</p>
+</template>
+<template id="d-travel" data-title="Vault di komputer, Anda sedang travel?">
+<p>Sesi Cowork yang Anda mulai dari HP atau web berjalan di cloud. Ia menjangkau folder di komputer <b>hanya jika</b> Claude Desktop di komputer itu terbuka dan online, foldernya sudah di-connect, dan izinnya sudah diset.</p>
+<p>Komputer menyala saja belum cukup. App harus terbuka, dan komputer tidak boleh sleep.</p>
+<p><b>Dispatch</b> mengendalikan Cowork di komputer dari HP — tapi hanya satu thread berkelanjutan; tidak bisa membuka thread baru. Tersedia untuk sebagian plan Pro/Max.</p>
+<p><b>Tanda Anda sedang di Dispatch:</b> di HP tidak ada tombol chat baru dan tidak ada pemilih folder. Kirim tugas baru sebagai pesan di thread yang sama, dan sebut path folder-nya, misalnya <span class="mono">KOS/Client Sanitized/Client D</span>.</p>
+<p><b>Sebelum berangkat:</b></p>
+<ol><li>Claude Desktop versi terbaru, masuk Login Items agar terbuka lagi setelah restart.</li><li>Matikan sleep otomatis.</li><li>Connect folder vault (Client Sanitized saja) di Cowork.</li><li>Uji dari HP sebelum pergi.</li></ol>
+<p>Cadangan terakhir: remote desktop ke komputer itu.</p>
+</template>
+<template id="d-noconn" data-title="Obsidian tanpa connector resmi — masih layak?">
+<p><b>Ya, untuk knowledge canonical pribadi.</b> Vault Obsidian hanyalah folder Markdown, jadi tidak butuh connector: Cowork membaca foldernya langsung, Claude Code bekerja di file-nya.</p>
+<ul><li>Obsidian punya CLI resmi sejak v1.12 (Feb 2026). Akses MCP tersedia lewat plugin komunitas — review dulu sebelum dipasang.</li>
+<li>Tanpa connector cloud, vault tidak terekspos ke cloud — selaras dengan least privilege.</li></ul>
+<p><b>Batasnya:</b> akses jarak jauh bergantung pada komputer tempat vault berada, dan kolaborasi tim lebih cocok di Notion, yang punya connector resmi.</p>
+</template>
+
+<template id="d-src-zk" data-title="Zettelkasten — sumber &amp; catatan">
+<ul>
+<li>Luhmann, N. (1981). <i>Kommunikation mit Zettelkästen. Ein Erfahrungsbericht.</i> Dalam Baier, Kepplinger &amp; Reumann (Eds.), <i>Öffentliche Meinung und sozialer Wandel.</i> Westdeutscher Verlag.</li>
+<li>Schmidt, J. F. K. (2018). <i>Niklas Luhmann's Card Index: The Fabrication of Serendipity.</i> Sociologica.</li>
+<li>Ahrens, S. (2017). <i>How to Take Smart Notes.</i></li>
+<li>Niklas Luhmann-Archiv, Universität Bielefeld — koleksi kartu versi digital.</li>
+</ul>
+<p><b>Catatan jujur.</b> Luhmann tidak menemukan sistem kartu; ilmuwan seperti Conrad Gessner dan Carl Linnaeus sudah memakainya berabad-abad sebelumnya. Jumlah buku dan artikel Luhmann berbeda antar sumber, jadi tidak kami sebut.</p>
+</template>
+<template id="d-src-pkm" data-title="PKM · UCLA — sumber &amp; catatan">
+<ul>
+<li>Frand, J. &amp; Hixon, C. (1999). <i>Personal Knowledge Management: Who, What, Why, When, Where, How?</i> Working paper, UCLA Anderson School of Management.</li>
+<li>Avery, S. et al. (2001). <i>Personal Knowledge Management: Framework for Integration and Partnerships.</i> ASCUE Conference.</li>
+</ul>
+<p><b>Perkembangan.</b> Kerangka PKM berikutnya (Avery dkk., 2001) memuat tujuh keterampilan: retrieving, evaluating, organizing, collaborating, analyzing, presenting, dan <b>securing</b> information. Keterampilan terakhir itu adalah benih yang dikembangkan AI KOS menjadi lapisan governance.</p>
+</template>
+<template id="d-src-basb" data-title="Building a Second Brain — sumber &amp; catatan">
+<ul>
+<li>Forte, T. (2022). <i>Building a Second Brain: A Proven Method to Organize Your Digital Life and Unlock Your Creative Potential.</i></li>
+<li>Forte Labs — fortelabs.com</li>
+</ul>
+<p><b>PARA singkatnya.</b> Projects: hasil aktif dengan tenggat. Areas: tanggung jawab berkelanjutan. Resources: topik rujukan. Archives: yang sudah tidak aktif.</p>
+<p><b>Catatan jujur.</b> "Second brain" juga dipakai sebagai istilah umum untuk sistem knowledge eksternal. Metode CODE dan PARA spesifik milik Forte.</p>
+</template>
+<template id="d-src-llmwiki" data-title="LLM Wiki — sumber &amp; catatan">
+<ul>
+<li>Karpathy, A. (April 2026). <i>llm-wiki</i> — GitHub gist, disebut penulisnya sebagai "idea file".</li>
+</ul>
+<p><b>Tiga operasi.</b> Ingest: memproses sumber baru ke wiki. Query: bertanya ke wiki. Lint: memeriksa kesehatan wiki — kontradiksi, tautan putus, halaman usang.</p>
+<p><b>Posisi.</b> Diajukan sebagai alternatif sederhana RAG untuk knowledge base skala pribadi atau tim kecil. Banyak implementasi komunitas; tidak ada versi resmi yang di-endorse penulisnya.</p>
+<p><b>Catatan jujur.</b> Pola ini baru berumur beberapa bulan. Praktik terbaiknya masih berkembang.</p>
+</template>
+
+<dialog class="sheet" id="sheet" aria-labelledby="sheetTitle">
+  <div class="sheet-in">
+    <div class="sheet-h"><h3 id="sheetTitle"></h3><button class="ibtn" id="sheetClose" aria-label="Tutup">✕</button></div>
+    <div id="sheetBody"></div>
+  </div>
+</dialog>
+
+<script>
+(function(){
+  var MODS={0:'Mulai',1:'Chat ≠ Knowledge',2:'Arsitektur',3:'Pipeline',4:'Governance',5:'Case A · ChatGPT',6:'Case B · Claude',7:'Akar KOS',8:'Action Card'};
+  var screens=[].slice.call(document.querySelectorAll('.screen'));
+  var nav=document.getElementById('nav');
+  var cur=0, seen={};
+  var side=document.getElementById('side'), scrim=document.getElementById('scrim'), menuBtn=document.getElementById('menuBtn');
+
+  /* ---- build sidebar ---- */
+  var groups={};
+  screens.forEach(function(s,i){var m=s.getAttribute('data-mod');(groups[m]=groups[m]||[]).push(i);});
+  Object.keys(groups).forEach(function(m){
+    var wrap=document.createElement('div');wrap.className='nmod';wrap.setAttribute('data-m',m);
+    var head=document.createElement('button');
+    var no=(m==='0')?'':(m==='8'?'':('M'+m));
+    head.innerHTML='<span class="no">'+no+'</span><span>'+MODS[m]+'</span><span class="dn" data-dn="'+m+'"></span>';
+    head.addEventListener('click',function(){go(groups[m][0]);});
+    wrap.appendChild(head);
+    var sub=document.createElement('div');sub.className='nsub';
+    groups[m].forEach(function(i){
+      var b=document.createElement('button');b.textContent=screens[i].getAttribute('data-t');b.setAttribute('data-i',i);
+      b.addEventListener('click',function(){go(i);});sub.appendChild(b);
+    });
+    wrap.appendChild(sub);nav.appendChild(wrap);
+  });
+
+  function go(i){
+    if(i<0||i>=screens.length)return;
+    screens[cur].classList.remove('on');
+    cur=i;seen[i]=1;
+    screens[i].classList.add('on');
+    var m=screens[i].getAttribute('data-mod');
+    [].forEach.call(nav.querySelectorAll('.nmod'),function(w){w.classList.toggle('cur',w.getAttribute('data-m')===m);});
+    [].forEach.call(nav.querySelectorAll('.nsub button'),function(b){var bi=+b.getAttribute('data-i');b.classList.toggle('on',bi===i);b.classList.toggle('seen',!!seen[bi]&&bi!==i);});
+    Object.keys(groups).forEach(function(g){var el=nav.querySelector('[data-dn="'+g+'"]');if(!el)return;var n=groups[g].filter(function(x){return seen[x];}).length;el.textContent=n+'/'+groups[g].length;});
+    document.getElementById('progTx').textContent=(i+1)+' / '+screens.length+' · '+MODS[m]+' · '+screens[i].getAttribute('data-t');
+    document.getElementById('progBar').style.width=((i+1)/screens.length*100)+'%';
+    document.getElementById('prevBtn').disabled=(i===0);
+    document.getElementById('nextBtn').style.visibility=(i===screens.length-1)?'hidden':'visible';
+    closeSide();
+    try{window.scrollTo({top:0,behavior:'auto'});}catch(e){window.scrollTo(0,0);}
+  }
+  document.getElementById('prevBtn').addEventListener('click',function(){go(cur-1);});
+  document.getElementById('nextBtn').addEventListener('click',function(){go(cur+1);});
+  [].forEach.call(document.querySelectorAll('[data-go="next"]'),function(b){b.addEventListener('click',function(){go(cur+1);});});
+  document.addEventListener('keydown',function(e){
+    if(document.getElementById('sheet').open)return;
+    var t=e.target.tagName;if(t==='INPUT'||t==='TEXTAREA')return;
+    if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);
+  });
+  /* swipe (mobile / IFP) */
+  var sx=null,sy=null;
+  var stage=document.getElementById('stage');
+  stage.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+  stage.addEventListener('touchend',function(e){
+    if(sx===null)return;var dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.6){go(dx<0?cur+1:cur-1);}sx=sy=null;
+  },{passive:true});
+
+  /* ---- drawer ---- */
+  function openSide(){side.classList.add('open');scrim.classList.add('open');menuBtn.setAttribute('aria-expanded','true');}
+  function closeSide(){side.classList.remove('open');scrim.classList.remove('open');menuBtn.setAttribute('aria-expanded','false');}
+  menuBtn.addEventListener('click',openSide);
+  scrim.addEventListener('click',closeSide);
+  document.getElementById('closeBtn').addEventListener('click',closeSide);
+
+  /* ---- theme ---- */
+  var root=document.documentElement;
+  document.getElementById('themeBtn').addEventListener('click',function(){
+    var d=root.getAttribute('data-theme')==='dark';
+    root.setAttribute('data-theme',d?'light':'dark');
+    document.getElementById('themeTx').textContent=d?'Gelap':'Terang';
+  });
+
+  /* ---- sheets ---- */
+  var sheet=document.getElementById('sheet');
+  function openSheet(id){
+    var t=document.getElementById(id);if(!t)return;
+    document.getElementById('sheetTitle').innerHTML=t.getAttribute('data-title')||'';
+    var body=document.getElementById('sheetBody');body.innerHTML='';
+    body.appendChild(t.content.cloneNode(true));
+    if(typeof sheet.showModal==='function'){sheet.showModal();}else{sheet.setAttribute('open','');}
+  }
+  function closeSheet(){if(typeof sheet.close==='function'){sheet.close();}else{sheet.removeAttribute('open');}}
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('[data-sheet]');
+    if(b){e.preventDefault();closeSide();openSheet(b.getAttribute('data-sheet'));return;}
+    var c=e.target.closest('[data-copy]');
+    if(c){var p=c.parentNode.querySelector('pre');if(p)copyText(p.textContent,c);}
+  });
+  document.getElementById('sheetClose').addEventListener('click',closeSheet);
+  sheet.addEventListener('click',function(e){if(e.target===sheet)closeSheet();});
+
+  function copyText(txt,btn){
+    var done=function(){var o=btn.textContent;btn.textContent='Tersalin ✓';setTimeout(function(){btn.textContent=o;},1600);};
+    var fallback=function(){var ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done();}catch(e){}document.body.removeChild(ta);};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback);}else{fallback();}
+  }
+  document.getElementById('copyAct').addEventListener('click',function(){
+    var lines=['ACTION CARD — AI Knowledge Operating System',''];
+    [].forEach.call(document.querySelectorAll('#acard .act'),function(a){
+      var ck=a.querySelector('input').checked?'[x]':'[ ]';
+      lines.push(ck+' '+a.querySelector('.when').textContent+': '+a.querySelector('.what').textContent);
+    });
+    lines.push('','Refleksi: Siapa Librarian manusia di tim Anda?','','AI First by IWDemy · Designed by Tjitra | Powered by IWDemy');
+    copyText(lines.join('\n'),this);
+  });
+
+  /* ---- decisions (feedback only after choice) ---- */
+  [].forEach.call(document.querySelectorAll('.q'),function(q){
+    var type=q.getAttribute('data-type'), fb=q.querySelector('.fb'), opts=[].slice.call(q.querySelectorAll('.opt'));
+    var neutral=q.getAttribute('data-neutral')==='1';
+    if(type==='single'){
+      opts.forEach(function(o){o.setAttribute('aria-pressed','false');o.addEventListener('click',function(){
+        opts.forEach(function(x){x.classList.remove('ok','no');x.setAttribute('aria-pressed','false');});
+        o.setAttribute('aria-pressed','true');
+        fb.className='fb show';
+        if(!neutral){var ok=o.getAttribute('data-ok')==='1';o.classList.add(ok?'ok':'no');fb.classList.add(ok?'ok':'no');}
+        fb.innerHTML=o.getAttribute('data-fb')||'';
+      });});
+    } else if(type==='multi'){
+      opts.forEach(function(o){o.setAttribute('aria-pressed','false');o.addEventListener('click',function(){
+        o.setAttribute('aria-pressed',o.getAttribute('aria-pressed')==='true'?'false':'true');
+        opts.forEach(function(x){x.classList.remove('ok','no','miss');});fb.className='fb';
+      });});
+      q.querySelector('.check').addEventListener('click',function(){
+        var allRight=true, any=false;
+        opts.forEach(function(o){
+          var picked=o.getAttribute('aria-pressed')==='true', should=o.getAttribute('data-ok')==='1';
+          if(picked)any=true;
+          o.classList.remove('ok','no','miss');
+          if(picked&&should)o.classList.add('ok');
+          else if(picked&&!should){o.classList.add('no');allRight=false;}
+          else if(!picked&&should){allRight=false;}
+        });
+        if(!any){fb.className='fb show';fb.innerHTML='Pilih minimal satu file dulu.';return;}
+        fb.className='fb show '+(allRight?'ok':'no');
+        fb.innerHTML=allRight?q.getAttribute('data-fb-ok'):q.getAttribute('data-fb-no');
+        if(!allRight){opts.forEach(function(o){if(o.getAttribute('data-ok')==='1'&&o.getAttribute('aria-pressed')!=='true'){o.classList.add('miss');}});}
+      });
+    }
+  });
+
+  go(0);
+})();
+</script>
+</body>
+</html>
