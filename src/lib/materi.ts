@@ -6,6 +6,7 @@ export type Materi = {
   title: string;
   url: string;
   stored_url?: string;
+  content?: string;
   created_at: string;
 };
 
@@ -29,6 +30,21 @@ const resolveMaterialUrl = async (materi: Materi): Promise<Materi> => {
     .createSignedUrl(storagePath, 60 * 60);
 
   if (error) throw error;
+
+  if (/\.html?$/i.test(storagePath)) {
+    const { data: file, error: downloadError } = await supabase.storage
+      .from(MATERIAL_BUCKET)
+      .download(storagePath);
+
+    if (downloadError) throw downloadError;
+    return {
+      ...materi,
+      stored_url: materi.url,
+      url: data.signedUrl,
+      content: await file.text(),
+    };
+  }
+
   return { ...materi, stored_url: materi.url, url: data.signedUrl };
 };
 

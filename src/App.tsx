@@ -952,7 +952,12 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
     }
     const additionalMaterials = materials.filter((materi) => !builtInTitles.has(materi.title) && !/^Materi Visual \d+$/.test(materi.title));
     if (additionalMaterials.length > 0) {
-      finalMaterials.push({ title: "Materi Tambahan", htmls: additionalMaterials.map((m) => ({ title: m.title, url: m.url })) });
+      finalMaterials.push({
+        title: "Materi Tambahan",
+        htmls: additionalMaterials.map((materi) => materi.content
+          ? { title: materi.title, content: materi.content }
+          : { title: materi.title, url: materi.url }),
+      });
     }
 
     setSelectedModule({
