@@ -23,6 +23,10 @@ import level3Day1_1Html from './Level 3/Level 3 day 1.1.html?raw';
 import twcHtml1 from '../ThinkingWithClaude/setup.html?raw';
 import twcHtml2 from '../ThinkingWithClaude/thinking.html?raw';
 import aptAssessmentHtml from './Strategize/apt-assessment.html?raw';
+import responsibleAiUntukPemimpinHtml from '../materi/Strategize/responsible-ai-untuk-pemimpin-v0.html?raw';
+import petaUsecaseAi2026Html from '../materi/Strategize/peta-usecase-ai-2026-v0.html?raw';
+import formatDataUntukAiHtml from '../materi/Strategize/Format-Data-untuk-AI-v0.html?raw';
+import aifWithClaudeHtml from '../materi/Strategize/aif-with-claude-v0.html?raw';
 import strategizeImage1 from '../Strategize/1.png';
 import strategizeImage2 from '../Strategize/2.png';
 import strategizeImage3 from '../Strategize/3.png';
@@ -393,7 +397,7 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
 }
 
 function MateriView() {
-  const [selectedModule, setSelectedModule] = useState('05');
+  const [selectedModule, setSelectedModule] = useState('04');
   const [materiTitle, setMateriTitle] = useState('');
   const [materiLink, setMateriLink] = useState('');
   const [materiList, setMateriList] = useState<{title: string, url: string}[]>([]);
@@ -403,8 +407,9 @@ function MateriView() {
     { id: '01', name: 'Strategize' },
     { id: '02', name: 'Prompt' },
     { id: '03', name: 'Create' },
-    { id: '04', name: 'Build' },
-    { id: '05', name: 'Thinking with Claude' },
+    { id: '04', name: 'Think' },
+    { id: '05', name: 'Build' },
+    { id: '06', name: 'ACT' },
   ];
 
   useEffect(() => {
@@ -412,7 +417,7 @@ function MateriView() {
       const stored = localStorage.getItem(`materi_module_${selectedModule}`);
       if (stored) {
         setMateriList(JSON.parse(stored));
-      } else if (selectedModule === '05') {
+      } else if (selectedModule === '04') {
         // Fallback for older data
         const legacyStored = localStorage.getItem('thinking_with_claude_materials');
         if (legacyStored) {
@@ -439,7 +444,7 @@ function MateriView() {
     const newList = [...materiList, { title: materiTitle, url: materiLink }];
     setMateriList(newList);
     localStorage.setItem(`materi_module_${selectedModule}`, JSON.stringify(newList));
-    if (selectedModule === '05') {
+    if (selectedModule === '04') {
       localStorage.setItem('thinking_with_claude_materials', JSON.stringify(newList));
     }
     setMateriTitle('');
@@ -451,7 +456,7 @@ function MateriView() {
     const newList = materiList.filter((_, i) => i !== index);
     setMateriList(newList);
     localStorage.setItem(`materi_module_${selectedModule}`, JSON.stringify(newList));
-    if (selectedModule === '05') {
+    if (selectedModule === '04') {
       localStorage.setItem('thinking_with_claude_materials', JSON.stringify(newList));
     }
   };
@@ -894,7 +899,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
         const parsed = JSON.parse(stored);
         if (parsed.length > 0) materials = parsed.map((m: any) => ({ title: m.title, url: m.url }));
       }
-      if (materials.length === 0 && moduleId === '05') {
+      if (materials.length === 0 && moduleId === '04') {
         const legacyStored = localStorage.getItem('thinking_with_claude_materials');
         if (legacyStored) {
           const parsed = JSON.parse(legacyStored);
@@ -961,11 +966,11 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
       return tier === 'Professional' || tier === 'Leaders' || tier === 'Internal';
     }
 
-    if (moduleId === '03' || moduleId === '04') { // Create, Build
+    if (moduleId === '03' || moduleId === '05' || moduleId === '06') { // Create, Build, ACT
       return tier === 'Leaders' || tier === 'Internal';
     }
 
-    if (moduleId === '05') { // Thinking with Claude
+    if (moduleId === '04') { // Think
       return tier === 'Internal' || tier === 'TWC';
     }
     
@@ -1240,10 +1245,10 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
           <div className="flex items-center justify-between border-b border-border-light-subtle pb-4 mb-8">
             <h2 className="font-sans font-bold text-xl text-light-hi">Akses Cepat</h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Module 01 - Strategize */}
             {canAccessModule("01") ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", [{ title: "Materi Sesi Penuh", htmls: [{ title: "Materi Visual", images: strategizeImages }, { title: "APT Assessment", content: aptAssessmentHtml }] }])}>
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", [{ title: "Thinking and Working with Claude", htmls: [{ title: "Thinking and Working with Claude", content: aifWithClaudeHtml }] }, { title: "Responsible, Ethic dan Safety", htmls: [{ title: "Responsible, Ethic dan Safety", content: responsibleAiUntukPemimpinHtml }] }, { title: "Umum", htmls: [{ title: "Materi Visual", images: strategizeImages }, { title: "APT Assessment", content: aptAssessmentHtml }, { title: "Peta Use Case AI 2026", content: petaUsecaseAi2026Html }, { title: "Format Data untuk AI", content: formatDataUntukAiHtml }] }])}>
                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">01</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Strategize</div>
@@ -1271,7 +1276,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
             )}
             {/* Module 02 - Prompt */}
             {canAccessModule('02') ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("02", "Prompt", "Chat Mastery", [{ day: "Day 1", title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }] }, { day: "Day 2", title: "Materi AI First Level 2 Day 2", htmls: [{ title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }])}>
+              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("02", "Prompt", "Chat Mastery", [{ title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }, { title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }])}>
                  <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">02</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Prompt</div>
@@ -1327,10 +1332,10 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               </div>
             )}
             
-            {/* Module 04 - Build */}
-            {canAccessModule('04') ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("04", "Build", "NoCode AI Build", [{ day: "Day 1", title: "Materi Day 1" }, { day: "Day 2", title: "Materi Day 2" }])}>
-                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">04</span>
+            {/* Module 05 - Build */}
+            {canAccessModule('05') ? (
+              <div className="order-5 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("05", "Build", "NoCode AI Build", [{ day: "Day 1", title: "Materi Day 1" }, { day: "Day 2", title: "Materi Day 2" }])}>
+                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">05</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Build</div>
                   <p className="font-body text-sm text-light-md">NoCode AI Build</p>
@@ -1343,8 +1348,8 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                 </div>
               </div>
             ) : (
-              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
-                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">04</span>
+              <div className="order-5 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
+                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">05</span>
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-sans font-bold text-lg text-light-md">Build</div>
@@ -1356,31 +1361,60 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               </div>
             )}
 
-            {/* Module 05 - Thinking with Claude */}
-            {canAccessModule('05') ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("05", "Thinking with Claude", "One Day Intensive", [{ day: "Materi", title: "Thinking with Claude", htmls: [{ title: "Thinking w/ Claude AI", content: twcHtml2 }, { title: "Setup Claude", content: twcHtml1 }] }])}>
-                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">05</span>
+            {/* Module 04 - Think */}
+            {canAccessModule('04') ? (
+              <div className="order-4 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("04", "Think", "One Day Intensive", [{ day: "Materi", title: "Thinking with Claude", htmls: [{ title: "Thinking w/ Claude AI", content: twcHtml2 }, { title: "Setup Claude", content: twcHtml1 }] }])}>
+                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">04</span>
                 <div>
-                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Thinking with Claude</div>
+                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Think</div>
                   <p className="font-body text-sm text-light-md">One Day Intensive</p>
                   <div className="mt-6 flex items-center gap-3">
                      <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                        <div className="bg-gold h-full rounded-full w-[0%]"></div>
+                        <div className="bg-gold h-full rounded-full w-[100%]"></div>
                      </div>
-                     <span className="font-mono text-xs text-light-lo">0%</span>
+                     <span className="font-mono text-xs text-light-lo">100%</span>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
-                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">05</span>
+              <div className="order-4 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
+                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">04</span>
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <div className="font-sans font-bold text-lg text-light-md">Thinking with Claude</div>
+                    <div className="font-sans font-bold text-lg text-light-md">Think</div>
                     <Lock className="w-4 h-4 text-light-lo" />
                   </div>
                   <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
                   <p className="font-body text-[10px] text-light-lo">Tier Internal atau TWC diperlukan untuk modul ini.</p>
+                </div>
+              </div>
+            )}
+
+            {/* Module 06 - ACT */}
+            {canAccessModule('06') ? (
+              <div className="order-6 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("06", "ACT", "Action & Transformation", [{ title: "Materi ACT" }])}>
+                <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">06</span>
+                <div>
+                  <div className="font-sans font-bold text-lg text-light-hi mb-2">ACT</div>
+                  <p className="font-body text-sm text-light-md">Action &amp; Transformation</p>
+                  <div className="mt-6 flex items-center gap-3">
+                    <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
+                      <div className="bg-gold h-full rounded-full w-[100%]"></div>
+                    </div>
+                    <span className="font-mono text-xs text-light-lo">100%</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="order-6 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
+                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">06</span>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-sans font-bold text-lg text-light-md">ACT</div>
+                    <Lock className="w-4 h-4 text-light-lo" />
+                  </div>
+                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
+                  <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
                 </div>
               </div>
             )}

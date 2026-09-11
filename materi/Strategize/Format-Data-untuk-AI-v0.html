@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark" data-view="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Format Data untuk AI — Panduan Keputusan Pemimpin Bisnis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --gold:#D4A84B; --gold-dim:#8B7340; --green:#3D8B4A; --red:#B4503C; --blue:#4A7C9B; --amber:#C08A3E;
+  --fs:1; --side:250px;
+}
+[data-theme="dark"]{
+  --bg:#0E0E0E; --bg-1:#161616; --bg-2:#1C1C1C; --bg-3:#242424;
+  --tx-hi:rgba(248,246,242,.92); --tx-md:rgba(248,246,242,.68); --tx-lo:rgba(248,246,242,.45); --tx-xs:rgba(248,246,242,.16);
+  --line:rgba(248,246,242,.12); --line-str:rgba(248,246,242,.24);
+  --track:rgba(248,246,242,.09); --glow:rgba(212,168,75,.13);
+}
+[data-theme="light"]{
+  --bg:#F8F6F2; --bg-1:#FFFFFF; --bg-2:#F1EEE7; --bg-3:#E7E3D9;
+  --tx-hi:rgba(14,14,14,.92); --tx-md:rgba(14,14,14,.66); --tx-lo:rgba(14,14,14,.44); --tx-xs:rgba(14,14,14,.14);
+  --line:rgba(14,14,14,.12); --line-str:rgba(14,14,14,.22);
+  --track:rgba(14,14,14,.08); --glow:rgba(212,168,75,.16);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--tx-hi);font-family:'Inter',system-ui,sans-serif;
+  font-size:calc(clamp(14px,1.35vw,16px)*var(--fs));line-height:1.65;overflow-x:hidden;
+  transition:background .35s,color .35s;}
+h1,h2,h3,h4,h5{font-family:'Plus Jakarta Sans',sans-serif;letter-spacing:-.02em;line-height:1.15;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:calc(10px*var(--fs));letter-spacing:.22em;
+  text-transform:uppercase;color:var(--gold);font-weight:500;}
+button{font-family:inherit;}
+
+/* ═══ COVER ═══ */
+#cover{position:fixed;inset:0;z-index:400;display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(24px,6vw,80px);background:var(--bg);overflow:hidden;
+  transition:opacity .6s,visibility .6s;}
+#cover.gone{opacity:0;visibility:hidden;pointer-events:none;}
+#cvc{position:absolute;inset:0;width:100%;height:100%;opacity:.5;}
+.cg{position:absolute;border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,var(--glow) 0%,transparent 64%);}
+.cg1{width:72vmax;height:72vmax;top:-24vmax;right:-24vmax;}
+.cg2{width:54vmax;height:54vmax;bottom:-26vmax;left:-20vmax;}
+.cov-in{position:relative;z-index:2;max-width:1100px;width:100%;margin:0 auto;}
+.cov-eb{margin-bottom:clamp(14px,2.5vh,26px);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.cov-dot{width:4px;height:4px;border-radius:50%;background:var(--tx-xs);}
+.cov-t{font-size:clamp(38px,8.6vw,110px);font-weight:800;letter-spacing:-.045em;line-height:.94;
+  margin-bottom:clamp(16px,3vh,28px);}
+.cov-t em{font-style:normal;color:var(--gold);display:block;}
+.cov-s{font-size:clamp(15px,2vw,21px);color:var(--tx-md);font-weight:300;max-width:620px;
+  line-height:1.55;margin-bottom:clamp(24px,4.5vh,42px);}
+.cov-l{display:flex;gap:clamp(7px,1.5vw,14px);flex-wrap:wrap;margin-bottom:clamp(26px,5vh,48px);}
+.cov-li{display:flex;align-items:center;gap:8px;padding:9px 15px;border:1px solid var(--line);
+  border-radius:100px;background:var(--bg-1);}
+.cov-li svg{width:15px;height:15px;flex:none;}
+.cov-li span{font-size:clamp(11px,1.2vw,13px);color:var(--tx-md);font-weight:500;white-space:nowrap;}
+.btn-go{display:inline-flex;align-items:center;gap:12px;background:var(--gold);color:#0E0E0E;border:none;
+  padding:clamp(14px,1.8vw,19px) clamp(26px,3.4vw,38px);border-radius:100px;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:clamp(14px,1.5vw,17px);font-weight:700;cursor:pointer;
+  box-shadow:0 6px 26px rgba(212,168,75,.24);transition:transform .2s,box-shadow .2s;}
+.btn-go:hover{transform:translateY(-2px);box-shadow:0 10px 34px rgba(212,168,75,.34);}
+.cov-f{position:absolute;bottom:clamp(20px,4vh,40px);left:clamp(24px,6vw,80px);right:clamp(24px,6vw,80px);
+  display:flex;justify-content:space-between;align-items:flex-end;gap:16px;z-index:2;flex-wrap:wrap;}
+.cov-f div{font-size:clamp(9px,1vw,11px);color:var(--tx-lo);font-family:'JetBrains Mono',monospace;
+  letter-spacing:.14em;text-transform:uppercase;}
+
+/* ═══ SHELL ═══ */
+#app{opacity:0;transition:opacity .5s .2s;display:flex;min-height:100vh;}
+#app.on{opacity:1;}
+
+/* SIDEBAR */
+.side{width:var(--side);flex:none;background:var(--bg-1);border-right:1px solid var(--line);
+  position:sticky;top:0;height:100vh;display:flex;flex-direction:column;
+  padding:calc(22px*var(--fs)) calc(14px*var(--fs));overflow-y:auto;z-index:150;transition:transform .3s;}
+.side-brand{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+  font-size:calc(19px*var(--fs));letter-spacing:-.03em;padding:0 calc(10px*var(--fs)) calc(18px*var(--fs));
+  border-bottom:1px solid var(--line);margin-bottom:calc(16px*var(--fs));}
+.side-brand b{color:var(--gold);}
+.side-brand small{display:block;font-family:'JetBrains Mono',monospace;font-size:calc(8.5px*var(--fs));
+  letter-spacing:.16em;color:var(--tx-lo);font-weight:400;margin-top:5px;text-transform:uppercase;}
+.side-l{font-family:'JetBrains Mono',monospace;font-size:calc(8.5px*var(--fs));letter-spacing:.2em;
+  text-transform:uppercase;color:var(--tx-lo);padding:0 calc(10px*var(--fs));margin:calc(14px*var(--fs)) 0 calc(7px*var(--fs));}
+.nb{display:flex;align-items:center;gap:calc(11px*var(--fs));width:100%;background:none;border:none;
+  color:var(--tx-md);cursor:pointer;text-align:left;border-radius:10px;
+  padding:calc(11px*var(--fs)) calc(10px*var(--fs));font-size:calc(13.5px*var(--fs));
+  font-weight:500;transition:background .2s,color .2s;line-height:1.3;}
+.nb svg{width:calc(17px*var(--fs));height:calc(17px*var(--fs));flex:none;color:var(--tx-lo);transition:color .2s;}
+.nb:hover{background:var(--bg-2);color:var(--tx-hi);}
+.nb.on{background:var(--glow);color:var(--gold);font-weight:600;}
+.nb.on svg{color:var(--gold);}
+.nb-n{font-family:'JetBrains Mono',monospace;font-size:calc(9px*var(--fs));color:var(--tx-xs);margin-left:auto;}
+.side-foot{margin-top:auto;padding-top:calc(16px*var(--fs));border-top:1px solid var(--line);}
+.ctlrow{display:flex;gap:6px;margin-bottom:8px;}
+.ctl{flex:1;background:var(--bg-2);border:1px solid var(--line);border-radius:8px;cursor:pointer;
+  color:var(--tx-lo);padding:calc(8px*var(--fs)) 4px;font-size:calc(9.5px*var(--fs));
+  font-family:'JetBrains Mono',monospace;letter-spacing:.06em;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:4px;}
+.ctl svg{width:calc(12px*var(--fs));height:calc(12px*var(--fs));}
+.ctl:hover{border-color:var(--line-str);color:var(--tx-hi);}
+.ctl.on{background:var(--glow);border-color:var(--gold);color:var(--gold);}
+.side-ver{font-family:'JetBrains Mono',monospace;font-size:calc(8.5px*var(--fs));color:var(--tx-lo);
+  letter-spacing:.1em;padding:0 4px;line-height:1.7;}
+
+.mtop{display:none;position:sticky;top:0;z-index:140;background:var(--bg);
+  border-bottom:1px solid var(--line);padding:12px 16px;align-items:center;gap:12px;}
+.mburger{background:none;border:1px solid var(--line);border-radius:9px;width:38px;height:38px;
+  cursor:pointer;color:var(--tx-md);display:flex;align-items:center;justify-content:center;flex:none;}
+.mburger svg{width:18px;height:18px;}
+.mtitle{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;}
+.mscrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:145;}
+.mscrim.on{display:block;}
+
+/* CONTENT */
+.content{flex:1;min-width:0;}
+main{max-width:1180px;margin:0 auto;padding:calc(34px*var(--fs)) clamp(16px,3.5vw,44px) calc(90px*var(--fs));}
+.page{display:none;animation:fi .4s ease;}
+.page.on{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.ph{margin-bottom:calc(30px*var(--fs));max-width:760px;}
+.ph h2{font-size:calc(clamp(23px,3.6vw,38px)*var(--fs));font-weight:800;margin:9px 0 11px;}
+.ph p{color:var(--tx-md);font-size:calc(clamp(14px,1.5vw,16.5px)*var(--fs));font-weight:300;}
+
+/* VIEW MODES */
+[data-view="mobile"] .side{position:fixed;left:0;top:0;transform:translateX(-100%);}
+[data-view="mobile"] .side.open{transform:none;}
+[data-view="mobile"] .mtop{display:flex;}
+[data-view="mobile"] main{max-width:430px;padding:22px 16px 70px;}
+[data-view="mobile"]{--fs:.92;}
+[data-view="mobile"] .fgrid{grid-template-columns:1fr 1fr!important;}
+[data-view="mobile"] .lensgrid,[data-view="mobile"] .cgrid,[data-view="mobile"] .bpgrid{grid-template-columns:1fr!important;}
+[data-view="mobile"] .cmpwrap{grid-template-columns:1fr!important;}
+[data-view="ifp"]{--fs:1.34;--side:300px;}
+[data-view="ifp"] main{max-width:1620px;}
+[data-view="ifp"] .fgrid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))!important;}
+@media(max-width:900px){
+  [data-view="auto"] .side{position:fixed;left:0;top:0;transform:translateX(-100%);}
+  [data-view="auto"] .side.open{transform:none;}
+  [data-view="auto"] .mtop{display:flex;}
+  [data-view="auto"] main{padding:22px 16px 70px;}
+}
+
+/* ═══ CONCEPT ═══ */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));
+  gap:calc(12px*var(--fs));margin-bottom:calc(26px*var(--fs));}
+.cc{background:var(--bg-1);border:1px solid var(--line);border-radius:16px;
+  padding:calc(20px*var(--fs));cursor:pointer;transition:border-color .2s,transform .18s;}
+.cc:hover{border-color:var(--gold);transform:translateY(-3px);}
+.cc-ic{width:calc(40px*var(--fs));height:calc(40px*var(--fs));border-radius:11px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:calc(14px*var(--fs));}
+.cc-ic svg{width:calc(20px*var(--fs));height:calc(20px*var(--fs));}
+.cc h3{font-size:calc(17px*var(--fs));font-weight:700;margin-bottom:7px;}
+.cc p{color:var(--tx-md);font-size:calc(13px*var(--fs));font-weight:300;line-height:1.55;}
+.cc-more{display:flex;align-items:center;gap:6px;margin-top:calc(12px*var(--fs));
+  font-family:'JetBrains Mono',monospace;font-size:calc(9px*var(--fs));letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold);}
+.cc-more svg{width:calc(11px*var(--fs));height:calc(11px*var(--fs));}
+
+.panel{background:var(--bg-1);border:1px solid var(--line);border-radius:18px;
+  padding:calc(24px*var(--fs));margin-bottom:calc(22px*var(--fs));}
+.panel-h{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.panel-h h3{font-size:calc(19px*var(--fs));font-weight:700;}
+.panel>p.sub{color:var(--tx-md);font-size:calc(13.5px*var(--fs));font-weight:300;
+  margin-bottom:calc(22px*var(--fs));max-width:640px;}
+.tokrow{display:grid;grid-template-columns:calc(90px*var(--fs)) 1fr calc(64px*var(--fs));
+  align-items:center;gap:calc(12px*var(--fs));margin-bottom:9px;cursor:pointer;}
+.tokrow:hover .tokbar{filter:brightness(1.18);}
+.tokrow .lbl{font-family:'JetBrains Mono',monospace;font-size:calc(11px*var(--fs));color:var(--tx-md);}
+.tokbar-t{height:calc(24px*var(--fs));background:var(--track);border-radius:6px;overflow:hidden;}
+.tokbar{height:100%;border-radius:6px;width:0;transition:width 1s cubic-bezier(.22,1,.36,1),filter .2s;}
+.tokrow .val{font-family:'JetBrains Mono',monospace;font-size:calc(11.5px*var(--fs));
+  text-align:right;font-weight:600;}
+
+.note{border-radius:12px;padding:calc(15px*var(--fs));display:flex;gap:11px;align-items:flex-start;}
+.note svg{width:calc(17px*var(--fs));height:calc(17px*var(--fs));flex:none;margin-top:2px;}
+.note p{font-size:calc(13px*var(--fs));font-weight:300;line-height:1.6;color:var(--tx-md);}
+.n-gold{background:var(--glow);} .n-gold svg,.n-gold b{color:var(--gold);}
+.n-red{background:rgba(180,80,60,.13);} .n-red svg,.n-red b{color:var(--red);}
+.n-green{background:rgba(61,139,74,.13);} .n-green svg,.n-green b{color:var(--green);}
+[data-theme="light"] .n-red svg,[data-theme="light"] .n-red b{color:#8F3A28;}
+
+/* ═══ CHIPS ═══ */
+.chiprow{display:flex;gap:calc(7px*var(--fs));flex-wrap:wrap;margin-bottom:calc(18px*var(--fs));}
+.chip{display:flex;align-items:center;gap:8px;padding:calc(10px*var(--fs)) calc(16px*var(--fs));
+  background:var(--bg-1);border:1px solid var(--line);border-radius:100px;cursor:pointer;
+  font-size:calc(13px*var(--fs));font-weight:500;color:var(--tx-md);transition:all .2s;}
+.chip svg{width:calc(15px*var(--fs));height:calc(15px*var(--fs));flex:none;}
+.chip:hover{border-color:var(--line-str);color:var(--tx-hi);}
+.chip.on{background:var(--gold);border-color:var(--gold);color:#0E0E0E;font-weight:600;}
+.chip.on svg{color:#0E0E0E!important;}
+.chip-sm{padding:calc(7px*var(--fs)) calc(14px*var(--fs));font-size:calc(12px*var(--fs));background:none;}
+.chip-sm.on{background:var(--bg-3);border-color:var(--gold);color:var(--gold);}
+
+/* ═══ FORMAT CARD ═══ */
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,196px),1fr));gap:calc(11px*var(--fs));}
+.fc{background:var(--bg-1);border:1px solid var(--line);border-radius:16px;padding:calc(16px*var(--fs));
+  cursor:pointer;transition:border-color .2s,transform .18s;display:flex;flex-direction:column;gap:calc(12px*var(--fs));}
+.fc:hover{border-color:var(--gold);transform:translateY(-3px);}
+.fc-t{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.fic{width:calc(36px*var(--fs));height:calc(36px*var(--fs));border-radius:10px;
+  display:flex;align-items:center;justify-content:center;flex:none;}
+.fic svg{width:calc(19px*var(--fs));height:calc(19px*var(--fs));}
+.badge{font-family:'JetBrains Mono',monospace;font-size:calc(8.5px*var(--fs));letter-spacing:.1em;
+  padding:calc(3px*var(--fs)) calc(7px*var(--fs));border-radius:5px;text-transform:uppercase;
+  font-weight:600;white-space:nowrap;}
+.b-work{background:rgba(61,139,74,.17);color:#5FA96C;}
+.b-src{background:rgba(192,138,62,.17);color:#C08A3E;}
+[data-theme="light"] .b-work{color:#2E6B37;} [data-theme="light"] .b-src{color:#8B6220;}
+.b-h{background:rgba(74,124,155,.17);color:#6FA3C4;}
+.b-a{background:rgba(139,115,64,.2);color:#B89A5E;}
+.b-b{background:rgba(212,168,75,.18);color:var(--gold);}
+[data-theme="light"] .b-h{color:#2F5D78;} [data-theme="light"] .b-a{color:#6B5528;} [data-theme="light"] .b-b{color:#8B6A1E;}
+.fname{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:calc(16px*var(--fs));line-height:1.2;}
+.fext{font-family:'JetBrains Mono',monospace;font-size:calc(9.5px*var(--fs));color:var(--tx-lo);margin-top:3px;}
+.aud{display:flex;align-items:center;gap:5px;}
+.aud svg{width:calc(11px*var(--fs));height:calc(11px*var(--fs));}
+.mini{display:flex;flex-direction:column;gap:5px;}
+.mini-r{display:grid;grid-template-columns:calc(40px*var(--fs)) 1fr;align-items:center;gap:8px;}
+.mini-l{font-family:'JetBrains Mono',monospace;font-size:calc(8px*var(--fs));letter-spacing:.08em;
+  color:var(--tx-lo);text-transform:uppercase;}
+.dots{display:flex;gap:3px;}
+.dot{flex:1;height:calc(5px*var(--fs));border-radius:100px;background:var(--track);}
+
+/* ═══ SCATTER ═══ */
+.scatter-wrap{position:relative;background:var(--bg-1);border:1px solid var(--line);
+  border-radius:18px;padding:calc(22px*var(--fs));}
+#scatter{width:100%;height:auto;display:block;overflow:visible;}
+.sc-dot{cursor:pointer;transition:r .2s,opacity .2s;}
+.sc-dot:hover{opacity:.75;}
+.sc-lgd{display:flex;gap:calc(16px*var(--fs));flex-wrap:wrap;margin-top:calc(14px*var(--fs));
+  padding-top:calc(14px*var(--fs));border-top:1px solid var(--line);}
+.sc-lgd-i{display:flex;align-items:center;gap:7px;font-size:calc(11.5px*var(--fs));color:var(--tx-md);}
+.sc-sw{width:calc(11px*var(--fs));height:calc(11px*var(--fs));border-radius:3px;}
+
+/* ═══ RANK ═══ */
+.rank{display:flex;flex-direction:column;gap:7px;}
+.rr{display:grid;grid-template-columns:calc(28px*var(--fs)) calc(112px*var(--fs)) 1fr calc(42px*var(--fs));
+  align-items:center;gap:calc(12px*var(--fs));background:var(--bg-1);border:1px solid var(--line);
+  border-radius:12px;padding:calc(12px*var(--fs)) calc(15px*var(--fs));cursor:pointer;transition:all .2s;}
+.rr:hover{border-color:var(--gold);transform:translateX(3px);}
+.rpos{font-family:'JetBrains Mono',monospace;font-size:calc(11.5px*var(--fs));color:var(--tx-lo);font-weight:600;}
+.rname{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:calc(14px*var(--fs));
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.rbar-t{height:calc(9px*var(--fs));background:var(--track);border-radius:100px;overflow:hidden;}
+.rbar{height:100%;border-radius:100px;width:0;transition:width .7s cubic-bezier(.22,1,.36,1);}
+.rsc{font-family:'JetBrains Mono',monospace;font-size:calc(11.5px*var(--fs));text-align:right;
+  color:var(--tx-md);font-weight:600;}
+
+/* ═══ COMPARE / RADAR ═══ */
+.cmpwrap{display:grid;grid-template-columns:1fr 1fr;gap:calc(14px*var(--fs));margin-bottom:calc(18px*var(--fs));}
+.cmpsel{background:var(--bg-1);border:1px solid var(--line);border-radius:14px;padding:calc(14px*var(--fs));}
+.cmpsel-l{font-family:'JetBrains Mono',monospace;font-size:calc(9px*var(--fs));letter-spacing:.18em;
+  text-transform:uppercase;color:var(--tx-lo);margin-bottom:calc(10px*var(--fs));display:block;}
+.cmppick{display:flex;gap:5px;flex-wrap:wrap;}
+.cpb{padding:calc(6px*var(--fs)) calc(11px*var(--fs));border-radius:8px;border:1px solid var(--line);
+  background:none;cursor:pointer;font-size:calc(11.5px*var(--fs));color:var(--tx-lo);transition:all .2s;}
+.cpb:hover{color:var(--tx-hi);border-color:var(--line-str);}
+.cpb.a{background:rgba(212,168,75,.2);border-color:var(--gold);color:var(--gold);font-weight:600;}
+.cpb.b{background:rgba(74,124,155,.2);border-color:var(--blue);color:#6FA3C4;font-weight:600;}
+[data-theme="light"] .cpb.b{color:#2F5D78;}
+.radar-wrap{background:var(--bg-1);border:1px solid var(--line);border-radius:18px;
+  padding:calc(22px*var(--fs));display:grid;grid-template-columns:1fr;gap:calc(18px*var(--fs));}
+#radar{width:100%;max-width:calc(460px*var(--fs));margin:0 auto;display:block;}
+.cmptbl{display:flex;flex-direction:column;gap:7px;}
+.cmpr{display:grid;grid-template-columns:calc(72px*var(--fs)) 1fr 1fr;align-items:center;
+  gap:calc(10px*var(--fs));padding:calc(9px*var(--fs)) 0;border-bottom:1px solid var(--line);}
+.cmpr:last-child{border-bottom:none;}
+.cmpr-l{font-family:'JetBrains Mono',monospace;font-size:calc(9.5px*var(--fs));letter-spacing:.1em;
+  text-transform:uppercase;color:var(--tx-lo);}
+.cmpbar-t{height:calc(7px*var(--fs));background:var(--track);border-radius:100px;overflow:hidden;position:relative;}
+.cmpbar{height:100%;border-radius:100px;transition:width .6s;}
+.cmpv{display:flex;align-items:center;gap:8px;}
+.cmpv span{font-family:'JetBrains Mono',monospace;font-size:calc(10px*var(--fs));
+  color:var(--tx-md);min-width:calc(20px*var(--fs));}
+.cmpv div:first-child{flex:1;}
+
+/* ═══ BEST PRACTICE ═══ */
+.bpgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:calc(13px*var(--fs));}
+.bp{background:var(--bg-1);border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  display:flex;flex-direction:column;transition:border-color .2s;}
+.bp:hover{border-color:var(--line-str);}
+.bp-top{padding:calc(20px*var(--fs));}
+.bp-n{font-family:'JetBrains Mono',monospace;font-size:calc(28px*var(--fs));font-weight:600;
+  color:var(--tx-xs);line-height:1;margin-bottom:calc(14px*var(--fs));display:block;}
+.bp h3{font-size:calc(18px*var(--fs));font-weight:700;margin-bottom:9px;line-height:1.2;}
+.bp>.bp-top>p{color:var(--tx-md);font-size:calc(13px*var(--fs));font-weight:300;line-height:1.6;}
+.bp-vis{padding:calc(14px*var(--fs)) calc(20px*var(--fs));background:var(--bg-2);}
+.bp-btn{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;border-top:1px solid var(--line);
+  padding:calc(14px*var(--fs)) calc(20px*var(--fs));cursor:pointer;color:var(--gold);
+  font-family:'JetBrains Mono',monospace;font-size:calc(9.5px*var(--fs));letter-spacing:.14em;
+  text-transform:uppercase;transition:background .2s;margin-top:auto;}
+.bp-btn:hover{background:var(--glow);}
+.bp-btn svg{width:calc(12px*var(--fs));height:calc(12px*var(--fs));margin-left:auto;}
+
+/* mini viz inside BP */
+.flowmini{display:flex;align-items:center;gap:calc(7px*var(--fs));}
+.fm-box{flex:1;text-align:center;padding:calc(9px*var(--fs)) calc(5px*var(--fs));border-radius:8px;
+  font-family:'JetBrains Mono',monospace;font-size:calc(9px*var(--fs));letter-spacing:.05em;}
+.fm-a{background:rgba(180,80,60,.16);color:var(--red);}
+.fm-b{background:rgba(61,139,74,.16);color:var(--green);}
+[data-theme="light"] .fm-a{color:#8F3A28;} [data-theme="light"] .fm-b{color:#2E6B37;}
+.fm-ar{color:var(--tx-lo);flex:none;display:flex;}
+.fm-ar svg{width:calc(14px*var(--fs));height:calc(14px*var(--fs));}
+.stripes{display:flex;gap:calc(4px*var(--fs));align-items:flex-end;height:calc(38px*var(--fs));}
+.stripe{flex:1;border-radius:3px 3px 0 0;}
+.gauge{display:flex;align-items:center;gap:calc(10px*var(--fs));}
+.gauge-t{flex:1;height:calc(8px*var(--fs));background:var(--track);border-radius:100px;overflow:hidden;display:flex;}
+.gauge-f{height:100%;}
+.gauge-l{font-family:'JetBrains Mono',monospace;font-size:calc(9px*var(--fs));color:var(--tx-lo);white-space:nowrap;}
+
+/* ═══ DRAWER ═══ */
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(3px);z-index:290;
+  opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;}
+.scrim.on{opacity:1;visibility:visible;}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(580px,100%);z-index:300;background:var(--bg-1);
+  border-left:1px solid var(--line);transform:translateX(101%);
+  transition:transform .38s cubic-bezier(.22,1,.36,1);overflow-y:auto;overscroll-behavior:contain;}
+.drawer.on{transform:none;}
+.dh{position:sticky;top:0;background:var(--bg-1);border-bottom:1px solid var(--line);z-index:2;
+  padding:calc(20px*var(--fs));display:flex;align-items:flex-start;gap:13px;}
+.dx{margin-left:auto;background:none;border:1px solid var(--line);border-radius:100px;
+  width:calc(34px*var(--fs));height:calc(34px*var(--fs));cursor:pointer;color:var(--tx-md);flex:none;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.dx:hover{border-color:var(--gold);color:var(--gold);}
+.dx svg{width:calc(15px*var(--fs));height:calc(15px*var(--fs));}
+.db{padding:calc(20px*var(--fs));}
+.ds{margin-bottom:calc(24px*var(--fs));}
+.ds-l{font-family:'JetBrains Mono',monospace;font-size:calc(9px*var(--fs));letter-spacing:.2em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:calc(11px*var(--fs));display:block;}
+.ds p{color:var(--tx-md);font-size:calc(13.5px*var(--fs));font-weight:300;line-height:1.65;}
+.dlist{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.dlist li{display:flex;gap:10px;align-items:flex-start;font-size:calc(13px*var(--fs));
+  color:var(--tx-md);font-weight:300;line-height:1.55;}
+.dlist li svg{width:calc(14px*var(--fs));height:calc(14px*var(--fs));flex:none;margin-top:4px;}
+.i-ok{color:var(--green);} .i-no{color:var(--red);}
+.lensgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.lb{background:var(--bg-2);border-radius:12px;padding:calc(13px*var(--fs));}
+.lb-h{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+.lb-h svg{width:calc(13px*var(--fs));height:calc(13px*var(--fs));}
+.lb-h span{font-family:'JetBrains Mono',monospace;font-size:calc(8.5px*var(--fs));
+  letter-spacing:.12em;text-transform:uppercase;color:var(--tx-lo);}
+.lb .dots{margin-bottom:7px;}
+.lb p{font-size:calc(11px*var(--fs));color:var(--tx-md);font-weight:300;line-height:1.45;}
+.uc{background:var(--bg-2);border-radius:12px;padding:calc(14px*var(--fs));margin-bottom:8px;}
+.uc h5{font-size:calc(13.5px*var(--fs));font-weight:700;margin-bottom:4px;}
+.uc p{font-size:calc(12.5px*var(--fs));color:var(--tx-md);font-weight:300;line-height:1.5;}
+
+/* story */
+.story-step{display:flex;gap:calc(14px*var(--fs));margin-bottom:calc(16px*var(--fs));}
+.story-n{width:calc(28px*var(--fs));height:calc(28px*var(--fs));border-radius:50%;flex:none;
+  background:var(--bg-3);display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:calc(11px*var(--fs));color:var(--tx-lo);font-weight:600;}
+.story-step.bad .story-n{background:rgba(180,80,60,.2);color:var(--red);}
+.story-step.good .story-n{background:rgba(61,139,74,.2);color:var(--green);}
+.story-c h5{font-size:calc(13.5px*var(--fs));font-weight:700;margin-bottom:5px;}
+.story-c p{font-size:calc(12.5px*var(--fs));color:var(--tx-md);font-weight:300;line-height:1.55;}
+.tblviz{background:var(--bg-2);border-radius:12px;padding:calc(14px*var(--fs));margin:calc(12px*var(--fs)) 0;}
+.tblviz-l{font-family:'JetBrains Mono',monospace;font-size:calc(8.5px*var(--fs));letter-spacing:.14em;
+  text-transform:uppercase;color:var(--tx-lo);margin-bottom:calc(9px*var(--fs));display:block;}
+.trow{display:grid;gap:calc(5px*var(--fs));margin-bottom:calc(5px*var(--fs));}
+.tcell{padding:calc(6px*var(--fs)) calc(8px*var(--fs));border-radius:5px;
+  font-family:'JetBrains Mono',monospace;font-size:calc(9.5px*var(--fs));text-align:right;}
+.tcell.hd{text-align:left;color:var(--tx-lo);background:none;font-size:calc(8.5px*var(--fs));
+  letter-spacing:.08em;text-transform:uppercase;}
+.tcell.ok{background:rgba(61,139,74,.15);color:#5FA96C;}
+.tcell.err{background:rgba(180,80,60,.2);color:var(--red);}
+.tcell.nm{background:var(--bg-3);color:var(--tx-md);text-align:left;}
+[data-theme="light"] .tcell.ok{color:#2E6B37;} [data-theme="light"] .tcell.err{color:#8F3A28;}
+
+/* ═══ WIZARD ═══ */
+.wiz{max-width:calc(680px*var(--fs));}
+.wp{display:flex;gap:5px;margin-bottom:calc(28px*var(--fs));}
+.wp div{height:3px;flex:1;background:var(--track);border-radius:100px;transition:background .35s;}
+.wp div.done{background:var(--gold);}
+.qb{margin-bottom:calc(26px*var(--fs));}
+.qn{font-family:'JetBrains Mono',monospace;font-size:calc(9.5px*var(--fs));letter-spacing:.18em;
+  color:var(--gold);margin-bottom:8px;display:block;}
+.qt{font-family:'Plus Jakarta Sans',sans-serif;font-size:calc(18px*var(--fs));font-weight:700;
+  margin-bottom:calc(14px*var(--fs));}
+.qo{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:var(--bg-1);
+  border:1px solid var(--line);border-radius:13px;padding:calc(14px*var(--fs)) calc(17px*var(--fs));
+  cursor:pointer;transition:all .2s;font-size:calc(13.5px*var(--fs));color:var(--tx-md);margin-bottom:8px;}
+.qo:hover{border-color:var(--line-str);color:var(--tx-hi);}
+.qo.on{border-color:var(--gold);background:var(--glow);color:var(--tx-hi);font-weight:500;}
+.qo svg{width:calc(18px*var(--fs));height:calc(18px*var(--fs));flex:none;color:var(--tx-lo);}
+.qo.on svg{color:var(--gold);}
+.result{background:var(--bg-1);border:1px solid var(--gold);border-radius:18px;padding:calc(24px*var(--fs));}
+.res-t{display:flex;align-items:center;gap:16px;margin-bottom:calc(20px*var(--fs));flex-wrap:wrap;}
+.res-i{width:calc(56px*var(--fs));height:calc(56px*var(--fs));border-radius:15px;
+  display:flex;align-items:center;justify-content:center;flex:none;}
+.res-i svg{width:calc(28px*var(--fs));height:calc(28px*var(--fs));}
+.res-n{font-family:'Plus Jakarta Sans',sans-serif;font-size:calc(28px*var(--fs));font-weight:800;letter-spacing:-.03em;}
+.res-tg{font-size:calc(13px*var(--fs));color:var(--tx-md);font-weight:300;}
+.res-w{color:var(--tx-md);font-size:calc(13.5px*var(--fs));font-weight:300;line-height:1.65;margin-bottom:calc(18px*var(--fs));}
+.res-l{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,110px),1fr));gap:9px;margin-bottom:calc(16px*var(--fs));}
+.res-a{padding-top:16px;border-top:1px solid var(--line);margin-top:calc(14px*var(--fs));}
+.pill{background:var(--bg-2);border:1px solid var(--line);border-radius:100px;
+  padding:calc(7px*var(--fs)) calc(14px*var(--fs));font-size:calc(12px*var(--fs));
+  color:var(--tx-md);cursor:pointer;transition:all .2s;}
+.pill:hover{border-color:var(--gold);color:var(--gold);}
+.ghost{background:none;border:1px solid var(--line);border-radius:100px;color:var(--tx-md);
+  padding:calc(10px*var(--fs)) calc(20px*var(--fs));cursor:pointer;font-size:calc(12.5px*var(--fs));
+  margin-top:14px;transition:all .2s;}
+.ghost:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ═══ PIPELINE ═══ */
+.pipe{display:flex;flex-direction:column;}
+.ps{position:relative;padding-left:calc(52px*var(--fs));padding-bottom:calc(16px*var(--fs));}
+.ps:last-child{padding-bottom:0;}
+.ps::before{content:'';position:absolute;left:calc(21px*var(--fs));top:calc(42px*var(--fs));
+  bottom:0;width:1px;background:var(--line);}
+.ps:last-child::before{display:none;}
+.pn{position:absolute;left:0;top:0;width:calc(43px*var(--fs));height:calc(43px*var(--fs));
+  border-radius:50%;background:var(--bg-2);border:1px solid var(--line);display:flex;
+  align-items:center;justify-content:center;transition:all .25s;color:var(--tx-lo);}
+.pn svg{width:calc(19px*var(--fs));height:calc(19px*var(--fs));}
+.ps.on .pn{background:var(--gold);border-color:var(--gold);color:#0E0E0E;}
+.ph2{display:flex;align-items:center;gap:12px;cursor:pointer;padding:calc(9px*var(--fs)) 0;
+  min-height:calc(43px*var(--fs));}
+.ph2 h3{font-size:calc(17px*var(--fs));font-weight:700;transition:color .2s;}
+.ps.on .ph2 h3{color:var(--gold);}
+.pchev{margin-left:auto;width:calc(16px*var(--fs));height:calc(16px*var(--fs));
+  color:var(--tx-lo);transition:transform .25s;flex:none;}
+.ps.on .pchev{transform:rotate(90deg);color:var(--gold);}
+.pbody{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.22,1,.36,1);}
+.ps.on .pbody{max-height:2000px;}
+.pin{padding:calc(6px*var(--fs)) 0 calc(18px*var(--fs));}
+.pin>p{color:var(--tx-md);font-size:calc(13.5px*var(--fs));font-weight:300;
+  line-height:1.65;margin-bottom:calc(14px*var(--fs));}
+.ptags{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:calc(14px*var(--fs));}
+.ptag{background:var(--bg-2);border:1px solid var(--line);border-radius:8px;
+  padding:calc(6px*var(--fs)) calc(12px*var(--fs));font-family:'JetBrains Mono',monospace;
+  font-size:calc(10.5px*var(--fs));color:var(--tx-md);}
+.ptag.hi{border-color:var(--gold);color:var(--gold);}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));
+  gap:9px;margin-bottom:calc(12px*var(--fs));}
+.tcard{background:var(--bg-2);border-radius:12px;padding:calc(14px*var(--fs));}
+.tcard-h{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+.tcard h5{font-size:calc(13px*var(--fs));font-weight:700;}
+.tbadge{font-family:'JetBrains Mono',monospace;font-size:calc(8px*var(--fs));letter-spacing:.1em;
+  text-transform:uppercase;padding:3px 7px;border-radius:5px;background:var(--glow);color:var(--gold);font-weight:600;}
+.tcard p{font-size:calc(11.5px*var(--fs));color:var(--tx-md);font-weight:300;line-height:1.5;}
+
+.foot{border-top:1px solid var(--line);margin-top:calc(46px*var(--fs));padding-top:calc(22px*var(--fs));
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+.foot div{font-family:'JetBrains Mono',monospace;font-size:calc(9.5px*var(--fs));
+  letter-spacing:.14em;text-transform:uppercase;color:var(--tx-lo);}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important;}}
+@media(hover:none){.fc:hover,.rr:hover,.cc:hover{transform:none;}}
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div id="cover">
+  <canvas id="cvc"></canvas><div class="cg cg1"></div><div class="cg cg2"></div>
+  <div class="cov-in">
+    <div class="cov-eb"><span class="eyebrow">AI First by IWDemy</span><span class="cov-dot"></span>
+      <span class="eyebrow" style="color:var(--tx-lo)">Panduan Keputusan</span></div>
+    <h1 class="cov-t">Format Data<em>untuk AI</em></h1>
+    <p class="cov-s">Lima perspektif untuk memilih format data yang tepat — akurasi, kecepatan, biaya, keamanan, dan siapa pembacanya. Dirancang untuk pemimpin bisnis, bukan teknisi.</p>
+    <div class="cov-l">
+      <div class="cov-li"><svg viewBox="0 0 24 24" fill="none" stroke="#3D8B4A" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg><span>Accuracy</span></div>
+      <div class="cov-li"><svg viewBox="0 0 24 24" fill="none" stroke="#4A7C9B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/></svg><span>Speed</span></div>
+      <div class="cov-li"><svg viewBox="0 0 24 24" fill="none" stroke="#D4A84B" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.8 1.8 0 010 3.6h-3a1.8 1.8 0 000 3.6h4"/></svg><span>Cost</span></div>
+      <div class="cov-li"><svg viewBox="0 0 24 24" fill="none" stroke="#B4503C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.9-7 9-4-1.1-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg><span>Security</span></div>
+      <div class="cov-li"><svg viewBox="0 0 24 24" fill="none" stroke="#8B7340" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0112 0"/><path d="M17 11h4M19 9v4"/></svg><span>Audience</span></div>
+    </div>
+    <button class="btn-go" onclick="enterApp()">Mulai Jelajahi
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  </div>
+  <div class="cov-f"><div>Versi 0.2 &nbsp;·&nbsp; 10 September 2026</div><div>Tjitra &amp; Associates &nbsp;|&nbsp; IWDemy</div></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="mscrim" id="mscrim" onclick="closeSide()"></div>
+  <aside class="side" id="side">
+    <div class="side-brand">AI<b>First</b><small>Format Data untuk AI</small></div>
+    <div class="side-l">Pahami</div>
+    <nav id="nav1"></nav>
+    <div class="side-l">Putuskan</div>
+    <nav id="nav2"></nav>
+    <div class="side-foot">
+      <div class="side-l" style="padding:0 4px;margin:0 0 7px">Tampilan</div>
+      <div class="ctlrow" id="viewctl"></div>
+      <div class="ctlrow"><button class="ctl" onclick="toggleTheme()" id="thbtn"></button></div>
+      <div class="side-ver">v0.2 · 10 Sep 2026<br>Tjitra &amp; Associates | IWDemy</div>
+    </div>
+  </aside>
+
+  <div class="content">
+    <div class="mtop">
+      <button class="mburger" onclick="openSide()" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+      <div class="mtitle" id="mtitle">Konsep Dasar</div>
+    </div>
+    <main>
+
+      <!-- 1 KONSEP -->
+      <section class="page on" id="p-konsep">
+        <div class="ph"><span class="eyebrow">01 — Fondasi</span>
+          <h2>Isi sama. Biaya bisa 4x beda.</h2>
+          <p>Satu informasi identik bisa jadi mahal atau murah tergantung format file-nya. Klik bar untuk lihat rinciannya.</p></div>
+        <div class="panel">
+          <div class="panel-h"><h3>Laporan penjualan yang sama, 5 format</h3></div>
+          <p class="sub">200 baris transaksi identik. Yang berubah hanya cara penulisannya.</p>
+          <div id="tokchart"></div>
+          <div class="note n-gold" style="margin-top:calc(18px*var(--fs))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>
+            <p><b>Kenapa berbeda?</b> Token dihitung dari teks yang benar-benar terkirim. JSON mengulang nama kolom tiap baris. PDF membawa artefak layout. CSV menulis nama kolom sekali saja.</p></div>
+        </div>
+        <div class="cgrid" id="cgrid"></div>
+      </section>
+
+      <!-- 2 PETA -->
+      <section class="page" id="p-peta">
+        <div class="ph"><span class="eyebrow">02 — Peta Format</span>
+          <h2>Sepuluh format, lima perspektif</h2>
+          <p>Klik kartu untuk detail lengkap. Saring berdasarkan kategori atau siapa pembacanya.</p></div>
+        <div class="chiprow" id="grpbar"></div>
+        <div class="chiprow" id="audbar"></div>
+        <div class="fgrid" id="fgrid"></div>
+      </section>
+
+      <!-- 3 LENSA -->
+      <section class="page" id="p-lensa">
+        <div class="ph"><span class="eyebrow">03 — Empat Lensa</span>
+          <h2>Prioritas Anda mengubah jawabannya</h2>
+          <p>Pilih satu lensa. Peringkat langsung berubah. Klik format mana pun untuk detail.</p></div>
+        <div class="chiprow" id="lensbar"></div>
+        <div class="note n-gold" id="lensnote" style="margin-bottom:calc(20px*var(--fs))"></div>
+        <div class="rank" id="rank"></div>
+      </section>
+
+      <!-- 4 MATRIKS -->
+      <section class="page" id="p-matriks">
+        <div class="ph"><span class="eyebrow">04 — Matriks Posisi</span>
+          <h2>Siapa unggul di dua hal sekaligus</h2>
+          <p>Sumbu tegak akurasi, sumbu datar hemat biaya. Kanan-atas adalah zona ideal. Klik titik untuk detail.</p></div>
+        <div class="scatter-wrap">
+          <svg id="scatter" viewBox="0 0 620 460" role="img" aria-label="Matriks posisi format berdasarkan akurasi dan efisiensi biaya"></svg>
+          <div class="sc-lgd">
+            <div class="sc-lgd-i"><div class="sc-sw" style="background:#4A7C9B"></div>Untuk manusia</div>
+            <div class="sc-lgd-i"><div class="sc-sw" style="background:#8B7340"></div>Untuk AI / mesin</div>
+            <div class="sc-lgd-i"><div class="sc-sw" style="background:#D4A84B"></div>Keduanya</div>
+            <div class="sc-lgd-i" style="color:var(--tx-lo)">Ukuran titik = skor keamanan</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5 BANDING -->
+      <section class="page" id="p-banding">
+        <div class="ph"><span class="eyebrow">05 — Bandingkan</span>
+          <h2>Dua format berdampingan</h2>
+          <p>Pilih dua format untuk melihat bentuk kekuatannya. Bentuk yang berbeda berarti keunggulan yang berbeda.</p></div>
+        <div class="cmpwrap">
+          <div class="cmpsel"><span class="cmpsel-l">Format A</span><div class="cmppick" id="pickA"></div></div>
+          <div class="cmpsel"><span class="cmpsel-l">Format B</span><div class="cmppick" id="pickB"></div></div>
+        </div>
+        <div class="radar-wrap">
+          <svg id="radar" viewBox="0 0 400 360" role="img" aria-label="Perbandingan radar dua format"></svg>
+          <div class="cmptbl" id="cmptbl"></div>
+        </div>
+        <div class="note n-gold" id="cmpnote" style="margin-top:calc(16px*var(--fs))"></div>
+      </section>
+
+      <!-- 6 PRAKTIK -->
+      <section class="page" id="p-praktik">
+        <div class="ph"><span class="eyebrow">06 — Praktik Terbaik</span>
+          <h2>Tiga hal yang paling menentukan</h2>
+          <p>Klik tiap kartu untuk contoh nyata dan langkah praktisnya.</p></div>
+        <div class="bpgrid" id="bpgrid"></div>
+      </section>
+
+      <!-- 7 PEMANDU -->
+      <section class="page" id="p-pandu">
+        <div class="ph"><span class="eyebrow">07 — Pemandu Keputusan</span>
+          <h2>Empat pertanyaan, satu rekomendasi</h2>
+          <p>Jawab sesuai situasi Anda. Rekomendasi disertai alasan dan peringatan risiko.</p></div>
+        <div class="wiz">
+          <div class="wp"><div id="wp1"></div><div id="wp2"></div><div id="wp3"></div><div id="wp4"></div></div>
+          <div id="qzone"></div><div id="reszone"></div>
+        </div>
+      </section>
+
+      <!-- 8 ALUR -->
+      <section class="page" id="p-alur">
+        <div class="ph"><span class="eyebrow">08 — Alur Dokumen ke AI</span>
+          <h2>Dari file kantor ke knowledge base</h2>
+          <p>Lima langkah membangun sistem tanya-jawab atas dokumen internal. Klik untuk detail dan pilihan tool.</p></div>
+        <div class="pipe" id="pipe"></div>
+      </section>
+
+      <div class="foot"><div>Format Data untuk AI · v0.2 · 10 Sep 2026</div><div>Tjitra &amp; Associates | IWDemy</div></div>
+    </main>
+  </div>
+</div>
+
+<div class="scrim" id="scrim" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer"><div id="dc"></div></aside>
+
+<script>
+const IC={
+doc:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>',
+table:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>',
+braces:'<path d="M8 3H7a2 2 0 00-2 2v5a2 2 0 01-2 2 2 2 0 012 2v5a2 2 0 002 2h1M16 3h1a2 2 0 012 2v5a2 2 0 002 2 2 2 0 00-2 2v5a2 2 0 01-2 2h-1"/>',
+pdf:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 15h1.5a1.5 1.5 0 000-3H8v6M14 12v6h1a2 2 0 002-2v-2a2 2 0 00-2-2z"/>',
+word:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M8 13l1.5 5L11 14l1.5 4L14 13"/>',
+sheet:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
+txt:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+html:'<path d="M8 6l-5 6 5 6M16 6l5 6-5 6M13 4l-2 16"/>',
+img:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>',
+gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8 2 2 0 11-2.8 2.8 1.6 1.6 0 00-2.8 1.2 2 2 0 11-4 0 1.6 1.6 0 00-2.8-1.2 2 2 0 11-2.8-2.8A1.6 1.6 0 002.5 13a2 2 0 110-4 1.6 1.6 0 001.2-2.8 2 2 0 112.8-2.8A1.6 1.6 0 009.3 2.5a2 2 0 114 0 1.6 1.6 0 002.8 1.2 2 2 0 112.8 2.8 1.6 1.6 0 001.2 2.8 2 2 0 110 4 1.6 1.6 0 00-1.2 1.7z"/>',
+target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/>',
+bolt:'<path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"/>',
+coin:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5h4a1.8 1.8 0 010 3.6h-3a1.8 1.8 0 000 3.6h4"/>',
+shield:'<path d="M12 3l7 3v6c0 4.5-3 7.9-7 9-4-1.1-7-4.5-7-9V6l7-3z"/>',
+check:'<path d="M20 6L9 17l-5-5"/>',
+x:'<path d="M18 6L6 18M6 6l12 12"/>',
+chev:'<path d="M9 6l6 6-6 6"/>',
+info:'<circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/>',
+warn:'<path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L14.7 3.9a2 2 0 00-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
+folder:'<path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>',
+swap:'<path d="M16 3l4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16"/>',
+cut:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"/>',
+net:'<circle cx="12" cy="12" r="2.5"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="19" cy="18" r="2"/><path d="M6.7 7.3l3.5 3.3M17.3 7.3l-3.5 3.3M6.7 16.7l3.5-3.3M17.3 16.7l-3.5-3.3"/>',
+db:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/>',
+sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+moon:'<path d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/>',
+user:'<circle cx="12" cy="8" r="3.5"/><path d="M5 21a7 7 0 0114 0"/>',
+cpu:'<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M10 2v4M14 2v4M10 18v4M14 18v4M2 10h4M2 14h4M18 10h4M18 14h4"/>',
+both:'<circle cx="8" cy="9" r="3"/><path d="M2.5 19a5.5 5.5 0 0111 0"/><rect x="15" y="6" width="7" height="7" rx="1.5"/><path d="M17 16v3M20 16v3"/>',
+grid:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+chart:'<path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/>',
+layers:'<path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>',
+star:'<path d="M12 2.5l2.9 6 6.6 1-4.8 4.6 1.1 6.5-5.8-3.1-5.8 3.1 1.1-6.5L2.5 9.5l6.6-1z"/>',
+compass:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5.5-5.5 2 2-5.5z"/>',
+route:'<circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M9 19h5a4 4 0 000-8H10a4 4 0 010-8h5"/>',
+phone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+screen:'<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
+auto:'<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 010 18z" fill="currentColor" stroke="none"/>',
+book:'<path d="M4 4a2 2 0 012-2h13v18H6a2 2 0 00-2 2z"/><path d="M4 19a2 2 0 012-2h13"/>',
+eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>'};
+const S=(p,c)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${c||''}">${p}</svg>`;
+
+/* ═══ AUDIENCE ═══ */
+const AUD={
+ h:{k:'h',n:'Manusia',ic:IC.user,c:'#4A7C9B',cls:'b-h',d:'Dibuat untuk dibaca dan disunting orang. Formatnya menjaga tampilan, bukan struktur data.'},
+ a:{k:'a',n:'AI / Mesin',ic:IC.cpu,c:'#8B7340',cls:'b-a',d:'Dibuat untuk diproses sistem. Struktur pasti, tapi tidak nyaman dibaca manusia.'},
+ b:{k:'b',n:'Keduanya',ic:IC.both,c:'#D4A84B',cls:'b-b',d:'Jembatan. Terbaca rapi oleh orang, terstruktur jelas bagi AI. Inilah yang membuat Markdown jadi standar dokumen siap-AI.'}};
+
+const LENS={
+ acc:{k:'acc',n:'Accuracy',id:'Akurasi',ic:IC.target,c:'#3D8B4A',
+  note:'<b>Accuracy — Akurasi.</b> Seberapa benar AI membaca isi dokumen. Format berstruktur jelas membuat AI jarang salah baca tabel dan angka. PDF paling sering menghasilkan angka tertukar — dan yang berbahaya, hasilnya terlihat masuk akal.'},
+ spd:{k:'spd',n:'Speed',id:'Kecepatan',ic:IC.bolt,c:'#4A7C9B',
+  note:'<b>Speed — Kecepatan.</b> Dari file mentah sampai jawaban. Format yang langsung terbaca menang telak. Yang butuh konversi atau OCR menambah langkah dan waktu tunggu.'},
+ cst:{k:'cst',n:'Cost',id:'Biaya',ic:IC.coin,c:'#D4A84B',
+  note:'<b>Cost — Biaya.</b> Berapa token terbakar untuk isi yang sama. Skor tinggi berarti murah. Untuk pemakaian harian dalam volume besar, selisih ini jadi angka nyata di tagihan.'},
+ sec:{k:'sec',n:'Security',id:'Keamanan',ic:IC.shield,c:'#B4503C',
+  note:'<b>Security — Keamanan.</b> Risiko data sensitif ikut terkirim tanpa disadari. Skor tinggi berarti isinya transparan dan mudah disaring. Skor rendah berarti ada metadata tersembunyi atau butuh layanan cloud pihak ketiga.'}};
+
+const F=[
+{id:'md',n:'Markdown',x:'.md',g:'dokumen',t:'work',aud:'b',ic:IC.doc,col:'#3D8B4A',acc:5,spd:5,cst:5,sec:4,
+ tag:'Format kerja terbaik untuk dokumen',
+ sum:'Teks biasa dengan struktur ringan — judul, poin, tabel sederhana. Dibaca sempurna oleh AI, tetap enak dibaca manusia. Standar de facto untuk dokumen siap-AI.',
+ ok:['Knowledge base internal dan RAG','Prompt panjang dengan banyak bagian','Materi untuk web atau Notion','Hasil konversi dari Word, PDF, PowerPoint'],
+ no:['Data tabular besar — pakai CSV','Output yang diproses kode — pakai JSON'],
+ why:{acc:'Judul dan struktur terbaca tepat. Skor tertinggi di uji tanya-jawab dokumen.',
+  spd:'Langsung terbaca tanpa konversi apa pun.',
+  cst:'Sekitar 15% lebih hemat dari JSON untuk isi naratif yang sama.',
+  sec:'Teks polos dan terbuka. Mudah diperiksa dan disensor sebelum dikirim.'},
+ secn:'Aman secara struktur — tidak ada metadata tersembunyi. Risiko tetap pada isi: pastikan nama, angka gaji, atau data pelanggan sudah disamarkan.',
+ uc:[{h:'Knowledge base kebijakan',p:'Konversi seluruh SOP ke Markdown, bangun sistem tanya-jawab. Struktur bab jadi batas potong yang alami.'},
+     {h:'Brief panjang ke AI',p:'Konteks proyek berbagai bagian tetap terbaca rapi, tanpa biaya token berlebih.'}]},
+
+{id:'csv',n:'CSV',x:'.csv',g:'data',t:'work',aud:'b',ic:IC.table,col:'#4A7C9B',acc:4,spd:5,cst:5,sec:2,
+ tag:'Paling hemat untuk data tabel',
+ sum:'Baris dan kolom polos. Nama kolom ditulis sekali di baris pertama — inilah yang membuatnya jauh lebih murah dari JSON untuk data berulang.',
+ ok:['Data penjualan, transaksi, absensi','Hasil survei dan daftar produk','Analisis tren dan agregasi angka','Ekspor Excel untuk diolah AI'],
+ no:['Data bertingkat atau tidak seragam — pakai JSON','Dokumen naratif — pakai Markdown'],
+ why:{acc:'Sangat baik untuk data seragam. Melemah bila ada kolom kosong atau format tak konsisten.',
+  spd:'Langsung terbaca. Tanpa konversi.',
+  cst:'Paling hemat untuk data berulang. Nama kolom tak diulang tiap baris.',
+  sec:'Risiko tinggi. Satu file ekspor sering memuat seluruh kolom termasuk NIK, nomor HP, dan alamat.'},
+ secn:'Titik risiko terbesar. Ekspor mentah dari sistem HR atau CRM hampir selalu membawa kolom pribadi. Hapus kolom yang tidak dibutuhkan sebelum unggah — jangan andalkan AI untuk mengabaikannya.',
+ uc:[{h:'Analisis penjualan bulanan',p:'Ekspor transaksi ke CSV, minta AI temukan pola musiman dan produk yang melambat.'},
+     {h:'Rekap survei karyawan',p:'Hapus kolom nama dan NIK dulu, sisakan jawaban dan departemen.'}]},
+
+{id:'json',n:'JSON',x:'.json',g:'data',t:'work',aud:'a',ic:IC.braces,col:'#8B7340',acc:5,spd:4,cst:2,sec:4,
+ tag:'Standar untuk otomasi dan integrasi',
+ sum:'Format terstruktur yang dibaca mesin dengan pasti. Wajib ketika hasil AI harus langsung diproses sistem lain, bukan sekadar dibaca orang.',
+ ok:['Output AI yang diproses kode atau sistem','Integrasi antar aplikasi dan API','Data bertingkat — pesanan dengan banyak item','Konfigurasi model dan pipeline'],
+ no:['Dokumen naratif panjang — boros token','Tabel sederhana — CSV jauh lebih murah'],
+ why:{acc:'Struktur eksplisit. Tanpa ambiguitas pembacaan.',
+  spd:'Cepat dibaca, tapi validasi skema menambah satu langkah.',
+  cst:'Paling boros. Nama kolom diulang tiap baris — untuk ratusan baris jadi mahal.',
+  sec:'Terbaca jelas dan mudah disaring per field sebelum dikirim.'},
+ secn:'Struktur per field memudahkan penyaringan otomatis — Anda bisa buang field sensitif secara sistematis. Ini keunggulannya dibanding CSV.',
+ uc:[{h:'Otomasi persetujuan dokumen',p:'AI membaca invoice, mengembalikan JSON berisi vendor, nominal, jatuh tempo — langsung masuk ERP.'},
+     {h:'Ekstraksi terstruktur dari kontrak',p:'Minta AI kembalikan JSON dengan field tetap: pihak, nilai, masa berlaku, klausa penalti.'}]},
+
+{id:'pdf',n:'PDF',x:'.pdf',g:'dokumen',t:'src',aud:'h',ic:IC.pdf,col:'#B4503C',acc:2,spd:2,cst:2,sec:2,
+ tag:'Format arsip — konversi dulu',
+ sum:'Dibuat untuk dicetak dan dibaca manusia, bukan untuk AI. Layout visualnya justru jadi gangguan: tabel pecah, kolom tertukar, header-footer terbaca sebagai isi.',
+ ok:['Ringkas laporan pendek sekali pakai','Referensi dokumen berlayout sederhana'],
+ no:['Knowledge base — konversi ke Markdown dulu','Dokumen bertabel rumit — angka sering tertukar','Hasil scan tanpa OCR — tidak terbaca'],
+ why:{acc:'Paling lemah. Dalam uji tanya-jawab, pertanyaan soal tabel sering dijawab salah — termasuk angka yang dikarang tapi terlihat masuk akal.',
+  spd:'Butuh ekstraksi dulu. Hasil scan butuh OCR — menambah waktu signifikan.',
+  cst:'Sulit diprediksi. Artefak layout dan teks berulang menambah token tak perlu.',
+  sec:'Menyimpan metadata tersembunyi — nama pembuat, riwayat revisi, kadang teks yang disensor secara visual tapi masih ada di lapisan teks.'},
+ secn:'Dua risiko khas: metadata penulis yang terbawa, dan sensor visual yang tidak benar-benar menghapus teks di baliknya. Untuk hasil scan, OCR biasanya berjalan di cloud — dokumen keluar dari lingkungan internal.',
+ uc:[{h:'Laporan tahunan jadi knowledge base',p:'Jangan unggah PDF langsung. Konversi ke Markdown dengan tool penjaga struktur tabel.'},
+     {h:'Kontrak vendor untuk direview',p:'Kontrak pendek masih bisa langsung. Untuk puluhan kontrak, konversi dulu.'}]},
+
+{id:'docx',n:'Word',x:'.docx',g:'dokumen',t:'src',aud:'h',ic:IC.word,col:'#4A7C9B',acc:3,spd:3,cst:3,sec:2,
+ tag:'Format penyuntingan, bukan format olah',
+ sum:'Kuat untuk kolaborasi dan penyuntingan manusia. Untuk AI, sebaiknya dikonversi ke Markdown supaya struktur bab terbaca bersih.',
+ ok:['Draf yang perlu direvisi AI lalu kembali ke tim','Dokumen untuk dicetak atau ditandatangani','Sumber untuk dikonversi ke Markdown'],
+ no:['Knowledge base — konversi dulu','Prompt harian — Markdown lebih ringan'],
+ why:{acc:'Cukup baik setelah diekstrak. Track changes dan komentar membingungkan AI bila tidak dibersihkan.',
+  spd:'Perlu ekstraksi, tapi jauh lebih cepat dan bersih daripada PDF.',
+  cst:'Sedang. Bergantung kualitas ekstraksi dan sisa markup.',
+  sec:'Menyimpan riwayat revisi, komentar internal, dan identitas penulis — sering tak disadari ikut terkirim.'},
+ secn:'Track changes dan komentar internal adalah risiko nyata. Diskusi internal bisa ikut terbaca. Terima semua revisi dan hapus komentar sebelum unggah.',
+ uc:[{h:'Revisi proposal klien',p:'Unggah draf, minta AI perbaiki alur dan bahasanya. Pastikan komentar internal sudah dihapus.'},
+     {h:'SOP jadi materi pelatihan',p:'Konversi ke Markdown, lalu minta AI ubah jadi modul dengan studi kasus.'}]},
+
+{id:'xlsx',n:'Excel',x:'.xlsx',g:'data',t:'src',aud:'h',ic:IC.sheet,col:'#3D8B4A',acc:3,spd:2,cst:3,sec:2,
+ tag:'Sumber data — ekspor per sheet ke CSV',
+ sum:'Kuat untuk model keuangan dan perencanaan, tapi AI tidak menjalankan rumusnya. Yang terbaca hanya hasil angkanya.',
+ ok:['Model keuangan dan anggaran sebagai sumber','Data multi-sheet yang perlu diekstrak sebagian'],
+ no:['Diunggah utuh berpuluh sheet — pilih yang relevan','Analisis bergantung logika rumus — jelaskan terpisah'],
+ why:{acc:'Baik untuk angka. Logika rumus dan hubungan antar-sheet tidak ikut terbaca.',
+  spd:'Perlu ekstraksi. File besar multi-sheet memperlambat.',
+  cst:'Sedang. Membengkak bila seluruh workbook ikut terkirim.',
+  sec:'Sheet tersembunyi, kolom bantu, dan komentar sel sering memuat data yang tak dimaksudkan dibagikan.'},
+ secn:'Risiko klasik: sheet tersembunyi berisi data mentah, atau kolom perhitungan memuat data gaji dan margin. Ekspor hanya sheet yang dibutuhkan.',
+ uc:[{h:'Analisis anggaran departemen',p:'Ekspor sheet ringkasan ke CSV. Jelaskan logika rumusnya dalam kalimat biasa.'},
+     {h:'Proyeksi arus kas',p:'Berikan datanya sebagai CSV, minta AI uji beberapa skenario asumsi.'}]},
+
+{id:'txt',n:'Teks Polos',x:'.txt',g:'dokumen',t:'work',aud:'b',ic:IC.txt,col:'#8B7340',acc:2,spd:5,cst:5,sec:4,
+ tag:'Cadangan saat anggaran token ketat',
+ sum:'Paling murah karena tanpa format sama sekali. Konsekuensinya: seluruh struktur hilang. Gunakan hanya bila isinya memang datar dan linear.',
+ ok:['Transkrip rapat dan wawancara','Catatan mentah dan log sistem','Isi yang memang tak berstruktur'],
+ no:['Dokumen berjudul dan bersub-bab — struktur hilang','Knowledge base — kualitas pencarian anjlok'],
+ why:{acc:'Lemah untuk isi berstruktur. AI kehilangan petunjuk hierarki dan konteks bagian.',
+  spd:'Tercepat. Tidak ada yang perlu diproses.',
+  cst:'Termurah. Tanpa markup sama sekali.',
+  sec:'Transparan sepenuhnya. Apa yang terlihat, itu yang terkirim.'},
+ secn:'Paling transparan secara teknis — tak ada yang tersembunyi. Tapi transkrip rapat sering memuat diskusi sensitif yang terucap tanpa sadar. Baca ulang sebelum unggah.',
+ uc:[{h:'Notulen dari transkrip rapat',p:'Transkrip mentah ke AI, minta ringkasan keputusan dan tindak lanjut beserta penanggung jawabnya.'}]},
+
+{id:'html',n:'HTML',x:'.html',g:'teknis',t:'src',aud:'b',ic:IC.html,col:'#4A7C9B',acc:3,spd:3,cst:3,sec:3,
+ tag:'Konten web — bersihkan dulu',
+ sum:'AI membacanya dengan baik, tapi tag navigasi, skrip, dan iklan ikut terhitung token. Bersihkan atau konversi ke Markdown.',
+ ok:['Menarik isi dari halaman web','Menyunting template email','Meninjau struktur dan aksesibilitas halaman'],
+ no:['Kirim mentah dengan skrip dan style — boros token'],
+ why:{acc:'Baik. Struktur heading terbaca, tapi noise navigasi mengaburkan isi utama.',
+  spd:'Cepat dibaca, perlu pembersihan singkat.',
+  cst:'Sedang. Tag pembuka-penutup menambah token.',
+  sec:'Bisa memuat token sesi, parameter tracking, atau data terbenam di atribut.'},
+ secn:'Halaman dari sistem internal sering memuat token sesi atau ID pengguna di URL dan atribut. Bersihkan sebelum kirim.',
+ uc:[{h:'Isi website jadi materi',p:'Bersihkan navigasi dan footer, konversi ke Markdown, olah jadi materi internal.'}]},
+
+{id:'img',n:'Gambar & Scan',x:'.png .jpg',g:'visual',t:'src',aud:'h',ic:IC.img,col:'#B4503C',acc:2,spd:2,cst:2,sec:1,
+ tag:'Perlu model vision — risiko tertinggi',
+ sum:'AI dengan kemampuan vision bisa membaca grafik, tangkapan layar, dan tulisan tangan. Tapi teks di dalam gambar tidak bisa dicari — harus di-OCR untuk knowledge base.',
+ ok:['Membaca grafik dan bagan','Tangkapan layar untuk diagnosis masalah','Transkripsi papan tulis dan catatan tangan'],
+ no:['Knowledge base — OCR ke teks dulu','Dokumen bertabel rapat — akurasi rendah'],
+ why:{acc:'Bergantung kualitas gambar. Angka pada grafik rapat sering salah baca.',
+  spd:'Pemrosesan gambar lebih lambat dari teks. Scan butuh OCR terpisah.',
+  cst:'Gambar resolusi tinggi mahal. Biaya per gambar, bukan per kata.',
+  sec:'Paling berisiko. Tangkapan layar sering memuat data lain tanpa disadari, dan OCR umumnya berjalan di cloud pihak ketiga.'},
+ secn:'Tangkapan layar adalah kebocoran paling umum — tab lain, notifikasi, nama pengguna, dan panel samping ikut terekam. Untuk dokumen scan, OCR biasanya mengirim gambar ke layanan cloud eksternal.',
+ uc:[{h:'Baca grafik dari laporan cetak',p:'Foto grafiknya, minta AI jelaskan tren dan angka kuncinya. Pastikan tak ada data lain di frame.'},
+     {h:'Arsip dokumen lama hasil scan',p:'OCR dulu jadi teks, rapikan ke Markdown, baru masuk knowledge base.'}]},
+
+{id:'yaml',n:'YAML',x:'.yaml',g:'teknis',t:'work',aud:'b',ic:IC.gear,col:'#8B7340',acc:4,spd:4,cst:4,sec:4,
+ tag:'Konfigurasi terstruktur yang mudah dibaca',
+ sum:'Alternatif JSON yang lebih ringkas dan enak dibaca manusia. Cocok untuk konfigurasi dan input prompt terstruktur.',
+ ok:['Konfigurasi sistem dan pipeline','Input prompt terstruktur yang perlu direvisi manusia','Template parameter yang sering diubah'],
+ no:['Data tabular besar — pakai CSV','Integrasi antar sistem — JSON lebih universal'],
+ why:{acc:'Baik. Struktur jelas, tapi salah indentasi bisa mengubah arti.',
+  spd:'Cepat. Langsung terbaca AI.',
+  cst:'Lebih hemat dari JSON — tanpa kurung dan tanda kutip berlebih.',
+  sec:'Terbaca jelas, mudah diperiksa. Tapi file konfigurasi sering memuat kredensial.'},
+ secn:'File konfigurasi kerap memuat kunci API, kata sandi database, atau endpoint internal. Ganti dengan placeholder sebelum kirim ke AI.',
+ uc:[{h:'Template prompt tim',p:'Simpan parameter prompt standar dalam YAML supaya seluruh tim memakai struktur yang sama.'}]}];
+
+const GRP=[{k:'all',n:'Semua'},{k:'dokumen',n:'Dokumen'},{k:'data',n:'Data'},{k:'teknis',n:'Teknis'},{k:'visual',n:'Visual'}];
+const TOK=[{n:'TXT',v:100,c:'#3D8B4A',d:'Tanpa format apa pun. Baseline termurah — tapi seluruh struktur hilang.'},
+ {n:'CSV',v:115,c:'#3D8B4A',d:'Nama kolom hanya sekali di baris pertama. Nyaris semurah TXT tapi struktur tabel tetap utuh.'},
+ {n:'Markdown',v:155,c:'#D4A84B',d:'Tanda judul dan poin menambah sedikit token. Imbalannya: AI paham hierarki dokumen. Pertukaran paling menguntungkan.'},
+ {n:'PDF (teks)',v:290,c:'#C08A3E',d:'Artefak layout, header-footer berulang, dan pemenggalan baris menambah token yang tidak membawa informasi.'},
+ {n:'JSON',v:410,c:'#B4503C',d:'Nama kolom diulang di setiap baris, plus kurung dan tanda kutip. Untuk 200 baris, ini jadi 4x lipat.'}];
+
+const CONCEPT=[
+{ic:IC.layers,c:'#C08A3E',h:'Format kerja vs format sumber',
+ p:'PDF, Word, Excel dibuat untuk manusia. AI bekerja jauh lebih baik dengan Markdown, CSV, atau JSON.',
+ more:'<p><b>Format sumber</b> — PDF, Word, PowerPoint, Excel, hasil scan. Dirancang supaya enak dilihat orang. Layout, font, dan penempatan visual adalah tujuannya.</p><p style="margin-top:12px"><b>Format kerja</b> — Markdown, CSV, JSON, YAML. Dirancang supaya struktur isinya jelas. Tidak ada layout yang perlu ditebak.</p><p style="margin-top:12px">Kesalahan paling umum di perusahaan: mengunggah PDF langsung ke AI dan berharap hasilnya akurat. Yang terjadi, AI harus menebak mana judul, mana isi tabel, mana catatan kaki. Satu langkah konversi sering memperbaiki hasil jauh lebih besar daripada memperbaiki prompt.</p>'},
+{ic:IC.target,c:'#3D8B4A',h:'Struktur menentukan akurasi',
+ p:'Tabel di PDF sering hancur saat dibaca AI — angka bisa tertukar antar kolom tanpa terlihat.',
+ more:'<p>Ketika PDF diekstrak, isinya jadi aliran teks. Batas kolom yang jelas bagi mata manusia tidak selalu terbaca oleh mesin.</p><p style="margin-top:12px">Akibatnya: nilai di kolom "Retur" bisa terbaca sebagai kolom "Penjualan Bersih". AI kemudian menjawab dengan angka itu — dengan penuh keyakinan.</p><p style="margin-top:12px">Inilah yang membuatnya berbahaya: jawabannya <b>tidak terlihat salah</b>. Angkanya masuk akal, formatnya benar, satuannya tepat. Kesalahan baru ketahuan saat ada yang mengecek ke sumber aslinya.</p>'},
+{ic:IC.compass,c:'#4A7C9B',h:'Tidak ada format terbaik tunggal',
+ p:'Yang ada adalah format paling tepat untuk tujuan Anda. Tiap tujuan punya jawaban berbeda.',
+ more:'<p>Meringkas laporan, mengolah data penjualan, membangun knowledge base — tiga tujuan, tiga jawaban berbeda.</p><p style="margin-top:12px">Yang berlaku umum hanyalah kerangka berpikirnya: <b>apa tujuan saya, siapa pembaca hasilnya, seberapa sensitif datanya, dan apa prioritas utama saya</b>. Empat pertanyaan itu yang dipakai di halaman Pemandu Keputusan.</p><p style="margin-top:12px">Pendekatan paling praktis untuk organisasi adalah berlapis: Markdown sebagai lapisan dokumen utama, JSON untuk yang diproses sistem, CSV untuk tabel, dan file kantor tetap sebagai arsip sumber.</p>'}];
+
+const BP=[
+{n:'01',ic:IC.swap,h:'Konversi sebelum unggah',
+ p:'Satu langkah konversi menaikkan akurasi jauh lebih besar daripada memperbaiki prompt berkali-kali.',
+ viz:'flow',
+ story:{
+  kind:'story',
+  title:'Skenario: angka yang tidak pernah salah terlihat',
+  intro:'Skenario komposit — disusun dari pola kegagalan yang terdokumentasi pada ekstraksi PDF bertabel, bukan kasus satu perusahaan tertentu.',
+  steps:[
+   {n:'1',s:'',h:'Niat yang benar',p:'Sebuah distributor membangun sistem tanya-jawab atas tiga tahun laporan penjualan. Semua laporan dalam PDF — rapi, bertabel, sudah ditandatangani. Tim mengunggahnya langsung. Sistemnya berjalan. Jawabannya cepat.'},
+   {n:'2',s:'bad',h:'Kegagalan yang senyap',p:'Tabel laporan punya empat kolom: Penjualan Kotor, Diskon, Retur, Penjualan Bersih. Saat diekstrak, batas kolom hilang. Sebagian nilai Retur terbaca sebagai Penjualan Bersih. Tidak ada pesan error. Sistem tidak tahu ada yang salah.'},
+   {n:'3',s:'bad',h:'Jawaban yang meyakinkan',p:'Ketika ditanya penjualan bersih kuartal tertentu, AI menjawab dengan angka yang formatnya benar, satuannya tepat, dan besarannya masuk akal. Tidak ada satu pun tanda yang membuat orang curiga.'},
+   {n:'4',s:'bad',h:'Ketahuan di tempat yang salah',p:'Kesalahan baru terlihat di rapat direksi, saat seseorang membandingkan angka dari sistem dengan laporan keuangan yang sudah diaudit. Selisihnya konsisten pada bulan-bulan dengan retur tinggi.'},
+   {n:'5',s:'good',h:'Perbaikan yang sederhana',p:'Solusinya bukan mengganti model AI. Cukup satu langkah di depan: konversi PDF ke Markdown dengan tool yang menjaga struktur tabel, periksa hasil konversi pada beberapa dokumen sampel, baru masuk ke sistem.'}],
+  table:true,
+  lesson:'Yang paling berbahaya dari format yang salah bukan sistem yang berhenti bekerja — itu ketahuan dalam hitungan menit. Yang berbahaya adalah sistem yang tetap berjalan dan tetap menjawab, dengan angka yang salah.',
+  action:['Konversi PDF, Word, dan PowerPoint ke Markdown sebelum masuk sistem','Untuk PDF bertabel rumit gunakan Docling; untuk Word dan PowerPoint gunakan MarkItDown','Periksa hasil konversi pada 3–5 dokumen sampel sebelum memproses seluruhnya','Simpan file asli sebagai arsip — konversi tidak menggantikan sumber']}},
+
+{n:'02',ic:IC.shield,h:'Bersihkan sebelum kirim',
+ p:'Kebocoran data hampir selalu terjadi di sisi Anda, bukan di sisi AI-nya.',
+ viz:'gauge',
+ story:{
+  kind:'list',
+  title:'Empat titik kebocoran paling sering',
+  intro:'Semuanya terjadi sebelum file sampai ke AI. Semuanya bisa dicegah dalam hitungan menit.',
+  items:[
+   {h:'Ekspor CSV yang terlalu lengkap',p:'Ekspor dari sistem HR atau CRM membawa seluruh kolom — termasuk NIK, nomor HP, alamat, dan gaji — padahal yang dibutuhkan hanya dua kolom. Hapus kolom yang tidak dipakai sebelum unggah.'},
+   {h:'Track changes dan komentar di Word',p:'Riwayat revisi menyimpan versi lama, dan komentar sering memuat diskusi internal yang tidak dimaksudkan keluar. Terima semua revisi, hapus semua komentar.'},
+   {h:'Sheet tersembunyi di Excel',p:'Workbook sering punya sheet data mentah atau kolom bantu berisi margin dan struktur biaya. Ekspor hanya sheet yang relevan ke CSV.'},
+   {h:'Tangkapan layar',p:'Kebocoran paling umum dan paling tidak disadari. Tab lain, notifikasi masuk, nama pengguna, panel samping — semuanya ikut terekam dalam satu gambar.'}],
+  lesson:'Model AI tidak bisa mengabaikan data yang sudah Anda kirim. Penyaringan harus terjadi sebelum, bukan sesudah.',
+  action:['Buat daftar periksa 30 detik sebelum unggah file apa pun','Untuk data pelanggan atau karyawan, hapus kolom identitas — bukan disamarkan, dihapus','Untuk knowledge base data sensitif, pertimbangkan penyimpanan yang di-host sendiri','Tetapkan siapa yang berwenang mengunggah data kategori tertentu']}},
+
+{n:'03',ic:IC.eye,h:'Uji sampel kecil dulu',
+ p:'Sepuluh baris atau dua halaman untuk memastikan AI membaca strukturnya benar, baru proses penuh.',
+ viz:'stripes',
+ story:{
+  kind:'list',
+  title:'Kenapa uji sampel mengubah banyak hal',
+  intro:'Langkah yang paling sering dilewati, padahal paling murah.',
+  items:[
+   {h:'Menemukan salah baca sejak awal',p:'Minta AI membaca 10 baris pertama dan menyebutkan kembali nama kolom beserta contoh nilainya. Kalau ada yang tertukar, ketahuan di menit pertama — bukan setelah 5.000 baris diproses.'},
+   {h:'Menghemat biaya nyata',p:'Memproses seluruh arsip dengan konversi yang salah berarti membayar dua kali: sekali untuk hasil yang tidak terpakai, sekali lagi untuk mengulang.'},
+   {h:'Mengkalibrasi ekspektasi',p:'Sampel kecil menunjukkan sejauh mana AI benar-benar memahami dokumen Anda. Ini menghindari dua kesalahan sekaligus: terlalu percaya, dan terlalu ragu.'},
+   {h:'Membuat standar untuk tim',p:'Sampel yang berhasil jadi acuan. Tim berikutnya tidak perlu menebak format dan cara prompt yang tepat.'}],
+  lesson:'Uji sampel bukan langkah tambahan. Ini yang membedakan sistem yang bisa dipercaya dari sistem yang hanya terlihat bekerja.',
+  action:['Uji dengan 10 baris data atau 2 halaman dokumen','Minta AI menyebutkan kembali struktur yang dibacanya, bukan langsung menjawab','Bandingkan hasilnya dengan sumber asli secara manual','Simpan sampel yang berhasil sebagai acuan tim']}}];
+
+const PIPE=[
+{id:'s1',n:'Kumpulkan file sumber',ic:IC.folder,
+ d:'Mulai dari dokumen yang sudah ada. Kenali dulu format apa yang dominan — ini menentukan seluruh jalur konversi berikutnya.',
+ tags:['PDF','Word','PowerPoint','Excel','Email'],hi:false,
+ note:'Tidak ada satu pun di daftar ini yang siap langsung dipakai AI. Semuanya format sumber — bahan mentah, bukan bahan jadi.'},
+{id:'s2',n:'Konversi ke Markdown',ic:IC.swap,
+ d:'Langkah paling menentukan. Kualitas konversi di sini menentukan kualitas jawaban di ujung.',
+ tags:['Docling','MarkItDown','Pandoc'],hi:true,
+ tools:[{n:'Docling',b:'PDF rumit',d:'Dari IBM. Terbaik untuk PDF bertabel padat, laporan keuangan, dan dokumen multi-kolom. Lebih lambat, tapi struktur tabel terjaga.'},
+  {n:'MarkItDown',b:'Office',d:'Dari Microsoft. Terbaik untuk Word, PowerPoint, dan Excel. Jauh lebih cepat untuk PDF digital sederhana.'},
+  {n:'Pandoc',b:'Antar markup',d:'Klasik dan andal untuk konversi antar format teks. Kurang kuat untuk PDF berlayout rumit.'}],
+ note:'Aturan praktis: PDF bertabel rumit pakai Docling. Word dan PowerPoint pakai MarkItDown. Setelah konversi, bersihkan nomor halaman dan header berulang.'},
+{id:'s3',n:'Potong jadi bagian',ic:IC.cut,
+ d:'Dokumen dipotong jadi bagian kecil supaya AI menemukan bagian relevan saja. Ini yang disebut chunking.',
+ tags:['Per judul','Per bab','256–512 token','Dengan tumpang tindih'],hi:false,
+ note:'Inilah alasan Markdown unggul: judul dan sub-judul jadi batas potong yang alami dan bermakna. Sertakan metadata di tiap potongan — sumber, bab, tanggal — supaya jawaban bisa ditelusuri asalnya.'},
+{id:'s4',n:'Ubah jadi vektor',ic:IC.net,
+ d:'Tiap potongan diubah jadi representasi angka yang menangkap maknanya. Ini memungkinkan pencarian berdasarkan makna, bukan kata kunci.',
+ tags:['Embedding model','Multilingual','Dimensi vektor'],hi:false,
+ note:'Untuk dokumen berbahasa Indonesia, pastikan model embedding-nya multilingual. Model yang hanya dilatih bahasa Inggris menurunkan kualitas pencarian secara signifikan.'},
+{id:'s5',n:'Simpan di vector database',ic:IC.db,
+ d:'Vektor, metadata, dan teks asli disimpan bersama. Di sinilah pertimbangan data residency masuk.',
+ tags:['pgvector','Qdrant','Pinecone','Weaviate'],hi:true,
+ tools:[{n:'pgvector',b:'Default 2026',d:'Ekstensi PostgreSQL. Paling masuk akal untuk mayoritas kasus di bawah 10 juta vektor — tanpa sistem baru, data tetap di database yang sudah Anda kelola.'},
+  {n:'Qdrant',b:'Self-host',d:'Terbaik saat sudah melampaui pgvector tapi ingin kendali penuh dan bebas kunci vendor. Efisien secara memori.'},
+  {n:'Pinecone',b:'Terkelola',d:'Layanan cloud penuh, tanpa beban operasional. Konsekuensinya: data berada di infrastruktur vendor.'},
+  {n:'Weaviate',b:'Hybrid',d:'Kuat untuk pencarian gabungan kata kunci dan makna. Berguna saat dokumen banyak istilah teknis dan kode produk.'}],
+ note:'Untuk data yang tidak boleh keluar dari Indonesia, pilih yang bisa di-host sendiri: pgvector, Qdrant, atau Weaviate. Layanan terkelola menyimpan data di wilayah vendor.'}];
+
+const QS=[
+{k:'goal',q:'Apa yang ingin Anda lakukan?',
+ o:[{v:'ringkas',l:'Meringkas atau menarik poin dari dokumen',ic:IC.doc},
+    {v:'sunting',l:'Menyunting atau memperbaiki draf',ic:IC.word},
+    {v:'analisis',l:'Menganalisis data dan angka',ic:IC.table},
+    {v:'otomasi',l:'Membangun otomasi atau integrasi sistem',ic:IC.braces},
+    {v:'kb',l:'Membangun knowledge base internal',ic:IC.db}]},
+{k:'out',q:'Hasilnya untuk siapa?',
+ o:[{v:'manusia',l:'Dibaca manusia — tim atau klien',ic:IC.user},
+    {v:'ai',l:'Diolah AI lagi di langkah berikutnya',ic:IC.cpu},
+    {v:'sistem',l:'Diproses sistem atau kode otomatis',ic:IC.gear}]},
+{k:'sens',q:'Seberapa sensitif datanya?',
+ o:[{v:'tinggi',l:'Ada data pribadi, gaji, atau rahasia dagang',ic:IC.shield},
+    {v:'sedang',l:'Internal, tapi bukan rahasia',ic:IC.info},
+    {v:'rendah',l:'Publik atau sudah dianonimkan',ic:IC.check}]},
+{k:'prio',q:'Prioritas utama Anda?',
+ o:[{v:'acc',l:'Akurasi — jawaban harus benar',ic:IC.target},
+    {v:'cst',l:'Biaya — volume besar, harus hemat',ic:IC.coin},
+    {v:'spd',l:'Kecepatan — perlu hasil sekarang',ic:IC.bolt}]}];
+const RULES={
+ ringkas:{manusia:{d:'md',cst:'txt',spd:'txt'},ai:{d:'md',cst:'txt'},sistem:{d:'json'}},
+ sunting:{manusia:{d:'docx',cst:'md',spd:'md'},ai:{d:'md'},sistem:{d:'json'}},
+ analisis:{manusia:{d:'csv',acc:'xlsx'},ai:{d:'csv',acc:'json'},sistem:{d:'json',cst:'csv',spd:'csv'}},
+ otomasi:{manusia:{d:'md'},ai:{d:'json'},sistem:{d:'json'}},
+ kb:{manusia:{d:'md'},ai:{d:'md'},sistem:{d:'md'}}};
+const SENS={
+ tinggi:'Data Anda sensitif. Sebelum unggah: hapus kolom identitas, terima semua track changes di Word, periksa sheet tersembunyi di Excel. Untuk knowledge base, pertimbangkan penyimpanan yang di-host sendiri.',
+ sedang:'Data internal. Bersihkan komentar dan metadata sebelum kirim. Hindari tangkapan layar — sering membawa informasi lain tanpa disadari.',
+ rendah:'Risiko rendah. Tetap periksa sekilas apakah ada nama atau angka yang sebenarnya tak perlu ikut terkirim.'};
+
+const NAV1=[{k:'konsep',n:'Konsep Dasar',ic:IC.book},{k:'peta',n:'Peta Format',ic:IC.grid},
+ {k:'lensa',n:'Empat Lensa',ic:IC.target},{k:'matriks',n:'Matriks Posisi',ic:IC.chart},
+ {k:'banding',n:'Bandingkan',ic:IC.layers}];
+const NAV2=[{k:'praktik',n:'Praktik Terbaik',ic:IC.star},{k:'pandu',n:'Pemandu Keputusan',ic:IC.compass},
+ {k:'alur',n:'Alur ke AI',ic:IC.route}];
+const VIEWS=[{k:'auto',n:'Auto',ic:IC.auto},{k:'mobile',n:'Mobile',ic:IC.phone},{k:'ifp',n:'IFP',ic:IC.screen}];
+
+let curLens='acc',curGrp='all',curAud='all',cmpA='md',cmpB='pdf',answers={};
+
+/* ── COVER ANIM ── */
+function initCover(){
+  const c=document.getElementById('cvc');if(!c)return;const ctx=c.getContext('2d');
+  let w,h,ps=[],raf;
+  function sz(){w=c.width=c.offsetWidth*devicePixelRatio;h=c.height=c.offsetHeight*devicePixelRatio;}
+  sz();const N=Math.min(44,Math.floor(w*h/100000));
+  for(let i=0;i<N;i++)ps.push({x:Math.random()*w,y:Math.random()*h,
+    vx:(Math.random()-.5)*.15*devicePixelRatio,vy:(Math.random()-.5)*.15*devicePixelRatio,
+    r:(Math.random()*1.4+.7)*devicePixelRatio});
+  function d(){ctx.clearRect(0,0,w,h);
+    const dk=document.documentElement.dataset.theme==='dark',lc=dk?'212,168,75':'139,115,64';
+    for(let i=0;i<ps.length;i++){const p=ps[i];p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>h)p.vy*=-1;
+      for(let j=i+1;j<ps.length;j++){const q=ps[j],dx=p.x-q.x,dy=p.y-q.y,dd=Math.hypot(dx,dy);
+        if(dd<128*devicePixelRatio){ctx.strokeStyle=`rgba(${lc},${(1-dd/(128*devicePixelRatio))*.25})`;
+          ctx.lineWidth=.6*devicePixelRatio;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke();}}
+      ctx.fillStyle=`rgba(${lc},.5)`;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();}
+    raf=requestAnimationFrame(d);}
+  if(!matchMedia('(prefers-reduced-motion:reduce)').matches)d();
+  addEventListener('resize',sz);window.__sc=()=>cancelAnimationFrame(raf);
+}
+function enterApp(){document.getElementById('cover').classList.add('gone');
+  document.getElementById('app').classList.add('on');
+  setTimeout(()=>{if(window.__sc)window.__sc();},700);animTok();}
+
+/* ── THEME & VIEW ── */
+function setTh(){const d=document.documentElement.dataset.theme==='dark';
+  document.getElementById('thbtn').innerHTML=S(d?IC.sun:IC.moon)+(d?'Terang':'Gelap');}
+function toggleTheme(){const r=document.documentElement;
+  r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';setTh();drawScatter();drawRadar();}
+function buildView(){document.getElementById('viewctl').innerHTML=VIEWS.map(v=>
+  `<button class="ctl${document.documentElement.dataset.view===v.k?' on':''}" onclick="setView('${v.k}')">${S(v.ic)}${v.n}</button>`).join('');}
+function setView(k){document.documentElement.dataset.view=k;closeSide();buildView();
+  setTimeout(()=>{drawScatter();drawRadar();},60);}
+
+/* ── SIDEBAR ── */
+function buildNav(){
+  const mk=l=>l.map((n,i)=>`<button class="nb${n.k==='konsep'?' on':''}" data-p="${n.k}" onclick="go('${n.k}',this)">
+    ${S(n.ic)}<span>${n.n}</span></button>`).join('');
+  document.getElementById('nav1').innerHTML=mk(NAV1);
+  document.getElementById('nav2').innerHTML=mk(NAV2);
+}
+function openSide(){document.getElementById('side').classList.add('open');
+  document.getElementById('mscrim').classList.add('on');}
+function closeSide(){document.getElementById('side').classList.remove('open');
+  document.getElementById('mscrim').classList.remove('on');}
+function go(p,btn){
+  document.querySelectorAll('.page').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(e=>e.classList.remove('on'));
+  document.getElementById('p-'+p).classList.add('on');btn.classList.add('on');
+  document.getElementById('mtitle').textContent=btn.textContent.trim();
+  closeSide();scrollTo({top:0,behavior:'smooth'});
+  if(p==='konsep')animTok();
+  if(p==='lensa')setTimeout(drawRank,60);
+  if(p==='matriks')setTimeout(drawScatter,60);
+  if(p==='banding')setTimeout(()=>{drawRadar();drawCmp();},60);
+}
+
+/* ── TOKEN ── */
+function buildTok(){const mx=Math.max(...TOK.map(t=>t.v));
+  document.getElementById('tokchart').innerHTML=TOK.map((t,i)=>
+  `<div class="tokrow" onclick="tokInfo(${i})" tabindex="0" role="button"><div class="lbl">${t.n}</div>
+   <div class="tokbar-t"><div class="tokbar" data-w="${(t.v/mx*100).toFixed(1)}" style="background:${t.c}"></div></div>
+   <div class="val" style="color:${t.c}">${t.v}%</div></div>`).join('');}
+function animTok(){setTimeout(()=>{document.querySelectorAll('#tokchart .tokbar').forEach((b,i)=>
+  setTimeout(()=>b.style.width=b.dataset.w+'%',i*90));},180);}
+function tokInfo(i){const t=TOK[i];
+  drawer(`<div class="dh"><div class="fic" style="background:${t.c}22;color:${t.c};width:42px;height:42px">${S(IC.coin)}</div>
+   <div><div class="fname" style="font-size:calc(19px*var(--fs))">${t.n}</div>
+   <div class="fext">${t.v}% dari baseline TXT</div></div>
+   <button class="dx" onclick="closeDrawer()">${S(IC.x)}</button></div>
+   <div class="db"><div class="ds"><span class="ds-l">Kenapa segini</span><p>${t.d}</p></div>
+   <div class="note n-gold">${S(IC.info)}<p>Perbandingan relatif untuk isi yang identik. Angka pasti bergantung isi dokumen dan model yang dipakai.</p></div></div>`);}
+
+/* ── DOTS ── */
+function dots(v,c){let s='<div class="dots">';for(let i=1;i<=5;i++)
+  s+=`<div class="dot" style="${i<=v?'background:'+c:''}"></div>`;return s+'</div>';}
+
+/* ── CONCEPT CARDS ── */
+function buildConcept(){document.getElementById('cgrid').innerHTML=CONCEPT.map((c,i)=>
+  `<div class="cc" onclick="conceptInfo(${i})" tabindex="0" role="button">
+   <div class="cc-ic" style="background:${c.c}22;color:${c.c}">${S(c.ic)}</div>
+   <h3>${c.h}</h3><p>${c.p}</p>
+   <div class="cc-more">Selengkapnya ${S(IC.chev)}</div></div>`).join('');}
+function conceptInfo(i){const c=CONCEPT[i];
+  drawer(`<div class="dh"><div class="fic" style="background:${c.c}22;color:${c.c};width:42px;height:42px">${S(c.ic)}</div>
+   <div><div class="fname" style="font-size:calc(18px*var(--fs))">${c.h}</div></div>
+   <button class="dx" onclick="closeDrawer()">${S(IC.x)}</button></div>
+   <div class="db"><div class="ds">${c.more}</div></div>`);}
+
+/* ── FORMAT GRID ── */
+function buildFilters(){
+  document.getElementById('grpbar').innerHTML=GRP.map(g=>
+   `<button class="chip chip-sm${g.k===curGrp?' on':''}" onclick="setGrp('${g.k}')">${g.n}</button>`).join('');
+  const auds=[{k:'all',n:'Semua pembaca',ic:IC.grid,c:'var(--tx-lo)'},
+   {k:'h',n:'Manusia',ic:AUD.h.ic,c:AUD.h.c},{k:'a',n:'AI / Mesin',ic:AUD.a.ic,c:AUD.a.c},{k:'b',n:'Keduanya',ic:AUD.b.ic,c:AUD.b.c}];
+  document.getElementById('audbar').innerHTML=auds.map(a=>
+   `<button class="chip${a.k===curAud?' on':''}" onclick="setAud('${a.k}')">
+    <span style="color:${a.k===curAud?'#0E0E0E':a.c};display:flex">${S(a.ic)}</span>${a.n}</button>`).join('');
+}
+function setGrp(k){curGrp=k;buildFilters();buildGrid();}
+function setAud(k){curAud=k;buildFilters();buildGrid();}
+function buildGrid(){
+  const l=F.filter(f=>(curGrp==='all'||f.g===curGrp)&&(curAud==='all'||f.aud===curAud));
+  const el=document.getElementById('fgrid');
+  if(!l.length){el.innerHTML='<div class="note n-gold" style="grid-column:1/-1">'+S(IC.info)+'<p>Tidak ada format yang cocok dengan kombinasi filter ini. Coba longgarkan salah satunya.</p></div>';return;}
+  el.innerHTML=l.map(f=>{const A=AUD[f.aud];return `
+   <div class="fc" onclick="openF('${f.id}')" tabindex="0" role="button" onkeydown="if(event.key==='Enter')openF('${f.id}')">
+    <div class="fc-t"><div class="fic" style="background:${f.col}22;color:${f.col}">${S(f.ic)}</div>
+     <span class="badge ${f.t==='work'?'b-work':'b-src'}">${f.t==='work'?'Kerja':'Sumber'}</span></div>
+    <div><div class="fname">${f.n}</div><div class="fext">${f.x}</div></div>
+    <span class="badge ${A.cls} aud" style="align-self:flex-start">${S(A.ic)}${A.n}</span>
+    <div class="mini">
+     <div class="mini-r"><span class="mini-l">Acc</span>${dots(f.acc,'#3D8B4A')}</div>
+     <div class="mini-r"><span class="mini-l">Speed</span>${dots(f.spd,'#4A7C9B')}</div>
+     <div class="mini-r"><span class="mini-l">Cost</span>${dots(f.cst,'#D4A84B')}</div>
+     <div class="mini-r"><span class="mini-l">Sec</span>${dots(f.sec,'#B4503C')}</div>
+    </div></div>`;}).join('');
+}
+
+/* ── DRAWER ── */
+function drawer(html){document.getElementById('dc').innerHTML=html;
+  document.getElementById('drawer').classList.add('on');
+  document.getElementById('scrim').classList.add('on');document.body.style.overflow='hidden';}
+function closeDrawer(){document.getElementById('drawer').classList.remove('on');
+  document.getElementById('scrim').classList.remove('on');document.body.style.overflow='';}
+addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeSide();}});
+
+function openF(id){const f=F.find(x=>x.id===id);if(!f)return;const A=AUD[f.aud];
+ const lg=Object.values(LENS).map(L=>`<div class="lb">
+   <div class="lb-h" style="color:${L.c}">${S(L.ic)}<span>${L.n}</span></div>
+   ${dots(f[L.k],L.c)}<p>${f.why[L.k]}</p></div>`).join('');
+ drawer(`<div class="dh"><div class="fic" style="background:${f.col}22;color:${f.col};width:44px;height:44px">${S(f.ic)}</div>
+  <div><div class="fname" style="font-size:calc(20px*var(--fs))">${f.n}</div>
+  <div class="fext">${f.x} · ${f.t==='work'?'Format kerja':'Format sumber'}</div></div>
+  <button class="dx" onclick="closeDrawer()">${S(IC.x)}</button></div>
+  <div class="db">
+   <div class="ds"><p style="color:var(--tx-hi);font-weight:500;margin-bottom:10px">${f.tag}</p><p>${f.sum}</p></div>
+   <div class="ds"><span class="ds-l">Pembaca utama</span>
+    <div class="note" style="background:${A.c}18"><span style="color:${A.c};display:flex">${S(A.ic)}</span>
+    <p><b style="color:${A.c}">${A.n}.</b> ${A.d}</p></div></div>
+   <div class="ds"><span class="ds-l">Skor empat lensa</span><div class="lensgrid">${lg}</div></div>
+   <div class="ds"><span class="ds-l">Cocok untuk</span>
+    <ul class="dlist">${f.ok.map(o=>`<li>${S(IC.check,'i-ok')}<span>${o}</span></li>`).join('')}</ul></div>
+   <div class="ds"><span class="ds-l">Hindari untuk</span>
+    <ul class="dlist">${f.no.map(o=>`<li>${S(IC.x,'i-no')}<span>${o}</span></li>`).join('')}</ul></div>
+   <div class="ds"><span class="ds-l">Catatan keamanan</span>
+    <div class="note n-red">${S(IC.shield)}<p>${f.secn}</p></div></div>
+   <div class="ds"><span class="ds-l">Contoh penggunaan</span>
+    ${f.uc.map(u=>`<div class="uc"><h5>${u.h}</h5><p>${u.p}</p></div>`).join('')}</div>
+  </div>`);}
+
+/* ── LENS RANK ── */
+function buildLens(){document.getElementById('lensbar').innerHTML=Object.values(LENS).map(L=>
+  `<button class="chip${L.k===curLens?' on':''}" onclick="setLens('${L.k}')">
+   <span style="color:${L.k===curLens?'#0E0E0E':L.c};display:flex">${S(L.ic)}</span>${L.n} · ${L.id}</button>`).join('');}
+function setLens(k){curLens=k;buildLens();drawRank();}
+function drawRank(){const L=LENS[curLens];
+  document.getElementById('lensnote').innerHTML=`<span style="color:${L.c};display:flex">${S(L.ic)}</span><p>${L.note}</p>`;
+  const s=[...F].sort((a,b)=>b[curLens]-a[curLens]||a.n.localeCompare(b.n));
+  document.getElementById('rank').innerHTML=s.map((f,i)=>`
+   <div class="rr" onclick="openF('${f.id}')" tabindex="0" role="button" onkeydown="if(event.key==='Enter')openF('${f.id}')">
+    <div class="rpos">${String(i+1).padStart(2,'0')}</div><div class="rname">${f.n}</div>
+    <div class="rbar-t"><div class="rbar" data-w="${f[curLens]*20}" style="background:${L.c}"></div></div>
+    <div class="rsc">${f[curLens]}/5</div></div>`).join('');
+  setTimeout(()=>document.querySelectorAll('#rank .rbar').forEach((b,i)=>
+    setTimeout(()=>b.style.width=b.dataset.w+'%',i*45)),50);}
+
+/* ── SCATTER ── */
+function drawScatter(){
+  const sv=document.getElementById('scatter');if(!sv)return;
+  const W=620,H=460,ml=62,mr=30,mt=26,mb=56;
+  const px=v=>ml+((v-1)/4)*(W-ml-mr), py=v=>H-mb-((v-1)/4)*(H-mt-mb);
+  const dk=document.documentElement.dataset.theme==='dark';
+  const gl=dk?'rgba(248,246,242,.09)':'rgba(14,14,14,.08)';
+  const tl=dk?'rgba(248,246,242,.45)':'rgba(14,14,14,.44)';
+  let g='';
+  g+=`<rect x="${px(3.4)}" y="${mt}" width="${W-mr-px(3.4)}" height="${py(3.4)-mt}" fill="#D4A84B" opacity="${dk?.07:.1}" rx="8"/>`;
+  g+=`<text x="${W-mr-10}" y="${mt+20}" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="#D4A84B" letter-spacing="1.5">ZONA IDEAL</text>`;
+  for(let i=1;i<=5;i++){g+=`<line x1="${px(i)}" y1="${mt}" x2="${px(i)}" y2="${H-mb}" stroke="${gl}" stroke-width="1"/>`;
+    g+=`<line x1="${ml}" y1="${py(i)}" x2="${W-mr}" y2="${py(i)}" stroke="${gl}" stroke-width="1"/>`;
+    g+=`<text x="${px(i)}" y="${H-mb+20}" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="${tl}">${i}</text>`;
+    g+=`<text x="${ml-12}" y="${py(i)+4}" text-anchor="end" font-family="JetBrains Mono" font-size="10" fill="${tl}">${i}</text>`;}
+  g+=`<text x="${(ml+W-mr)/2}" y="${H-14}" text-anchor="middle" font-family="JetBrains Mono" font-size="10.5" fill="${tl}" letter-spacing="1.8">HEMAT BIAYA →</text>`;
+  g+=`<text x="18" y="${(mt+H-mb)/2}" text-anchor="middle" font-family="JetBrains Mono" font-size="10.5" fill="${tl}" letter-spacing="1.8" transform="rotate(-90 18 ${(mt+H-mb)/2})">AKURASI →</text>`;
+  const used=[];
+  F.forEach(f=>{
+    let x=px(f.cst),y=py(f.acc);
+    while(used.some(u=>Math.hypot(u.x-x,u.y-y)<30)){x+=17;y-=13;}
+    used.push({x,y});
+    const c=AUD[f.aud].c,r=8+f.sec*2.6;
+    g+=`<g class="sc-dot" onclick="openF('${f.id}')" role="button" tabindex="0">
+      <circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity=".28"/>
+      <circle cx="${x}" cy="${y}" r="${r*.42}" fill="${c}"/>
+      <text x="${x}" y="${y-r-7}" text-anchor="middle" font-family="Plus Jakarta Sans" font-weight="700"
+        font-size="11.5" fill="${dk?'rgba(248,246,242,.9)':'rgba(14,14,14,.9)'}">${f.n}</text></g>`;});
+  sv.innerHTML=g;}
+
+/* ── RADAR ── */
+function buildPick(){
+  const mk=(w,cur)=>F.map(f=>`<button class="cpb${f.id===cur?(w==='A'?' a':' b'):''}" onclick="setCmp('${w}','${f.id}')">${f.n}</button>`).join('');
+  document.getElementById('pickA').innerHTML=mk('A',cmpA);
+  document.getElementById('pickB').innerHTML=mk('B',cmpB);}
+function setCmp(w,id){if(w==='A')cmpA=id;else cmpB=id;buildPick();drawRadar();drawCmp();}
+function drawRadar(){
+  const sv=document.getElementById('radar');if(!sv)return;
+  const cx=200,cy=168,R=112,ax=[LENS.acc,LENS.spd,LENS.cst,LENS.sec];
+  const dk=document.documentElement.dataset.theme==='dark';
+  const gl=dk?'rgba(248,246,242,.13)':'rgba(14,14,14,.12)';
+  const tc=dk?'rgba(248,246,242,.6)':'rgba(14,14,14,.6)';
+  const pt=(i,v)=>{const a=-Math.PI/2+i*Math.PI/2,r=R*(v/5);return[cx+Math.cos(a)*r,cy+Math.sin(a)*r];};
+  let g='';
+  for(let lv=1;lv<=5;lv++){const p=[0,1,2,3].map(i=>pt(i,lv).join(',')).join(' ');
+    g+=`<polygon points="${p}" fill="none" stroke="${gl}" stroke-width="1"/>`;}
+  [0,1,2,3].forEach(i=>{const[x,y]=pt(i,5);g+=`<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${gl}" stroke-width="1"/>`;});
+  const A=F.find(f=>f.id===cmpA),B=F.find(f=>f.id===cmpB);
+  const poly=(f,col,op)=>{const p=ax.map((L,i)=>pt(i,f[L.k]).join(',')).join(' ');
+    let s=`<polygon points="${p}" fill="${col}" fill-opacity="${op}" stroke="${col}" stroke-width="2.4" stroke-linejoin="round"/>`;
+    ax.forEach((L,i)=>{const[x,y]=pt(i,f[L.k]);s+=`<circle cx="${x}" cy="${y}" r="4" fill="${col}"/>`;});return s;};
+  if(B)g+=poly(B,'#4A7C9B',.2);
+  if(A)g+=poly(A,'#D4A84B',.22);
+  const lp=[[cx,cy-R-18,'middle'],[cx+R+22,cy+4,'middle'],[cx,cy+R+26,'middle'],[cx-R-22,cy+4,'middle']];
+  ax.forEach((L,i)=>{const[x,y,an]=lp[i];
+    g+=`<text x="${x}" y="${y}" text-anchor="${an}" font-family="JetBrains Mono" font-size="10" fill="${L.c}" letter-spacing="1.2">${L.n.toUpperCase()}</text>`;});
+  g+=`<g><rect x="88" y="316" width="11" height="11" rx="2.5" fill="#D4A84B"/>
+   <text x="105" y="326" font-family="Inter" font-size="12" fill="${tc}">${A?A.n:'—'}</text>
+   <rect x="208" y="316" width="11" height="11" rx="2.5" fill="#4A7C9B"/>
+   <text x="225" y="326" font-family="Inter" font-size="12" fill="${tc}">${B?B.n:'—'}</text></g>`;
+  sv.innerHTML=g;}
+function drawCmp(){
+  const A=F.find(f=>f.id===cmpA),B=F.find(f=>f.id===cmpB);if(!A||!B)return;
+  document.getElementById('cmptbl').innerHTML=Object.values(LENS).map(L=>`
+   <div class="cmpr"><div class="cmpr-l" style="color:${L.c}">${L.n}</div>
+    <div class="cmpv"><div class="cmpbar-t"><div class="cmpbar" style="width:${A[L.k]*20}%;background:#D4A84B"></div></div><span>${A[L.k]}</span></div>
+    <div class="cmpv"><div class="cmpbar-t"><div class="cmpbar" style="width:${B[L.k]*20}%;background:#4A7C9B"></div></div><span>${B[L.k]}</span></div>
+   </div>`).join('')+`
+   <div class="cmpr"><div class="cmpr-l">Pembaca</div>
+    <div><span class="badge ${AUD[A.aud].cls}">${AUD[A.aud].n}</span></div>
+    <div><span class="badge ${AUD[B.aud].cls}">${AUD[B.aud].n}</span></div></div>`;
+  const dA=Object.values(LENS).reduce((s,L)=>s+A[L.k],0),dB=Object.values(LENS).reduce((s,L)=>s+B[L.k],0);
+  const win=dA>dB?A:dB>dA?B:null;
+  const gaps=Object.values(LENS).map(L=>({n:L.id,d:A[L.k]-B[L.k]})).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d))[0];
+  document.getElementById('cmpnote').innerHTML=S(IC.info)+`<p><b>Bacaannya:</b> ${
+   win?`Total skor <b>${win.n}</b> lebih tinggi (${Math.max(dA,dB)} vs ${Math.min(dA,dB)}).`:'Total skor keduanya sama.'
+   } Selisih terbesar ada di <b>${gaps.n}</b> — ${gaps.d>0?A.n:B.n} unggul ${Math.abs(gaps.d)} poin. Kalau ${gaps.n.toLowerCase()} bukan prioritas Anda, selisih ini tidak relevan. Klik nama format di peta untuk detailnya.</p>`;}
+
+/* ── BEST PRACTICE ── */
+function bpViz(kind){
+  if(kind==='flow')return `<div class="flowmini">
+   <div class="fm-box fm-a">PDF</div><div class="fm-ar">${S(IC.chev)}</div>
+   <div class="fm-box fm-b">MARKDOWN</div><div class="fm-ar">${S(IC.chev)}</div>
+   <div class="fm-box fm-b">AI</div></div>`;
+  if(kind==='gauge')return `<div class="gauge">
+   <div class="gauge-t"><div class="gauge-f" style="width:82%;background:#B4503C"></div>
+   <div class="gauge-f" style="width:18%;background:#3D8B4A"></div></div>
+   <div class="gauge-l">Sisi Anda / Sisi AI</div></div>`;
+  const hs=[26,38,52,68,90,100];
+  return `<div class="stripes">${hs.map((h,i)=>
+   `<div class="stripe" style="height:${h}%;background:${i<2?'#3D8B4A':'var(--track)'}"></div>`).join('')}</div>`;}
+function buildBP(){document.getElementById('bpgrid').innerHTML=BP.map((b,i)=>`
+  <div class="bp"><div class="bp-top"><span class="bp-n">${b.n}</span>
+   <div class="fic" style="background:var(--glow);color:var(--gold);margin-bottom:calc(13px*var(--fs))">${S(b.ic)}</div>
+   <h3>${b.h}</h3><p>${b.p}</p></div>
+   <div class="bp-vis">${bpViz(b.viz)}</div>
+   <button class="bp-btn" onclick="bpInfo(${i})">${b.story.kind==='story'?'Baca skenarionya':'Lihat detailnya'} ${S(IC.chev)}</button></div>`).join('');}
+function bpInfo(i){const b=BP[i],st=b.story;
+  const tbl=st.table?`<div class="tblviz"><span class="tblviz-l">Yang terjadi saat batas kolom hilang</span>
+   <div class="trow" style="grid-template-columns:1.5fr 1fr 1fr 1fr">
+    <div class="tcell hd">Produk</div><div class="tcell hd">Kotor</div><div class="tcell hd">Retur</div><div class="tcell hd">Bersih</div></div>
+   <div class="trow" style="grid-template-columns:1.5fr 1fr 1fr 1fr">
+    <div class="tcell nm">Sumber asli</div><div class="tcell ok">840</div><div class="tcell ok">115</div><div class="tcell ok">725</div></div>
+   <div class="trow" style="grid-template-columns:1.5fr 1fr 1fr 1fr">
+    <div class="tcell nm">Terbaca AI</div><div class="tcell ok">840</div><div class="tcell err">725</div><div class="tcell err">115</div></div>
+   <p style="font-size:calc(11.5px*var(--fs));color:var(--tx-md);margin-top:calc(10px*var(--fs));font-weight:300;line-height:1.5">Dua kolom terakhir tertukar. Semua angkanya benar — hanya letaknya salah. Tidak ada error, tidak ada peringatan.</p></div>`:'';
+  const body=st.kind==='story'
+   ? st.steps.map(s=>`<div class="story-step ${s.s}"><div class="story-n">${s.n}</div>
+      <div class="story-c"><h5>${s.h}</h5><p>${s.p}</p></div></div>`).join('')+tbl
+   : st.items.map(it=>`<div class="uc"><h5>${it.h}</h5><p>${it.p}</p></div>`).join('');
+  drawer(`<div class="dh"><div class="fic" style="background:var(--glow);color:var(--gold);width:44px;height:44px">${S(b.ic)}</div>
+   <div><div class="fname" style="font-size:calc(18px*var(--fs))">${b.h}</div>
+   <div class="fext">Praktik ${b.n}</div></div>
+   <button class="dx" onclick="closeDrawer()">${S(IC.x)}</button></div>
+   <div class="db">
+    <div class="ds"><span class="ds-l">${st.title}</span><p style="margin-bottom:calc(16px*var(--fs))">${st.intro}</p>${body}</div>
+    <div class="ds"><div class="note n-red">${S(IC.warn)}<p><b>Pelajarannya.</b> ${st.lesson}</p></div></div>
+    <div class="ds"><span class="ds-l">Langkah praktis</span>
+     <ul class="dlist">${st.action.map(a=>`<li>${S(IC.check,'i-ok')}<span>${a}</span></li>`).join('')}</ul></div>
+   </div>`);}
+
+/* ── WIZARD ── */
+function buildWiz(){const st=Object.keys(answers).length;let h='';
+  for(let i=0;i<=Math.min(st,QS.length-1);i++){if(i>=QS.length)break;const Q=QS[i];
+   h+=`<div class="qb"><span class="qn">Pertanyaan ${i+1} / 4</span><div class="qt">${Q.q}</div>
+    ${Q.o.map(o=>`<button class="qo${answers[Q.k]===o.v?' on':''}" onclick="pick('${Q.k}','${o.v}',${i})">${S(o.ic)}<span>${o.l}</span></button>`).join('')}
+    </div>`;}
+  document.getElementById('qzone').innerHTML=h;
+  for(let i=1;i<=4;i++)document.getElementById('wp'+i).className=(i<=st?'done':'');
+  if(st>=4)showResult();else document.getElementById('reszone').innerHTML='';}
+function pick(k,v,idx){QS.map(q=>q.k).slice(idx+1).forEach(kk=>delete answers[kk]);
+  answers[k]=v;buildWiz();
+  setTimeout(()=>{const t=document.getElementById(Object.keys(answers).length>=4?'reszone':'qzone');
+   if(t&&t.lastElementChild)t.lastElementChild.scrollIntoView({behavior:'smooth',block:'center'});},90);}
+function showResult(){
+  const r=RULES[answers.goal][answers.out],f=F.find(x=>x.id===(r[answers.prio]||r.d));
+  const L=LENS[answers.prio],A=AUD[f.aud];
+  const alts=F.filter(x=>x.id!==f.id&&x.t==='work').sort((a,b)=>b[answers.prio]-a[answers.prio]).slice(0,3);
+  const low=f.sec<=2&&answers.sens==='tinggi';
+  document.getElementById('reszone').innerHTML=`<div class="result">
+   <div class="res-t"><div class="res-i" style="background:${f.col}22;color:${f.col}">${S(f.ic)}</div>
+    <div><div class="res-n">${f.n}</div><div class="res-tg">${f.tag}</div></div>
+    <span class="badge ${A.cls} aud" style="margin-left:auto">${S(A.ic)}${A.n}</span></div>
+   <p class="res-w">${f.sum}</p>
+   <div class="res-l">${Object.values(LENS).map(l=>`<div class="lb">
+     <div class="lb-h" style="color:${l.c}">${S(l.ic)}<span>${l.n}</span></div>${dots(f[l.k],l.c)}</div>`).join('')}</div>
+   <div class="note n-gold" style="margin-bottom:10px">${S(IC.info)}
+    <p><b>Kenapa ini?</b> Prioritas Anda ${L.id.toLowerCase()} — ${f.why[answers.prio]}</p></div>
+   <div class="note ${low?'n-red':'n-green'}">${S(low?IC.warn:IC.shield)}
+    <p><b>${low?'Perhatian keamanan.':'Catatan keamanan.'}</b> ${SENS[answers.sens]}${low?' Format ini skor keamanannya rendah — '+f.secn.charAt(0).toLowerCase()+f.secn.slice(1):''}</p></div>
+   <div class="res-a"><span class="cmpsel-l">Alternatif berdasarkan ${L.id.toLowerCase()}</span>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">${alts.map(a=>`<button class="pill" onclick="openF('${a.id}')">${a.n} · ${a[answers.prio]}/5</button>`).join('')}</div>
+    <button class="ghost" onclick="resetWiz()">Ulangi dari awal</button></div></div>`;}
+function resetWiz(){answers={};buildWiz();scrollTo({top:0,behavior:'smooth'});}
+
+/* ── PIPELINE ── */
+function buildPipe(){document.getElementById('pipe').innerHTML=PIPE.map((s,i)=>`
+  <div class="ps" id="ps-${s.id}"><div class="pn">${S(s.ic)}</div>
+   <div class="ph2" onclick="togPipe('${s.id}')" tabindex="0" role="button" aria-expanded="false"
+     onkeydown="if(event.key==='Enter')togPipe('${s.id}')">
+    <h3>${i+1}. ${s.n}</h3><span class="pchev" style="display:flex">${S(IC.chev)}</span></div>
+   <div class="pbody"><div class="pin"><p>${s.d}</p>
+    <div class="ptags">${s.tags.map(t=>`<span class="ptag${s.hi?' hi':''}">${t}</span>`).join('')}</div>
+    ${s.tools?`<div class="tgrid">${s.tools.map(t=>`<div class="tcard">
+      <div class="tcard-h"><h5>${t.n}</h5><span class="tbadge">${t.b}</span></div><p>${t.d}</p></div>`).join('')}</div>`:''}
+    <div class="note n-gold">${S(IC.info)}<p>${s.note}</p></div></div></div></div>`).join('');}
+function togPipe(id){const el=document.getElementById('ps-'+id),op=el.classList.contains('on');
+  document.querySelectorAll('.ps').forEach(e=>{e.classList.remove('on');
+   e.querySelector('.ph2').setAttribute('aria-expanded','false');});
+  if(!op){el.classList.add('on');el.querySelector('.ph2').setAttribute('aria-expanded','true');}}
+
+/* ── INIT ── */
+setTh();buildView();initCover();buildNav();buildTok();buildConcept();buildFilters();buildGrid();
+buildLens();drawRank();drawScatter();buildPick();drawRadar();drawCmp();buildBP();buildWiz();buildPipe();
+addEventListener('resize',()=>{drawScatter();drawRadar();});
+</script>
+</body>
+</html>
