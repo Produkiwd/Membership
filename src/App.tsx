@@ -1,7 +1,7 @@
 import { Monitor, Sparkles, BookOpen, Calendar, ChevronRight, ChevronLeft, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2, ExternalLink } from 'lucide-react';
 import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent, type ChangeEvent } from 'react';
 import { cn } from './lib/utils';
-import { AI_OS_GROUP, AI_OS_TIER, canAccessAifModule } from './lib/access';
+import { AI_OS_GROUP, AI_OS_TIER, canAccessAifModule, canAccessPromptDatabase } from './lib/access';
 import {
   createPendingMember,
   getCurrentUser,
@@ -1103,7 +1103,10 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
     return allowedPortals.includes('aif') && canAccessAifModule(sinadAccess.tier, moduleId);
   };
 
+  const canOpenPromptDatabase = canAccessPromptDatabase(sinadAccess.tier, allowedPortals, isAdmin);
+
   const openPromptDatabase = () => {
+    if (!canOpenPromptDatabase) return;
     localStorage.setItem('appToken', 'iwdemy123');
     setActiveTab('prompts');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1284,7 +1287,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               Kembali ke Hub
             </button>
           )}
-          {sinadAccess.tier !== 'Community' || isAdmin ? (
+          {canOpenPromptDatabase ? (
             <button 
               onClick={() => {
                 if (activeTab === 'prompts') {
@@ -1717,7 +1720,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   <Lock className="w-4 h-4 text-light-lo" />
                 </div>
               )}
-              {sinadAccess.tier !== 'Community' || isAdmin ? (
+              {canOpenPromptDatabase ? (
                 <button
                   type="button"
                   onClick={openPromptDatabase}
@@ -1961,7 +1964,9 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
             )}
           </>
         ) : activeTab === 'prompts' ? (
-          <PromptDatabaseView onBack={() => { setActiveTab('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+          canOpenPromptDatabase
+            ? <PromptDatabaseView onBack={() => { setActiveTab('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+            : <div className="p-12 text-center font-body text-light-md">Akses Prompt Database tidak tersedia untuk akun ini.</div>
         ) : activeTab === 'admin' ? (
           <AdminView />
         ) : (

@@ -9,3 +9,9 @@ export const canAccessAifModule = (tier: string, moduleId: string): boolean => {
   if (moduleId === '04') return ['Internal', 'TWC'].includes(tier);
   return false;
 };
+
+export const canAccessPromptDatabase = (tier: string, allowedPortals: string[], isAdmin: boolean): boolean => {
+  if (isAdmin) return true;
+  if (tier === 'Community') return false;
+  return tier !== AI_OS_TIER || allowedPortals.includes('aif');
+};
