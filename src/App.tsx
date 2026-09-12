@@ -1,6 +1,7 @@
 import { Monitor, Sparkles, BookOpen, Calendar, ChevronRight, ChevronLeft, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2, ExternalLink } from 'lucide-react';
 import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent, type ChangeEvent } from 'react';
 import { cn } from './lib/utils';
+import { AI_OS_GROUP, AI_OS_TIER, canAccessAifModule, portalsForTier } from './lib/access';
 import {
   createPendingMember,
   getCurrentUser,
@@ -251,6 +252,7 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
   const [exp, setExp] = useState(currentExp);
   
   const togglePortal = (p: string) => {
+    if (tier === AI_OS_TIER) return;
     setPortals(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
   };
   
@@ -321,9 +323,10 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
       </td>
       <td className="py-3 px-2 align-top">
         <div className="flex flex-col gap-1 text-[10px]">
-          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portals.includes('aif')} onChange={() => togglePortal('aif')} /> AIF</label>
-          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portals.includes('idl')} onChange={() => togglePortal('idl')} /> IDL</label>
-          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portals.includes('sinad')} onChange={() => togglePortal('sinad')} /> SinaD</label>
+          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portalsForTier(tier, portals).includes('aif')} disabled={tier === AI_OS_TIER} onChange={() => togglePortal('aif')} /> AIF</label>
+          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portalsForTier(tier, portals).includes('idl')} disabled={tier === AI_OS_TIER} onChange={() => togglePortal('idl')} /> IDL</label>
+          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portalsForTier(tier, portals).includes('sinad')} disabled={tier === AI_OS_TIER} onChange={() => togglePortal('sinad')} /> SinaD</label>
+          {tier === AI_OS_TIER && <span className="text-light-md">Paket AI OS: AIF + IDL</span>}
         </div>
       </td>
       <td className="py-3 px-2 align-top">
@@ -331,8 +334,12 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
           value={tier} 
           onChange={e => {
             const newTier = e.target.value;
+            const nextPortals = portalsForTier(newTier, portals);
+            const nextGroup = newTier === AI_OS_TIER ? AI_OS_GROUP : group;
             setTier(newTier);
-            handleUpdate(mb.id, role, newTier, exp, portals, sinadMateri, sinadExercise, group);
+            setPortals(nextPortals);
+            setGroup(nextGroup);
+            handleUpdate(mb.id, role, newTier, exp, nextPortals, sinadMateri, sinadExercise, nextGroup);
           }}
           className="border border-border-light-subtle rounded px-2 py-1 bg-transparent block w-full focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted text-xs"
         >
@@ -371,7 +378,7 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
         <div className="flex flex-col gap-2">
           <Button 
             disabled={isUpdating}
-            onClick={() => handleUpdate(mb.id, role, tier, exp, portals, sinadMateri, sinadExercise, group)}
+            onClick={() => handleUpdate(mb.id, role, tier, exp, portalsForTier(tier, portals), sinadMateri, sinadExercise, group)}
             variant="primary" 
             className="py-1.5 px-4 text-[10px]"
           >
@@ -661,6 +668,8 @@ function AdminView() {
 
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [newTier, setNewTier] = useState('Professional');
+  const [newGroup, setNewGroup] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState({ text: '', type: '' });
 
@@ -676,12 +685,14 @@ function AdminView() {
         throw new Error('Password minimal 6 karakter.');
       }
 
-      await createPendingMember(emailFormatted, newPassword);
+      await createPendingMember(emailFormatted, newPassword, newTier, newGroup);
       setMembers(await listMembers());
 
       setCreateMsg({ text: `Akun login dan akses ${emailFormatted} sudah dibuat. User bisa login dengan password yang kamu tentukan.`, type: 'success' });
       setNewEmail('');
       setNewPassword('');
+      setNewTier('Professional');
+      setNewGroup('');
     } catch (err: any) {
       // Console error hidden for auth already in use etc to avoid false alarms
       setCreateMsg({ text: err.message || 'Gagal membuat akun.', type: 'error' });
@@ -698,14 +709,14 @@ function AdminView() {
     }
   };
 
-  const predefinedGroups = ["AIF Leaders Batch 1", "AIF Professional Batch 1", "Internal Office", "Community"];
+  const predefinedGroups = ["AIF Leaders Batch 1", "AIF Professional Batch 1", "Internal Office", "Community", AI_OS_GROUP];
   const allGroups = Array.from(new Set([
     ...predefinedGroups,
     ...members.map(m => m.group).filter(Boolean)
   ])).sort();
 
   const allTiers = Array.from(new Set([
-    "Professional", "Leaders", "Community", "Internal", "Teacher", "Student", "TWC",
+    "Professional", "Leaders", "Community", "Internal", "Teacher", "Student", "TWC", AI_OS_TIER,
     ...members.map(m => m.tier).filter(Boolean)
   ])).sort();
 
@@ -721,7 +732,7 @@ function AdminView() {
         <h3 className="font-sans font-bold text-xl text-light-hi mb-2">Tambah Member Baru</h3>
         <p className="font-body text-sm text-light-md mb-6">Buat akun login dan akses portal dalam satu langkah.</p>
         
-        <form onSubmit={handleCreateUser} className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
+        <form onSubmit={handleCreateUser} className="flex gap-4 items-end flex-wrap">
           <div className="flex-1 w-full min-w-[200px]">
             <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Email</label>
             <input 
@@ -744,6 +755,32 @@ function AdminView() {
               minLength={6}
               placeholder="Minimal 6 karakter"
               className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi placeholder:text-light-lo focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted transition-all"
+              disabled={isCreating}
+            />
+          </div>
+          <div className="flex-1 w-full min-w-[180px]">
+            <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Tier</label>
+            <select
+              value={newTier}
+              onChange={(e) => {
+                setNewTier(e.target.value);
+                if (e.target.value === AI_OS_TIER) setNewGroup(AI_OS_GROUP);
+              }}
+              className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi bg-white focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted"
+              disabled={isCreating}
+            >
+              {allTiers.map((tier) => <option key={tier} value={tier}>{tier}</option>)}
+            </select>
+          </div>
+          <div className="flex-1 w-full min-w-[180px]">
+            <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Grup / Batch</label>
+            <input
+              type="text"
+              list="groupList"
+              value={newGroup}
+              onChange={(e) => setNewGroup(e.target.value)}
+              placeholder="Pilih atau ketik grup"
+              className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted"
               disabled={isCreating}
             />
           </div>
@@ -924,6 +961,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   const [currentPortal, setCurrentPortal] = useState<'hub' | 'aif' | 'idl' | 'sinad'>('hub');
   const [sinadAccess, setSinadAccess] = useState({ tier: 'Professional', materi: false, exercise: false });
   const [isLoadingPortals, setIsLoadingPortals] = useState(true);
+  const [profileError, setProfileError] = useState(false);
 
   const getPortalName = (id: string) => {
     if (id === 'aif') return 'AIF Community';
@@ -947,6 +985,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   const [iframeModalUrl, setIframeModalUrl] = useState<{url: string, title: string} | null>(null);
 
   const handleModuleClick = async (moduleId: string, defaultTitle: string, defaultSubtitle: string, defaultMaterials: any[]) => {
+    if (!allowedPortals.includes('aif') || !canAccessAifModule(sinadAccess.tier, moduleId)) return;
     let materials: Materi[] = [];
     try {
       materials = await getMateriByModule(moduleId);
@@ -1044,24 +1083,13 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   };
 
   const canAccessModule = (moduleId: string) => {
-    const tier = sinadAccess.tier; // This is the user's tier for the portal
+    return allowedPortals.includes('aif') && canAccessAifModule(sinadAccess.tier, moduleId);
+  };
 
-
-    if (moduleId === '01') return true; // Strategize available to all, including TWC
-    
-    if (moduleId === '02') { // Prompt
-      return tier === 'Professional' || tier === 'Leaders' || tier === 'Internal';
-    }
-
-    if (moduleId === '03' || moduleId === '05' || moduleId === '06' || moduleId === '07') { // Create, Build, ACT, AI OS
-      return tier === 'Leaders' || tier === 'Internal';
-    }
-
-    if (moduleId === '04') { // Think
-      return tier === 'Internal' || tier === 'TWC';
-    }
-    
-    return false;
+  const openPromptDatabase = () => {
+    localStorage.setItem('appToken', 'iwdemy123');
+    setActiveTab('prompts');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleChangePassword = async (e: FormEvent) => {
@@ -1093,11 +1121,16 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   useEffect(() => {
     let isMounted = true;
     const loadMemberData = async () => {
-      let data: any = { role: 'member', allowedPortals: ['aif'], tier: 'Professional', sinadMateri: false, sinadExercise: false };
+      let data;
       try {
         data = await getMyMemberProfile();
       } catch (err) {
         console.error("Gagal mendapatkan data member", err);
+        if (isMounted) {
+          setProfileError(true);
+          setIsLoadingPortals(false);
+        }
+        return;
       }
 
       try {
@@ -1105,7 +1138,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
         if (data.role === 'admin') setIsAdmin(true);
 
-        let portals = data.allowedPortals || ["aif"];
+        let portals = portalsForTier(data.tier || 'Professional', data.allowedPortals || ["aif"]);
         if (data.tier === "TWC" && !portals.includes("idl")) {
           portals.push("idl");
         }
@@ -1209,6 +1242,15 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
     );
   }
 
+  if (profileError) {
+    return (
+      <div className="min-h-screen bg-bg-light flex flex-col items-center justify-center gap-4 p-6 text-center">
+        <p className="font-body text-light-hi">Akses member belum dapat diverifikasi. Silakan coba muat ulang halaman.</p>
+        <Button onClick={() => window.location.reload()}>Muat Ulang</Button>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-bg-light antialiased selection:bg-gold selection:text-bg-dark flex flex-col">
@@ -1228,8 +1270,12 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
           {sinadAccess.tier !== 'Community' || isAdmin ? (
             <button 
               onClick={() => {
-                setActiveTab(activeTab === 'prompts' ? 'dashboard' : 'prompts');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (activeTab === 'prompts') {
+                  setActiveTab('dashboard');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                  openPromptDatabase();
+                }
               }} 
               className={cn("hidden sm:inline-block transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow", activeTab === 'prompts' ? 'text-gold-muted font-black' : 'text-light-lo hover:text-light-hi')}
             >
@@ -1370,6 +1416,8 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                 </div>
               </div>
             )}
+            {sinadAccess.tier !== AI_OS_TIER && (
+              <>
             {/* Module 02 - Prompt */}
             {canAccessModule('02') ? (
               <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("02", "Prompt", "Chat Mastery", [{ title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }, { title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }])}>
@@ -1514,6 +1562,8 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                 </div>
               </div>
             )}
+              </>
+            )}
 
             {/* Module 07 - AI OS */}
             {canAccessModule('07') ? (
@@ -1550,11 +1600,12 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
           <div className="lg:col-span-8">
             <div className="flex items-center justify-between border-b border-border-light-subtle pb-4 mb-8">
-              <h2 className="font-sans font-bold text-xl text-light-hi">Jalur Kepemimpinan Teknis</h2>
+              <h2 className="font-sans font-bold text-xl text-light-hi">{sinadAccess.tier === AI_OS_TIER ? 'Akses Platform' : 'Jalur Kepemimpinan Teknis'}</h2>
             </div>
             
             <div className="space-y-4">
               {/* Module Item Active */}
+              {allowedPortals.includes('idl') && (
               <a href="https://idl.iwdemy.com" onClick={handleIdlClick} target="_blank" rel="noopener noreferrer" className="group bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card flex flex-col sm:flex-row gap-6 lg:gap-8 items-start sm:items-center hover:border-gold/30 transition-all cursor-pointer block">
                 <div className="w-14 h-14 rounded-lg bg-bg-light border border-border-light-subtle flex items-center justify-center shrink-0">
                   <BookOpen className="w-6 h-6 text-gold-muted" />
@@ -1567,7 +1618,10 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   Lanjutkan <ChevronRight className="w-4 h-4 ml-1" />
                 </div>
               </a>
+              )}
 
+              {sinadAccess.tier !== AI_OS_TIER && (
+                <>
               {/* Module Item Locked */}
               <div className="group bg-bg-light border border-transparent p-6 md:p-8 rounded-xl flex flex-col sm:flex-row gap-6 lg:gap-8 items-start sm:items-center opacity-80 mix-blend-multiply">
                 <div className="w-14 h-14 rounded-lg border border-border-light-subtle flex items-center justify-center shrink-0">
@@ -1595,12 +1649,16 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   Terkunci
                 </div>
               </div>
+                </>
+              )}
             </div>
           </div>
           
           <div className="lg:col-span-4">
             <h2 className="font-sans font-bold text-sm text-light-hi tracking-eyebrow uppercase mb-6 border-b border-border-light-subtle pb-4">Akses Lainnya</h2>
             <div className="space-y-4">
+              {sinadAccess.tier !== AI_OS_TIER && (
+                <>
               {sinadAccess.tier === 'Internal' || isAdmin ? (
                 <a href="#" onClick={(e) => { e.preventDefault(); setIsTimelineModalOpen(true); }} className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
                   <div className="flex items-center gap-4">
@@ -1652,14 +1710,12 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   <Lock className="w-4 h-4 text-light-lo" />
                 </div>
               )}
+                </>
+              )}
               {sinadAccess.tier !== 'Community' || isAdmin ? (
                 <button
                   type="button"
-                  onClick={() => {
-                    localStorage.setItem('appToken', 'iwdemy123');
-                    setActiveTab('prompts');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
+                  onClick={openPromptDatabase}
                   className="w-full text-left flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group cursor-pointer"
                 >
                   <div className="flex items-center gap-4">

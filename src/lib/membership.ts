@@ -1,5 +1,6 @@
 import type { AuthChangeEvent, User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import { portalsForTier } from './access';
 
 type RpcMember = {
   id: string;
@@ -32,7 +33,7 @@ export const normalizeMember = (member: RpcMember): MemberRecord => ({
   role: member.role === 'employee' || member.role === 'manager' ? 'member' : (member.role || 'member'),
   tier: member.tier || 'Professional',
   group: member.group || '',
-  allowedPortals: member.allowedPortals?.length ? member.allowedPortals : ['aif'],
+  allowedPortals: portalsForTier(member.tier || 'Professional', member.allowedPortals?.length ? member.allowedPortals : ['aif']),
   sinadMateri: Boolean(member.sinadMateri),
   sinadExercise: Boolean(member.sinadExercise),
   expiresAt: toFirebaseLikeDate(member.expiresAt),
@@ -115,23 +116,23 @@ export const updateMember = async (
     p_role: role,
     p_tier: tier,
     p_expires_at: expiresAt || null,
-    p_allowed_portals: allowedPortals,
+    p_allowed_portals: portalsForTier(tier, allowedPortals),
     p_sinad_materi: sinadMateri,
     p_sinad_exercise: sinadExercise,
     p_group_name: group || null,
   }));
 };
 
-export const createPendingMember = async (email: string, password: string) => {
+export const createPendingMember = async (email: string, password: string, tier = 'Professional', group = '') => {
   const { data, error } = await supabase.functions.invoke<{ member: RpcMember }>('admin-create-member-user', {
     body: {
       email,
       password,
       name: email.split('@')[0],
       role: 'member',
-      tier: 'Professional',
-      groupName: null,
-      allowedPortals: ['aif'],
+      tier,
+      groupName: group || null,
+      allowedPortals: portalsForTier(tier, ['aif']),
       expiresAt: null,
     },
   });
