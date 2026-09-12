@@ -1,7 +1,7 @@
 import { Monitor, Sparkles, BookOpen, Calendar, ChevronRight, ChevronLeft, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2, ExternalLink } from 'lucide-react';
 import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent, type ChangeEvent } from 'react';
 import { cn } from './lib/utils';
-import { AI_OS_GROUP, AI_OS_TIER, canAccessAifModule, portalsForTier } from './lib/access';
+import { AI_OS_GROUP, AI_OS_TIER, canAccessAifModule } from './lib/access';
 import {
   createPendingMember,
   getCurrentUser,
@@ -252,7 +252,6 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
   const [exp, setExp] = useState(currentExp);
   
   const togglePortal = (p: string) => {
-    if (tier === AI_OS_TIER) return;
     setPortals(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
   };
   
@@ -323,10 +322,9 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
       </td>
       <td className="py-3 px-2 align-top">
         <div className="flex flex-col gap-1 text-[10px]">
-          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portalsForTier(tier, portals).includes('aif')} disabled={tier === AI_OS_TIER} onChange={() => togglePortal('aif')} /> AIF</label>
-          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portalsForTier(tier, portals).includes('idl')} disabled={tier === AI_OS_TIER} onChange={() => togglePortal('idl')} /> IDL</label>
-          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portalsForTier(tier, portals).includes('sinad')} disabled={tier === AI_OS_TIER} onChange={() => togglePortal('sinad')} /> SinaD</label>
-          {tier === AI_OS_TIER && <span className="text-light-md">Paket AI OS: AIF + IDL</span>}
+          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portals.includes('aif')} onChange={() => togglePortal('aif')} /> AIF</label>
+          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portals.includes('idl')} onChange={() => togglePortal('idl')} /> IDL</label>
+          <label className="flex items-center gap-1 cursor-pointer hover:text-gold-muted"><input type="checkbox" checked={portals.includes('sinad')} onChange={() => togglePortal('sinad')} /> SinaD</label>
         </div>
       </td>
       <td className="py-3 px-2 align-top">
@@ -334,12 +332,10 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
           value={tier} 
           onChange={e => {
             const newTier = e.target.value;
-            const nextPortals = portalsForTier(newTier, portals);
             const nextGroup = newTier === AI_OS_TIER ? AI_OS_GROUP : group;
             setTier(newTier);
-            setPortals(nextPortals);
             setGroup(nextGroup);
-            handleUpdate(mb.id, role, newTier, exp, nextPortals, sinadMateri, sinadExercise, nextGroup);
+            handleUpdate(mb.id, role, newTier, exp, portals, sinadMateri, sinadExercise, nextGroup);
           }}
           className="border border-border-light-subtle rounded px-2 py-1 bg-transparent block w-full focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted text-xs"
         >
@@ -378,7 +374,7 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
         <div className="flex flex-col gap-2">
           <Button 
             disabled={isUpdating}
-            onClick={() => handleUpdate(mb.id, role, tier, exp, portalsForTier(tier, portals), sinadMateri, sinadExercise, group)}
+            onClick={() => handleUpdate(mb.id, role, tier, exp, portals, sinadMateri, sinadExercise, group)}
             variant="primary" 
             className="py-1.5 px-4 text-[10px]"
           >
@@ -670,6 +666,7 @@ function AdminView() {
   const [newPassword, setNewPassword] = useState('');
   const [newTier, setNewTier] = useState('Professional');
   const [newGroup, setNewGroup] = useState('');
+  const [newPortals, setNewPortals] = useState<string[]>(['aif']);
   const [isCreating, setIsCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState({ text: '', type: '' });
 
@@ -684,8 +681,11 @@ function AdminView() {
       if (newPassword.length < 6) {
         throw new Error('Password minimal 6 karakter.');
       }
+      if (newPortals.length === 0) {
+        throw new Error('Pilih minimal satu akses portal.');
+      }
 
-      await createPendingMember(emailFormatted, newPassword, newTier, newGroup);
+      await createPendingMember(emailFormatted, newPassword, newTier, newGroup, newPortals);
       setMembers(await listMembers());
 
       setCreateMsg({ text: `Akun login dan akses ${emailFormatted} sudah dibuat. User bisa login dengan password yang kamu tentukan.`, type: 'success' });
@@ -693,6 +693,7 @@ function AdminView() {
       setNewPassword('');
       setNewTier('Professional');
       setNewGroup('');
+      setNewPortals(['aif']);
     } catch (err: any) {
       // Console error hidden for auth already in use etc to avoid false alarms
       setCreateMsg({ text: err.message || 'Gagal membuat akun.', type: 'error' });
@@ -784,6 +785,22 @@ function AdminView() {
               disabled={isCreating}
             />
           </div>
+          <fieldset className="flex-1 w-full min-w-[180px]">
+            <legend className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase mb-2">Akses Portal</legend>
+            <div className="flex flex-wrap gap-3 py-3 text-sm text-light-hi">
+              {(['aif', 'sinad', 'idl'] as const).map((portal) => (
+                <label key={portal} className="flex items-center gap-1 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newPortals.includes(portal)}
+                    onChange={() => setNewPortals((current) => current.includes(portal) ? current.filter((item) => item !== portal) : [...current, portal])}
+                    disabled={isCreating}
+                  />
+                  {portal === 'aif' ? 'AIF' : portal === 'sinad' ? 'SinaD' : 'IDL'}
+                </label>
+              ))}
+            </div>
+          </fieldset>
           <Button type="submit" variant="primary" disabled={isCreating} className="py-3 px-8 border border-transparent w-full sm:w-auto mt-4 sm:mt-0">
             {isCreating ? "Membuat..." : "Tambah"}
           </Button>
@@ -1138,7 +1155,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
         if (data.role === 'admin') setIsAdmin(true);
 
-        let portals = portalsForTier(data.tier || 'Professional', data.allowedPortals || ["aif"]);
+        let portals = data.allowedPortals || ["aif"];
         if (data.tier === "TWC" && !portals.includes("idl")) {
           portals.push("idl");
         }
@@ -1416,8 +1433,6 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                 </div>
               </div>
             )}
-            {sinadAccess.tier !== AI_OS_TIER && (
-              <>
             {/* Module 02 - Prompt */}
             {canAccessModule('02') ? (
               <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("02", "Prompt", "Chat Mastery", [{ title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }, { title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }])}>
@@ -1562,8 +1577,6 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                 </div>
               </div>
             )}
-              </>
-            )}
 
             {/* Module 07 - AI OS */}
             {canAccessModule('07') ? (
@@ -1600,7 +1613,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
           <div className="lg:col-span-8">
             <div className="flex items-center justify-between border-b border-border-light-subtle pb-4 mb-8">
-              <h2 className="font-sans font-bold text-xl text-light-hi">{sinadAccess.tier === AI_OS_TIER ? 'Akses Platform' : 'Jalur Kepemimpinan Teknis'}</h2>
+              <h2 className="font-sans font-bold text-xl text-light-hi">Jalur Kepemimpinan Teknis</h2>
             </div>
             
             <div className="space-y-4">
@@ -1620,8 +1633,6 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               </a>
               )}
 
-              {sinadAccess.tier !== AI_OS_TIER && (
-                <>
               {/* Module Item Locked */}
               <div className="group bg-bg-light border border-transparent p-6 md:p-8 rounded-xl flex flex-col sm:flex-row gap-6 lg:gap-8 items-start sm:items-center opacity-80 mix-blend-multiply">
                 <div className="w-14 h-14 rounded-lg border border-border-light-subtle flex items-center justify-center shrink-0">
@@ -1649,16 +1660,12 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   Terkunci
                 </div>
               </div>
-                </>
-              )}
             </div>
           </div>
           
           <div className="lg:col-span-4">
             <h2 className="font-sans font-bold text-sm text-light-hi tracking-eyebrow uppercase mb-6 border-b border-border-light-subtle pb-4">Akses Lainnya</h2>
             <div className="space-y-4">
-              {sinadAccess.tier !== AI_OS_TIER && (
-                <>
               {sinadAccess.tier === 'Internal' || isAdmin ? (
                 <a href="#" onClick={(e) => { e.preventDefault(); setIsTimelineModalOpen(true); }} className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
                   <div className="flex items-center gap-4">
@@ -1709,8 +1716,6 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   </div>
                   <Lock className="w-4 h-4 text-light-lo" />
                 </div>
-              )}
-                </>
               )}
               {sinadAccess.tier !== 'Community' || isAdmin ? (
                 <button
