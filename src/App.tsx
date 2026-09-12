@@ -1150,11 +1150,20 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout>;
 
+    // 12 September 2026 in Asia/Bangkok (UTC+7): keep members signed in during the event.
+    const eventStart = Date.parse('2026-09-11T17:00:00Z');
+    const eventEnd = Date.parse('2026-09-12T17:00:00Z');
+
     const resetTimer = () => {
       if (timeoutId) clearTimeout(timeoutId);
       // 60 minutes = 3600000 ms
       timeoutId = setTimeout(() => {
-        handleLogout();
+        const now = Date.now();
+        if (now >= eventStart && now < eventEnd) {
+          resetTimer();
+        } else {
+          handleLogout();
+        }
       }, 3600000);
     };
 
