@@ -32,6 +32,7 @@ import aifWithClaudeHtml from '../materi/Strategize/aif-with-claude-v0.html?raw'
 import aiKnowledgeOperatingSystemHtml from '../materi/ACT/AI_Knowledge_Operating_System_v0.html?raw';
 import SinadPortal from './components/SinadPortal';
 import PromptDatabaseView from './components/PromptDatabaseView';
+import KnowledgeArtifactPortal, { isKnowledgeArtifactId } from './components/KnowledgeArtifactPortal';
 
 function Eyebrow({ children, variant = 'light' }: { children: ReactNode, variant?: 'light' | 'dark' | 'flat' }) {
   return (
@@ -81,9 +82,15 @@ function LoginView() {
     try {
       const formattedEmail = email.trim().toLowerCase();
 
+      localStorage.setItem('member_last_activity_at', String(Date.now()));
       await signInMember(formattedEmail, password);
-      localStorage.setItem('temp_password', password);
+      if (isKnowledgeArtifactId(new URLSearchParams(window.location.search).get('artifact'))) {
+        localStorage.removeItem('temp_password');
+      } else {
+        localStorage.setItem('temp_password', password);
+      }
     } catch (error: any) {
+      localStorage.removeItem('member_last_activity_at');
       // Handle predictable errors without printing to console
       if (error.name === 'ExpiredError' || error.message === 'EXPIRED') {
         setIsExpiredOpen(true);
@@ -1193,48 +1200,11 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
   const handleLogout = async () => {
     try {
-      localStorage.removeItem('temp_password');
       await signOutMember();
     } catch(err) {
       console.error(err);
     }
   };
-
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-
-    // 12 September 2026 in Asia/Bangkok (UTC+7): keep members signed in during the event.
-    const eventStart = Date.parse('2026-09-11T17:00:00Z');
-    const eventEnd = Date.parse('2026-09-12T17:00:00Z');
-
-    const resetTimer = () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      // 60 minutes = 3600000 ms
-      timeoutId = setTimeout(() => {
-        const now = Date.now();
-        if (now >= eventStart && now < eventEnd) {
-          resetTimer();
-        } else {
-          handleLogout();
-        }
-      }, 3600000);
-    };
-
-    resetTimer();
-
-    const events = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart'];
-
-    for (const ev of events) {
-      window.addEventListener(ev, resetTimer, true); // true for capture phase to catch inner scrolls
-    }
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-      for (const ev of events) {
-        window.removeEventListener(ev, resetTimer, true);
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (!isLoadingPortals && allowedPortals.length === 1 && allowedPortals[0] === 'idl') {
@@ -1981,6 +1951,7 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [authInitialized, setAuthInitialized] = useState(false);
   const [forcePasswordReset, setForcePasswordReset] = useState(false);
+  const requestedArtifact = new URLSearchParams(window.location.search).get('artifact');
 
   useEffect(() => {
     getCurrentUser().then((currentUser) => {
@@ -2003,13 +1974,76 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (!user) return;
+
+    const idleLimitMs = 60 * 60 * 1000;
+    const storageKey = 'member_last_activity_at';
+    const stored = Number(localStorage.getItem(storageKey));
+    let lastActivityAt = stored > 0 ? stored : Date.now();
+    let lastSavedAt = stored > 0 ? stored : 0;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let loggingOut = false;
+    if (!stored) localStorage.setItem(storageKey, String(lastActivityAt));
+
+    const expireIfIdle = () => {
+      if (loggingOut) return true;
+      const sharedActivityAt = Number(localStorage.getItem(storageKey));
+      if (sharedActivityAt > lastActivityAt) lastActivityAt = sharedActivityAt;
+      if (Date.now() - lastActivityAt < idleLimitMs) return false;
+      loggingOut = true;
+      void signOutMember().catch((error) => {
+        console.error('Gagal mengakhiri sesi tidak aktif:', error);
+        setUser(null);
+      });
+      return true;
+    };
+
+    const scheduleExpiry = () => {
+      clearTimeout(timeoutId);
+      if (expireIfIdle()) return;
+      timeoutId = setTimeout(scheduleExpiry, Math.max(1000, idleLimitMs - (Date.now() - lastActivityAt)));
+    };
+
+    const recordActivity = () => {
+      if (expireIfIdle()) return;
+      lastActivityAt = Date.now();
+      if (lastActivityAt - lastSavedAt >= 15000) {
+        localStorage.setItem(storageKey, String(lastActivityAt));
+        lastSavedAt = lastActivityAt;
+      }
+      scheduleExpiry();
+    };
+
+    const checkOnReturn = () => {
+      if (!document.hidden) scheduleExpiry();
+    };
+
+    const events = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart', 'member-artifact-activity'];
+    events.forEach((event) => window.addEventListener(event, recordActivity, true));
+    document.addEventListener('visibilitychange', checkOnReturn);
+    window.addEventListener('focus', checkOnReturn);
+    window.addEventListener('pageshow', checkOnReturn);
+    window.addEventListener('storage', checkOnReturn);
+    scheduleExpiry();
+
+    return () => {
+      clearTimeout(timeoutId);
+      events.forEach((event) => window.removeEventListener(event, recordActivity, true));
+      document.removeEventListener('visibilitychange', checkOnReturn);
+      window.removeEventListener('focus', checkOnReturn);
+      window.removeEventListener('pageshow', checkOnReturn);
+      window.removeEventListener('storage', checkOnReturn);
+    };
+  }, [user?.id]);
+
   if (!authInitialized) {
     return <div className="min-h-screen bg-bg-dark flex items-center justify-center text-gold font-mono uppercase tracking-widest text-xs font-bold">Memuat...</div>;
   }
 
   return (
     <>
-      {!user ? <LoginView /> : <DashboardView user={user} forcePasswordReset={forcePasswordReset} />}
+      {!user ? <LoginView /> : isKnowledgeArtifactId(requestedArtifact) ? <KnowledgeArtifactPortal initialId={requestedArtifact} /> : <DashboardView user={user} forcePasswordReset={forcePasswordReset} />}
     </>
   );
 }

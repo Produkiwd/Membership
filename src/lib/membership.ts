@@ -75,6 +75,8 @@ export const onAuthUserChange = (callback: (user: User | null, event: AuthChange
 };
 
 export const signOutMember = async () => {
+  localStorage.removeItem('temp_password');
+  localStorage.removeItem('member_last_activity_at');
   const { error } = await supabase.auth.signOut();
   if (error) throw error;
 };
