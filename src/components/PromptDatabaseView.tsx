@@ -13,6 +13,7 @@ import {
   Lightbulb, Brain, Compass, MessageSquare, Zap, AlertTriangle, Trash2
 } from 'lucide-react';
 export interface Prompt { id: string; title: string; description: string; content: string; category: string; }
+import { EntranceLoading } from './EntranceLoading';
 
 // ==========================================
 // 1. DATA TYPES & INTERFACES
@@ -585,6 +586,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
   // 'beranda' | 'my-journal' | 'prompt-studio' | 'community' | 'techniques' | 'reading-learning' | 'exercise' | 'vault'
   const [activeMenu, setActiveMenu] = useState<string>('beranda');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   // Journal Prompts (LocalStorage Persisted)
   const [journalPrompts, setJournalPrompts] = useState<JournalPrompt[]>(() => {
@@ -913,6 +915,11 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
   return (
     <div className="min-h-screen bg-[#f5f6f9] text-slate-900 flex font-sans antialiased selection:bg-[#E5C158] selection:text-slate-950">
+      
+      {/* Entrance Loading Motion */}
+      {isInitialLoading && (
+        <EntranceLoading onComplete={() => setIsInitialLoading(false)} />
+      )}
       
       {/* ========================================================================= */}
       {/* 1. SIDEBAR NAVIGATION (WJG PATTERN & OFFICIAL LOGOS) */}
