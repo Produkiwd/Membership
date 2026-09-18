@@ -10,15 +10,9 @@ import {
   Target, Shield, TrendingUp, Share2, 
   Star, Plus, RefreshCw, Eye, Tag, Award, BookmarkCheck, 
   FileEdit, Menu, Home, CheckCircle2, SlidersHorizontal, Dumbbell,
-  Lightbulb, Brain, Compass
+  Lightbulb, Brain, Compass, MessageSquare, Zap, AlertTriangle
 } from 'lucide-react';
-export interface Prompt {
-  id: string;
-  title: string;
-  description: string;
-  content: string;
-  category: string;
-}
+export interface Prompt { id: string; title: string; description: string; content: string; category: string; }
 
 // ==========================================
 // 1. DATA TYPES & INTERFACES
@@ -192,88 +186,507 @@ Lakukan dekonstruksi analitis terhadap laporan terlampir dengan metodologi Synto
 
 const DEPARTMENT_TAGS = ['Semua', 'Finance', 'HR', 'Strategy', 'Operations', 'Marketing', 'Tech'];
 
-// 5 Reading & Learning Modes
-const readingModesData = [
-  {
-    num: "01",
-    tag: "1 → 10",
-    title: "Get the Gist Instantly",
-    subtitle: "High-Level Executive Summary",
-    theory: "Cognitive Load Theory (John Sweller)",
-    desc: "Minta AI merangkum materi kompleks dalam 3 lapis pemahaman: untuk anak 10 tahun, praktisi, dan CEO.",
-    prompt: "Jelaskan tesis utama dokumen ini dalam 3 lapis: (1) Konsep sederhana, (2) Implikasi bisnis strategis, (3) Satu titik kerentanan kritis terbesar."
-  },
-  {
-    num: "02",
-    tag: "10 → 1",
-    title: "Create Structured Outlines",
-    subtitle: "Deconstruct & Decision Matrix",
-    theory: "Schema Theory (Jean Piaget)",
-    desc: "Ubah materi panjang menjadi matriks tabel keputusan: Masalah, Akar Penyebab, Intervensi, dan Titik Gagal.",
-    prompt: "Dekonstruksi dokumen strategi ini menjadi matriks keputusan: Masalah Utama, Akar Penyebab, Intervensi Solutif, Estimasi Dampak, dan Titik Risiko Kegagalan."
-  },
-  {
-    num: "03",
-    tag: "10 ↔ 10",
-    title: "Syntopical Reading & Debate",
-    subtitle: "Cross-Pollinate Perspectives",
-    theory: "Dialectical Inquiry (Mortimer Adler)",
-    desc: "Adu argumentasi antara dokumen A dan dokumen B melalui simulasi debat kritis AI.",
-    prompt: "Ambil sudut pandang Dokumen A dan lakukan kritik tajam terhadap temuan Dokumen B. Di mana titik ketidaksesuaian logikanya?"
-  },
-  {
-    num: "04",
-    tag: "1 → 1",
-    title: "Deep Mastery & Socratic Loop",
-    subtitle: "Mental Model Stress-Testing",
-    theory: "Feynman Technique & Socratic Inquiry",
-    desc: "Uji apakah Anda benar-benar paham suatu konsep melalui sesi tanya jawab sokratik yang menantang asumsi Anda.",
-    prompt: "Bertindaklah sebagai Socrates. Tanyakan 3 pertanyaan paling sulit mengenai proposal bisnis saya ini hingga ke akar logikanya."
-  },
-  {
-    num: "05",
-    tag: "10 → 10+",
-    title: "Accelerate Your Research",
-    subtitle: "Discover Research Gaps",
-    theory: "Dual Coding Theory (Allan Paivio)",
-    desc: "Temukan pola tersembunyi dan celah riset di antara tumpukan dokumen referensi multi-sumber.",
-    prompt: "Berdasarkan seluruh dokumen terlampir, sebutkan di mana titik konsensus para ahli, apa yang masih diperdebatkan, dan apa research gap yang belum terjawab?"
-  }
-];
+// ============================================================================
+// COMPREHENSIVE CURRICULUM DATASETS (UNTRUNCATED)
+// ============================================================================
 
-// Prompting Techniques Data
-const promptingTechniquesData = [
+// 1. Foundational Prompting Techniques (8 Items with Multi-Step Flow)
+const techniquesData = [
   {
     id: "zero-shot",
-    title: "Zero-Shot & Few-Shot Prompting",
+    title: "Zero-Shot Prompting",
     tag: "Foundational",
-    desc: "Mengunci gaya keluaran dan format AI dengan memberikan contoh konkret (2-3 contoh) daripada instruksi abstrak.",
-    steps: ["Definisikan format target", "Berikan 2 contoh input -> output yang ideal", "Minta AI melanjutkan pola yang sama"],
-    example: "Contoh 1:\nInput: 'Vendor minta naik harga 10%'\nOutput: [Apresiasi] + [Tanya Justifikasi Data] + [Tawarkan Kontrak 2 Tahun]\n\nSekarang proses kasus berikut dengan pola yang sama: [Input Anda]"
+    steps: ["Define Query Clearly", "Send Prompt to LLM", "LLM Interprets Prompt", "Generate Response based on Internal Knowledge", "Direct Output Returned"],
+    desc: "Zero-shot prompting involves directly asking questions without providing explicit examples, relying purely on the model's pre-trained internal knowledge.",
+    example: "Jelaskan perbedaan utama antara CAPEX dan OPEX dalam konteks perencanaan infrastruktur TI, dan berikan contoh konkret dari masing-masing kategori untuk industri perbankan modern."
+  },
+  {
+    id: "one-shot",
+    title: "One-Shot Prompting",
+    tag: "Foundational",
+    steps: ["Prepare Query", "Include 1 Example Demonstrating Expected Output", "Send Prompt to LLM", "LLM Analyzes Provided Example", "Generates Contextually Similar Response", "Final Output Delivered"],
+    desc: "One-shot prompting includes exactly one explicit exemplar in the prompt, helping the model immediately grasp the expected output format, tone, and logical density.",
+    example: `Berikut adalah contoh ringkasan eksekutif satu kalimat:
+
+Contoh:
+[Fakta]: Biaya lisensi database melonjak 40%.
+[Dampak]: Margin operasional Q3 tertekan 2.1%.
+[Rekomendasi]: Evaluasi migrasi open-source database dalam 6 bulan.
+
+Sekarang buat ringkasan situasi berikut dengan struktur yang sama persis:
+[Fakta]: Tingkat turnover staf software engineer mencapai 25% tahun ini.`
+  },
+  {
+    id: "few-shot",
+    title: "Few-Shot Prompting",
+    tag: "Pattern Locking",
+    steps: ["Identify Query & Desired Response Style", "Provide Multiple Relevant Examples (2-5)", "Send Prompt & Examples to LLM", "LLM Recognizes Patterns from Examples", "Generates Response Following Established Pattern", "Final Contextualized Output Delivered"],
+    desc: "Few-shot prompting involves providing 2–5 structured examples. This locks in classification rules, nuances, and specific styling without needing complex abstract rules.",
+    example: `Klasifikasikan sentimen umpan balik nasabah dan tentukan mitigasinya:
+
+Contoh 1:
+Input: 'Aplikasi sering crash saat transaksi tanggal 25.'
+Kategori: Kritis (Bug Finansial)
+Mitigasi: Eskalasi Tim DevOps P1 & refund biaya admin jika ada gagal bayar.
+
+Contoh 2:
+Input: 'Warna tombol konfirmasi kurang kontras di layar malam.'
+Kategori: Minor (UI/UX)
+Mitigasi: Masukkan ke backlog sprint desain UI bulan depan.
+
+Sekarang klasifikasikan input berikut:
+Input: 'Saldo terpotong dua kali pada saat pembayaran QRIS di kasir supermarket.'`
   },
   {
     id: "cot",
-    title: "Chain-of-Thought (CoT) Reasoning",
-    tag: "Logic & Problem Solving",
-    desc: "Memaksa AI melakukan penalaran langkah demi langkah sebelum memberikan kesimpulan akhir untuk memangkas halusinasi.",
-    steps: ["Identifikasi kompleksitas masalah", "Gunakan perintah eksplisit: 'Pikirkan tahap demi tahap'", "Verifikasi kesimpulan bertahap"],
-    example: "Sebelum memberikan jawaban akhir, uraikan langkah berpikir Anda dalam format:\nLangkah 1: Identifikasi fakta utama\nLangkah 2: Hitung dampak finansial\nLangkah 3: Rumuskan 2 alternatif mitigasi\nKesimpulan Akhir:"
+    title: "Chain-of-Thought (CoT) Prompting",
+    tag: "Logic & Reasoning",
+    steps: ["Identify Complex Problem", 'Instruct LLM Explicitly ("Think step-by-step")', "Send Step-by-step Prompt", "LLM Performs Incremental Reasoning", "Provides Detailed Intermediate Steps", "Reaches Logical Conclusion", "Complete Answer Delivered"],
+    desc: "Chain-of-thought prompting explicitly instructs the LLM to perform incremental reasoning before answering. This cuts hallucination rates significantly on complex math, logic, or policy trade-offs.",
+    example: `Sebelum memberikan rekomendasi investasi pada proyek otomatisasi pergudangan senilai Rp 5 Miliar, uraikan proses berpikir Anda tahap demi tahap:
+
+Langkah 1: Hitung Payback Period dan ROI kasar berdasarkan asumsi efisiensi biaya lembur Rp 1.5 Miliar/tahun.
+Langkah 2: Evaluasi risiko teknis integrasi dengan legacy ERP yang sudah berusia 8 tahun.
+Langkah 3: Rumuskan 2 alternatif mitigasi kegagalan adopsi di lapangan.
+Kesimpulan & Rekomendasi Final:`
   },
   {
-    id: "jeff-su",
-    title: "Jeff Su's Precision Framework",
-    tag: "High Precision",
-    desc: "Gunakan XML Sandwich (<context>, <task>, <rules>) dan Universal Perfection Loop untuk kontrol ambiguitas maksimal.",
-    steps: ["Bungkus konteks dalam tag XML", "Tentukan tone dan panjang teks eksplisit", "Instruksikan AI menilai mandiri skor 10/10"],
-    example: "<context>\nAnda adalah Senior Risk Consultant untuk industri logistik.\n</context>\n\n<task>\nAudit dokumen SOP pergudangan terlampir.\n</task>\n\n<rules>\nGunakan nada asertif dan profesional. Buat tabel 3 kolom untuk temuan risiko.\n</rules>"
+    id: "self-consistency",
+    title: "Self-Consistency Prompting",
+    tag: "Multi-Path Consensus",
+    steps: ["Clearly Define Query & Desired Reasoning", "Send Prompt to LLM (Multiple Generations)", "LLM Generates Multiple Reasoning Paths", "Evaluate Multiple Outputs for Consistency", "Select Most Consistent Answer", "Final Verified Answer Provided"],
+    desc: "Self-consistency involves generating multiple divergent reasoning paths for the same problem, then selecting the answer supported by consensus. Highly effective for mission-critical decisions.",
+    example: `Evaluasi strategi penetapan harga langganan B2B ini melalui 3 sudut pandang penalaran yang independen:
+Jalur A: Analisis elastisitas harga dan willingness-to-pay segmen enterprise.
+Jalur B: Analisis margin kontribusi per akun (CAC vs LTV 3 tahun).
+Jalur C: Analisis respon kompetitif dari incumbent market leader.
+
+Bandingkan kesimpulan ketiganya, temukan titik temu paling kokoh, dan berikan harga akhir yang paling aman bagi cashflow.`
   },
   {
-    id: "brutal",
-    title: "The Brutal Method (Red Teaming)",
-    tag: "Executive Audit",
-    desc: "Bypass kecenderungan AI bersikap sopan (politeness bias). Paksa AI menjadi pengkritik paling tajam terhadap proposal Anda.",
-    steps: ["Pilih persona Devil's Advocate", "Gunakan framing pihak ketiga", "Perintahkan mencari titik gagal terburuk"],
-    example: "Abaikan rasa sopan santun. Bertindaklah sebagai investor paling skeptis yang sedang menguji proposal ini. Sebutkan 3 alasan paling fatal mengapa proyek ini akan gagal total."
+    id: "role-based",
+    title: "Role-Based Prompting",
+    tag: "Expert Persona",
+    steps: ["Choose Desired Role/Persona", "Craft Prompt Clearly Defining the Role", "Send Role-based Prompt to LLM", "LLM Adopts Specified Role", "Generates Response Aligned with Expertise", "Role-Specific Output Delivered"],
+    desc: "Role-based prompting instructs the model to embody a world-class specialist persona, anchoring the vocabulary, analytical depth, and perspective to that specific professional domain.",
+    example: "Bertindaklah sebagai Chief Risk Officer (CRO) perbankan tier-1 dengan pengalaman 20 tahun dalam audit kepatuhan regulasi OJK dan Basel III. Review ringkasan arsitektur cloud data nasabah ini dan soroti 3 celah kepatuhan paling rentan terhadap sanksi hukum."
+  },
+  {
+    id: "instruction-tuning",
+    title: "Instruction Tuning (Task-Specific Constraints)",
+    tag: "Precision Control",
+    steps: ["Identify Specific Task Requirements", "Prepare Detailed Task-specific Instructions", "Include Instructions Explicitly in Prompt", "Send Clearly Structured Prompt", "LLM Precisely Follows Provided Instructions", "Generates Task-specific Output", "Final Output Delivered"],
+    desc: "Instruction tuning explicitly bounds the model with strict formatting, negative constraints (what NOT to do), and structural guardrails for reproducible business automation.",
+    example: `Instruksi Khusus & Batasan Ketat:
+1. Ekstrak hanya entitas: [Nama Mitra], [Nilai Kontrak], [Masa Berlaku], [Penalti Keterlambatan].
+2. Tampilkan dalam tabel Markdown 4 kolom.
+3. Jika informasi penalti tidak disebutkan di dokumen, tulis 'TIDAK DICANTUMKAN' (DILARANG MENGARANG/HALUSINASI).
+4. Dilarang menambahkan kata pengantar atau salam penutup. Hanya keluarkan tabel Markdown.`
+  },
+  {
+    id: "react",
+    title: "ReAct (Reasoning + Action) Prompting",
+    tag: "Autonomous Agentic",
+    steps: ["Clearly State Query Requiring External Info", "Send Prompt with Action Permissions", "LLM Reasons to Identify Required Actions", "LLM Initiates Appropriate External Action", "Receives & Processes External Data", "Continues Reasoning with Context", "Final, Fully-informed Answer"],
+    desc: "ReAct combines verbal reasoning traces ('Thought') with task-specific actions ('Action') and feedback observation ('Observation') to ground LLM outputs in real-time verified facts.",
+    example: `Terapkan siklus ReAct (Thought -> Action -> Observation -> Final Answer):
+
+Thought 1: Saya perlu mengecek apakah regulasi batas upah minimum provinsi (UMP) 2025 telah diterbitkan secara resmi.
+Action 1: [Search / Query Dokumen Regulasi UMP 2025]
+Observation 1: Peraturan Gubernur diterbitkan dengan kenaikan 6.5%.
+Thought 2: Sekarang saya harus menghitung dampak kenaikan ini terhadap pos anggaran biaya operasional pabrik.
+Final Answer: Ringkasan dampak kenaikan UMP 6.5% beserta 2 strategi rasionalisasi shift kerja.`
+  }
+];
+
+// 2. The Brutal Method (Honest Feedback & Red Teaming)
+const brutalMethodData = {
+  problem: {
+    title: "THE PROBLEM: THE \"HELPFULNESS\" & POLITENESS BIAS",
+    points: [
+      {
+        title: "AI Dilatih untuk Melindungi Ego Pengguna",
+        desc: "Secara default, model AI dioptimasi melalui RLHF (Reinforcement Learning from Human Feedback) untuk bersikap ramah, suportif, dan menyenangkan. Akibatnya, AI cenderung memberikan validasi palsu atau pujian sopan terhadap proposal bisnis yang sebetulnya rapuh."
+      },
+      {
+        title: "Kebutuhan Keputusan High-Stakes",
+        desc: "Untuk proposal tender dewan direksi, peluncuran produk baru, penawaran merger, atau mitigasi audit hukum, feedback sopan sangat berbahaya. Anda membutuhkan kritik kejam tanpa ampun sebelum pasar atau kompetitor menghukum Anda."
+      }
+    ]
+  },
+  framework: [
+    {
+      num: "1",
+      title: "Begin Fresh: Kill the Memory",
+      desc: "Gunakan 'Temporary Chat' (ChatGPT, Gemini) atau 'Incognito/Ghost Mode' (Claude) agar model tidak mengingat riwayat preferensi Anda yang membuat AI berusaha menyenangkan Anda."
+    },
+    {
+      num: "2",
+      title: "Right Model Selection",
+      desc: "Untuk keputusan bernilai tinggi, uji dokumen Anda ke 2-3 model berbeda. Grok/DeepSeek cenderung lebih lugas dan blak-blakan, sementara ChatGPT/Claude memerlukan dorongan persona kritis."
+    },
+    {
+      num: "3",
+      title: "Use a Critic Persona",
+      desc: "Tugaskan peran pengkritik tanpa kompromi: Devil's Advocate, Auditor Forensik Skeptis, atau Investor Kejam ala Shark Tank yang bertujuan membantai asumsi proposal Anda."
+    },
+    {
+      num: "4",
+      title: "Third-Party Framing",
+      desc: "Lepaskan identitas Anda dari materi tersebut. Katakan: 'Ini adalah draf dari kompetitor kita / kolega lain'. Trik psikologis ini membebaskan AI dari rasa enggan menyakiti perasaan Anda."
+    },
+    {
+      num: "5",
+      title: "Ask Specific Risk Questions",
+      desc: "Ganti pertanyaan 'Bagaimana menurutmu?' dengan pertanyaan berdaya rusak tinggi: 'Lakukan pre-mortem: sebutkan 3 alasan paling fatal mengapa inisiatif ini akan gagal total dalam 90 hari.'"
+    },
+    {
+      num: "6",
+      title: "Leverage AI Against Itself (AI Jiu-Jitsu)",
+      desc: "Minta AI memberi nilai 1-100 pada kekejaman kritiknya. Lalu perintahkan: 'Kritik di atas masih terlalu sopan. Tingkatkan skor ketajamannya menjadi 95/100 dan bongkar lubang logika terdalam!'"
+    }
+  ],
+  modelSpectrum: [
+    {
+      name: "Grok & DeepSeek",
+      badge: "Honest & Blunt",
+      desc: "Cenderung sangat objektif, blak-blakan, tidak segan menolak premis yang salah, dan minim basa-basi kesopanan."
+    },
+    {
+      name: "Gemini",
+      badge: "Supportive / Explorative",
+      desc: "Sangat unggul dalam sintesis multi-dokumen panjang dan riset, namun membutuhkan perintah eksplisit agar mau mengkritik tajam."
+    },
+    {
+      name: "ChatGPT & Claude",
+      badge: "Ego-Protective by Default",
+      desc: "Sangat santun dan diplomatis secara default. Sangat membutuhkan framing pihak ketiga atau persona Red Teaming agar tidak memuji-muji draf yang lemah."
+    }
+  ],
+  systemLevelBonus: {
+    title: "BONUS: SYSTEM-LEVEL CUSTOM INSTRUCTIONS",
+    desc: "Gunakan pengaturan personalisasi profil untuk menetapkan instruksi permanen:",
+    prompt: "Prioritize substance over compliments; challenge assumptions relentlessly; never soften criticism to make me feel comfortable; act as an unapologetic Red Team auditor."
+  }
+};
+
+// 3. Jeff Su's Precision Framework
+const jeffSuData = {
+  templates: [
+    {
+      title: "Prompt Optimizer Meta-Prompt",
+      desc: "Alternatif gratis untuk tools optimasi prompt berbayar. AI bertindak sebagai prompt engineer elit yang me-rewrite prompt awal Anda.",
+      prompt: `You are an expert prompt engineer specializing in creating prompts for AI language models, particularly [model]. Your task is to take my prompt and transform it into a well-crafted and effective prompt that will elicit optimal responses. Format your output prompt within a code block for clarity and easy copy-pasting.
+
+## Here's my initial prompt:
+[paste your prompt here]`
+    },
+    {
+      title: "XML Sandwich Template",
+      desc: "Meningkatkan presisi model dengan memisahkan komponen instruksi ke dalam tag XML terisolasi.",
+      prompt: `<context>
+[Berikan latar belakang, siapa Anda, industri bisnis, dan kondisi yang dihadapi]
+</context>
+
+<task>
+[Jelaskan instruksi spesifik apa yang harus dilakukan AI menggunakan action verbs]
+</task>
+
+<rules>
+1. Gunakan nada asertif dan profesional.
+2. Buat tabel 3 kolom untuk temuan risiko.
+3. Jangan membuat asumsi di luar fakta yang disediakan.
+</rules>
+
+<example>
+[Berikan contoh output target yang ideal]
+</example>`
+    },
+    {
+      title: "Universal Perfection Loop",
+      desc: "Perintahkan AI untuk membangun rubrik penilaian internal dan mengiterasi drafnya secara mandiri sampai bernilai 10/10 sebelum menjawab.",
+      prompt: "Before you respond, create an internal rubric for what defines a 'world-class, 10/10' answer to my request. Then internally iterate on your work until it scores 10/10 against that rubric, and show me only the final, perfect output."
+    },
+    {
+      title: "Router Nudge Phrases",
+      desc: "Frasa tambahan di akhir prompt untuk memicu alokasi komputasi reasoning mendalam pada model berpikir tingkat tinggi.",
+      prompt: `Tambahkan salah satu frasa ini di baris penutup prompt Anda:
+- "Think hard about this."
+- "Think deeply and consider edge cases before answering."
+- "Evaluate hidden trade-offs carefully."`
+    },
+    {
+      title: "Verbosity Control Phrases",
+      desc: "Mengontrol panjang teks keluaran secara presisi agar tidak terlalu dangkal maupun bertele-tele.",
+      prompt: `- Low Verbosity: "Give me the bottom line in 100 words or less, use markdown bullets for high scanability."
+- Medium Verbosity: "Aim for a concise 3-5 paragraph explanation with clear section headers."
+- High Verbosity: "Provide a comprehensive and detailed breakdown (600–800 words) with step-by-step rationales."`
+    }
+  ],
+  buildingBlocks: [
+    { title: "1. Task", desc: "Komponen paling krusial. Selalu mulai dengan action verb eksplisit: generate, write, analyze, audit, synthesize." },
+    { title: "2. Context", desc: "Jawab 3 hal penting: latar belakang situasi, kriteria sukses ('what success looks like'), dan lingkungan kerja." },
+    { title: "3. Exemplars", desc: "Berikan 1–3 contoh konkret dari output yang diinginkan untuk mengunci gaya dan format." },
+    { title: "4. Persona", desc: "Definisikan peran spesifik: 'Senior Procurement Director', 'Forensic Auditor', dll." },
+    { title: "5. Format", desc: "Visualisasikan bentuk output: tabel Markdown, memo Minto Pyramid, email eksekutif, atau JSON." },
+    { title: "6. Tone", desc: "Tentukan nada bicara: objektif, lugas tanpa basa-basi, asertif, atau diplomatik persuasif." }
+  ],
+  bestPractices: [
+    { title: "Router Nudge Phrases", desc: "Gunakan untuk memaksa higher reasoning model berjalan pada model reasoning (o1, o3, Gemini Thinking)." },
+    { title: "Verbosity Control", desc: "Kontrol panjang konten karena model dapat kelebihan atau kekurangan kata tanpa arahan spesifik." },
+    { title: "Prompt Optimizer Meta-Prompt", desc: "Gunakan AI untuk mengaudit dan me-rewrite instruksi buatan Anda sendiri." },
+    { title: "XML Sandwich", desc: "Gunakan tag <task>, <context>, <rules> supaya model lebih presisi membaca instruksi panjang." },
+    { title: "Perfection Loop", desc: "Gunakan rubrik internal AI untuk menilai kualitas output dirinya sendiri sampai mencapai skor 10/10." }
+  ],
+  mistakes: [
+    { title: "1. Overly Specific Custom Instructions", desc: "Terlalu detail justru membatasi keluwesan model. Cantumkan intinya saja: preferensi, tone, dan format." },
+    { title: "2. Tidak Memanfaatkan untuk Otomasi", desc: "AI bisa membantu menulis kode, formula Excel rumit, atau skrip automasi tanpa Anda harus menguasai pemrograman." },
+    { title: "3. The First-try Fallacy", desc: "Jangan harapkan kesempurnaan langsung di percobaan pertama. Minta AI mengajukan pertanyaan klarifikasi terlebih dahulu." },
+    { title: "4. The Summary-only Shortfall", desc: "Jangan sekadar meminta rangkuman biasa. Minta actionable insights dan implikasi strategis bisnis." },
+    { title: "5. Prompt Overload Paradox", desc: "Fokus menguasai 3–5 formula prinsipil yang bisa diadaptasi daripada menyimpan ribuan prompt yang jarang dipakai." }
+  ]
+};
+
+// 4. Smart Learning & Research (5 Mode Kognitif Pembelajaran Berbasis Riset)
+const readingModesData = [
+  {
+    id: 1,
+    tag: "100 → 1",
+    num: "01",
+    title: "Get the Gist Instantly",
+    subtitle: "Big Picture First (Memahami Intisari Utama)",
+    theory: "Cognitive Load Theory",
+    theorist: "John Sweller",
+    theoryDesc: "Kapasitas memori kerja manusia sangat terbatas. Pembelajaran efektif membutuhkan pengelolaan beban kognitif dengan meminimalisir gangguan (extraneous load) dan memaksimalkan skema pemahaman konseptual (germane load).",
+    tactic: "Sebelum membaca teks mentah secara mendetail, gunakan AI untuk membuat Briefing Docs dan Study Guides otomatis. Ini memberikan peta struktural awal yang secara drastis mengurangi beban kognitif dan membebaskan pikiran Anda untuk menganalisis konsep.",
+    samplePrompt: "What is the single most important concept that connects all of these materials? Explain in one paragraph.",
+    problem: "Terlalu banyak materi dan dokumen tebal, tidak tahu harus mulai dari mana.",
+    solution: "Mengubah tumpukan konten menjadi satu pemahaman inti (core understanding) yang mudah dicerna.",
+    impact: "Memahami gambaran besar dengan cepat, memberikan arah pembelajaran yang lebih terfokus.",
+    workflow: [
+      "Upload semua materi — slides, PDFs, artikel, transkrip",
+      "Minta AI menemukan satu konsep pemersatu utamanya",
+      "Simpan jawaban sebagai Catatan — ini menjadi peta belajar Anda",
+      "Gunakan Audio Overview untuk mencerna materi dengan mendengarkan"
+    ],
+    quickWin: "Dalam 5 menit, dapatkan peta utuh tanpa harus membaca seluruh tumpukan halaman terlebih dahulu."
+  },
+  {
+    id: 2,
+    tag: "100 → 10",
+    num: "02",
+    title: "Create Structured Outlines",
+    subtitle: "Organize & Chunk (Mendekonstruksi Dokumen)",
+    theory: "Connectivism",
+    theorist: "George Siemens",
+    theoryDesc: "Di era digital, pembelajaran bukan sekadar konstruksi pengetahuan internal, melainkan tentang mengenali pola dan membangun koneksi antar informasi dari berbagai sumber lintas domain.",
+    tactic: "Kumpulkan materi acak lintas sumber. Minta AI bertindak sebagai mesin konektivis — memetakan hubungan antar domain dan merapikannya secara struktural dalam matriks keputusan.",
+    samplePrompt: "Act as a strategic advisor. Synthesize these sources to find three unexpected connections between [Concept A] and [Concept B]. Provide citations.",
+    problem: "Informasi berhasil diserap namun tersebar berantakan dan tidak terorganisir.",
+    solution: "Mengubah materi yang berserakan menjadi poin-poin terstruktur melalui proses chunking (pengelompokan).",
+    impact: "Materi menjadi terorganisir rapi, mudah dipelajari, dan siap dipresentasikan ke stakeholder.",
+    workflow: [
+      "Gunakan materi yang sudah ada di dalam ruang kerja AI",
+      "Minta AI menyusunnya menjadi 10 poin utama atau sebuah outline terstruktur",
+      "Simpan output yang terstruktur sebagai Catatan",
+      "Buat Mind Map untuk memvisualisasikan koneksi antar konsep"
+    ],
+    quickWin: "Materi yang super berantakan berubah menjadi outline super rapi dalam waktu kurang dari 10 menit."
+  },
+  {
+    id: 3,
+    tag: "0 → 1",
+    num: "03",
+    title: "Spark New Ideas",
+    subtitle: "Beat the Blank Page (Menumpas Sindrom Halaman Kosong)",
+    theory: "Constructivism",
+    theorist: "Piaget & Vygotsky",
+    theoryDesc: "Pembelajar secara aktif membangun (mengkonstruksi) pemahaman dengan mengalami berbagai hal dan merefleksikannya, membangun di atas skema kognitif yang telah ada sebelumnya.",
+    tactic: "Gunakan Active Reading: tuliskan pemikiran, refleksi, atau hipotesis awal Anda pada kolom chat AI. Lalu minta AI untuk memeriksa interpretasi tersebut berdasarkan teks sumber aslinya.",
+    samplePrompt: "Based on the text, is my interpretation here accurate? What evidence supports or contradicts my thought?",
+    problem: "Kesulitan atau mengalami 'blank page syndrome' saat harus memulai proses analisis dari layar putih.",
+    solution: "Menjadikan AI sebagai partner brainstorming yang pandangannya tertambat kuat pada dokumen referensi.",
+    impact: "Mendapatkan banyak inspirasi dan ide segar serta pijakan awal penulisan yang tajam.",
+    workflow: [
+      "Upload satu dokumen utama sebagai jangkar (silabus, brief, proposal)",
+      "Lakukan curah pendapat (brainstorming) sudut pandang kritis dengan AI",
+      "Simpan ide-ide menarik sebagai Catatan Baru",
+      "Kembangkan catatan tersebut menjadi draf kerja awal melalui format FAQ"
+    ],
+    quickWin: "Dalam waktu 5 menit sesi brainstorming terarah dengan AI, Anda akan menumpas sindrom halaman kosong."
+  },
+  {
+    id: 4,
+    tag: "100 → 100+",
+    num: "04",
+    title: "Deep Mastery",
+    subtitle: "From Learner to Expert (Dari Pemula Menjadi Mahir)",
+    theory: "Elaborative Interrogation",
+    theorist: "Feynman Technique",
+    theoryDesc: "Pembelajaran aktif melalui pertanyaan 'Mengapa?' dan 'Bagaimana?' mengintegrasikan fakta baru dengan pengetahuan dasar. Ini pergeseran dari membaca pasif menjadi menjelaskan secara aktif — pondasi utama menuju keahlian sejati.",
+    tactic: "Upload konsep/framework yang Anda miliki, lalu gunakan AI sebagai Socratic sparring partner (rekan debat). Minta AI untuk mengkritisi asumsi Anda, dan paksa diri Anda menjawab tantangan tersebut.",
+    samplePrompt: "Review my uploaded framework. Ask me one deep, challenging question about the underlying assumptions of this model, and wait for my answer.",
+    problem: "Pemahaman masih terasa berada di permukaan, sering gugup saat menghadapi skenario di luar materi teks.",
+    solution: "Memperdalam tingkat pemahaman hingga selevel pakar melalui pola Socratic dialog bertingkat.",
+    impact: "Mampu mempertahankan argumen dan menjawab pertanyaan fundamental stakeholder dengan percaya diri.",
+    workflow: [
+      "Pastikan seluruh materi suatu topik sudah berada di dalam sistem",
+      "Minta AI mengajukan pertanyaan fundamental (pertanyaan 'why', 'what if')",
+      "Simpan analogi dan jawaban krusial Anda menjadi Catatan pemahaman utuh",
+      "Kembangkan menjadi Study Guide beserta kumpulan flashcard pengujiannya"
+    ],
+    quickWin: "Dalam 3-4 putaran pertanyaan sokratik kritis, temukan blind spot (sisi gelap pemahaman) yang tidak Anda sadari."
+  },
+  {
+    id: 5,
+    tag: "10 → 10+",
+    num: "05",
+    title: "Accelerate Your Research",
+    subtitle: "Synthesize & Discover (Sintesis Celah Riset)",
+    theory: "Dual Coding Theory",
+    theorist: "Allan Paivio",
+    theoryDesc: "Manusia jauh lebih mudah memproses dan mengingat informasi jika disampaikan via dua saluran kognitif sekaligus secara berbarengan — visual/tekstual serta auditori.",
+    tactic: "Hasilkan sintesis komprehensif bagi dokumen kompleks Anda. Identifikasi di mana titik konsensus para ahli, titik yang masih diperdebatkan, serta temukan research gap yang belum terjawab.",
+    samplePrompt: "What is the consensus across all these sources? What is still debated? Where is the research gap I could fill?",
+    problem: "Kesulitan menyari atau mensintesis tumpukan sumber riset atau dokumen referensi multi-sumber.",
+    solution: "Sintesis mendalam difasilitasi AI guna memetakan konsensus, perdebatan, dan celah kosong (research gap).",
+    impact: "Penemuan gagasan inovatif baru yang memandu percepatan riset dan pengambilan keputusan strategis.",
+    workflow: [
+      "Upload jurnal riset, memo, regulasi, dan berbagai artikel pendukung",
+      "Beri instruksi sintesis dan analisis literature gap pada materi rujukan tersebut",
+      "Tandai ide hasil sintesis ini dan simpan sebagai referensi terpercaya",
+      "Satukan dalam tinjauan komparatif menggunakan format matriks atau timeline"
+    ],
+    quickWin: "Buat pemetaan lanskap riset dalam waktu 15 menit, tugas yang biasanya memakan waktu berhari-hari."
+  }
+];
+
+// 5. Use AI To Learn Anything Faster (10 Pola Percepatan Belajar - Moritz Kremb)
+const learningData = [
+  {
+    title: "Explain Like I'm 5 (ELIF)",
+    author: "Moritz Kremb",
+    desc: "Sederhanakan konsep rumit menjadi penjelasan bahasa awam yang bahkan anak kecil pun bisa paham. Sangat cocok saat Anda baru pertama kali mempelajari domain baru yang asing.",
+    prompt: "Explain [insert concept or topic] as if you were talking to a 5-year-old child. Use simple language, everyday analogies, and avoid technical jargon."
+  },
+  {
+    title: "Examples & Analogies",
+    author: "Moritz Kremb",
+    desc: "Minta contoh konkret di dunia nyata yang membuat ide abstrak langsung 'klik' di kepala.",
+    prompt: "Explain [insert concept or topic] using three different real-world examples or analogies that would be easy for a beginner to understand."
+  },
+  {
+    title: "Motivation & Habit Consistency",
+    author: "Moritz Kremb",
+    desc: "Dapatkan strategi praktis dan tips menjaga motivasi belajar serta disiplin konsistensi saat materi terasa berat.",
+    prompt: "I'm struggling to stay motivated while learning [insert subject or skill]. Provide me with 5 practical strategies to boost my motivation and maintain consistency in my studies."
+  },
+  {
+    title: "Role-Play & Simulation",
+    author: "Moritz Kremb",
+    desc: "Simulasikan interaksi nyata untuk mempraktikkan keterampilan negosiasi, presentasi, atau penanganan konflik.",
+    prompt: "Let's role-play a scenario where I'm [insert your role] and you're [insert counterpart role]. We'll practice [insert skill or situation]. Begin the scenario, and I'll respond accordingly."
+  },
+  {
+    title: "Structured Study Plan",
+    author: "Moritz Kremb",
+    desc: "Petakan kurikulum belajar dari awal hingga akhir dengan target mingguan terukur agar tidak kewalahan.",
+    prompt: "Create a detailed study plan for learning [insert subject or skill] over the course of [insert time frame]. Include specific goals, free resources, weekly milestones, and assessment checkpoints."
+  },
+  {
+    title: "Active Recall Quiz",
+    author: "Moritz Kremb",
+    desc: "Uji pemahaman Anda dengan serangkaian soal latihan variatif untuk menguji apakah Anda benar-benar paham.",
+    prompt: "Generate a 10-question quiz on [insert topic], including a mix of multiple-choice, true/false, and short-answer questions. Provide answers and brief explanations for each question."
+  },
+  {
+    title: "Mindmap & Conceptual Hierarchy",
+    author: "Moritz Kremb",
+    desc: "Petakan hubungan sebab-akibat dan hierarki konsep utama beserta sub-cabangnya untuk melihat gambaran besar.",
+    prompt: "Create a detailed mind map for the topic [insert topic]. Include main branches, sub-branches, and key concepts or ideas for each in a clean indented markdown list."
+  },
+  {
+    title: "Expert Roundtable Discussion",
+    author: "Moritz Kremb",
+    desc: "Simulasikan diskusi meja bundar antara para pakar terkemuka di bidang tertentu untuk mendapatkan multi-perspektif.",
+    prompt: "Simulate a roundtable discussion with me and three experts in [insert field] discussing [insert topic or question]. Present their different viewpoints and any potential areas of agreement or disagreement."
+  },
+  {
+    title: "Mental Associations & Mnemonics",
+    author: "Moritz Kremb",
+    desc: "Buat jembatan keledai dan teknik asosiasi memori agar rumus, istilah asing, atau urutan langkah menempel erat di ingatan.",
+    prompt: "Help me create mental associations or mnemonic devices to remember key information about [insert topic or concept]."
+  },
+  {
+    title: "Improve What You Have (Iterative Polish)",
+    author: "Moritz Kremb",
+    desc: "Dapatkan kritik konstruktif dan rekomendasi revisi spesifik untuk menyempurnakan dokumen draf yang telah Anda buat.",
+    prompt: "Here's something I've [written/created/produced]: [insert your work]. Please provide specific suggestions to improve it, focusing on [aspect you want to improve, e.g., clarity, structure, persuasiveness]. Explain why each change would make it better."
+  }
+];
+
+// 6. How to Use AI to Extract Everything from a Book / Long Report (10 Strategi Sintesis)
+const extractBooksData = [
+  {
+    title: "Key Takeaways & Core Lessons",
+    desc: "Buku bisnis sering kali memuat banyak cerita pendukung. AI membantu menyaring intisari esensial dan menerjemahkannya ke tindakan nyata.",
+    prompt: "Identify the top 5 actionable takeaways from [book title] and explain how each could be applied in a real-world business scenario."
+  },
+  {
+    title: "Case Studies Deep-Dive",
+    desc: "Studi kasus nyata menjembatani jurang antara teori abstrak dan praktik lapangan. Ekstrak pelajaran dari kasus yang dibahas.",
+    prompt: "Identify any case studies presented in [book title]. Summarize their key points and explain how they support the book's overall message."
+  },
+  {
+    title: "Book Comparison & Dialectic",
+    desc: "Membandingkan dua buku memperlihatkan titik temu dan perdebatan pemikiran para penulis ternama.",
+    prompt: "Compare and contrast the key principles in [book title] with those in [another relevant book]. What are the similarities and differences? How do they complement or contradict each other?"
+  },
+  {
+    title: "Explain to Different Audiences",
+    desc: "Jelaskan ide pokok buku pada 3 tingkat kesulitan berbeda untuk menguji kedalaman pemahaman.",
+    prompt: `In [book title], the author discusses [concept]. Explain this concept as if you were teaching:
+a) A high school student
+b) A seasoned CEO
+c) A student considering a career in this field
+How does the explanation differ for each audience?`
+  },
+  {
+    title: "Apply to Different Business Models",
+    desc: "Uji fleksibilitas teori buku jika diterapkan pada konteks industri atau skala bisnis yang berbeda drastis.",
+    prompt: `Imagine you're implementing the strategies from [book title] in:
+a) A tech startup
+b) A family-owned retail business
+c) A large multinational manufacturing corporation
+What would be the specific challenges and opportunities in each scenario?`
+  },
+  {
+    title: "Extract & Apply Frameworks",
+    desc: "Ekstrak model atau matriks yang diperkenalkan penulis, lalu uji pada kasus sukses dan kegagalan bisnis terkini.",
+    prompt: `In [book title], the author presents [specific framework or model]. Apply this framework to analyze:
+a) A recent business success story
+b) A notable business failure
+What insights does this analysis provide?`
+  },
+  {
+    title: "30-Day Action Implementation Plan",
+    desc: "Ubah teori buku menjadi roadmap eksekusi terukur 30 hari bagi seorang pemimpin bisnis.",
+    prompt: "Based on the principles outlined in [book title], create a practical 30-day action plan for a business leader looking to implement these ideas with weekly milestones and KPIs."
+  },
+  {
+    title: "Identify Potential Weaknesses & Blind Spots",
+    desc: "Memahami suatu konsep secara matang berarti mampu mengenali batas keberlakuan dan potensi titik gagalnya.",
+    prompt: "What are the potential criticisms or limitations of the ideas presented in [book title]? Under what market conditions would this strategy fail?"
+  },
+  {
+    title: "Main Thesis Synthesis",
+    desc: "Rangkum tesis utama buku dalam satu kalimat tajam, kemudian petakan bagaimana bab-bab berikutnya membangun fondasi tesis tersebut.",
+    prompt: "Summarize the main thesis of [book title] in one sentence, then expand on how this central idea is systematically developed throughout the book."
+  },
+  {
+    title: "Analyze Memorable Quotes",
+    desc: "Bedah kutipan paling berpengaruh dari buku untuk memahami konteks filosofis di balik pemikiran sang penulis.",
+    prompt: "Extract 3-5 memorable quotes from [book title]. For each quote, explain its context, deeper significance, and how it encapsulates a key strategic lesson from the book."
   }
 ];
 
@@ -340,6 +753,10 @@ export default function App({ onBack }: { onBack?: () => void }) {
   const [selectedTag, setSelectedTag] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  
+  // Sub-Navigation Tabs
+  const [activeTechniqueSubTab, setActiveTechniqueSubTab] = useState<'foundational' | 'brutal' | 'jeffsu'>('foundational');
+  const [activeLearningSubTab, setActiveLearningSubTab] = useState<'smart' | 'faster' | 'extract'>('smart');
   
   // Modals
   const [comparingPrompt, setComparingPrompt] = useState<JournalPrompt | null>(null);
@@ -1413,54 +1830,363 @@ export default function App({ onBack }: { onBack?: () => void }) {
           {/* VIEW: PROMPTING TECHNIQUES */}
           {/* ===================================================================== */}
           {activeMenu === 'techniques' && (
-            <div className="space-y-5 animate-in fade-in duration-300">
+            <div className="space-y-6 animate-in fade-in duration-300">
               
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
-                  Framework &amp; Pola Instruksi
-                </span>
-                <h2 className="text-lg font-bold text-slate-900 mt-0.5">Prompting Techniques</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Kuasai pola instruksi dari zero-shot hingga teknik presisi Jeff Su dan The Brutal Method.
-                </p>
+              {/* Header & Sub-Navigation */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                    Framework &amp; Kurikulum Prompting
+                  </span>
+                  <h2 className="text-lg font-bold text-slate-900 mt-0.5">Prompting Techniques</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Kuasai 8 teknik fundamental, metode audit kritis The Brutal Method, dan Jeff Su Precision Framework.
+                  </p>
+                </div>
+
+                {/* Sub-Tabs Pills */}
+                <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200/80 self-start md:self-auto">
+                  <button
+                    onClick={() => setActiveTechniqueSubTab('foundational')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                      activeTechniqueSubTab === 'foundational'
+                        ? 'bg-slate-900 text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    8 Foundational Techniques
+                  </button>
+                  <button
+                    onClick={() => setActiveTechniqueSubTab('brutal')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                      activeTechniqueSubTab === 'brutal'
+                        ? 'bg-slate-900 text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    The Brutal Method
+                  </button>
+                  <button
+                    onClick={() => setActiveTechniqueSubTab('jeffsu')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                      activeTechniqueSubTab === 'jeffsu'
+                        ? 'bg-slate-900 text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Jeff Su Framework
+                  </button>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {promptingTechniquesData.map(tech => (
-                  <div key={tech.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
-                          {tech.tag}
-                        </span>
+              {/* ------------------------------------------------------------- */}
+              {/* SUBTAB 1: 8 FOUNDATIONAL TECHNIQUES */}
+              {/* ------------------------------------------------------------- */}
+              {activeTechniqueSubTab === 'foundational' && (
+                <div className="space-y-4 animate-in fade-in duration-300">
+                  <div className="flex items-center justify-between text-xs text-slate-500 px-1">
+                    <span>Menampilkan 8 teknik dasar pemrosesan instruksi AI</span>
+                    <span className="font-mono text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                      Rujukan: Brij Kishore Pandey (@codewithbrij)
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {techniquesData.map((tech, idx) => (
+                      <div key={tech.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm hover:border-slate-300 transition-all">
+                        <div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[10px] font-mono font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
+                              {tech.tag}
+                            </span>
+                            <span className="text-[11px] font-mono font-bold text-slate-400">
+                              0{idx + 1}
+                            </span>
+                          </div>
+
+                          <h3 className="font-bold text-sm text-slate-900 mb-1">{tech.title}</h3>
+                          <p className="text-xs text-slate-600 mb-3 leading-relaxed">{tech.desc}</p>
+                          
+                          {/* Visual Step Flow */}
+                          <div className="bg-slate-50/80 border border-slate-200/60 rounded-xl p-2.5 mb-3">
+                            <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block mb-1.5">
+                              Alur Penalaran Model (Reasoning Path):
+                            </span>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              {tech.steps.map((s, i) => (
+                                <React.Fragment key={i}>
+                                  <span className="inline-flex items-center text-[10px] font-medium bg-white text-slate-700 px-2 py-1 rounded-md border border-slate-200 shadow-2xs">
+                                    {s}
+                                  </span>
+                                  {i < tech.steps.length - 1 && (
+                                    <ArrowRight size={10} className="text-slate-400 shrink-0" />
+                                  )}
+                                </React.Fragment>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Example Prompt Box */}
+                          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-mono text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+                            {tech.example}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => handleCopy(tech.example, tech.id)}
+                          className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                        >
+                          {copiedId === tech.id ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
+                          {copiedId === tech.id ? 'Formula Tersalin!' : 'Salin Contoh Formula'}
+                        </button>
                       </div>
-                      <h3 className="font-bold text-sm text-slate-900 mb-1">{tech.title}</h3>
-                      <p className="text-xs text-slate-600 mb-3 leading-relaxed">{tech.desc}</p>
-                      
-                      <div className="space-y-1 mb-3">
-                        {tech.steps.map((s, i) => (
-                          <div key={i} className="text-[11px] text-slate-500 flex items-center gap-1.5">
-                            <span className="w-4 h-4 rounded bg-slate-100 flex items-center justify-center font-mono text-[9px] font-bold text-slate-700">{i + 1}</span>
-                            {s}
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ------------------------------------------------------------- */}
+              {/* SUBTAB 2: THE BRUTAL METHOD */}
+              {/* ------------------------------------------------------------- */}
+              {activeTechniqueSubTab === 'brutal' && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  
+                  {/* The Problem Section */}
+                  <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                    <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                      Latar Belakang
+                    </span>
+                    <h3 className="font-bold text-base text-slate-900 mt-1 mb-4">
+                      {brutalMethodData.problem.title}
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {brutalMethodData.problem.points.map((pt, i) => (
+                        <div key={i} className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                          <h4 className="font-bold text-xs text-slate-900 mb-1 flex items-center gap-1.5">
+                            {i === 0 ? <Brain size={14} className="text-slate-600" /> : <AlertTriangle size={14} className="text-amber-600" />}
+                            {pt.title}
+                          </h4>
+                          <p className="text-xs text-slate-600 leading-relaxed">{pt.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* The 6-Step Brutal Framework */}
+                  <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                    <div className="mb-4">
+                      <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                        Metodologi Eksekusi
+                      </span>
+                      <h3 className="font-bold text-base text-slate-900 mt-0.5">
+                        The 6-Step Brutal Framework (Red Teaming AI)
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        6 langkah praktis untuk mematikan keramahan artifisial dan memaksa AI menjadi penguji paling kejam terhadap dokumen kerja Anda.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                      {brutalMethodData.framework.map((step) => (
+                        <div key={step.num} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="w-5 h-5 rounded-full bg-slate-900 text-white font-mono text-[10px] font-bold flex items-center justify-center">
+                                {step.num}
+                              </span>
+                              <h4 className="font-bold text-xs text-slate-900">{step.title}</h4>
+                            </div>
+                            <p className="text-xs text-slate-600 leading-relaxed">{step.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Model Spectrum & Custom Instructions */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    
+                    {/* Model Spectrum */}
+                    <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                      <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                        Karakteristik Model
+                      </span>
+                      <h3 className="font-bold text-base text-slate-900 mt-0.5 mb-3">
+                        The Model Spectrum: Tingkat Kesopanan Bawaan
+                      </h3>
+
+                      <div className="space-y-3">
+                        {brutalMethodData.modelSpectrum.map((spec, i) => (
+                          <div key={i} className="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-start justify-between gap-3">
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="font-bold text-xs text-slate-900">{spec.name}</h4>
+                                <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200">
+                                  {spec.badge}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-600 leading-relaxed">{spec.desc}</p>
+                            </div>
                           </div>
                         ))}
                       </div>
+                    </div>
 
-                      <div className="bg-slate-50 rounded-xl p-3 text-xs font-mono text-slate-700 mb-3 whitespace-pre-line leading-relaxed border border-slate-200/60">
-                        {tech.example}
+                    {/* Custom Instruction Box */}
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
+                      <div>
+                        <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                          Bonus Permanen
+                        </span>
+                        <h3 className="font-bold text-sm text-slate-900 mt-0.5 mb-1">
+                          System-Level Custom Instruction
+                        </h3>
+                        <p className="text-xs text-slate-500 mb-3 leading-relaxed">
+                          {brutalMethodData.systemLevelBonus.desc}
+                        </p>
+                        
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 font-mono text-xs text-slate-700 leading-relaxed italic mb-3">
+                          "{brutalMethodData.systemLevelBonus.prompt}"
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleCopy(brutalMethodData.systemLevelBonus.prompt, 'sys-prompt')}
+                        className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                      >
+                        {copiedId === 'sys-prompt' ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
+                        {copiedId === 'sys-prompt' ? 'Tersalin!' : 'Salin Instruksi Sistem'}
+                      </button>
+                    </div>
+
+                  </div>
+
+                </div>
+              )}
+
+              {/* ------------------------------------------------------------- */}
+              {/* SUBTAB 3: JEFF SU PRECISION FRAMEWORK */}
+              {/* ------------------------------------------------------------- */}
+              {activeTechniqueSubTab === 'jeffsu' && (
+                <div className="space-y-6 animate-in fade-in duration-300">
+                  
+                  {/* Templates */}
+                  <div className="space-y-3">
+                    <div className="px-1">
+                      <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                        Bagian 1
+                      </span>
+                      <h3 className="font-bold text-base text-slate-900 mt-0.5">
+                        5 Precision Prompt Templates (Jeff Su)
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Formula baku untuk optimasi instruksi, pembungkusan XML, pemicu deep reasoning, dan kontrol panjang keluaran.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {jeffSuData.templates.map((tpl, i) => (
+                        <div key={i} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm">
+                          <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <h4 className="font-bold text-xs sm:text-sm text-slate-900">{tpl.title}</h4>
+                              <span className="text-[10px] font-mono text-slate-400 font-bold">Template #{i + 1}</span>
+                            </div>
+                            <p className="text-xs text-slate-600 mb-3 leading-relaxed">{tpl.desc}</p>
+                            
+                            <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-mono text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+                              {tpl.prompt}
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => handleCopy(tpl.prompt, `jeff-tpl-${i}`)}
+                            className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                          >
+                            {copiedId === `jeff-tpl-${i}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
+                            {copiedId === `jeff-tpl-${i}` ? 'Template Tersalin!' : 'Salin Template'}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 6 Building Blocks */}
+                  <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                    <div className="mb-4">
+                      <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                        Bagian 2
+                      </span>
+                      <h3 className="font-bold text-base text-slate-900 mt-0.5">
+                        6 Building Blocks of a Perfect Prompt
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Anatomi lengkap sebuah prompt kelas dunia menurut Jeff Su.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                      {jeffSuData.buildingBlocks.map((bb, i) => (
+                        <div key={i} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50">
+                          <h4 className="font-bold text-xs text-slate-900 mb-1">{bb.title}</h4>
+                          <p className="text-xs text-slate-600 leading-relaxed">{bb.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Best Practices & Common Mistakes */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    {/* Best Practices */}
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                      <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                        Bagian 3
+                      </span>
+                      <h3 className="font-bold text-sm text-slate-900 mt-0.5 mb-3">
+                        5 ChatGPT / LLM Best Practices
+                      </h3>
+                      <div className="space-y-2.5">
+                        {jeffSuData.bestPractices.map((bp, i) => (
+                          <div key={i} className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                            <h4 className="font-bold text-xs text-slate-900 mb-0.5 flex items-center gap-1.5">
+                              <span className="w-4 h-4 rounded-full bg-slate-200 font-mono text-[9px] font-bold flex items-center justify-center text-slate-700">
+                                {i + 1}
+                              </span>
+                              {bp.title}
+                            </h4>
+                            <p className="text-xs text-slate-600 leading-relaxed pl-5.5">{bp.desc}</p>
+                          </div>
+                        ))}
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => handleCopy(tech.example, tech.id)}
-                      className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1 transition-colors"
-                    >
-                      {copiedId === tech.id ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
-                      Salin Formula Template
-                    </button>
+                    {/* Mistakes */}
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                      <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                        Bagian 4
+                      </span>
+                      <h3 className="font-bold text-sm text-slate-900 mt-0.5 mb-3">
+                        5 Kesalahan Umum Prompting
+                      </h3>
+                      <div className="space-y-2.5">
+                        {jeffSuData.mistakes.map((mis, i) => (
+                          <div key={i} className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+                            <h4 className="font-bold text-xs text-slate-900 mb-0.5 flex items-center gap-1.5">
+                              <AlertTriangle size={12} className="text-amber-600 shrink-0" />
+                              {mis.title}
+                            </h4>
+                            <p className="text-xs text-slate-600 leading-relaxed pl-4.5">{mis.desc}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                   </div>
-                ))}
-              </div>
+
+                </div>
+              )}
 
             </div>
           )}
@@ -1469,43 +2195,276 @@ export default function App({ onBack }: { onBack?: () => void }) {
           {/* VIEW: READING & LEARNING */}
           {/* ===================================================================== */}
           {activeMenu === 'reading-learning' && (
-            <div className="space-y-5 animate-in fade-in duration-300">
+            <div className="space-y-6 animate-in fade-in duration-300">
               
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
-                  Materi Day 1 &amp; Day 2
-                </span>
-                <h2 className="text-lg font-bold text-slate-900 mt-0.5">Reading &amp; Learning Tactics</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  5 Mode Pembelajaran Kognitif untuk mendekonstruksi dokumen tebal menjadi model mental terapan.
-                </p>
+              {/* Header & Sub-Navigation */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                    Materi Day 1 &amp; Day 2
+                  </span>
+                  <h2 className="text-lg font-bold text-slate-900 mt-0.5">Reading &amp; Smart Learning</h2>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Mode pembelajaran kognitif, strategi percepatan penyerapan konsep, dan ekstraksi intisari buku tebal.
+                  </p>
+                </div>
+
+                {/* Sub-Tabs Pills */}
+                <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200/80 self-start md:self-auto">
+                  <button
+                    onClick={() => setActiveLearningSubTab('smart')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                      activeLearningSubTab === 'smart'
+                        ? 'bg-slate-900 text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    5 Mode Kognitif
+                  </button>
+                  <button
+                    onClick={() => setActiveLearningSubTab('faster')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                      activeLearningSubTab === 'faster'
+                        ? 'bg-slate-900 text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    10 Pola Belajar Cepat
+                  </button>
+                  <button
+                    onClick={() => setActiveLearningSubTab('extract')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                      activeLearningSubTab === 'extract'
+                        ? 'bg-slate-900 text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    10 Ekstraksi Buku/Laporan
+                  </button>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {readingModesData.map(mode => (
-                  <div key={mode.num} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-mono font-bold text-slate-400">{mode.num}</span>
-                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
-                          {mode.tag}
-                        </span>
-                      </div>
-                      <h3 className="font-bold text-xs sm:text-sm text-slate-900 mb-0.5">{mode.title}</h3>
-                      <span className="text-[10px] font-mono text-slate-400 block mb-2">{mode.theory}</span>
-                      <p className="text-[11px] text-slate-600 leading-relaxed mb-3">{mode.desc}</p>
-                    </div>
-
-                    <button
-                      onClick={() => handleCopy(mode.prompt, `mode-${mode.num}`)}
-                      className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1 transition-colors"
-                    >
-                      {copiedId === `mode-${mode.num}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
-                      Salin Formula
-                    </button>
+              {/* ------------------------------------------------------------- */}
+              {/* SUBTAB 1: 5 MODE KOGNITIF */}
+              {/* ------------------------------------------------------------- */}
+              {activeLearningSubTab === 'smart' && (
+                <div className="space-y-5 animate-in fade-in duration-300">
+                  <div className="px-1 text-xs text-slate-500">
+                    5 mode pembelajaran berbasis riset kognitif. Setiap mode memetakan teori pembelajaran ke dalam matriks kasus dan workflow nyata.
                   </div>
-                ))}
-              </div>
+
+                  <div className="space-y-5">
+                    {readingModesData.map(mode => (
+                      <div key={mode.id} className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5 hover:border-slate-300 transition-all">
+                        
+                        {/* Mode Title & Tag */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
+                          <div className="flex items-center gap-3">
+                            <span className="w-9 h-9 rounded-xl bg-slate-900 text-white font-mono font-bold text-sm flex items-center justify-center">
+                              {mode.num}
+                            </span>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-bold text-base text-slate-900">{mode.title}</h3>
+                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                                  {mode.tag}
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-500">{mode.subtitle}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 3-Column Structured Breakdown */}
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                          
+                          {/* Col 1: Teori Ilmiah */}
+                          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between">
+                            <div>
+                              <div className="flex items-center gap-1.5 mb-2">
+                                <Brain size={14} className="text-slate-700" />
+                                <span className="text-[10px] font-mono font-bold uppercase text-slate-500 tracking-wider">
+                                  Landasan Teori Ilmiah
+                                </span>
+                              </div>
+                              <h4 className="font-bold text-xs text-slate-900">{mode.theory}</h4>
+                              <span className="text-[10px] font-mono text-slate-500 block mb-2">
+                                Penggagas: {mode.theorist}
+                              </span>
+                              <p className="text-xs text-slate-600 leading-relaxed">{mode.theoryDesc}</p>
+                            </div>
+                          </div>
+
+                          {/* Col 2: Matriks Kasus & Dampak */}
+                          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between">
+                            <div>
+                              <div className="flex items-center gap-1.5 mb-2">
+                                <Target size={14} className="text-slate-700" />
+                                <span className="text-[10px] font-mono font-bold uppercase text-slate-500 tracking-wider">
+                                  Matriks Masalah &amp; Solusi
+                                </span>
+                              </div>
+                              <div className="space-y-2 text-xs">
+                                <div>
+                                  <strong className="text-slate-800 block text-[10px] uppercase font-mono">Masalah:</strong>
+                                  <p className="text-slate-600">{mode.problem}</p>
+                                </div>
+                                <div>
+                                  <strong className="text-slate-800 block text-[10px] uppercase font-mono">Solusi:</strong>
+                                  <p className="text-slate-600">{mode.solution}</p>
+                                </div>
+                                <div>
+                                  <strong className="text-slate-800 block text-[10px] uppercase font-mono">Dampak Akhir:</strong>
+                                  <p className="text-slate-700 font-medium">{mode.impact}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Col 3: Taktik & Workflow */}
+                          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between">
+                            <div>
+                              <div className="flex items-center gap-1.5 mb-2">
+                                <Layers size={14} className="text-slate-700" />
+                                <span className="text-[10px] font-mono font-bold uppercase text-slate-500 tracking-wider">
+                                  Taktik &amp; Workflow 4 Langkah
+                                </span>
+                              </div>
+                              <p className="text-xs text-slate-700 font-medium mb-2.5 leading-relaxed">{mode.tactic}</p>
+                              <div className="space-y-1">
+                                {mode.workflow.map((step, sIdx) => (
+                                  <div key={sIdx} className="flex items-start gap-1.5 text-[11px] text-slate-600">
+                                    <span className="w-3.5 h-3.5 rounded-full bg-slate-200 text-slate-700 font-mono text-[9px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                                      {sIdx + 1}
+                                    </span>
+                                    <span>{step}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+
+                        {/* Bottom: Prompt Box & Quick Win */}
+                        <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                          <div className="flex-1 w-full bg-slate-50 rounded-xl p-3 border border-slate-200 text-xs font-mono text-slate-700">
+                            <span className="text-[10px] font-bold font-mono text-slate-400 block mb-1 uppercase tracking-wider flex items-center gap-1">
+                              <MessageSquare size={11} /> Sample Prompt:
+                            </span>
+                            "{mode.samplePrompt}"
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                            <div className="hidden xl:flex items-center gap-1 text-[11px] text-slate-500 bg-amber-50/80 border border-amber-200/60 px-2.5 py-1.5 rounded-lg max-w-xs">
+                              <Zap size={12} className="text-amber-600 shrink-0" />
+                              <span className="truncate"><strong>Quick Win:</strong> {mode.quickWin}</span>
+                            </div>
+
+                            <button
+                              onClick={() => handleCopy(mode.samplePrompt, `mode-${mode.num}`)}
+                              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1.5 transition-colors whitespace-nowrap"
+                            >
+                              {copiedId === `mode-${mode.num}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
+                              {copiedId === `mode-${mode.num}` ? 'Prompt Tersalin!' : 'Salin Prompt Mode'}
+                            </button>
+                          </div>
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ------------------------------------------------------------- */}
+              {/* SUBTAB 2: 10 POLA BELAJAR CEPAT (MORITZ KREMB) */}
+              {/* ------------------------------------------------------------- */}
+              {activeLearningSubTab === 'faster' && (
+                <div className="space-y-4 animate-in fade-in duration-300">
+                  <div className="flex items-center justify-between text-xs text-slate-500 px-1">
+                    <span>10 Prompt Templates untuk akselerasi penguasaan materi baru</span>
+                    <span className="font-mono text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                      Rujukan: Moritz Kremb (@moritzkremb)
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {learningData.map((item, idx) => (
+                      <div key={idx} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm hover:border-slate-300 transition-all">
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
+                              Pola 0{idx + 1}
+                            </span>
+                            <span className="text-[10px] font-mono text-slate-400">
+                              {item.author}
+                            </span>
+                          </div>
+
+                          <h3 className="font-bold text-sm text-slate-900 mb-1">{item.title}</h3>
+                          <p className="text-xs text-slate-600 mb-3 leading-relaxed">{item.desc}</p>
+                          
+                          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-mono text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto">
+                            {item.prompt}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => handleCopy(item.prompt, `learn-${idx}`)}
+                          className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                        >
+                          {copiedId === `learn-${idx}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
+                          {copiedId === `learn-${idx}` ? 'Formula Tersalin!' : 'Salin Template'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ------------------------------------------------------------- */}
+              {/* SUBTAB 3: 10 EKSTRAKSI BUKU / LAPORAN */}
+              {/* ------------------------------------------------------------- */}
+              {activeLearningSubTab === 'extract' && (
+                <div className="space-y-4 animate-in fade-in duration-300">
+                  <div className="flex items-center justify-between text-xs text-slate-500 px-1">
+                    <span>10 Strategi membedah intisari buku bisnis tebal, laporan tahunan, dan studi kasus</span>
+                    <span className="font-mono text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                      Book &amp; Long-Form Analysis
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {extractBooksData.map((item, idx) => (
+                      <div key={idx} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm hover:border-slate-300 transition-all">
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
+                              Strategi 0{idx + 1}
+                            </span>
+                          </div>
+
+                          <h3 className="font-bold text-sm text-slate-900 mb-1">{item.title}</h3>
+                          <p className="text-xs text-slate-600 mb-3 leading-relaxed">{item.desc}</p>
+                          
+                          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-mono text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto">
+                            {item.prompt}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => handleCopy(item.prompt, `book-${idx}`)}
+                          className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                        >
+                          {copiedId === `book-${idx}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
+                          {copiedId === `book-${idx}` ? 'Formula Tersalin!' : 'Salin Template'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
             </div>
           )}
