@@ -10,7 +10,7 @@ import {
   Target, Shield, TrendingUp, Share2, 
   Star, Plus, RefreshCw, Eye, Tag, Award, BookmarkCheck, 
   FileEdit, Menu, Home, CheckCircle2, SlidersHorizontal, Dumbbell,
-  Lightbulb, Brain, Compass, MessageSquare, Zap, AlertTriangle
+  Lightbulb, Brain, Compass, MessageSquare, Zap, AlertTriangle, Trash2
 } from 'lucide-react';
 export interface Prompt { id: string; title: string; description: string; content: string; category: string; }
 
@@ -626,6 +626,14 @@ export default function App({ onBack }: { onBack?: () => void }) {
   const [reviewingPrompt, setReviewingPrompt] = useState<JournalPrompt | null>(null);
   const [reviewScore, setReviewScore] = useState<number>(9.5);
   const [reviewFeedback, setReviewFeedback] = useState<string>('');
+  const [promptToDelete, setPromptToDelete] = useState<JournalPrompt | null>(null);
+
+  const handleDeletePrompt = (id: string) => {
+    setJournalPrompts(prev => prev.filter(item => item.id !== id));
+    if (comparingPrompt && comparingPrompt.id === id) setComparingPrompt(null);
+    if (reviewingPrompt && reviewingPrompt.id === id) setReviewingPrompt(null);
+    setPromptToDelete(null);
+  };
 
   const handleOpenReview = (item: JournalPrompt) => {
     const latest = item.versions[item.versions.length - 1];
@@ -1438,7 +1446,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                         className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-400 transition-all flex flex-col justify-between shadow-sm"
                       >
                         <div>
-                          {/* Meta Header with Simple Star */}
+                          {/* Meta Header with Simple Star & Delete */}
                           <div className="flex items-center justify-between gap-2 mb-2.5">
                             <div className="flex items-center gap-1.5">
                               <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200/60">
@@ -1449,10 +1457,21 @@ export default function App({ onBack }: { onBack?: () => void }) {
                               </span>
                             </div>
 
-                            {/* Minimalist Star Rating */}
-                            <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
-                              <Star size={11} className="text-[#C9A23E] fill-[#C9A23E]" />
-                              <span>{item.score.toFixed(1)}</span>
+                            <div className="flex items-center gap-1.5">
+                              {/* Minimalist Star Rating */}
+                              <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
+                                <Star size={11} className="text-[#C9A23E] fill-[#C9A23E]" />
+                                <span>{item.score.toFixed(1)}</span>
+                              </div>
+
+                              {/* Delete Action */}
+                              <button
+                                onClick={() => setPromptToDelete(item)}
+                                className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                title="Hapus Prompt dari Jurnal"
+                              >
+                                <Trash2 size={13} />
+                              </button>
                             </div>
                           </div>
 
@@ -1796,9 +1815,20 @@ export default function App({ onBack }: { onBack?: () => void }) {
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
-                              <Star size={11} className="text-[#C9A23E] fill-[#C9A23E]" />
-                              <span>{item.score.toFixed(1)}</span>
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
+                                <Star size={11} className="text-[#C9A23E] fill-[#C9A23E]" />
+                                <span>{item.score.toFixed(1)}</span>
+                              </div>
+                              {item.authorName.includes('Saya') && (
+                                <button
+                                  onClick={() => setPromptToDelete(item)}
+                                  className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                  title="Hapus Prompt"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              )}
                             </div>
                           </div>
 
@@ -2670,9 +2700,22 @@ export default function App({ onBack }: { onBack?: () => void }) {
                 </span>
                 <h3 className="text-sm font-bold text-white mt-0.5">{comparingPrompt.title}</h3>
               </div>
-              <button onClick={() => setComparingPrompt(null)} className="text-slate-400 hover:text-white">
-                <X size={16} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const toDelete = comparingPrompt;
+                    setComparingPrompt(null);
+                    setPromptToDelete(toDelete);
+                  }}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-white/10 transition-colors"
+                  title="Hapus Prompt Ini"
+                >
+                  <Trash2 size={16} />
+                </button>
+                <button onClick={() => setComparingPrompt(null)} className="text-slate-400 hover:text-white">
+                  <X size={16} />
+                </button>
+              </div>
             </div>
 
             <div className="p-5 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#f5f6f9]">
@@ -2887,6 +2930,52 @@ export default function App({ onBack }: { onBack?: () => void }) {
               </div>
             </form>
 
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: KONFIRMASI HAPUS PROMPT */}
+      {/* ========================================================================= */}
+      {promptToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-5 border border-slate-200 shadow-2xl space-y-4">
+            <div className="flex items-start gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 border border-rose-100">
+                <Trash2 size={20} />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-sm text-slate-900 leading-snug">Hapus Prompt Ini?</h3>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Prompt akan dihapus permanen dari repositori jurnal dan daftar tag terkait.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs space-y-1">
+              <div className="font-bold text-slate-800 leading-snug">{promptToDelete.title}</div>
+              <div className="text-[10px] font-mono text-slate-500">
+                #{promptToDelete.tag || promptToDelete.departmentTag || 'Umum'} • Versi {promptToDelete.currentVersion}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setPromptToDelete(null)}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeletePrompt(promptToDelete.id)}
+                className="px-4 py-1.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-colors shadow-sm flex items-center gap-1.5"
+              >
+                <Trash2 size={13} />
+                <span>Ya, Hapus</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
