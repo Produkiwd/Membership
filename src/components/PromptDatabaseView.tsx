@@ -308,7 +308,7 @@ const exercisesData = [
   }
 ];
 
-export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) {
+export default function App({ onBack }: { onBack?: () => void }) {
   // Navigation State (WJG Style)
   // 'beranda' | 'my-journal' | 'prompt-studio' | 'community' | 'techniques' | 'reading-learning' | 'exercise' | 'vault'
   const [activeMenu, setActiveMenu] = useState<string>('beranda');
@@ -551,7 +551,7 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
   );
 
   return (
-    <div className="min-h-screen bg-[#F8F6F1] text-slate-900 flex font-sans antialiased selection:bg-[#E5C158] selection:text-slate-950">
+    <div className="min-h-screen bg-[#f5f6f9] text-slate-900 flex font-sans antialiased selection:bg-[#E5C158] selection:text-slate-950">
       
       {/* ========================================================================= */}
       {/* 1. SIDEBAR NAVIGATION (WJG PATTERN & OFFICIAL LOGOS) */}
@@ -775,18 +775,21 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
             <div className="space-y-8 animate-in fade-in duration-300">
               
               {/* Clean Welcome Hero */}
-              <section className="bg-gradient-to-br from-[#141210] to-[#24201C] rounded-3xl text-white p-7 sm:p-10 shadow-sm border border-[#2E2823]">
+              <section className="bg-gradient-to-br from-[#141210] to-[#1e1a17] rounded-2xl text-white p-7 sm:p-9 shadow-sm border border-[#2a2420]">
                 <div className="max-w-2xl">
-                  <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight mb-2">
+                  <span className="inline-block text-[10px] font-mono font-bold uppercase tracking-[2px] text-[#E5C158] mb-2">
+                    Enterprise Prompt System
+                  </span>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight mb-2.5">
                     Selamat datang di <span className="text-[#E5C158]">Prompt Database.</span>
                   </h1>
                   <p className="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
-                    Buka jurnal saya atau buat formula baru. Ruang terintegrasi untuk menyusun instruksi AI terstruktur, melacak evolusi Sebelum &amp; Sesudah (Before &amp; After), serta mengeksplorasi teknik dan studi kasus interaktif.
+                    Buka jurnal saya atau buat formula baru. Ruang kerja terstruktur untuk mengoptimalkan prompt AI, melacak komparasi Sebelum &amp; Sesudah (Before &amp; After), serta mendalami teknik prompting berstandar eksekutif.
                   </p>
                   <div className="flex flex-wrap items-center gap-3">
                     <button
                       onClick={() => setActiveMenu('my-journal')}
-                      className="px-4 py-2.5 rounded-xl bg-[#E5C158] hover:bg-[#F0CF6B] text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md"
+                      className="px-4 py-2.5 rounded-xl bg-[#E5C158] hover:bg-[#F0CF6B] text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
                     >
                       Buka Jurnal Saya <ArrowRight size={13} />
                     </button>
@@ -804,14 +807,14 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                 </div>
               </section>
 
-              {/* 6 Modular Boxes (Grid 3x2) */}
+              {/* 6 Modular Boxes (Grid 3x2) - Harmonious Wijigila Style */}
               <section className="space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest">
-                      Pilihan Modul
+                    <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest block mb-0.5">
+                      PILIHAN MODUL
                     </span>
-                    <h2 className="text-base font-bold text-slate-900">Pilih Kebutuhan Pembelajaran</h2>
+                    <h2 className="text-base font-bold text-slate-900 tracking-tight">Pilih Kebutuhan Pembelajaran</h2>
                   </div>
                 </div>
 
@@ -820,156 +823,162 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                   {/* Box 1: My Prompt Journal */}
                   <div 
                     onClick={() => setActiveMenu('my-journal')}
-                    className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-[#E5C158] transition-all cursor-pointer group flex flex-col justify-between"
+                    className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="w-8 h-8 rounded-lg bg-amber-50 text-[#C9A23E] flex items-center justify-center font-black font-mono text-xs">
+                      <div className="flex items-center justify-between mb-3.5">
+                        <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-slate-700 transition-colors">
                           01
-                        </div>
-                        <span className="text-[10px] font-mono text-slate-400 font-bold">
+                        </span>
+                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
                           {journalPrompts.length} Tersimpan
                         </span>
                       </div>
-                      <h3 className="font-bold text-sm text-slate-900 group-hover:text-[#9A7920] transition-colors mb-1">
+                      <h3 className="font-bold text-sm text-slate-900 group-hover:text-slate-950 transition-colors mb-1.5">
                         My Prompt Journal
                       </h3>
-                      <p className="text-xs text-slate-500 leading-relaxed mb-3">
+                      <p className="text-xs text-slate-500 leading-relaxed mb-4">
                         Repositori personal Anda untuk melacak riwayat evolusi Before &amp; After, catatan revisi, dan kematangan prompt dari waktu ke waktu.
                       </p>
                     </div>
-                    <div className="text-xs font-bold text-[#C9A23E] flex items-center gap-1 mt-auto">
-                      Buka Jurnal Saya <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                    <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
+                      <span>Buka Jurnal Saya</span>
+                      <ArrowRight size={13} />
                     </div>
                   </div>
 
                   {/* Box 2: Prompt Formula Studio */}
                   <div 
                     onClick={() => setActiveMenu('prompt-studio')}
-                    className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-[#E5C158] transition-all cursor-pointer group flex flex-col justify-between"
+                    className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-black font-mono text-xs">
+                      <div className="flex items-center justify-between mb-3.5">
+                        <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-slate-700 transition-colors">
                           02
-                        </div>
-                        <span className="text-[9px] font-mono font-bold uppercase text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                        </span>
+                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
                           Formula Studio
                         </span>
                       </div>
-                      <h3 className="font-bold text-sm text-slate-900 group-hover:text-emerald-700 transition-colors mb-1">
+                      <h3 className="font-bold text-sm text-slate-900 group-hover:text-slate-950 transition-colors mb-1.5">
                         Prompt Formula Studio
                       </h3>
-                      <p className="text-xs text-slate-500 leading-relaxed mb-3">
+                      <p className="text-xs text-slate-500 leading-relaxed mb-4">
                         Susun instruksi berbobot tinggi dengan panduan 7 parameter A.C.T.I.O.N.S. atau 3 parameter ACT cepat.
                       </p>
                     </div>
-                    <div className="text-xs font-bold text-emerald-700 flex items-center gap-1 mt-auto">
-                      Buat Formula Baru <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                    <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
+                      <span>Buat Formula Baru</span>
+                      <ArrowRight size={13} />
                     </div>
                   </div>
 
                   {/* Box 3: Prompt Community */}
                   <div 
                     onClick={() => setActiveMenu('community')}
-                    className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-[#E5C158] transition-all cursor-pointer group flex flex-col justify-between"
+                    className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center font-black font-mono text-xs">
+                      <div className="flex items-center justify-between mb-3.5">
+                        <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-slate-700 transition-colors">
                           03
-                        </div>
-                        <span className="text-[9px] font-mono font-bold uppercase text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded">
-                          Community Feedback
+                        </span>
+                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
+                          Community Hub
                         </span>
                       </div>
-                      <h3 className="font-bold text-sm text-slate-900 group-hover:text-blue-700 transition-colors mb-1">
+                      <h3 className="font-bold text-sm text-slate-900 group-hover:text-slate-950 transition-colors mb-1.5">
                         Prompt Community
                       </h3>
-                      <p className="text-xs text-slate-500 leading-relaxed mb-3">
+                      <p className="text-xs text-slate-500 leading-relaxed mb-4">
                         Jelajahi dan adaptasi formula teruji dari rekan komunitas lintas divisi lengkap dengan feedback dan skor kurasi fasilitator.
                       </p>
                     </div>
-                    <div className="text-xs font-bold text-blue-700 flex items-center gap-1 mt-auto">
-                      Jelajahi Komunitas <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                    <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
+                      <span>Jelajahi Komunitas</span>
+                      <ArrowRight size={13} />
                     </div>
                   </div>
 
                   {/* Box 4: Prompting Techniques */}
                   <div 
                     onClick={() => setActiveMenu('techniques')}
-                    className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-[#E5C158] transition-all cursor-pointer group flex flex-col justify-between"
+                    className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center font-black font-mono text-xs">
+                      <div className="flex items-center justify-between mb-3.5">
+                        <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-slate-700 transition-colors">
                           04
-                        </div>
-                        <span className="text-[9px] font-mono font-bold uppercase text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded">
+                        </span>
+                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
                           Materi &amp; Teknik
                         </span>
                       </div>
-                      <h3 className="font-bold text-sm text-slate-900 group-hover:text-indigo-700 transition-colors mb-1">
+                      <h3 className="font-bold text-sm text-slate-900 group-hover:text-slate-950 transition-colors mb-1.5">
                         Prompting Techniques
                       </h3>
-                      <p className="text-xs text-slate-500 leading-relaxed mb-3">
+                      <p className="text-xs text-slate-500 leading-relaxed mb-4">
                         Pola instruksi presisi: Zero-Shot, Few-Shot, Chain-of-Thought (CoT), The Brutal Method, hingga Jeff Su XML Sandwich.
                       </p>
                     </div>
-                    <div className="text-xs font-bold text-indigo-700 flex items-center gap-1 mt-auto">
-                      Pelajari Teknik <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                    <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
+                      <span>Pelajari Teknik</span>
+                      <ArrowRight size={13} />
                     </div>
                   </div>
 
                   {/* Box 5: Reading & Smart Learning */}
                   <div 
                     onClick={() => setActiveMenu('reading-learning')}
-                    className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-[#E5C158] transition-all cursor-pointer group flex flex-col justify-between"
+                    className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center font-black font-mono text-xs">
+                      <div className="flex items-center justify-between mb-3.5">
+                        <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-slate-700 transition-colors">
                           05
-                        </div>
-                        <span className="text-[9px] font-mono font-bold uppercase text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded">
+                        </span>
+                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
                           Smart Learning
                         </span>
                       </div>
-                      <h3 className="font-bold text-sm text-slate-900 group-hover:text-purple-700 transition-colors mb-1">
+                      <h3 className="font-bold text-sm text-slate-900 group-hover:text-slate-950 transition-colors mb-1.5">
                         Reading &amp; Smart Learning
                       </h3>
-                      <p className="text-xs text-slate-500 leading-relaxed mb-3">
+                      <p className="text-xs text-slate-500 leading-relaxed mb-4">
                         5 Mode Baca berbasis teori kognitif (Syntopical Reading, Dual Coding, Schema Theory) untuk sintesis laporan dan pembelajaran cepat.
                       </p>
                     </div>
-                    <div className="text-xs font-bold text-purple-700 flex items-center gap-1 mt-auto">
-                      Buka Materi Baca <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                    <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
+                      <span>Buka Materi Baca</span>
+                      <ArrowRight size={13} />
                     </div>
                   </div>
 
                   {/* Box 6: Exercise & Practice Lab */}
                   <div 
                     onClick={() => setActiveMenu('exercise')}
-                    className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-[#E5C158] transition-all cursor-pointer group flex flex-col justify-between"
+                    className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-700 flex items-center justify-center font-black font-mono text-xs">
+                      <div className="flex items-center justify-between mb-3.5">
+                        <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-slate-700 transition-colors">
                           06
-                        </div>
-                        <span className="text-[9px] font-mono font-bold uppercase text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded">
-                          Exercise Lab
+                        </span>
+                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
+                          Practice Lab
                         </span>
                       </div>
-                      <h3 className="font-bold text-sm text-slate-900 group-hover:text-rose-700 transition-colors mb-1">
+                      <h3 className="font-bold text-sm text-slate-900 group-hover:text-slate-950 transition-colors mb-1.5">
                         Exercise &amp; Practice Lab
                       </h3>
-                      <p className="text-xs text-slate-500 leading-relaxed mb-3">
+                      <p className="text-xs text-slate-500 leading-relaxed mb-4">
                         Latihan mandiri &amp; studi kasus interaktif untuk menguji ketajaman prompt Anda dengan benchmark solution dari fasilitator.
                       </p>
                     </div>
-                    <div className="text-xs font-bold text-rose-700 flex items-center gap-1 mt-auto">
-                      Mulai Latihan <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+                    <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
+                      <span>Mulai Latihan</span>
+                      <ArrowRight size={13} />
                     </div>
                   </div>
 
@@ -979,14 +988,14 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
               {/* Bottom Card for 1,000+ Basic Prompt Vault */}
               <div 
                 onClick={() => setActiveMenu('vault')}
-                className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 hover:border-[#E5C158] transition-all cursor-pointer flex items-center justify-between gap-4 group"
+                className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer flex items-center justify-between gap-4 group"
               >
                 <div className="flex items-center gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold">
                     <Library size={18} />
                   </div>
                   <div>
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-[#9A7920] transition-colors">
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-slate-950 transition-colors">
                       Basic Prompt Library (1.000+ Vault)
                     </h4>
                     <p className="text-[11px] text-slate-500">
@@ -994,8 +1003,9 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                     </p>
                   </div>
                 </div>
-                <div className="text-xs font-bold text-slate-700 flex items-center gap-1 shrink-0">
-                  Buka Basic Library <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+                <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 shrink-0 group-hover:text-slate-950 group-hover:gap-2 transition-all">
+                  <span>Buka Basic Library</span>
+                  <ArrowRight size={13} />
                 </div>
               </div>
 
@@ -1050,23 +1060,23 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                   return (
                     <div 
                       key={item.id}
-                      className="bg-white rounded-2xl border border-slate-200 p-4 hover:border-[#E5C158] transition-all flex flex-col justify-between"
+                      className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-400 transition-all flex flex-col justify-between shadow-sm"
                     >
                       <div>
-                        {/* Meta Header with Simple Star (⭐ 9.5) */}
-                        <div className="flex items-center justify-between gap-2 mb-2">
+                        {/* Meta Header with Simple Star */}
+                        <div className="flex items-center justify-between gap-2 mb-2.5">
                           <div className="flex items-center gap-1.5">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-600">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200/60">
                               #{item.departmentTag}
                             </span>
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-50 text-emerald-700">
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200/60">
                               v{item.currentVersion}
                             </span>
                           </div>
 
                           {/* Minimalist Star Rating */}
-                          <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60">
-                            <Star size={11} className="text-amber-600 fill-amber-500" />
+                          <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
+                            <Star size={11} className="text-[#C9A23E] fill-[#C9A23E]" />
                             <span>{item.score.toFixed(1)}</span>
                           </div>
                         </div>
@@ -1080,7 +1090,7 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                         </p>
 
                         {/* Clean Short Excerpt */}
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 mb-3 text-xs font-mono text-slate-700 line-clamp-3">
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-3 text-xs font-mono text-slate-700 line-clamp-3">
                           {latest.promptText}
                         </div>
                       </div>
@@ -1091,9 +1101,9 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                           {hasBeforeAfter && (
                             <button
                               onClick={() => setComparingPrompt(item)}
-                              className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs flex items-center gap-1 transition-colors"
+                              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1 transition-colors"
                             >
-                              <TrendingUp size={11} className="text-amber-700" />
+                              <TrendingUp size={11} className="text-slate-600" />
                               Before vs After
                             </button>
                           )}
@@ -1110,7 +1120,7 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                           onClick={() => handleCopy(latest.promptText, item.id)}
                           className={`px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition-all ${
                             copiedId === item.id
-                              ? 'bg-emerald-600 text-white'
+                              ? 'bg-slate-800 text-[#E5C158]'
                               : 'bg-[#141210] hover:bg-slate-800 text-white'
                           }`}
                         >
@@ -1207,81 +1217,81 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
 
                 <div className="space-y-3 pt-1">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1"><span className="text-[#C9A23E]">A -</span> Actor & Audience (Peran & Sasaran)</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">A -</span> Actor & Audience (Peran & Sasaran)</label>
                     <textarea
                       rows={2}
                       placeholder="Bertindaklah sebagai Senior Procurement Manager. Audiens adalah Direktur Vendor..."
                       value={actionData.a}
                       onChange={(e) => setActionData({ ...actionData, a: e.target.value })}
-                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C9A23E]"
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1"><span className="text-[#C9A23E]">C -</span> Context & Conditions (Situasi Bisnis)</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">C -</span> Context & Conditions (Situasi Bisnis)</label>
                     <textarea
                       rows={2}
                       placeholder="Kemitraan berjalan 2 tahun. Ada pemotongan budget 15% dari direksi..."
                       value={actionData.c}
                       onChange={(e) => setActionData({ ...actionData, c: e.target.value })}
-                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C9A23E]"
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1"><span className="text-[#C9A23E]">T -</span> Target & Task (Tugas yang Dihasilkan)</label>
+                    <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">T -</span> Target & Task (Tugas yang Dihasilkan)</label>
                     <textarea
                       rows={2}
                       placeholder="Susun email negosiasi perpanjangan kontrak dengan opsi trade-off..."
                       value={actionData.t}
                       onChange={(e) => setActionData({ ...actionData, t: e.target.value })}
-                      className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C9A23E]"
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
                     />
                   </div>
 
                   {builderType === 'ACTIONS' && (
                     <>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1"><span className="text-[#C9A23E]">I -</span> Intention & Impact (Dampak Psikologis / Bisnis)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">I -</span> Intention & Impact (Dampak Psikologis / Bisnis)</label>
                         <textarea
                           rows={2}
                           placeholder="Membangun kemitraan jangka panjang win-win..."
                           value={actionData.i}
                           onChange={(e) => setActionData({ ...actionData, i: e.target.value })}
-                          className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C9A23E]"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1"><span className="text-[#C9A23E]">O -</span> Output & Organization (Format Minto / Struktur)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">O -</span> Output & Organization (Format Minto / Struktur)</label>
                         <textarea
                           rows={2}
                           placeholder="Format Minto Pyramid (SCQA). Maksimal 4 paragraf lugas..."
                           value={actionData.o}
                           onChange={(e) => setActionData({ ...actionData, o: e.target.value })}
-                          className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C9A23E]"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1"><span className="text-[#C9A23E]">N -</span> Negatives (Pantangan & Batasan Halusinasi)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">N -</span> Negatives (Pantangan & Batasan Halusinasi)</label>
                         <textarea
                           rows={2}
                           placeholder="DILARANG mengancam pemutusan kontrak sepihak..."
                           value={actionData.n}
                           onChange={(e) => setActionData({ ...actionData, n: e.target.value })}
-                          className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C9A23E]"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1"><span className="text-[#C9A23E]">S -</span> Steps (Urutan Logika AI)</label>
+                        <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">S -</span> Steps (Urutan Logika AI)</label>
                         <textarea
                           rows={2}
                           placeholder="1. Beri apresiasi SLA, 2. Paparkan konteks, 3. Tawarkan opsi multi-year..."
                           value={actionData.s}
                           onChange={(e) => setActionData({ ...actionData, s: e.target.value })}
-                          className="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C9A23E]"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
                         />
                       </div>
                     </>
@@ -1297,7 +1307,7 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                     }}
                     className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold flex items-center gap-1.5"
                   >
-                    {copiedId === 'preview-builder' ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                    {copiedId === 'preview-builder' ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
                     Salin Formula
                   </button>
 
@@ -1320,8 +1330,11 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
           {activeMenu === 'community' && (
             <div className="space-y-5 animate-in fade-in duration-300">
               
-              <div className="bg-white p-4 rounded-2xl border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-sm">
                 <div>
+                  <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider block mb-0.5">
+                    Peer Learning
+                  </span>
                   <h2 className="text-sm font-bold text-slate-900">Prompt Community</h2>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Jelajahi dan adaptasi formula teruji dari rekan kerja ke dalam jurnal pribadi Anda.
@@ -1335,12 +1348,12 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                   return (
                     <div 
                       key={item.id}
-                      className="bg-white rounded-2xl border border-slate-200 p-4 hover:border-[#E5C158] transition-all flex flex-col justify-between"
+                      className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-400 transition-all flex flex-col justify-between shadow-sm"
                     >
                       <div>
-                        <div className="flex items-center justify-between gap-2 mb-2">
+                        <div className="flex items-center justify-between gap-2 mb-2.5">
                           <div className="flex items-center gap-1.5">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-600">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200/60">
                               #{item.departmentTag}
                             </span>
                             <span className="text-[11px] text-slate-500">
@@ -1348,8 +1361,8 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60">
-                            <Star size={11} className="text-amber-600 fill-amber-500" />
+                          <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
+                            <Star size={11} className="text-[#C9A23E] fill-[#C9A23E]" />
                             <span>{item.score.toFixed(1)}</span>
                           </div>
                         </div>
@@ -1361,7 +1374,7 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                           {item.description}
                         </p>
 
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 mb-3 text-xs font-mono text-slate-700 line-clamp-3">
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-3 text-xs font-mono text-slate-700 line-clamp-3">
                           {latest.promptText}
                         </div>
                       </div>
@@ -1369,9 +1382,9 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                       <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
                         <button
                           onClick={() => adoptToMyJournal(item)}
-                          className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs flex items-center gap-1 transition-colors"
+                          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1 transition-colors"
                         >
-                          <BookmarkCheck size={12} className="text-amber-700" />
+                          <BookmarkCheck size={12} className="text-slate-600" />
                           Adaptasi ke Jurnal
                         </button>
 
@@ -1379,7 +1392,7 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                           onClick={() => handleCopy(latest.promptText, `comm-${item.id}`)}
                           className={`px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition-all ${
                             copiedId === `comm-${item.id}`
-                              ? 'bg-emerald-600 text-white'
+                              ? 'bg-slate-800 text-[#E5C158]'
                               : 'bg-[#141210] hover:bg-slate-800 text-white'
                           }`}
                         >
@@ -1402,11 +1415,11 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
           {activeMenu === 'techniques' && (
             <div className="space-y-5 animate-in fade-in duration-300">
               
-              <div className="bg-white p-5 rounded-2xl border border-slate-200">
-                <span className="text-[10px] font-mono font-bold uppercase text-[#C9A23E] tracking-wider">
-                  Framework & Pola Instruksi
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                  Framework &amp; Pola Instruksi
                 </span>
-                <h2 className="text-lg font-bold text-slate-900 mt-1">Prompting Techniques</h2>
+                <h2 className="text-lg font-bold text-slate-900 mt-0.5">Prompting Techniques</h2>
                 <p className="text-xs text-slate-500 mt-0.5">
                   Kuasai pola instruksi dari zero-shot hingga teknik presisi Jeff Su dan The Brutal Method.
                 </p>
@@ -1414,35 +1427,35 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {promptingTechniquesData.map(tech => (
-                  <div key={tech.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between">
+                  <div key={tech.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">
+                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
                           {tech.tag}
                         </span>
                       </div>
                       <h3 className="font-bold text-sm text-slate-900 mb-1">{tech.title}</h3>
-                      <p className="text-xs text-slate-600 mb-3">{tech.desc}</p>
+                      <p className="text-xs text-slate-600 mb-3 leading-relaxed">{tech.desc}</p>
                       
                       <div className="space-y-1 mb-3">
                         {tech.steps.map((s, i) => (
                           <div key={i} className="text-[11px] text-slate-500 flex items-center gap-1.5">
-                            <span className="w-3.5 h-3.5 rounded-full bg-slate-100 flex items-center justify-center font-mono text-[9px] font-bold text-slate-700">{i + 1}</span>
+                            <span className="w-4 h-4 rounded bg-slate-100 flex items-center justify-center font-mono text-[9px] font-bold text-slate-700">{i + 1}</span>
                             {s}
                           </div>
                         ))}
                       </div>
 
-                      <div className="bg-slate-50 rounded-xl p-3 text-xs font-mono text-slate-700 mb-3 whitespace-pre-line leading-relaxed">
+                      <div className="bg-slate-50 rounded-xl p-3 text-xs font-mono text-slate-700 mb-3 whitespace-pre-line leading-relaxed border border-slate-200/60">
                         {tech.example}
                       </div>
                     </div>
 
                     <button
                       onClick={() => handleCopy(tech.example, tech.id)}
-                      className="w-full py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1 transition-colors"
+                      className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1 transition-colors"
                     >
-                      {copiedId === tech.id ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                      {copiedId === tech.id ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
                       Salin Formula Template
                     </button>
                   </div>
@@ -1458,11 +1471,11 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
           {activeMenu === 'reading-learning' && (
             <div className="space-y-5 animate-in fade-in duration-300">
               
-              <div className="bg-white p-5 rounded-2xl border border-slate-200">
-                <span className="text-[10px] font-mono font-bold uppercase text-[#C9A23E] tracking-wider">
-                  Materi Day 1 & Day 2
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                  Materi Day 1 &amp; Day 2
                 </span>
-                <h2 className="text-lg font-bold text-slate-900 mt-1">Reading & Learning Tactics</h2>
+                <h2 className="text-lg font-bold text-slate-900 mt-0.5">Reading &amp; Learning Tactics</h2>
                 <p className="text-xs text-slate-500 mt-0.5">
                   5 Mode Pembelajaran Kognitif untuk mendekonstruksi dokumen tebal menjadi model mental terapan.
                 </p>
@@ -1470,11 +1483,11 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {readingModesData.map(mode => (
-                  <div key={mode.num} className="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col justify-between">
+                  <div key={mode.num} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-lg font-black font-mono text-[#C9A23E]">{mode.num}</span>
-                        <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+                        <span className="text-sm font-mono font-bold text-slate-400">{mode.num}</span>
+                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
                           {mode.tag}
                         </span>
                       </div>
@@ -1485,9 +1498,9 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
 
                     <button
                       onClick={() => handleCopy(mode.prompt, `mode-${mode.num}`)}
-                      className="w-full py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1 transition-colors"
+                      className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1 transition-colors"
                     >
-                      {copiedId === `mode-${mode.num}` ? <Check size={12} className="text-emerald-600" /> : <Copy size={12} />}
+                      {copiedId === `mode-${mode.num}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
                       Salin Formula
                     </button>
                   </div>
@@ -1503,12 +1516,12 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
           {activeMenu === 'exercise' && (
             <div className="space-y-5 animate-in fade-in duration-300">
               
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 flex items-center justify-between">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 flex items-center justify-between shadow-sm">
                 <div>
-                  <span className="text-[10px] font-mono font-bold uppercase text-rose-700 tracking-wider">
+                  <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
                     Interactive Practice
                   </span>
-                  <h2 className="text-lg font-bold text-slate-900 mt-0.5">Exercise & Practice Lab</h2>
+                  <h2 className="text-lg font-bold text-slate-900 mt-0.5">Exercise &amp; Practice Lab</h2>
                   <p className="text-xs text-slate-500 mt-0.5">
                     Latihan mandiri membedah kasus bisnis nyata dan menguji ketajaman formulasi prompt Anda.
                   </p>
@@ -1517,19 +1530,21 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {exercisesData.map(ex => (
-                  <div key={ex.id} className="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col justify-between">
+                  <div key={ex.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rose-50 text-rose-700">
+                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
                           #{ex.department}
                         </span>
                       </div>
                       <h3 className="font-bold text-sm text-slate-900 mb-2">{ex.title}</h3>
                       <p className="text-xs text-slate-600 leading-relaxed mb-3">{ex.scenario}</p>
                       
-                      <div className="bg-rose-50/60 border border-rose-100 rounded-xl p-2.5 text-xs text-rose-950 mb-3">
-                        <strong className="block text-[10px] font-mono uppercase text-rose-800 mb-1">Contoh Prompt Buruk (Before):</strong>
-                        "{ex.poorPrompt}"
+                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 mb-3">
+                        <span className="block text-[10px] font-mono uppercase text-slate-400 font-bold mb-1">
+                          Contoh Prompt Awal (Ad-hoc):
+                        </span>
+                        <span className="italic font-mono text-slate-600">"{ex.poorPrompt}"</span>
                       </div>
                     </div>
 
@@ -1538,7 +1553,7 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                         setActiveExercise(ex);
                         setShowExerciseSolution(false);
                       }}
-                      className="w-full py-1.5 rounded-lg bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold transition-all"
+                      className="w-full py-2 rounded-xl bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold transition-all"
                     >
                       Buka Lembar Latihan
                     </button>
@@ -1659,7 +1674,7 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
       {/* ========================================================================= */}
       {comparingPrompt && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
             <div className="px-5 py-3.5 bg-[#141210] text-white flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-mono text-[#E5C158] uppercase tracking-wider">
@@ -1672,18 +1687,18 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
               </button>
             </div>
 
-            <div className="p-5 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#F8F6F1]">
+            <div className="p-5 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#f5f6f9]">
               <div className="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col">
                 <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                  <span className="text-xs font-mono font-bold text-slate-600">
-                    🔴 VERSI 1 (BEFORE)
+                  <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
+                    Versi 1 (Before)
                   </span>
                   <span className="text-[10px] text-slate-400 font-mono">{comparingPrompt.versions[0].date}</span>
                 </div>
                 <div className="text-[11px] font-bold text-slate-500 mb-2">
                   Pola: {comparingPrompt.versions[0].frameworkUsed}
                 </div>
-                <div className="bg-slate-50 rounded-xl p-3 text-xs font-mono text-slate-800 whitespace-pre-line leading-relaxed flex-1">
+                <div className="bg-slate-50 rounded-xl p-3 text-xs font-mono text-slate-800 whitespace-pre-line leading-relaxed flex-1 border border-slate-200/60">
                   {comparingPrompt.versions[0].promptText}
                 </div>
                 {comparingPrompt.versions[0].notes && (
@@ -1696,21 +1711,21 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
               {(() => {
                 const latest = comparingPrompt.versions[comparingPrompt.versions.length - 1];
                 return (
-                  <div className="bg-white rounded-2xl border-2 border-[#E5C158] p-4 flex flex-col">
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-amber-100">
-                      <span className="text-xs font-mono font-bold text-[#8F6F1A]">
-                        🟢 VERSI {latest.version} (AFTER)
+                  <div className="bg-white rounded-2xl border-2 border-slate-900 p-4 flex flex-col shadow-sm">
+                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                      <span className="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider">
+                        Versi {latest.version} (After)
                       </span>
                       <span className="text-[10px] text-slate-400 font-mono">{latest.date}</span>
                     </div>
-                    <div className="text-[11px] font-bold text-[#8F6F1A] mb-2">
+                    <div className="text-[11px] font-bold text-slate-800 mb-2">
                       Pola: {latest.frameworkUsed}
                     </div>
-                    <div className="bg-amber-50/40 rounded-xl p-3 text-xs font-mono text-slate-900 whitespace-pre-line leading-relaxed flex-1">
+                    <div className="bg-slate-50 rounded-xl p-3 text-xs font-mono text-slate-900 whitespace-pre-line leading-relaxed flex-1 border border-slate-200/60">
                       {latest.promptText}
                     </div>
                     {latest.notes && (
-                      <p className="text-[11px] text-emerald-800 mt-2 font-medium">
+                      <p className="text-[11px] text-slate-700 mt-2 font-medium bg-slate-100 p-2.5 rounded-xl border border-slate-200/60">
                         <strong>Perubahan Kunci:</strong> {latest.notes}
                       </p>
                     )}
@@ -1722,7 +1737,7 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
             <div className="px-5 py-2.5 bg-white border-t border-slate-200 flex justify-end">
               <button
                 onClick={() => setComparingPrompt(null)}
-                className="px-4 py-1.5 rounded-xl bg-[#141210] text-white text-xs font-bold"
+                className="px-4 py-1.5 rounded-xl bg-[#141210] hover:bg-slate-800 text-white text-xs font-bold"
               >
                 Tutup
               </button>
@@ -1736,7 +1751,7 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
       {/* ========================================================================= */}
       {activeExercise && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
             <div className="px-5 py-3.5 bg-[#141210] text-white flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-mono text-[#E5C158] uppercase tracking-wider">
@@ -1758,8 +1773,10 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
               </div>
 
               <div>
-                <h4 className="text-xs font-bold text-rose-800 mb-1">Prompt Awal yang Buruk (Ad-hoc):</h4>
-                <p className="text-xs font-mono text-rose-900 bg-rose-50 p-2.5 rounded-xl border border-rose-100">
+                <h4 className="text-xs font-mono font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Prompt Awal (Ad-hoc):
+                </h4>
+                <p className="text-xs font-mono text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
                   "{activeExercise.poorPrompt}"
                 </p>
               </div>
@@ -1768,7 +1785,7 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
                 <h4 className="text-xs font-bold text-slate-800 mb-1.5">Panduan Kunci:</h4>
                 <div className="flex flex-wrap gap-1.5">
                   {activeExercise.hints.map((h, i) => (
-                    <span key={i} className="text-[11px] font-medium bg-amber-50 text-amber-900 px-2 py-0.5 rounded border border-amber-200/60">
+                    <span key={i} className="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200/60">
                       ✓ {h}
                     </span>
                   ))}
@@ -1777,16 +1794,16 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
 
               {showExerciseSolution ? (
                 <div className="space-y-2 pt-2 border-t border-slate-100 animate-in fade-in">
-                  <h4 className="text-xs font-bold text-emerald-800 flex items-center gap-1">
-                    <CheckCircle2 size={13} className="text-emerald-600" />
+                  <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                    <CheckCircle2 size={13} className="text-slate-700" />
                     Solusi Benchmark Fasilitator AIF:
                   </h4>
-                  <pre className="text-xs font-mono text-slate-800 bg-emerald-50/40 p-3 rounded-xl border border-emerald-200 whitespace-pre-line leading-relaxed">
+                  <pre className="text-xs font-mono text-slate-100 bg-slate-900 p-3.5 rounded-xl border border-slate-800 whitespace-pre-line leading-relaxed">
                     {activeExercise.benchmarkSolution}
                   </pre>
                   <button
                     onClick={() => handleCopy(activeExercise.benchmarkSolution, 'ex-sol')}
-                    className="px-3 py-1.5 rounded-lg bg-[#141210] text-[#E5C158] text-xs font-bold flex items-center gap-1"
+                    className="px-3 py-1.5 rounded-lg bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold flex items-center gap-1"
                   >
                     {copiedId === 'ex-sol' ? <Check size={12} /> : <Copy size={12} />}
                     Salin Solusi ke Clipboard
@@ -1807,7 +1824,7 @@ export default function PromptDatabaseView({ onBack }: { onBack?: () => void }) 
             <div className="px-5 py-2.5 bg-slate-50 border-t border-slate-200 flex justify-end">
               <button
                 onClick={() => setActiveExercise(null)}
-                className="px-4 py-1.5 rounded-xl bg-slate-800 text-white text-xs font-bold"
+                className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold"
               >
                 Tutup Latihan
               </button>
