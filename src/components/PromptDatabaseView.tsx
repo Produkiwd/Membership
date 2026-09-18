@@ -762,6 +762,62 @@ export default function App({ onBack }: { onBack?: () => void }) {
   const [comparingPrompt, setComparingPrompt] = useState<JournalPrompt | null>(null);
   const [activeExercise, setActiveExercise] = useState<typeof exercisesData[0] | null>(null);
   const [showExerciseSolution, setShowExerciseSolution] = useState(false);
+  const [reviewingPrompt, setReviewingPrompt] = useState<JournalPrompt | null>(null);
+  const [reviewScore, setReviewScore] = useState<number>(9.5);
+  const [reviewFeedback, setReviewFeedback] = useState<string>('');
+
+  const handleOpenReview = (item: JournalPrompt) => {
+    const latest = item.versions[item.versions.length - 1];
+    setReviewingPrompt(item);
+    setReviewScore(latest.facilitatorScore || item.score || 9.0);
+    setReviewFeedback(latest.facilitatorFeedback || '');
+  };
+
+  const handleSaveReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewingPrompt) return;
+
+    setJournalPrompts(prev => prev.map(item => {
+      if (item.id === reviewingPrompt.id) {
+        const updatedVersions = item.versions.map((v, i) => {
+          if (i === item.versions.length - 1) {
+            return {
+              ...v,
+              facilitatorScore: reviewScore,
+              facilitatorFeedback: reviewFeedback
+            };
+          }
+          return v;
+        });
+
+        return {
+          ...item,
+          score: reviewScore,
+          versions: updatedVersions
+        };
+      }
+      return item;
+    }));
+
+    if (comparingPrompt && comparingPrompt.id === reviewingPrompt.id) {
+      setComparingPrompt(prev => {
+        if (!prev) return null;
+        const updatedVersions = prev.versions.map((v, i) => {
+          if (i === prev.versions.length - 1) {
+            return {
+              ...v,
+              facilitatorScore: reviewScore,
+              facilitatorFeedback: reviewFeedback
+            };
+          }
+          return v;
+        });
+        return { ...prev, score: reviewScore, versions: updatedVersions };
+      });
+    }
+
+    setReviewingPrompt(null);
+  };
 
   // Builder Form State
   const [iteratingPromptId, setIteratingPromptId] = useState<string | null>(null);
@@ -1514,7 +1570,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
                       {/* Card Footer Actions */}
                       <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex flex-wrap items-center gap-1.5">
                           {hasBeforeAfter && (
                             <button
                               onClick={() => setComparingPrompt(item)}
@@ -1530,6 +1586,14 @@ export default function App({ onBack }: { onBack?: () => void }) {
                           >
                             <RefreshCw size={10} className="text-slate-600" />
                             v{item.currentVersion + 1}
+                          </button>
+                          <button
+                            onClick={() => handleOpenReview(item)}
+                            className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 font-bold text-xs flex items-center gap-1 transition-colors"
+                            title="Beri Nilai & Evaluasi Fasilitator"
+                          >
+                            <Award size={11} className="text-[#C9A23E]" />
+                            Review Fasilitator
                           </button>
                         </div>
 
@@ -1797,13 +1861,23 @@ export default function App({ onBack }: { onBack?: () => void }) {
                       </div>
 
                       <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                        <button
-                          onClick={() => adoptToMyJournal(item)}
-                          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1 transition-colors"
-                        >
-                          <BookmarkCheck size={12} className="text-slate-600" />
-                          Adaptasi ke Jurnal
-                        </button>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <button
+                            onClick={() => adoptToMyJournal(item)}
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1 transition-colors"
+                          >
+                            <BookmarkCheck size={12} className="text-slate-600" />
+                            Adaptasi ke Jurnal
+                          </button>
+                          <button
+                            onClick={() => handleOpenReview(item)}
+                            className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 font-bold text-xs flex items-center gap-1 transition-colors"
+                            title="Beri Nilai & Evaluasi Fasilitator"
+                          >
+                            <Award size={11} className="text-[#C9A23E]" />
+                            Review Fasilitator
+                          </button>
+                        </div>
 
                         <button
                           onClick={() => handleCopy(latest.promptText, `comm-${item.id}`)}
@@ -2688,12 +2762,39 @@ export default function App({ onBack }: { onBack?: () => void }) {
                         <strong>Perubahan Kunci:</strong> {latest.notes}
                       </p>
                     )}
+
+                    {(latest.facilitatorScore || latest.facilitatorFeedback) && (
+                      <div className="mt-2.5 p-3 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-bold text-amber-900 flex items-center gap-1 text-[11px]">
+                            <Award size={13} className="text-[#C9A23E]" /> Evaluasi Fasilitator AIF:
+                          </span>
+                          {latest.facilitatorScore && (
+                            <span className="font-mono font-bold text-[#C9A23E] bg-white px-2 py-0.5 rounded border border-amber-200 text-[11px]">
+                              {latest.facilitatorScore.toFixed(1)} ★
+                            </span>
+                          )}
+                        </div>
+                        {latest.facilitatorFeedback && (
+                          <p className="text-slate-700 text-[11px] leading-relaxed italic">
+                            "{latest.facilitatorFeedback}"
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })()}
             </div>
 
-            <div className="px-5 py-2.5 bg-white border-t border-slate-200 flex justify-end">
+            <div className="px-5 py-2.5 bg-white border-t border-slate-200 flex items-center justify-between">
+              <button
+                onClick={() => handleOpenReview(comparingPrompt)}
+                className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 font-bold text-xs flex items-center gap-1.5 transition-colors"
+              >
+                <Award size={12} className="text-[#C9A23E]" />
+                Beri / Edit Nilai Fasilitator
+              </button>
               <button
                 onClick={() => setComparingPrompt(null)}
                 className="px-4 py-1.5 rounded-xl bg-[#141210] hover:bg-slate-800 text-white text-xs font-bold"
@@ -2701,6 +2802,136 @@ export default function App({ onBack }: { onBack?: () => void }) {
                 Tutup
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL: TRAINER / FACILITATOR EVALUATION WORKBENCH */}
+      {/* ========================================================================= */}
+      {reviewingPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
+            
+            {/* Header */}
+            <div className="px-5 py-4 bg-[#141210] text-white flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-mono text-[#E5C158] uppercase tracking-wider flex items-center gap-1.5">
+                  <Award size={12} className="text-[#E5C158]" /> Mode Fasilitator / Trainer
+                </span>
+                <h3 className="text-sm font-bold text-white mt-0.5">
+                  Evaluasi &amp; Penilaian Prompt Peserta
+                </h3>
+              </div>
+              <button onClick={() => setReviewingPrompt(null)} className="text-slate-400 hover:text-white">
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSaveReview} className="p-5 overflow-y-auto space-y-4 flex-1">
+              {/* Target Prompt Info */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-bold text-slate-900">{reviewingPrompt.title}</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200">
+                    #{reviewingPrompt.departmentTag} • v{reviewingPrompt.currentVersion}
+                  </span>
+                </div>
+                <div className="text-[11px] text-slate-500 mb-2">
+                  Penulis: <strong className="text-slate-800">{reviewingPrompt.authorName}</strong>
+                </div>
+                <div className="bg-white p-2.5 rounded-lg border border-slate-200/80 text-xs font-mono text-slate-700 max-h-24 overflow-y-auto">
+                  {reviewingPrompt.versions[reviewingPrompt.versions.length - 1].promptText}
+                </div>
+              </div>
+
+              {/* Score Input (1.0 to 10.0) */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                    <Star size={13} className="text-[#C9A23E] fill-[#C9A23E]" /> Skor Fasilitator (Skala 1.0 - 10.0)
+                  </label>
+                  <span className="font-mono text-base font-black text-slate-900 px-2.5 py-0.5 bg-amber-50 border border-amber-200 rounded-lg text-[#C9A23E]">
+                    {reviewScore.toFixed(1)} ★
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="5.0"
+                  max="10.0"
+                  step="0.1"
+                  value={reviewScore}
+                  onChange={(e) => setReviewScore(parseFloat(e.target.value))}
+                  className="w-full accent-slate-900 cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1">
+                  <span>5.0 (Dasar)</span>
+                  <span>7.5 (Kompeten)</span>
+                  <span>9.0 (Mahir)</span>
+                  <span>10.0 (Mastery)</span>
+                </div>
+              </div>
+
+              {/* Quick Score Chips */}
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { val: 8.5, label: "8.5 - Perlu Penajaman Output" },
+                  { val: 9.0, label: "9.0 - Terstruktur Baik" },
+                  { val: 9.5, label: "9.5 - Sangat Tajam & Leverage Jelas" },
+                  { val: 9.8, label: "9.8 - Kualitas Benchmark" }
+                ].map((chip) => (
+                  <button
+                    type="button"
+                    key={chip.val}
+                    onClick={() => setReviewScore(chip.val)}
+                    className={`text-[10px] font-mono px-2.5 py-1 rounded-lg border transition-all ${
+                      reviewScore === chip.val
+                        ? 'bg-slate-900 text-white border-slate-900 font-bold'
+                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Qualitative Written Feedback */}
+              <div>
+                <label className="block text-xs font-bold text-slate-900 mb-1">
+                  Catatan Evaluasi Formatif Fasilitator:
+                </label>
+                <textarea
+                  rows={3}
+                  value={reviewFeedback}
+                  onChange={(e) => setReviewFeedback(e.target.value)}
+                  placeholder="Berikan apresiasi dan catatan konstruktif (misal: 'Evolusi luar biasa. Penggunaan trade-off multi-year memberikan leverage nyata...')"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#C9A23E] leading-relaxed"
+                />
+                <span className="text-[10px] text-slate-400 block mt-1">
+                  Feedback ini akan otomatis tertera di kartu jurnal peserta dan pada modal Before vs After.
+                </span>
+              </div>
+
+              {/* Buttons */}
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setReviewingPrompt(null)}
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-xl bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold transition-colors shadow-sm flex items-center gap-1.5"
+                >
+                  <Check size={13} />
+                  Simpan Nilai &amp; Feedback
+                </button>
+              </div>
+            </form>
+
           </div>
         </div>
       )}
