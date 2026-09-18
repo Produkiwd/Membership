@@ -31,7 +31,8 @@ export interface JournalPrompt {
   id: string;
   title: string;
   description: string;
-  departmentTag: string; // 'Finance' | 'HR' | 'Strategy' | 'Operations' | 'Marketing' | 'Tech'
+  tag: string; // Dynamic user-defined tag
+  departmentTag?: string; // backwards-compatibility alias
   currentVersion: number;
   versions: PromptVersion[];
   isPublic: boolean;
@@ -43,8 +44,6 @@ export interface JournalPrompt {
 
 // Initial Curated Data (Clean & Realistic - Production)
 const INITIAL_JOURNAL_PROMPTS: JournalPrompt[] = [];
-
-const DEPARTMENT_TAGS = ['Semua', 'Finance', 'HR', 'Strategy', 'Operations', 'Marketing', 'Tech'];
 
 // ============================================================================
 // COMPREHENSIVE CURRICULUM DATASETS (UNTRUNCATED)
@@ -684,7 +683,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
   // Builder Form State
   const [iteratingPromptId, setIteratingPromptId] = useState<string | null>(null);
   const [builderTitle, setBuilderTitle] = useState('');
-  const [builderTag, setBuilderTag] = useState('Finance');
+  const [builderTag, setBuilderTag] = useState('');
   const [builderType, setBuilderType] = useState<'ACTIONS' | 'ACT'>('ACTIONS');
   const [builderNotes, setBuilderNotes] = useState('');
   const [actionData, setActionData] = useState({
@@ -759,6 +758,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
     e.preventDefault();
     const compiled = getCompiledPrompt();
     const today = new Date().toISOString().split('T')[0];
+    const finalTag = (builderTag.trim() || 'Umum');
 
     if (iteratingPromptId) {
       setJournalPrompts(prev => prev.map(item => {
@@ -775,7 +775,8 @@ export default function App({ onBack }: { onBack?: () => void }) {
           return {
             ...item,
             title: builderTitle || item.title,
-            departmentTag: builderTag || item.departmentTag,
+            tag: finalTag,
+            departmentTag: finalTag,
             currentVersion: nextV,
             score: Math.min(9.8, item.score + 0.1),
             updatedAt: today,
@@ -789,7 +790,8 @@ export default function App({ onBack }: { onBack?: () => void }) {
         id: `jp-${Date.now()}`,
         title: builderTitle || 'Prompt Kerja Baru',
         description: builderNotes || 'Prompt terstruktur hasil formula A.C.T.I.O.N.S.',
-        departmentTag: builderTag,
+        tag: finalTag,
+        departmentTag: finalTag,
         currentVersion: 1,
         score: 9.0,
         isPublic: true,
@@ -811,6 +813,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
     setIteratingPromptId(null);
     setBuilderTitle('');
+    setBuilderTag('');
     setBuilderNotes('');
     setActionData({ a: '', c: '', t: '', i: '', o: '', n: '', s: '' });
     setActiveMenu('my-journal');
@@ -820,7 +823,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
   const startIteration = (prompt: JournalPrompt) => {
     setIteratingPromptId(prompt.id);
     setBuilderTitle(prompt.title);
-    setBuilderTag(prompt.departmentTag);
+    setBuilderTag(prompt.tag || prompt.departmentTag || '');
     setBuilderType('ACTIONS');
     setBuilderNotes(`Catatan Perbaikan v${prompt.currentVersion + 1}: `);
     
@@ -841,10 +844,13 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
   const adoptToMyJournal = (item: JournalPrompt) => {
     const latest = item.versions[item.versions.length - 1];
+    const itemTag = item.tag || item.departmentTag || 'Umum';
     const adopted: JournalPrompt = {
       ...item,
       id: `jp-adp-${Date.now()}`,
       title: `${item.title} (Adaptasi Saya)`,
+      tag: itemTag,
+      departmentTag: itemTag,
       authorName: `Saya (Adaptasi dari ${item.authorName})`,
       currentVersion: 1,
       createdAt: new Date().toISOString().split('T')[0],
@@ -864,11 +870,23 @@ export default function App({ onBack }: { onBack?: () => void }) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Dynamic tags derived from existing prompts (no predetermined fixed tags)
+  const existingTags = Array.from(
+    new Set(
+      journalPrompts
+        .map(item => (item.tag || item.departmentTag || '').trim())
+        .filter(Boolean)
+    )
+  );
+  const availableFilterTags = ['Semua', ...existingTags];
+
   // Filtered lists
   const filteredJournal = journalPrompts.filter(item => {
-    const matchTag = selectedTag === 'Semua' || item.departmentTag === selectedTag;
+    const itemTag = item.tag || item.departmentTag || 'Umum';
+    const matchTag = selectedTag === 'Semua' || itemTag.toLowerCase() === selectedTag.toLowerCase();
     const matchQ = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                   item.description.toLowerCase().includes(searchQuery.toLowerCase());
+                   item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                   itemTag.toLowerCase().includes(searchQuery.toLowerCase());
     return matchTag && matchQ;
   });
 
@@ -1227,7 +1245,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                         Prompt Community
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                        Jelajahi dan adaptasi formula teruji dari rekan komunitas lintas divisi lengkap dengan feedback dan skor kurasi fasilitator.
+                        Jelajahi dan adaptasi formula teruji dari rekan komunitas lintas topik dan bidang kerja lengkap dengan feedback dan skor kurasi fasilitator.
                       </p>
                     </div>
                     <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
@@ -1357,14 +1375,14 @@ export default function App({ onBack }: { onBack?: () => void }) {
               <div className="bg-white p-3.5 rounded-2xl border border-slate-200 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
                 <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 no-scrollbar">
                   <span className="text-[11px] font-mono font-bold uppercase text-slate-400 mr-1 flex items-center gap-1">
-                    <Tag size={11} /> Divisi:
+                    <Tag size={11} /> Tag:
                   </span>
-                  {DEPARTMENT_TAGS.map(tag => (
+                  {availableFilterTags.map(tag => (
                     <button
                       key={tag}
                       onClick={() => setSelectedTag(tag)}
                       className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                        selectedTag === tag
+                        selectedTag.toLowerCase() === tag.toLowerCase()
                           ? 'bg-[#141210] text-white'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
@@ -1424,7 +1442,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                           <div className="flex items-center justify-between gap-2 mb-2.5">
                             <div className="flex items-center gap-1.5">
                               <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200/60">
-                                #{item.departmentTag}
+                                #{item.tag || item.departmentTag || 'Umum'}
                               </span>
                               <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200/60">
                                 v{item.currentVersion}
@@ -1547,16 +1565,44 @@ export default function App({ onBack }: { onBack?: () => void }) {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Divisi</label>
-                    <select
-                      value={builderTag}
-                      onChange={(e) => setBuilderTag(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C9A23E]"
-                    >
-                      {DEPARTMENT_TAGS.filter(t => t !== 'Semua').map(t => (
-                        <option key={t} value={t}>{t}</option>
-                      ))}
-                    </select>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-xs font-bold text-slate-700">Tag / Kategori</label>
+                      <span className="text-[10px] text-slate-400">Bebas buat tag baru</span>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Ketik tag bebas (cth: Negosiasi, Strategi, People, Sales, Tech...)"
+                        value={builderTag}
+                        onChange={(e) => setBuilderTag(e.target.value)}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C9A23E]"
+                        list="existing-tags-datalist"
+                      />
+                      <datalist id="existing-tags-datalist">
+                        {existingTags.map(t => (
+                          <option key={t} value={t} />
+                        ))}
+                      </datalist>
+                    </div>
+                    {existingTags.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                        <span className="text-[10px] text-slate-400 font-mono">Pilih dari tag yang ada:</span>
+                        {existingTags.map(t => (
+                          <button
+                            key={t}
+                            type="button"
+                            onClick={() => setBuilderTag(t)}
+                            className={`text-[10px] px-2 py-0.5 rounded-md border transition-all ${
+                              builderTag.toLowerCase() === t.toLowerCase()
+                                ? 'bg-[#141210] text-white border-[#141210]'
+                                : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+                            }`}
+                          >
+                            #{t}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1743,7 +1789,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                           <div className="flex items-center justify-between gap-2 mb-2.5">
                             <div className="flex items-center gap-1.5">
                               <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200/60">
-                                #{item.departmentTag}
+                                #{item.tag || item.departmentTag || 'Umum'}
                               </span>
                               <span className="text-[11px] text-slate-500">
                                 oleh: <strong className="text-slate-800">{item.authorName}</strong>
@@ -2744,7 +2790,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-bold text-slate-900">{reviewingPrompt.title}</span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200">
-                    #{reviewingPrompt.departmentTag} • v{reviewingPrompt.currentVersion}
+                    #{reviewingPrompt.tag || reviewingPrompt.departmentTag || 'Umum'} • v{reviewingPrompt.currentVersion}
                   </span>
                 </div>
                 <div className="text-[11px] text-slate-500 mb-2">
