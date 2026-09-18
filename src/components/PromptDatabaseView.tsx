@@ -41,148 +41,8 @@ export interface JournalPrompt {
   updatedAt: string;
 }
 
-// Initial Curated Data (Clean & Realistic)
-const INITIAL_JOURNAL_PROMPTS: JournalPrompt[] = [
-  {
-    id: 'jp-1',
-    title: 'Negosiasi Kontrak Vendor Cloud & IT',
-    description: 'Strategi efisiensi biaya tahunan 15% tanpa menurunkan SLA uptime 99.9%.',
-    departmentTag: 'Finance',
-    currentVersion: 2,
-    score: 9.5,
-    isPublic: true,
-    authorName: 'Juli (Fasilitator)',
-    createdAt: '2026-09-10',
-    updatedAt: '2026-09-14',
-    versions: [
-      {
-        version: 1,
-        date: 'Day 1 (Before)',
-        frameworkUsed: 'Draft Awal (Ad-hoc)',
-        promptText: 'Tolong buatkan email negosiasi perpanjangan kontrak vendor IT. Minta diskon harga 15% karena anggaran tahun ini dipotong dewan direksi. Nada sopan dan profesional.',
-        notes: 'Hasil generik, terkesan meminta-minta tanpa posisi tawar (trade-off) yang jelas.',
-      },
-      {
-        version: 2,
-        date: 'Day 4 (After)',
-        frameworkUsed: 'A.C.T.I.O.N.S. & Minto SCQA',
-        promptText: `[A - Actor & Audience]
-Bertindaklah sebagai Senior Procurement & Strategic Sourcing Manager. Audiens adalah Commercial Director Vendor Cloud.
-
-[C - Context & Conditions]
-Kemitraan berjalan 2 tahun dengan SLA memuaskan. Ada arahan rasionalisasi budget 15% dari direksi. Kontrak berakhir dalam 45 hari.
-
-[T - Target & Task]
-Susun email negosiasi kontrak 2 tahun ke depan dengan penyesuaian tarif 15% atau volume diskon tambahan tanpa menurunkan SLA 99.9%.
-
-[I - Intention & Impact]
-Kemitraan win-win jangka panjang tanpa kesan krisis likuiditas, melainkan disiplin efisiensi bersama.
-
-[O - Output & Organization]
-Format Minto Pyramid (SCQA). Maksimal 4 paragraf lugas. Berikan 3 opsi skema fleksibilitas penutup.
-
-[N - Negatives & Non-negotiables]
-DILARANG mengancam pemutusan kontrak sepihak. Jangan mengutip data biaya rahasia kompetitor lain.
-
-[S - Steps & Sequencing]
-1. Apresiasi SLA 2 tahun terakhir.
-2. Paparkan konteks pembaruan strategi korporat.
-3. Tawarkan perpanjangan multi-year sebagai kompensasi harga.
-4. Undang sesi diskusi 20 menit minggu ini.`,
-        notes: 'Ditambahkan skema trade-off multi-year, struktur SCQA, dan batasan nada non-konfrontatif.',
-        facilitatorScore: 9.5,
-        facilitatorFeedback: 'Evolusi luar biasa. Penggunaan trade-off multi-year memberikan leverage nyata bagi kedua belah pihak.'
-      }
-    ]
-  },
-  {
-    id: 'jp-2',
-    title: 'Memo Internal: Restrukturisasi Tim Berbasis AI',
-    description: 'Komunikasi perubahan sensitif untuk menjaga rasa aman psikologis dan kestabilan kerja.',
-    departmentTag: 'HR',
-    currentVersion: 2,
-    score: 9.6,
-    isPublic: true,
-    authorName: 'Mariyah (HR Lead)',
-    createdAt: '2026-09-12',
-    updatedAt: '2026-09-15',
-    versions: [
-      {
-        version: 1,
-        date: 'Day 1 (Before)',
-        frameworkUsed: 'Draft Awal',
-        promptText: 'Buatkan memo resmi dari HRD untuk semua karyawan tentang restrukturisasi divisi teknologi dan pemindahan beberapa posisi.',
-        notes: 'Kaku dan berpotensi memicu rumor liar di kalangan staf.',
-      },
-      {
-        version: 2,
-        date: 'Day 3 (After)',
-        frameworkUsed: 'A.C.T.I.O.N.S. & Crucial Conversations',
-        promptText: `[A - Actor & Audience]
-Bertindaklah sebagai Chief People Officer bersama CEO. Audiens adalah seluruh staf dan manajer lintas divisi.
-
-[C - Context & Conditions]
-Transformasi ke model cross-functional squad berbasis AI. Sebagian peran bergeser fungsi tanpa adanya PHK.
-
-[T - Target & Task]
-Susun memo internal yang mengumumkan restrukturisasi tim ini secara transparan, empatik, dan menenangkan.
-
-[I - Intention & Impact]
-Meredam kecemasan (psychological safety) dan menegaskan adanya jalur reskilling yang didampingi penuh manajemen.
-
-[O - Output & Organization]
-1. Mengapa kita berubah sekarang.
-2. Apa yang berubah vs apa yang TETAP UTUH (stabilitas).
-3. Jadwal sesi townhall terbuka per divisi.
-
-[N - Negatives & Non-negotiables]
-HINDARI jargon dingin ('downsizing', 'optimalisasi aset manusia'). Dilarang membuat janji palsu.
-
-[S - Steps & Sequencing]
-Buka dengan apresiasi dedikasi, jelaskan visi pertumbuhan, lalu berikan transparansi roadmap langkah berikutnya.`,
-        notes: 'Fokus pada Psychological Safety, kepastian tidak ada PHK, dan jadwal sesi dialog terbuka.',
-        facilitatorScore: 9.6,
-        facilitatorFeedback: 'Nuansa empati pemimpin sangat terasa. Menghilangkan kecemasan tanpa kehilangan ketegasan arah.'
-      }
-    ]
-  },
-  {
-    id: 'jp-3',
-    title: 'Sintesis Dokumen Riset Pasar 80 Halaman',
-    description: 'Mengekstrak intisari laporan panjang menjadi matriks keputusan 3 skenario untuk direksi.',
-    departmentTag: 'Strategy',
-    currentVersion: 2,
-    score: 9.3,
-    isPublic: true,
-    authorName: 'Farha (Strategic Planner)',
-    createdAt: '2026-09-13',
-    updatedAt: '2026-09-16',
-    versions: [
-      {
-        version: 1,
-        date: 'Day 2 (Before)',
-        frameworkUsed: 'Ringkasan Pasif',
-        promptText: 'Ringkas dokumen riset pasar ini dan berikan poin-poin penting apa yang harus dilakukan perusahaan.',
-        notes: 'Terlalu umum, tidak siap dijadikan bahan pengambilan keputusan dewan direksi.',
-      },
-      {
-        version: 2,
-        date: 'Day 5 (After)',
-        frameworkUsed: 'Syntopical Reading & Devil\'s Advocate',
-        promptText: `Bertindaklah sebagai Senior Strategic Advisor Dewan Direksi.
-Lakukan dekonstruksi analitis terhadap laporan terlampir dengan metodologi Syntopical Reading & First-Principles:
-
-1. CORE THESIS: Premis utama dokumen dan bukti empiris yang paling rentan dibantah.
-2. AUDIT RISIKO: Gunakan sudut pandang Devil's Advocate (apa blind-spot terbesar jika rekomendasi ini kita ambil?).
-3. MATRIKS KEPUTUSAN: Tabel 3 kolom (Skenario Tindakan, Dampak EBITDA & Modal, Mitigasi Risiko Kunci).
-4. VERDICT: 1 paragraf rekomendasi final yang lugas untuk diputuskan pada rapat BOD.`,
-        notes: 'Mengubah ringkasan pasif menjadi matriks keputusan 3 skenario siap saji.',
-        facilitatorScore: 9.3,
-        facilitatorFeedback: 'Sudut pandang Devil\'s Advocate pada poin 2 memaksa AI menguji risiko yang sering diabaikan.'
-      }
-    ]
-  }
-];
+// Initial Curated Data (Clean & Realistic - Production)
+const INITIAL_JOURNAL_PROMPTS: JournalPrompt[] = [];
 
 const DEPARTMENT_TAGS = ['Semua', 'Finance', 'HR', 'Strategy', 'Operations', 'Marketing', 'Tech'];
 
@@ -730,10 +590,12 @@ export default function App({ onBack }: { onBack?: () => void }) {
   // Journal Prompts (LocalStorage Persisted)
   const [journalPrompts, setJournalPrompts] = useState<JournalPrompt[]>(() => {
     try {
-      const saved = localStorage.getItem('aif_clean_journal_v2');
+      const saved = localStorage.getItem('aif_prod_journal_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.filter((p: any) => !['jp-1', 'jp-2', 'jp-3'].includes(p.id));
+        }
       }
     } catch (e) {
       console.error('Failed to parse journal', e);
@@ -743,7 +605,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem('aif_clean_journal_v2', JSON.stringify(journalPrompts));
+      localStorage.setItem('aif_prod_journal_v1', JSON.stringify(journalPrompts));
     } catch (e) {
       console.error('Failed to save journal', e);
     }
@@ -1524,96 +1386,119 @@ export default function App({ onBack }: { onBack?: () => void }) {
                 </div>
               </div>
 
-              {/* Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredJournal.map(item => {
-                  const latest = item.versions[item.versions.length - 1];
-                  const hasBeforeAfter = item.versions.length > 1;
+              {/* Cards Grid / Empty State */}
+              {filteredJournal.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-10 text-center max-w-xl mx-auto my-6 shadow-sm">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-3.5">
+                    <BookmarkCheck size={22} className="text-slate-600" />
+                  </div>
+                  <h3 className="font-bold text-sm text-slate-900 mb-1">Belum Ada Prompt di Jurnal Pribadi</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed mb-4 max-w-md mx-auto">
+                    Mulai simpan formula instruksi kerja Anda di Prompt Formula Studio, atau pelajari teknik-teknik prompting dari pustaka materi.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setIteratingPromptId(null);
+                      setBuilderTitle('');
+                      setActiveMenu('prompt-studio');
+                    }}
+                    className="px-4 py-2 rounded-xl bg-[#141210] hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-2 transition-colors shadow-sm"
+                  >
+                    <Plus size={14} className="text-[#E5C158]" />
+                    <span>Buat Formula Baru</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredJournal.map(item => {
+                    const latest = item.versions[item.versions.length - 1];
+                    const hasBeforeAfter = item.versions.length > 1;
 
-                  return (
-                    <div 
-                      key={item.id}
-                      className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-400 transition-all flex flex-col justify-between shadow-sm"
-                    >
-                      <div>
-                        {/* Meta Header with Simple Star */}
-                        <div className="flex items-center justify-between gap-2 mb-2.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200/60">
-                              #{item.departmentTag}
-                            </span>
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200/60">
-                              v{item.currentVersion}
-                            </span>
+                    return (
+                      <div 
+                        key={item.id}
+                        className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-400 transition-all flex flex-col justify-between shadow-sm"
+                      >
+                        <div>
+                          {/* Meta Header with Simple Star */}
+                          <div className="flex items-center justify-between gap-2 mb-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200/60">
+                                #{item.departmentTag}
+                              </span>
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200/60">
+                                v{item.currentVersion}
+                              </span>
+                            </div>
+
+                            {/* Minimalist Star Rating */}
+                            <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
+                              <Star size={11} className="text-[#C9A23E] fill-[#C9A23E]" />
+                              <span>{item.score.toFixed(1)}</span>
+                            </div>
                           </div>
 
-                          {/* Minimalist Star Rating */}
-                          <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
-                            <Star size={11} className="text-[#C9A23E] fill-[#C9A23E]" />
-                            <span>{item.score.toFixed(1)}</span>
+                          {/* Title */}
+                          <h3 className="font-bold text-sm text-slate-900 mb-1 leading-snug">
+                            {item.title}
+                          </h3>
+                          <p className="text-[11px] text-slate-500 mb-3 leading-relaxed">
+                            {item.description}
+                          </p>
+
+                          {/* Clean Short Excerpt */}
+                          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-3 text-xs font-mono text-slate-700 line-clamp-3">
+                            {latest.promptText}
                           </div>
                         </div>
 
-                        {/* Title */}
-                        <h3 className="font-bold text-sm text-slate-900 mb-1 leading-snug">
-                          {item.title}
-                        </h3>
-                        <p className="text-[11px] text-slate-500 mb-3 leading-relaxed">
-                          {item.description}
-                        </p>
-
-                        {/* Clean Short Excerpt */}
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-3 text-xs font-mono text-slate-700 line-clamp-3">
-                          {latest.promptText}
-                        </div>
-                      </div>
-
-                      {/* Card Footer Actions */}
-                      <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          {hasBeforeAfter && (
+                        {/* Card Footer Actions */}
+                        <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {hasBeforeAfter && (
+                              <button
+                                onClick={() => setComparingPrompt(item)}
+                                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1 transition-colors"
+                              >
+                                <TrendingUp size={11} className="text-slate-600" />
+                                Before vs After
+                              </button>
+                            )}
                             <button
-                              onClick={() => setComparingPrompt(item)}
+                              onClick={() => startIteration(item)}
                               className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1 transition-colors"
                             >
-                              <TrendingUp size={11} className="text-slate-600" />
-                              Before vs After
+                              <RefreshCw size={10} className="text-slate-600" />
+                              v{item.currentVersion + 1}
                             </button>
-                          )}
+                            <button
+                              onClick={() => handleOpenReview(item)}
+                              className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 font-bold text-xs flex items-center gap-1 transition-colors"
+                              title="Beri Nilai & Evaluasi Fasilitator"
+                            >
+                              <Award size={11} className="text-[#C9A23E]" />
+                              Review Fasilitator
+                            </button>
+                          </div>
+
                           <button
-                            onClick={() => startIteration(item)}
-                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1 transition-colors"
+                            onClick={() => handleCopy(latest.promptText, item.id)}
+                            className={`px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition-all ${
+                              copiedId === item.id
+                                ? 'bg-slate-800 text-[#E5C158]'
+                                : 'bg-[#141210] hover:bg-slate-800 text-white'
+                            }`}
                           >
-                            <RefreshCw size={10} className="text-slate-600" />
-                            v{item.currentVersion + 1}
-                          </button>
-                          <button
-                            onClick={() => handleOpenReview(item)}
-                            className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 font-bold text-xs flex items-center gap-1 transition-colors"
-                            title="Beri Nilai & Evaluasi Fasilitator"
-                          >
-                            <Award size={11} className="text-[#C9A23E]" />
-                            Review Fasilitator
+                            {copiedId === item.id ? <Check size={11} /> : <Copy size={11} />}
+                            {copiedId === item.id ? 'Tersalin' : 'Salin'}
                           </button>
                         </div>
 
-                        <button
-                          onClick={() => handleCopy(latest.promptText, item.id)}
-                          className={`px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition-all ${
-                            copiedId === item.id
-                              ? 'bg-slate-800 text-[#E5C158]'
-                              : 'bg-[#141210] hover:bg-slate-800 text-white'
-                          }`}
-                        >
-                          {copiedId === item.id ? <Check size={11} /> : <Copy size={11} />}
-                          {copiedId === item.id ? 'Tersalin' : 'Salin'}
-                        </button>
                       </div>
-
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
 
             </div>
           )}
@@ -1823,79 +1708,103 @@ export default function App({ onBack }: { onBack?: () => void }) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {journalPrompts.filter(p => p.isPublic).map(item => {
-                  const latest = item.versions[item.versions.length - 1];
-                  return (
-                    <div 
-                      key={item.id}
-                      className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-400 transition-all flex flex-col justify-between shadow-sm"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-2 mb-2.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200/60">
-                              #{item.departmentTag}
-                            </span>
-                            <span className="text-[11px] text-slate-500">
-                              oleh: <strong className="text-slate-800">{item.authorName}</strong>
-                            </span>
+              {/* Cards Grid / Empty State */}
+              {journalPrompts.filter(p => p.isPublic).length === 0 ? (
+                <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-10 text-center max-w-xl mx-auto my-6 shadow-sm">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-3.5">
+                    <Share2 size={22} className="text-slate-600" />
+                  </div>
+                  <h3 className="font-bold text-sm text-slate-900 mb-1">Prompt Community Masih Kosong</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed mb-4 max-w-md mx-auto">
+                    Setiap prompt yang disimpan dan diatur publik akan muncul di sini agar dapat dipelajari, diadaptasi, serta direview oleh fasilitator.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setIteratingPromptId(null);
+                      setBuilderTitle('');
+                      setActiveMenu('prompt-studio');
+                    }}
+                    className="px-4 py-2 rounded-xl bg-[#141210] hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-2 transition-colors shadow-sm"
+                  >
+                    <Plus size={14} className="text-[#E5C158]" />
+                    <span>Buat Prompt Pertama</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {journalPrompts.filter(p => p.isPublic).map(item => {
+                    const latest = item.versions[item.versions.length - 1];
+                    return (
+                      <div 
+                        key={item.id}
+                        className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-400 transition-all flex flex-col justify-between shadow-sm"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-2 mb-2.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200/60">
+                                #{item.departmentTag}
+                              </span>
+                              <span className="text-[11px] text-slate-500">
+                                oleh: <strong className="text-slate-800">{item.authorName}</strong>
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
+                              <Star size={11} className="text-[#C9A23E] fill-[#C9A23E]" />
+                              <span>{item.score.toFixed(1)}</span>
+                            </div>
                           </div>
 
-                          <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
-                            <Star size={11} className="text-[#C9A23E] fill-[#C9A23E]" />
-                            <span>{item.score.toFixed(1)}</span>
+                          <h3 className="font-bold text-sm text-slate-900 mb-1 leading-snug">
+                            {item.title}
+                          </h3>
+                          <p className="text-[11px] text-slate-500 mb-3 leading-relaxed">
+                            {item.description}
+                          </p>
+
+                          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-3 text-xs font-mono text-slate-700 line-clamp-3">
+                            {latest.promptText}
                           </div>
                         </div>
 
-                        <h3 className="font-bold text-sm text-slate-900 mb-1 leading-snug">
-                          {item.title}
-                        </h3>
-                        <p className="text-[11px] text-slate-500 mb-3 leading-relaxed">
-                          {item.description}
-                        </p>
+                        <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <button
+                              onClick={() => adoptToMyJournal(item)}
+                              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1 transition-colors"
+                            >
+                              <BookmarkCheck size={12} className="text-slate-600" />
+                              Adaptasi ke Jurnal
+                            </button>
+                            <button
+                              onClick={() => handleOpenReview(item)}
+                              className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 font-bold text-xs flex items-center gap-1 transition-colors"
+                              title="Beri Nilai & Evaluasi Fasilitator"
+                            >
+                              <Award size={11} className="text-[#C9A23E]" />
+                              Review Fasilitator
+                            </button>
+                          </div>
 
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-3 text-xs font-mono text-slate-700 line-clamp-3">
-                          {latest.promptText}
-                        </div>
-                      </div>
-
-                      <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                        <div className="flex flex-wrap items-center gap-1.5">
                           <button
-                            onClick={() => adoptToMyJournal(item)}
-                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1 transition-colors"
+                            onClick={() => handleCopy(latest.promptText, `comm-${item.id}`)}
+                            className={`px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition-all ${
+                              copiedId === `comm-${item.id}`
+                                ? 'bg-slate-800 text-[#E5C158]'
+                                : 'bg-[#141210] hover:bg-slate-800 text-white'
+                            }`}
                           >
-                            <BookmarkCheck size={12} className="text-slate-600" />
-                            Adaptasi ke Jurnal
-                          </button>
-                          <button
-                            onClick={() => handleOpenReview(item)}
-                            className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 font-bold text-xs flex items-center gap-1 transition-colors"
-                            title="Beri Nilai & Evaluasi Fasilitator"
-                          >
-                            <Award size={11} className="text-[#C9A23E]" />
-                            Review Fasilitator
+                            {copiedId === `comm-${item.id}` ? <Check size={11} /> : <Copy size={11} />}
+                            {copiedId === `comm-${item.id}` ? 'Tersalin' : 'Salin'}
                           </button>
                         </div>
 
-                        <button
-                          onClick={() => handleCopy(latest.promptText, `comm-${item.id}`)}
-                          className={`px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition-all ${
-                            copiedId === `comm-${item.id}`
-                              ? 'bg-slate-800 text-[#E5C158]'
-                              : 'bg-[#141210] hover:bg-slate-800 text-white'
-                          }`}
-                        >
-                          {copiedId === `comm-${item.id}` ? <Check size={11} /> : <Copy size={11} />}
-                          {copiedId === `comm-${item.id}` ? 'Tersalin' : 'Salin'}
-                        </button>
                       </div>
-
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
 
             </div>
           )}
