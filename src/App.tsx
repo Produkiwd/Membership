@@ -1257,21 +1257,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               Kembali ke Hub
             </button>
           )}
-          {canOpenPromptDatabase ? (
-            <button 
-              onClick={() => {
-                if (activeTab === 'prompts') {
-                  setActiveTab('dashboard');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                } else {
-                  openPromptDatabase();
-                }
-              }} 
-              className={cn("hidden sm:inline-block transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow", activeTab === 'prompts' ? 'text-gold-muted font-black' : 'text-light-lo hover:text-light-hi')}
-            >
-              Prompt Studio
-            </button>
-          ) : null}
+
           {activeTab !== 'dashboard' && (
             <button 
               onClick={() => {
@@ -1686,6 +1672,27 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   <div className="flex items-center gap-4">
                     <FileText className="w-4 h-4 text-light-lo" />
                     <span className="font-body font-medium text-sm text-light-lo">Arsip Arsitektur</span>
+                  </div>
+                  <Lock className="w-4 h-4 text-light-lo" />
+                </div>
+              )}
+              {canOpenPromptDatabase ? (
+                <button
+                  type="button"
+                  onClick={openPromptDatabase}
+                  className="w-full text-left flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group cursor-pointer"
+                >
+                  <div className="flex items-center gap-4">
+                    <BookOpen className="w-4 h-4 text-gold-muted" />
+                    <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Prompt Studio</span>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
+                </button>
+              ) : (
+                <div className="flex justify-between p-5 bg-bg-light border border-border-light-subtle opacity-60 rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <BookOpen className="w-4 h-4 text-light-lo" />
+                    <span className="font-body font-medium text-sm text-light-lo">Prompt Studio</span>
                   </div>
                   <Lock className="w-4 h-4 text-light-lo" />
                 </div>
