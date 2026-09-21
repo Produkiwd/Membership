@@ -24,8 +24,6 @@ export interface PromptVersion {
   frameworkUsed: string;
   promptText: string;
   notes?: string;
-  facilitatorFeedback?: string;
-  facilitatorScore?: number;
 }
 
 export interface JournalPrompt {
@@ -38,7 +36,7 @@ export interface JournalPrompt {
   versions: PromptVersion[];
   isPublic: boolean;
   authorName: string;
-  score: number; // 1 to 10 scale
+  score: number; // 1 to 5 scale
   createdAt: string;
   updatedAt: string;
 }
@@ -550,8 +548,29 @@ What insights does this analysis provide?`
   }
 ];
 
-// Interactive Exercises Data
-const exercisesData = [
+// Interactive Exercises Data Interface
+export interface ExerciseCase {
+  id: string;
+  title: string;
+  department: string;
+  scenario: string;
+  poorPrompt: string;
+  hints: string[];
+  benchmarkSolution: string;
+  whyEffective: string;
+  comparativeAnalysis: {
+    adHocLimit: string;
+    actionsAdvantage: string;
+  };
+  actionsBreakdown: {
+    letter: string;
+    label: string;
+    detail: string;
+  }[];
+}
+
+// Enriched Interactive Exercises Data
+const exercisesData: ExerciseCase[] = [
   {
     id: "ex-1",
     title: "Studi Kasus 1: Negosiasi Kontrak Vendor",
@@ -559,7 +578,27 @@ const exercisesData = [
     scenario: "Vendor perangkat lunak menaikkan biaya lisensi tahunan sebesar 12%. Dewan direksi meminta Anda menegosiasikan agar kenaikan maksimal 3% atau ditukar dengan SLA tambahan.",
     poorPrompt: "Tolong buatkan email ke vendor agar jangan naikkan harga 12%, kami minta 3% saja ya.",
     hints: ["Gunakan A.C.T.I.O.N.S.", "Masukkan trade-off durasi kontrak", "Terapkan format Minto SCQA"],
-    benchmarkSolution: `[A - Actor] Senior Procurement Manager ke Account Director Vendor\n[C - Context] Kemitraan 3 tahun sukses, ada pembatasan budget korporat 3%\n[T - Task] Negosiasi batas kenaikan 3% dengan opsi perpanjangan komitmen 3 tahun (multi-year)\n[I - Impact] Kemitraan win-win tanpa memutus hubungan kerja sama\n[O - Output] Format Minto SCQA, maksimal 3 paragraf, 2 opsi solusi`
+    benchmarkSolution: `[A - Actor] Senior Procurement Director ke Account Executive Vendor Software Enterprise
+[C - Context] Notifikasi kenaikan lisensi 12% sepihak, batas pagu anggaran korporasi maksimal 3%
+[T - Task] Susun surat balasan negosiasi yang menolak kenaikan 12% dan menawarkan batas 3% yang ditukar dengan komitmen kontrak perpanjangan 3 tahun (multi-year)
+[I - Impact] Menjaga kontinuitas operasional sistem ERP tanpa deviasi pagu belanja operasional (OPEX)
+[O - Output] Surat formal korporat 3 paragraf Minto SCQA + klausul addendum SLA
+[N - Nuance] Tegas, profesional, menghargai kemitraan historis 3 tahun, solutif win-win
+[S - Structure] Situasi Kemitraan → Komplikasi Anggaran → Solusi Trade-off Komitmen 3 Tahun`,
+    whyEffective: "Formula ini menggeser dinamika negosiasi dari 'konflik harga zero-sum' menjadi 'kolaborasi nilai jangka panjang'. Dengan menetapkan peran Senior Procurement Director, AI memposisikan komunikasi secara profesional dan terukur. Penyebutan batas kenaikan 3% disertai counter-offer komitmen multi-year 3 tahun memberi ruang gerak (leverage) bagi vendor tanpa melanggar batasan anggaran direksi. Format Minto SCQA memastikan eksekutif vendor dapat langsung membaca situasi dan opsi dalam 60 detik tanpa retorika defensif.",
+    comparativeAnalysis: {
+      adHocLimit: "Prompt ad-hoc sekadar menolak harga ('jangan naikkan 12%') tanpa landasan bisnis dan tanpa alternatif kompromi. Menghasilkan email kaku yang mudah ditolak oleh account director vendor.",
+      actionsAdvantage: "Memberikan anchor target 3%, trade-off perpanjangan kontrak multi-year, serta menyajikan 2 opsi win-win terstruktur menggunakan standar piramida Minto SCQA."
+    },
+    actionsBreakdown: [
+      { letter: "A", label: "Actor", detail: "Senior Procurement Director ke Account Executive Vendor" },
+      { letter: "C", label: "Context", detail: "Kemitraan 3 tahun sukses, restriksi budget korporat 3%" },
+      { letter: "T", label: "Task", detail: "Negosiasi cap 3% dengan opsi kompensasi multi-year contract" },
+      { letter: "I", label: "Impact", detail: "Mencegah pembengkakan OPEX tanpa memutus hubungan kerja sama" },
+      { letter: "O", label: "Output", detail: "Format Minto SCQA, maksimal 3 paragraf, 2 opsi solusi" },
+      { letter: "N", label: "Nuance", detail: "Tegas solutif, menghormati relasi historis, zero defensiveness" },
+      { letter: "S", label: "Structure", detail: "Situation → Complication → Question → Proposed Options" }
+    ]
   },
   {
     id: "ex-2",
@@ -568,7 +607,27 @@ const exercisesData = [
     scenario: "Divisi operasional akan digabungkan dengan tim digital. Anda harus mengumumkan perubahan peran tanpa memicu kecemasan PHK di kalangan karyawan.",
     poorPrompt: "Buatkan memo pengumuman restrukturisasi divisi untuk karyawan kantor.",
     hints: ["Terapkan prinsip Psychological Safety", "Jelaskan apa yang berubah vs apa yang TETAP STABIL", "Sediakan jadwal dialog terbuka"],
-    benchmarkSolution: `[A - Actor] Chief People Officer & Direktur Operasional ke Seluruh Karyawan\n[C - Context] Transisi organisasi menuju squad lincah tanpa pemutusan hubungan kerja\n[T - Task] Pengumuman perubahan struktur tim dan jalur reskilling\n[I - Impact] Menjaga ketenangan emosional dan stabilitas kinerja tim\n[O - Output] Struktur empati kepemimpinan, FAQ terlampir, jadwal sesi townhall`
+    benchmarkSolution: `[A - Actor] Chief People Officer bersama COO ke Seluruh Karyawan Divisi Operasi & Digital
+[C - Context] Penyelarasan divisi operasional ke dalam agile squad baru untuk efisiensi alur kerja tanpa ada pemutusan hubungan kerja (Zero Layoff)
+[T - Task] Tuliskan memo kepemimpinan yang menjelaskan latar belakang strategis perubahan, jaminan stabilitas pekerjaan, dan jalur program reskilling
+[I - Impact] Menghilangkan kecemasan psikologis, mempertahankan retensi talenta kunci, dan memicu antusiasme adaptasi
+[O - Output] Memo empati 400 kata + Matriks Perubahan Peran + Jadwal Townhall Q&A terbuka
+[N - Nuance] Empatik, transparan, apresiatif atas kontribusi masa lalu, menenangkan
+[S - Structure] Narasi Visi Masa Depan → Klarifikasi Hal yang Tetap Stabil → Garis Besar Perubahan → FAQ Terbuka`,
+    whyEffective: "Dalam restrukturisasi tim, risiko terbesar adalah eksodus talenta dan kepanikan rumor PHK akibat ambiguitas informasi. Formula fasilitator memanfaatkan empati kepemimpinan tingkat CPO/COO, memisahkan secara eksplisit antara apa yang BERUBAH vs apa yang TETAP STABIL (anchor psikologis). Lampiran FAQ dan sesi townhall langsung menutup ruang spekulasi, sekaligus menegaskan jaminan reskilling tanpa pemutusan hubungan kerja.",
+    comparativeAnalysis: {
+      adHocLimit: "Prompt ad-hoc menghasilkan memo administratif birokratis yang dingin. Karyawan akan fokus membaca 'antara baris' dan mencurigai agenda PHK tersembunyi.",
+      actionsAdvantage: "Membangun Psychological Safety melalui transparansi alasan strategis, penegasan komitmen zero-layoff, dan jalur dukungan reskilling yang konkret."
+    },
+    actionsBreakdown: [
+      { letter: "A", label: "Actor", detail: "Chief People Officer & COO ke Seluruh Karyawan" },
+      { letter: "C", label: "Context", detail: "Transisi organisasi menuju squad lincah tanpa pemutusan hubungan kerja" },
+      { letter: "T", label: "Task", detail: "Pengumuman perubahan struktur tim dan jalur program reskilling" },
+      { letter: "I", label: "Impact", detail: "Menjaga ketenangan emosional dan stabilitas kinerja tim" },
+      { letter: "O", label: "Output", detail: "Struktur empati kepemimpinan, FAQ terlampir, jadwal sesi townhall" },
+      { letter: "N", label: "Nuance", detail: "Transparan, suportif, menghargai kontribusi lama, menenangkan" },
+      { letter: "S", label: "Structure", detail: "Konteks Transformasi → Jaminan Stabilitas → Detail Peran → Dialog" }
+    ]
   },
   {
     id: "ex-3",
@@ -577,7 +636,177 @@ const exercisesData = [
     scenario: "Anda menerima laporan 70 halaman tentang rencana ekspansi pasar baru. Direksi ingin mengetahui titik blind-spot yang sengaja dipercantik oleh tim penyusun.",
     poorPrompt: "Ringkas laporan ekspansi pasar ini dan apa kesimpulannya.",
     hints: ["Gunakan pendekatan Devil's Advocate", "Dekonstruksi premis paling rapuh", "Buat matriks keputusan 3 skenario"],
-    benchmarkSolution: `Bertindaklah sebagai Senior Strategic Risk Auditor. Dekonstruksi laporan terlampir dengan First-Principles: (1) Uji 3 asumsi pertumbuhan paling rapuh, (2) Sebutkan skenario terburuk (Worst Case), (3) Buat Decision Matrix Opsi Konservatif vs Agresif.`
+    benchmarkSolution: `[A - Actor] Senior Strategic Risk Auditor & Investment Committee Advisor
+[C - Context] Laporan ekspansi pasar 70 halaman dengan indikasi optimisme berlebih pada asumsi penetrasi pasar
+[T - Task] Dekonstruksi laporan dengan First-Principles: (1) Uji 3 asumsi pertumbuhan paling rapuh, (2) Sebutkan skenario terburuk (Worst Case), (3) Buat Decision Matrix Opsi Konservatif vs Agresif
+[I - Impact] Mencegah kesalahan alokasi belanja modal (CAPEX) fatal oleh Dewan Direksi
+[O - Output] Executive Risk Memo 1 halaman + Decision Matrix Konservatif vs Agresif
+[N - Nuance] Kritis objektif, tanpa kompromi, analitis berbasis bukti angka riil
+[S - Structure] Dekonstruksi Asumsi Rapuh → Simulasi Worst Case → Matriks Rekomendasi Mitigasi`,
+    whyEffective: "Laporan bisnis 70 halaman sering kali disusun dengan bias konfirmasi (hanya menonjolkan data optimis). Dengan memberi instruksi spesifik kepada AI untuk bertindak sebagai Senior Strategic Risk Auditor independen dan menerapkan dekonstruksi First-Principles, model dipaksa melucuti narasi persuasif dan langsung menguji titik-titik asumsi paling rapuh. Matriks keputusan 3 skenario memberikan direksi peta jalan mitigasi yang objektif.",
+    comparativeAnalysis: {
+      adHocLimit: "Prompt ad-hoc ('ringkas laporan ini') hanya mengulang ringkasan eksekutif yang sudah dipercantik (cherry-picked) oleh penyusun laporan tanpa daya kritis.",
+      actionsAdvantage: "Membedah laporan dengan lensa Devil's Advocate: menguji asumsi dasar, memodelkan skenario terburuk (Worst Case), dan menghasilkan Decision Matrix komparatif."
+    },
+    actionsBreakdown: [
+      { letter: "A", label: "Actor", detail: "Senior Strategic Risk Auditor & Investment Committee Advisor" },
+      { letter: "C", label: "Context", detail: "Laporan ekspansi pasar 70 halaman dengan bias optimisme berlebih" },
+      { letter: "T", label: "Task", detail: "Dekonstruksi 3 asumsi pertumbuhan paling rapuh dengan First-Principles" },
+      { letter: "I", label: "Impact", detail: "Mencegah risiko keputusan alokasi modal bernilai miliaran rupiah" },
+      { letter: "O", label: "Output", detail: "Executive Risk Memo 1 halaman + Matriks Keputusan 3 Skenario" },
+      { letter: "N", label: "Nuance", detail: "Objektif, skeptis ilmiah, tanpa toleransi pada klaim tanpa data" },
+      { letter: "S", label: "Structure", detail: "Audit Premis Dasar → Kalkulasi Skenario Downside → Opsi Aksi" }
+    ]
+  }
+];
+
+// Seed Prompts for Prompt Community (Curated Variety: Ad-hoc to Executive ACTIONS)
+const SEED_COMMUNITY_PROMPTS: JournalPrompt[] = [
+  {
+    id: "comm-seed-1",
+    title: "Executive Synthesis & Decision Memo",
+    description: "Format Minto Pyramid SCQA untuk merangkum proposal kompleks menjadi memo keputusan C-level 1 halaman.",
+    tag: "Strategy",
+    departmentTag: "Strategy",
+    currentVersion: 2,
+    isPublic: true,
+    authorName: "Komunitas AIF",
+    score: 4.9,
+    createdAt: "2026-09-18",
+    updatedAt: "2026-09-20",
+    versions: [
+      {
+        version: 1,
+        date: "2026-09-18",
+        frameworkUsed: "ACT",
+        promptText: "[Actor] Chief of Staff ke Dewan Direksi\n[Context] Proposal ekspansi regional senilai $2M\n[Task] Buat ringkasan eksekutif 1 halaman",
+        notes: "Versi awal masih ringkas namun belum mencakup trade-off mitigasi risiko."
+      },
+      {
+        version: 2,
+        date: "2026-09-20",
+        frameworkUsed: "A.C.T.I.O.N.S.",
+        promptText: `[Peran & Audiens]\nChief of Staff & Senior Strategic Advisor ke Board of Directors\n\n[Situasi & Latar Belakang]\nProposal belanja modal ekspansi regional $2M dengan ketidakpastian nilai tukar mata uang 5%\n\n[Tugas & Target]\nBedah kelayakan proposal menjadi Decision Memo 1 halaman dengan format Minto SCQA\n\n[Dampak yang Diharapkan]\nDireksi dapat memutuskan Go/No-Go dalam rapat 15 menit dengan mitigasi downside terukur\n\n[Format Keluaran]\n1 halaman terstruktur: Situation, Complication, Core Question, Recommendation (2 Opsi: Konservatif vs Agresif)\n\n[Batasan & Pantangan]\nObjektif, berbasis angka, zero bias optimis, tajam pada trade-off modal\n\n[Urutan Langkah]\nTabel perbandingan ROI vs Risiko + 3 pertanyaan kunci yang harus dijawab vendor`,
+        notes: "Peningkatan drastis dengan A.C.T.I.O.N.S. Menambahkan trade-off opsi agresif vs konservatif."
+      }
+    ]
+  },
+  {
+    id: "comm-seed-2",
+    title: "Vendor Contract Renegotiation & Multi-Year Trade-off",
+    description: "Strategi negosiasi kenaikan harga vendor lisensi perangkat lunak dengan leverage komitmen multi-tahun.",
+    tag: "Finance",
+    departmentTag: "Finance",
+    currentVersion: 1,
+    isPublic: true,
+    authorName: "Reza Procurement",
+    score: 4.8,
+    createdAt: "2026-09-19",
+    updatedAt: "2026-09-19",
+    versions: [
+      {
+        version: 1,
+        date: "2026-09-19",
+        frameworkUsed: "A.C.T.I.O.N.S.",
+        promptText: `[Peran & Audiens]\nSenior Procurement Director ke Account Executive Vendor Software Enterprise\n\n[Situasi & Latar Belakang]\nNotifikasi kenaikan lisensi 12% sepihak, batas pagu anggaran korporasi maksimal 3%\n\n[Tugas & Target]\nSusun surat balasan negosiasi yang menolak kenaikan 12% dan menawarkan cap 3% yang ditukar dengan komitmen kontrak perpanjangan 3 tahun (multi-year)\n\n[Dampak yang Diharapkan]\nMenjaga kontinuitas operasional sistem ERP tanpa deviasi pagu belanja operasional (OPEX)\n\n[Format Keluaran]\nSurat formal korporat 3 paragraf Minto SCQA + klausul addendum SLA\n\n[Batasan & Pantangan]\nTegas, profesional, menghargai kemitraan historis 3 tahun, solutif win-win\n\n[Urutan Langkah]\nSituasi Kemitraan → Komplikasi Anggaran → Solusi Trade-off Komitmen 3 Tahun`,
+        notes: "Formula praktis untuk negosiasi pengadaan dan vendor management."
+      }
+    ]
+  },
+  {
+    id: "comm-seed-3",
+    title: "Change Management & Org Restructuring Memo",
+    description: "Komunikasi perubahan struktur tim lintas fungsi untuk menjaga Psychological Safety dan mencegah rumor PHK.",
+    tag: "HR",
+    departmentTag: "HR",
+    currentVersion: 2,
+    isPublic: true,
+    authorName: "Sarah HR Lead",
+    score: 4.8,
+    createdAt: "2026-09-17",
+    updatedAt: "2026-09-19",
+    versions: [
+      {
+        version: 1,
+        date: "2026-09-17",
+        frameworkUsed: "ACT",
+        promptText: "[Actor] HR Director\n[Context] Penggabungan tim operasional dan teknologi\n[Task] Buat pengumuman internal restrukturisasi",
+        notes: "Terlalu umum, draft AI menghasilkan kalimat dingin yang memicu kekhawatiran tim."
+      },
+      {
+        version: 2,
+        date: "2026-09-19",
+        frameworkUsed: "A.C.T.I.O.N.S.",
+        promptText: `[Peran & Audiens]\nChief People Officer bersama COO ke Seluruh Karyawan Divisi Operasi & Digital\n\n[Situasi & Latar Belakang]\nPenyelarasan divisi operasional ke dalam agile squad baru untuk efisiensi alur kerja tanpa ada pemutusan hubungan kerja (Zero Layoff)\n\n[Tugas & Target]\nTuliskan memo kepemimpinan yang menjelaskan latar belakang strategis perubahan, jaminan stabilitas pekerjaan, dan jalur program reskilling\n\n[Dampak yang Diharapkan]\nMenghilangkan kecemasan psikologis, mempertahankan retensi karyawan kunci, dan memicu antusiasme adaptasi\n\n[Format Keluaran]\nMemo empati 400 kata + Matriks Perubahan Peran + Jadwal Townhall Q&A terbuka\n\n[Batasan & Pantangan]\nEmpatik, transparan, apresiatif atas kontribusi masa lalu, menenangkan\n\n[Urutan Langkah]\nNarasi Visi Masa Depan → Klarifikasi Hal yang Tetap Stabil → Garis Besar Perubahan → FAQ Terbuka`,
+        notes: "Menerapkan prinsip Psychological Safety Amy Edmondson."
+      }
+    ]
+  },
+  {
+    id: "comm-seed-4",
+    title: "Devil's Advocate Business Plan Stress-Test",
+    description: "Dekonstruksi First-Principles untuk membedah titik blind-spot dan skenario terburuk dalam rencana peluncuran produk.",
+    tag: "Product",
+    departmentTag: "Product",
+    currentVersion: 1,
+    isPublic: true,
+    authorName: "Kevin Risk Analyst",
+    score: 4.9,
+    createdAt: "2026-09-20",
+    updatedAt: "2026-09-20",
+    versions: [
+      {
+        version: 1,
+        date: "2026-09-20",
+        frameworkUsed: "A.C.T.I.O.N.S.",
+        promptText: `[Peran & Audiens]\nIndependent Strategic Risk Auditor & Ex-Venture Capital Principal\n\n[Situasi & Latar Belakang]\nRencana peluncuran produk B2B SaaS baru yang menargetkan ARR Rp 15 Miliar pada tahun pertama\n\n[Tugas & Target]\nBertindak sebagai Devil's Advocate agresif. Lakukan stress-test terhadap 3 asumsi customer acquisition cost (CAC), churn rate, dan kapasitas sales engineer\n\n[Dampak yang Diharapkan]\nMenemukan cacat fatal finansial sebelum anggaran modal dieksekusi\n\n[Format Keluaran]\nPre-Mortem Audit Report: Matriks Titik Rentan, Simulasi Worst-Case Scenario, dan 3 Opsi Mitigasi\n\n[Batasan & Pantangan]\nKritis tanpa kompromi, skeptis rasional, berbasis data pembanding industri\n\n[Urutan Langkah]\nPremis Model Bisnis → Titik Keruntuhan Tercepat → Matriks Stress-Test`,
+        notes: "Menggunakan teknik Inversion Mental Model & Pre-Mortem."
+      }
+    ]
+  },
+  {
+    id: "comm-seed-5",
+    title: "High-Conversion B2B Sales Cold Outreach",
+    description: "Formula ACT terarah untuk email outreach korporat berbasis problem-first dan value hook 30 detik.",
+    tag: "Marketing",
+    departmentTag: "Marketing",
+    currentVersion: 1,
+    isPublic: true,
+    authorName: "Dion Sales Lead",
+    score: 3.9,
+    createdAt: "2026-09-18",
+    updatedAt: "2026-09-18",
+    versions: [
+      {
+        version: 1,
+        date: "2026-09-18",
+        frameworkUsed: "ACT",
+        promptText: `[Peran & Audiens]\nEnterprise B2B Account Executive spesialis otomasi logistik\n\n[Situasi & Latar Belakang]\nTarget audiens adalah VP of Supply Chain perusahaan FMCG yang sedang menghadapi lonjakan biaya last-mile delivery 18%\n\n[Tugas & Target]\nTulis cold email 90 kata dengan struktur: Pain point spesifik industri → Bukti studi kasus 1 kalimat → Low-friction call to action (15 min call)`,
+        notes: "Contoh formula ACT cepat untuk operasional harian."
+      }
+    ]
+  },
+  {
+    id: "comm-seed-6",
+    title: "Draft SOP Operasional Pergudangan (Baseline Ad-hoc)",
+    description: "Contoh pembanding prompt tingkat dasar (ad-hoc) untuk latihan peningkatan kualitas sebelum vs sesudah.",
+    tag: "Operations",
+    departmentTag: "Operations",
+    currentVersion: 1,
+    isPublic: true,
+    authorName: "Gudang Logistik Team",
+    score: 3.1,
+    createdAt: "2026-09-16",
+    updatedAt: "2026-09-16",
+    versions: [
+      {
+        version: 1,
+        date: "2026-09-16",
+        frameworkUsed: "Ad-hoc",
+        promptText: "Tolong buatkan draf SOP standar operasional prosedur penerimaan barang di gudang logistik yang lengkap dari awal sampai akhir beserta format tabelnya.",
+        notes: "Contoh prompt pemula tanpa parameter batasan peran, situasi gudang, maupun standar output yang terukur."
+      }
+    ]
   }
 ];
 
@@ -623,71 +852,59 @@ export default function App({ onBack }: { onBack?: () => void }) {
   
   // Modals
   const [comparingPrompt, setComparingPrompt] = useState<JournalPrompt | null>(null);
-  const [activeExercise, setActiveExercise] = useState<typeof exercisesData[0] | null>(null);
+  const [activeExercise, setActiveExercise] = useState<ExerciseCase | null>(null);
   const [showExerciseSolution, setShowExerciseSolution] = useState(false);
-  const [reviewingPrompt, setReviewingPrompt] = useState<JournalPrompt | null>(null);
-  const [reviewScore, setReviewScore] = useState<number>(9.5);
-  const [reviewFeedback, setReviewFeedback] = useState<string>('');
   const [promptToDelete, setPromptToDelete] = useState<JournalPrompt | null>(null);
+
+  // Community & Journal 1 to 5 Star Rating System (Direct, Simple & Interactive)
+  const [userRatings, setUserRatings] = useState<Record<string, number>>(() => {
+    try {
+      const saved = localStorage.getItem('prompt_user_ratings_v1');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const handleRatePrompt = (promptId: string, star: number) => {
+    setUserRatings(prev => {
+      const updated = { ...prev, [promptId]: star };
+      try {
+        localStorage.setItem('prompt_user_ratings_v1', JSON.stringify(updated));
+      } catch (e) {
+        console.error(e);
+      }
+      return updated;
+    });
+  };
+
+  const getEffectiveRating = (item: JournalPrompt) => {
+    if (userRatings[item.id] !== undefined) {
+      return userRatings[item.id];
+    }
+    return item.score > 5 ? Number((item.score / 2).toFixed(1)) : item.score;
+  };
+
+  // Close modals on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (activeExercise) {
+          setActiveExercise(null);
+          setShowExerciseSolution(false);
+        }
+        if (comparingPrompt) setComparingPrompt(null);
+        if (promptToDelete) setPromptToDelete(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeExercise, comparingPrompt, promptToDelete]);
 
   const handleDeletePrompt = (id: string) => {
     setJournalPrompts(prev => prev.filter(item => item.id !== id));
     if (comparingPrompt && comparingPrompt.id === id) setComparingPrompt(null);
-    if (reviewingPrompt && reviewingPrompt.id === id) setReviewingPrompt(null);
     setPromptToDelete(null);
-  };
-
-  const handleOpenReview = (item: JournalPrompt) => {
-    const latest = item.versions[item.versions.length - 1];
-    setReviewingPrompt(item);
-    setReviewScore(latest.facilitatorScore || item.score || 9.0);
-    setReviewFeedback(latest.facilitatorFeedback || '');
-  };
-
-  const handleSaveReview = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!reviewingPrompt) return;
-
-    setJournalPrompts(prev => prev.map(item => {
-      if (item.id === reviewingPrompt.id) {
-        const updatedVersions = item.versions.map((v, i) => {
-          if (i === item.versions.length - 1) {
-            return {
-              ...v,
-              facilitatorScore: reviewScore,
-              facilitatorFeedback: reviewFeedback
-            };
-          }
-          return v;
-        });
-
-        return {
-          ...item,
-          score: reviewScore,
-          versions: updatedVersions
-        };
-      }
-      return item;
-    }));
-
-    if (comparingPrompt && comparingPrompt.id === reviewingPrompt.id) {
-      setComparingPrompt(prev => {
-        if (!prev) return null;
-        const updatedVersions = prev.versions.map((v, i) => {
-          if (i === prev.versions.length - 1) {
-            return {
-              ...v,
-              facilitatorScore: reviewScore,
-              facilitatorFeedback: reviewFeedback
-            };
-          }
-          return v;
-        });
-        return { ...prev, score: reviewScore, versions: updatedVersions };
-      });
-    }
-
-    setReviewingPrompt(null);
   };
 
   // Builder Form State
@@ -742,24 +959,24 @@ export default function App({ onBack }: { onBack?: () => void }) {
   const getCompiledPrompt = () => {
     if (builderType === 'ACT') {
       const parts = [];
-      if (actionData.a) parts.push(`[A - Actor & Audience]\n${actionData.a}`);
-      if (actionData.c) parts.push(`[C - Context & Conditions]\n${actionData.c}`);
-      if (actionData.t) parts.push(`[T - Target & Task]\n${actionData.t}`);
+      if (actionData.a) parts.push(`[Peran & Audiens]\n${actionData.a}`);
+      if (actionData.c) parts.push(`[Situasi & Latar Belakang]\n${actionData.c}`);
+      if (actionData.t) parts.push(`[Tugas & Target]\n${actionData.t}`);
       if (parts.length === 0) {
-        return `[A - Actor]\nBertindaklah sebagai Senior Specialist.\n\n[C - Context]\nKonteks situasi saat ini memerlukan solusi terukur.\n\n[T - Task]\nTugas Anda adalah menyusun rencana tindakan.`;
+        return `[Peran & Audiens]\nBertindaklah sebagai Senior Specialist.\n\n[Situasi & Latar Belakang]\nSituasi saat ini memerlukan solusi terukur dan efisien.\n\n[Tugas & Target]\nTugas Anda adalah menyusun rencana tindakan konkret.`;
       }
       return parts.join('\n\n');
     }
     const parts = [];
-    if (actionData.a) parts.push(`[A - Actor & Audience]\n${actionData.a}`);
-    if (actionData.c) parts.push(`[C - Context & Conditions]\n${actionData.c}`);
-    if (actionData.t) parts.push(`[T - Target & Task]\n${actionData.t}`);
-    if (actionData.i) parts.push(`[I - Intention & Impact]\n${actionData.i}`);
-    if (actionData.o) parts.push(`[O - Output & Organization]\n${actionData.o}`);
-    if (actionData.n) parts.push(`[N - Negatives & Non-negotiables]\n${actionData.n}`);
-    if (actionData.s) parts.push(`[S - Steps & Sequencing]\n${actionData.s}`);
+    if (actionData.a) parts.push(`[Peran & Audiens]\n${actionData.a}`);
+    if (actionData.c) parts.push(`[Situasi & Latar Belakang]\n${actionData.c}`);
+    if (actionData.t) parts.push(`[Tugas & Target]\n${actionData.t}`);
+    if (actionData.i) parts.push(`[Dampak yang Diharapkan]\n${actionData.i}`);
+    if (actionData.o) parts.push(`[Format Keluaran]\n${actionData.o}`);
+    if (actionData.n) parts.push(`[Batasan & Pantangan]\n${actionData.n}`);
+    if (actionData.s) parts.push(`[Urutan Langkah]\n${actionData.s}`);
     if (parts.length === 0) {
-      return `[A - Actor & Audience]\nBertindaklah sebagai [Peran/Keahlian Anda]. Audiens: [Target Pemangku Kepentingan].\n\n[C - Context & Conditions]\nLatar belakang situasi bisnis: [Jelaskan fakta dan kondisi saat ini].\n\n[T - Target & Task]\nTugas spesifik Anda: [Jelaskan dokumen/output yang harus dibuat].\n\n[I - Intention & Impact]\nDampak yang ingin dicapai: [Tujuan perubahan perilaku/keputusan].\n\n[O - Output & Organization]\nFormat keluaran: [Gunakan Minto Pyramid / SCQA / Tabel 3 Kolom].\n\n[N - Negatives & Non-negotiables]\nDILARANG [Sebutkan pantangan nada, asumsi salah, atau kata terlarang].\n\n[S - Steps & Sequencing]\nIkuti urutan pemikiran ini:\n1. [Langkah 1]\n2. [Langkah 2]\n3. [Langkah 3]`;
+      return `[Peran & Audiens]\nBertindaklah sebagai [Peran/Keahlian Anda]. Audiens: [Target Pemangku Kepentingan].\n\n[Situasi & Latar Belakang]\nLatar belakang situasi bisnis: [Jelaskan fakta dan kondisi saat ini].\n\n[Tugas & Target]\nTugas spesifik Anda: [Jelaskan dokumen/output yang harus dibuat].\n\n[Dampak yang Diharapkan]\nDampak yang ingin dicapai: [Tujuan perubahan perilaku/keputusan].\n\n[Format Keluaran]\nFormat keluaran: [Gunakan Minto Pyramid / SCQA / Tabel Ringkas].\n\n[Batasan & Pantangan]\nDILARANG: [Sebutkan pantangan nada, asumsi tanpa data, atau batasan kata].\n\n[Urutan Langkah]\nIkuti urutan pemikiran ini:\n1. [Langkah 1]\n2. [Langkah 2]\n3. [Langkah 3]`;
     }
     return parts.join('\n\n');
   };
@@ -779,8 +996,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
             date: `${today} (v${nextV})`,
             frameworkUsed: builderType === 'ACTIONS' ? 'A.C.T.I.O.N.S.' : 'ACT',
             promptText: compiled,
-            notes: builderNotes || `Iterasi ke versi ${nextV} dengan penajaman parameter kerja.`,
-            facilitatorScore: Math.min(9.8, item.score + 0.1)
+            notes: builderNotes || `Iterasi ke versi ${nextV} dengan penajaman parameter kerja.`
           };
           return {
             ...item,
@@ -788,7 +1004,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
             tag: finalTag,
             departmentTag: finalTag,
             currentVersion: nextV,
-            score: Math.min(9.8, item.score + 0.1),
+            score: Math.min(5.0, item.score > 5 ? Number((item.score / 2).toFixed(1)) : item.score),
             updatedAt: today,
             versions: [...item.versions, newVersion]
           };
@@ -803,7 +1019,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
         tag: finalTag,
         departmentTag: finalTag,
         currentVersion: 1,
-        score: 9.0,
+        score: 5.0,
         isPublic: true,
         authorName: 'Saya (Personal)',
         createdAt: today,
@@ -863,6 +1079,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
       departmentTag: itemTag,
       authorName: `Saya (Adaptasi dari ${item.authorName})`,
       currentVersion: 1,
+      isPublic: false,
       createdAt: new Date().toISOString().split('T')[0],
       updatedAt: new Date().toISOString().split('T')[0],
       versions: [
@@ -876,19 +1093,70 @@ export default function App({ onBack }: { onBack?: () => void }) {
       ]
     };
     setJournalPrompts(prev => [adopted, ...prev]);
-    setActiveMenu('my-journal');
+    setCopiedId(`adp-${item.id}`);
+    setTimeout(() => setCopiedId(null), 2500);
+  };
+
+  // Pre-fill Formula Studio directly from Case Study Benchmark
+  const handleStartFormulaFromExercise = (ex: ExerciseCase) => {
+    setIteratingPromptId(null);
+    setBuilderTitle(`Solusi: ${ex.title}`);
+    setBuilderTag(ex.department);
+    setBuilderType('ACTIONS');
+    setBuilderNotes(`Berdasarkan studi kasus ${ex.title}.\nSkenario: ${ex.scenario}`);
+
+    const actorMatch = ex.benchmarkSolution.match(/\[A - Actor\]\s*([^\n]+)/i);
+    const taskMatch = ex.benchmarkSolution.match(/\[T - Task\]\s*([^\n]+)/i);
+    const outputMatch = ex.benchmarkSolution.match(/\[O - Output\]\s*([^\n]+)/i);
+
+    setActionData({
+      a: actorMatch ? actorMatch[1].trim() : `Senior ${ex.department} Director`,
+      c: `Skenario Bisnis: ${ex.scenario}`,
+      t: taskMatch ? taskMatch[1].trim() : 'Menyusun rencana tindakan strategis terukur.',
+      i: 'Menghasilkan kesepakatan win-win tanpa memutus hubungan kerja sama.',
+      o: outputMatch ? outputMatch[1].trim() : 'Format Minto SCQA, maksimal 3 paragraf, opsi solusi jelas.',
+      n: 'Tegas profesional, berbasis data, zero defensiveness.',
+      s: 'Konteks Situasi → Komplikasi Utama → Solusi Trade-off'
+    });
+
+    setActiveExercise(null);
+    setShowExerciseSolution(false);
+    setActiveMenu('prompt-studio');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Dynamic tags derived from existing prompts (no predetermined fixed tags)
-  const existingTags = Array.from(
-    new Set(
+  // Safe navigation that automatically resets modal states so they never get stuck
+  const handleNavigate = (menu: string) => {
+    setActiveExercise(null);
+    setShowExerciseSolution(false);
+    setComparingPrompt(null);
+    setPromptToDelete(null);
+    setActiveMenu(menu);
+    setSidebarOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Merged Community Prompts: Curated Seed Prompts + User's Public Prompts
+  const communityPrompts = React.useMemo(() => {
+    const userPublic = journalPrompts.filter(p => p.isPublic);
+    const combined: JournalPrompt[] = [...SEED_COMMUNITY_PROMPTS];
+    userPublic.forEach(up => {
+      if (!combined.some(cp => cp.id === up.id)) {
+        combined.unshift(up);
+      }
+    });
+    return combined;
+  }, [journalPrompts]);
+
+  // Dynamic tags derived from existing prompts (typed as string[])
+  const existingTags: string[] = Array.from(
+    new Set<string>(
       journalPrompts
         .map(item => (item.tag || item.departmentTag || '').trim())
-        .filter(Boolean)
+        .filter((t): t is string => Boolean(t))
     )
   );
-  const availableFilterTags = ['Semua', ...existingTags];
+  const availableFilterTags: string[] = ['Semua', ...existingTags];
 
   // Filtered lists
   const filteredJournal = journalPrompts.filter(item => {
@@ -963,7 +1231,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
           </div>
 
           <button
-            onClick={() => { setActiveMenu('beranda'); setSidebarOpen(false); }}
+            onClick={() => handleNavigate('beranda')}
             className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeMenu === 'beranda'
                 ? 'bg-[#E5C158] text-slate-950 shadow-md shadow-[#E5C158]/20'
@@ -975,7 +1243,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
           </button>
 
           <button
-            onClick={() => { setActiveMenu('my-journal'); setSidebarOpen(false); }}
+            onClick={() => handleNavigate('my-journal')}
             className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeMenu === 'my-journal'
                 ? 'bg-[#E5C158] text-slate-950 shadow-md shadow-[#E5C158]/20'
@@ -992,7 +1260,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
           </button>
 
           <button
-            onClick={() => { setActiveMenu('prompt-studio'); setSidebarOpen(false); }}
+            onClick={() => handleNavigate('prompt-studio')}
             className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeMenu === 'prompt-studio'
                 ? 'bg-[#E5C158] text-slate-950 shadow-md shadow-[#E5C158]/20'
@@ -1004,7 +1272,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
           </button>
 
           <button
-            onClick={() => { setActiveMenu('community'); setSidebarOpen(false); }}
+            onClick={() => handleNavigate('community')}
             className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeMenu === 'community'
                 ? 'bg-[#E5C158] text-slate-950 shadow-md shadow-[#E5C158]/20'
@@ -1016,7 +1284,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
           </button>
 
           <button
-            onClick={() => { setActiveMenu('techniques'); setSidebarOpen(false); }}
+            onClick={() => handleNavigate('techniques')}
             className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeMenu === 'techniques'
                 ? 'bg-[#E5C158] text-slate-950 shadow-md shadow-[#E5C158]/20'
@@ -1028,7 +1296,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
           </button>
 
           <button
-            onClick={() => { setActiveMenu('reading-learning'); setSidebarOpen(false); }}
+            onClick={() => handleNavigate('reading-learning')}
             className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeMenu === 'reading-learning'
                 ? 'bg-[#E5C158] text-slate-950 shadow-md shadow-[#E5C158]/20'
@@ -1040,7 +1308,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
           </button>
 
           <button
-            onClick={() => { setActiveMenu('exercise'); setSidebarOpen(false); }}
+            onClick={() => handleNavigate('exercise')}
             className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeMenu === 'exercise'
                 ? 'bg-[#E5C158] text-slate-950 shadow-md shadow-[#E5C158]/20'
@@ -1053,7 +1321,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
           <div className="pt-3 border-t border-[#24201C]/60 my-2">
             <button
-              onClick={() => { setActiveMenu('vault'); setSidebarOpen(false); }}
+              onClick={() => handleNavigate('vault')}
               className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                 activeMenu === 'vault'
                   ? 'bg-[#E5C158] text-slate-950 shadow-md shadow-[#E5C158]/20'
@@ -1070,11 +1338,11 @@ export default function App({ onBack }: { onBack?: () => void }) {
         <div className="p-3.5 border-t border-[#24201C] bg-[#110F0D]">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-[#E5C158]/10 border border-[#E5C158]/30 flex items-center justify-center text-[10px] font-mono font-bold text-[#E5C158]">
-              PW
+              PS
             </div>
             <div className="flex flex-col overflow-hidden">
-              <span className="text-xs font-bold text-white truncate">Personal Workspace</span>
-              <span className="text-[10px] text-slate-400 truncate">Prompt Journal Active</span>
+              <span className="text-xs font-bold text-white truncate">Prompt Studio</span>
+              <span className="text-[10px] text-slate-400 truncate">Ruang Latihan Mandiri</span>
             </div>
           </div>
         </div>
@@ -1104,7 +1372,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
               <Menu size={18} />
             </button>
             <div className="flex items-center gap-2 text-xs font-mono">
-              <span className="text-slate-400 uppercase">PROMPT DATABASE</span>
+              <span className="text-slate-400 uppercase">PROMPT STUDIO</span>
               <span className="text-slate-300">/</span>
               <span className="font-bold text-slate-800 uppercase">
                 {activeMenu === 'beranda' ? 'Beranda' : 
@@ -1124,7 +1392,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                 setIteratingPromptId(null);
                 setBuilderTitle('');
                 setBuilderNotes('');
-                setActiveMenu('prompt-studio');
+                handleNavigate('prompt-studio');
               }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold shadow-sm transition-all"
             >
@@ -1146,17 +1414,17 @@ export default function App({ onBack }: { onBack?: () => void }) {
               <section className="bg-gradient-to-br from-[#141210] to-[#1e1a17] rounded-2xl text-white p-7 sm:p-9 shadow-sm border border-[#2a2420]">
                 <div className="max-w-2xl">
                   <span className="inline-block text-[10px] font-mono font-bold uppercase tracking-[2px] text-[#E5C158] mb-2">
-                    Enterprise Prompt System
+                    Ruang Latihan Prompt Enterprise
                   </span>
                   <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight mb-2.5">
-                    Selamat datang di <span className="text-[#E5C158]">Prompt Database.</span>
+                    Selamat datang di <span className="text-[#E5C158]">Prompt Studio.</span>
                   </h1>
                   <p className="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6">
-                    Buka jurnal saya atau buat formula baru. Ruang kerja terstruktur untuk mengoptimalkan prompt AI, melacak komparasi Sebelum &amp; Sesudah (Before &amp; After), serta mendalami teknik prompting berstandar eksekutif.
+                    Ruang latihan prompt Anda: pelajari teknik, uji di kasus nyata, dan simpan formula terbaik ke jurnal pribadi.
                   </p>
                   <div className="flex flex-wrap items-center gap-3">
                     <button
-                      onClick={() => setActiveMenu('my-journal')}
+                      onClick={() => handleNavigate('my-journal')}
                       className="px-4 py-2.5 rounded-xl bg-[#E5C158] hover:bg-[#F0CF6B] text-slate-950 text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
                     >
                       Buka Jurnal Saya <ArrowRight size={13} />
@@ -1165,7 +1433,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                       onClick={() => {
                         setIteratingPromptId(null);
                         setBuilderTitle('');
-                        setActiveMenu('prompt-studio');
+                        handleNavigate('prompt-studio');
                       }}
                       className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold flex items-center gap-1.5 transition-all border border-white/10"
                     >
@@ -1190,7 +1458,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                   
                   {/* Box 1: My Prompt Journal */}
                   <div 
-                    onClick={() => setActiveMenu('my-journal')}
+                    onClick={() => handleNavigate('my-journal')}
                     className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
@@ -1217,7 +1485,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
                   {/* Box 2: Prompt Formula Studio */}
                   <div 
-                    onClick={() => setActiveMenu('prompt-studio')}
+                    onClick={() => handleNavigate('prompt-studio')}
                     className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
@@ -1244,7 +1512,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
                   {/* Box 3: Prompt Community */}
                   <div 
-                    onClick={() => setActiveMenu('community')}
+                    onClick={() => handleNavigate('community')}
                     className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
@@ -1271,7 +1539,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
                   {/* Box 4: Prompting Techniques */}
                   <div 
-                    onClick={() => setActiveMenu('techniques')}
+                    onClick={() => handleNavigate('techniques')}
                     className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
@@ -1298,7 +1566,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
                   {/* Box 5: Reading & Smart Learning */}
                   <div 
-                    onClick={() => setActiveMenu('reading-learning')}
+                    onClick={() => handleNavigate('reading-learning')}
                     className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
@@ -1325,7 +1593,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
                   {/* Box 6: Exercise & Practice Lab */}
                   <div 
-                    onClick={() => setActiveMenu('exercise')}
+                    onClick={() => handleNavigate('exercise')}
                     className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
@@ -1355,7 +1623,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
               {/* Bottom Card for 1,000+ Basic Prompt Vault */}
               <div 
-                onClick={() => setActiveMenu('vault')}
+                onClick={() => handleNavigate('vault')}
                 className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer flex items-center justify-between gap-4 group"
               >
                 <div className="flex items-center gap-3.5">
@@ -1465,10 +1733,31 @@ export default function App({ onBack }: { onBack?: () => void }) {
                             </div>
 
                             <div className="flex items-center gap-1.5">
-                              {/* Minimalist Star Rating */}
-                              <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
-                                <Star size={11} className="text-[#C9A23E] fill-[#C9A23E]" />
-                                <span>{item.score.toFixed(1)}</span>
+                              {/* 1-5 Star Interactive Community Rating */}
+                              <div className="flex items-center gap-1 bg-slate-50 hover:bg-amber-50/50 px-2 py-0.5 rounded-xl border border-slate-200/80 transition-colors">
+                                <div className="flex items-center gap-0.5">
+                                  {[1, 2, 3, 4, 5].map((starNum) => {
+                                    const effScore = getEffectiveRating(item);
+                                    const isFilled = starNum <= Math.round(effScore);
+                                    return (
+                                      <button
+                                        key={starNum}
+                                        type="button"
+                                        onClick={() => handleRatePrompt(item.id, starNum)}
+                                        title={`Beri nilai ${starNum} bintang`}
+                                        className="p-0.5 text-slate-300 hover:text-amber-400 hover:scale-125 transition-all focus:outline-none"
+                                      >
+                                        <Star
+                                          size={12}
+                                          className={isFilled ? "text-amber-500 fill-amber-400" : "text-slate-300"}
+                                        />
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                                <span className="text-[11px] font-mono font-bold text-slate-700 ml-0.5">
+                                  {getEffectiveRating(item).toFixed(1)}
+                                </span>
                               </div>
 
                               {/* Delete Action */}
@@ -1491,7 +1780,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                           </p>
 
                           {/* Clean Short Excerpt */}
-                          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-3 text-xs font-mono text-slate-700 line-clamp-3">
+                          <div className="bg-slate-50/80 border border-slate-200/80 rounded-xl p-3 mb-3 text-xs font-sans text-slate-700 leading-relaxed line-clamp-3">
                             {latest.promptText}
                           </div>
                         </div>
@@ -1514,14 +1803,6 @@ export default function App({ onBack }: { onBack?: () => void }) {
                             >
                               <RefreshCw size={10} className="text-slate-600" />
                               v{item.currentVersion + 1}
-                            </button>
-                            <button
-                              onClick={() => handleOpenReview(item)}
-                              className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 font-bold text-xs flex items-center gap-1 transition-colors"
-                              title="Beri Nilai & Evaluasi Fasilitator"
-                            >
-                              <Award size={11} className="text-[#C9A23E]" />
-                              Review Fasilitator
                             </button>
                           </div>
 
@@ -1655,81 +1936,81 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
                 <div className="space-y-3 pt-1">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">A -</span> Actor & Audience (Peran & Sasaran)</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">A -</span> Peran &amp; Audiens (Actor &amp; Target)</label>
                     <textarea
                       rows={2}
                       placeholder="Bertindaklah sebagai Senior Procurement Manager. Audiens adalah Direktur Vendor..."
                       value={actionData.a}
                       onChange={(e) => setActionData({ ...actionData, a: e.target.value })}
-                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">C -</span> Context & Conditions (Situasi Bisnis)</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">C -</span> Situasi &amp; Latar Belakang (Context &amp; Situation)</label>
                     <textarea
                       rows={2}
-                      placeholder="Kemitraan berjalan 2 tahun. Ada pemotongan budget 15% dari direksi..."
+                      placeholder="Kemitraan berjalan 2 tahun. Ada penyesuaian budget 15% dari direksi..."
                       value={actionData.c}
                       onChange={(e) => setActionData({ ...actionData, c: e.target.value })}
-                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">T -</span> Target & Task (Tugas yang Dihasilkan)</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">T -</span> Tugas &amp; Target Hasil (Task &amp; Deliverables)</label>
                     <textarea
                       rows={2}
-                      placeholder="Susun email negosiasi perpanjangan kontrak dengan opsi trade-off..."
+                      placeholder="Susun email negosiasi perpanjangan kontrak dengan opsi trade-off komitmen jangka panjang..."
                       value={actionData.t}
                       onChange={(e) => setActionData({ ...actionData, t: e.target.value })}
-                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
+                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
                     />
                   </div>
 
                   {builderType === 'ACTIONS' && (
                     <>
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">I -</span> Intention & Impact (Dampak Psikologis / Bisnis)</label>
+                        <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">I -</span> Dampak yang Diharapkan (Intention &amp; Impact)</label>
                         <textarea
                           rows={2}
-                          placeholder="Membangun kemitraan jangka panjang win-win..."
+                          placeholder="Membangun kemitraan jangka panjang saling menguntungkan (win-win)..."
                           value={actionData.i}
                           onChange={(e) => setActionData({ ...actionData, i: e.target.value })}
-                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">O -</span> Output & Organization (Format Minto / Struktur)</label>
+                        <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">O -</span> Format Keluaran (Output &amp; Structure)</label>
                         <textarea
                           rows={2}
                           placeholder="Format Minto Pyramid (SCQA). Maksimal 4 paragraf lugas..."
                           value={actionData.o}
                           onChange={(e) => setActionData({ ...actionData, o: e.target.value })}
-                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">N -</span> Negatives (Pantangan & Batasan Halusinasi)</label>
+                        <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">N -</span> Batasan &amp; Pantangan (Negatives &amp; Guardrails)</label>
                         <textarea
                           rows={2}
-                          placeholder="DILARANG mengancam pemutusan kontrak sepihak..."
+                          placeholder="DILARANG menggunakan nada agresif, ancaman pemutusan kontrak sepihak, atau asumsi tanpa data..."
                           value={actionData.n}
                           onChange={(e) => setActionData({ ...actionData, n: e.target.value })}
-                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 mb-1"><span className="font-mono font-bold text-slate-800">S -</span> Steps (Urutan Logika AI)</label>
+                        <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">S -</span> Urutan Langkah (Steps &amp; Reasoning)</label>
                         <textarea
                           rows={2}
-                          placeholder="1. Beri apresiasi SLA, 2. Paparkan konteks, 3. Tawarkan opsi multi-year..."
+                          placeholder="1. Beri apresiasi pencapaian SLA, 2. Paparkan situasi anggaran, 3. Tawarkan opsi perpanjangan multi-year..."
                           value={actionData.s}
                           onChange={(e) => setActionData({ ...actionData, s: e.target.value })}
-                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-slate-400"
+                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
                         />
                       </div>
                     </>
@@ -1781,31 +2062,32 @@ export default function App({ onBack }: { onBack?: () => void }) {
               </div>
 
               {/* Cards Grid / Empty State */}
-              {journalPrompts.filter(p => p.isPublic).length === 0 ? (
+              {communityPrompts.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-10 text-center max-w-xl mx-auto my-6 shadow-sm">
                   <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-3.5">
                     <Share2 size={22} className="text-slate-600" />
                   </div>
                   <h3 className="font-bold text-sm text-slate-900 mb-1">Prompt Community Masih Kosong</h3>
                   <p className="text-xs text-slate-500 leading-relaxed mb-4 max-w-md mx-auto">
-                    Setiap prompt yang disimpan dan diatur publik akan muncul di sini agar dapat dipelajari, diadaptasi, serta direview oleh fasilitator.
+                    Setiap prompt yang disimpan dan diatur publik akan muncul di sini agar dapat dipelajari, diadaptasi, serta diberi rating bintang oleh seluruh anggota komunitas.
                   </p>
                   <button
                     onClick={() => {
                       setIteratingPromptId(null);
                       setBuilderTitle('');
-                      setActiveMenu('prompt-studio');
+                      handleNavigate('prompt-studio');
                     }}
                     className="px-4 py-2 rounded-xl bg-[#141210] hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-2 transition-colors shadow-sm"
                   >
                     <Plus size={14} className="text-[#E5C158]" />
-                    <span>Buat Prompt Pertama</span>
+                    <span>Buat Formula Pertama</span>
                   </button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {journalPrompts.filter(p => p.isPublic).map(item => {
+                  {communityPrompts.map(item => {
                     const latest = item.versions[item.versions.length - 1];
+                    const isAdoptionSuccess = copiedId === `adp-${item.id}`;
                     return (
                       <div 
                         key={item.id}
@@ -1813,7 +2095,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                       >
                         <div>
                           <div className="flex items-center justify-between gap-2 mb-2.5">
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex flex-wrap items-center gap-1.5">
                               <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200/60">
                                 #{item.tag || item.departmentTag || 'Umum'}
                               </span>
@@ -1823,10 +2105,33 @@ export default function App({ onBack }: { onBack?: () => void }) {
                             </div>
 
                             <div className="flex items-center gap-1.5">
-                              <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200/60">
-                                <Star size={11} className="text-[#C9A23E] fill-[#C9A23E]" />
-                                <span>{item.score.toFixed(1)}</span>
+                              {/* 1-5 Star Interactive Community Rating */}
+                              <div className="flex items-center gap-1 bg-slate-50 hover:bg-amber-50/50 px-2 py-0.5 rounded-xl border border-slate-200/80 transition-colors">
+                                <div className="flex items-center gap-0.5">
+                                  {[1, 2, 3, 4, 5].map((starNum) => {
+                                    const effScore = getEffectiveRating(item);
+                                    const isFilled = starNum <= Math.round(effScore);
+                                    return (
+                                      <button
+                                        key={starNum}
+                                        type="button"
+                                        onClick={() => handleRatePrompt(item.id, starNum)}
+                                        title={`Beri nilai ${starNum} bintang`}
+                                        className="p-0.5 text-slate-300 hover:text-amber-400 hover:scale-125 transition-all focus:outline-none"
+                                      >
+                                        <Star
+                                          size={12}
+                                          className={isFilled ? "text-amber-500 fill-amber-400" : "text-slate-300"}
+                                        />
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                                <span className="text-[11px] font-mono font-bold text-slate-700 ml-0.5">
+                                  {getEffectiveRating(item).toFixed(1)}
+                                </span>
                               </div>
+
                               {item.authorName.includes('Saya') && (
                                 <button
                                   onClick={() => setPromptToDelete(item)}
@@ -1846,29 +2151,24 @@ export default function App({ onBack }: { onBack?: () => void }) {
                             {item.description}
                           </p>
 
-                          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-3 text-xs font-mono text-slate-700 line-clamp-3">
+                          <div className="bg-slate-50/80 border border-slate-200/80 rounded-xl p-3 mb-3 text-xs font-sans text-slate-700 leading-relaxed line-clamp-3">
                             {latest.promptText}
                           </div>
                         </div>
 
                         <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <button
-                              onClick={() => adoptToMyJournal(item)}
-                              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1 transition-colors"
-                            >
-                              <BookmarkCheck size={12} className="text-slate-600" />
-                              Adaptasi ke Jurnal
-                            </button>
-                            <button
-                              onClick={() => handleOpenReview(item)}
-                              className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 font-bold text-xs flex items-center gap-1 transition-colors"
-                              title="Beri Nilai & Evaluasi Fasilitator"
-                            >
-                              <Award size={11} className="text-[#C9A23E]" />
-                              Review Fasilitator
-                            </button>
-                          </div>
+                          <button
+                            onClick={() => adoptToMyJournal(item)}
+                            className={`px-2.5 py-1 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all ${
+                              isAdoptionSuccess 
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-300' 
+                                : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
+                            }`}
+                            title="Duplikasi formula ini ke dalam Jurnal Pribadi Anda"
+                          >
+                            {isAdoptionSuccess ? <Check size={12} className="text-emerald-600" /> : <BookmarkCheck size={12} className="text-slate-600" />}
+                            <span>{isAdoptionSuccess ? 'Tersimpan ke Jurnal!' : 'Simpan ke Jurnalku'}</span>
+                          </button>
 
                           <button
                             onClick={() => handleCopy(latest.promptText, `comm-${item.id}`)}
@@ -1993,7 +2293,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                           </div>
 
                           {/* Example Prompt Box */}
-                          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-mono text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+                          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-sans text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
                             {tech.example}
                           </div>
                         </div>
@@ -2112,7 +2412,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                           {brutalMethodData.systemLevelBonus.desc}
                         </p>
                         
-                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 font-mono text-xs text-slate-700 leading-relaxed italic mb-3">
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 font-sans text-xs text-slate-700 leading-relaxed italic mb-3">
                           "{brutalMethodData.systemLevelBonus.prompt}"
                         </div>
                       </div>
@@ -2161,7 +2461,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                             </div>
                             <p className="text-xs text-slate-600 mb-3 leading-relaxed">{tpl.desc}</p>
                             
-                            <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-mono text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+                            <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-sans text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
                               {tpl.prompt}
                             </div>
                           </div>
@@ -2414,8 +2714,8 @@ export default function App({ onBack }: { onBack?: () => void }) {
 
                         {/* Bottom: Prompt Box & Quick Win */}
                         <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                          <div className="flex-1 w-full bg-slate-50 rounded-xl p-3 border border-slate-200 text-xs font-mono text-slate-700">
-                            <span className="text-[10px] font-bold font-mono text-slate-400 block mb-1 uppercase tracking-wider flex items-center gap-1">
+                          <div className="flex-1 w-full bg-slate-50 rounded-xl p-3.5 border border-slate-200 text-xs font-sans text-slate-700 leading-relaxed">
+                            <span className="text-[10px] font-bold text-slate-400 block mb-1 uppercase tracking-wider flex items-center gap-1">
                               <MessageSquare size={11} /> Sample Prompt:
                             </span>
                             "{mode.samplePrompt}"
@@ -2471,7 +2771,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                           <h3 className="font-bold text-sm text-slate-900 mb-1">{item.title}</h3>
                           <p className="text-xs text-slate-600 mb-3 leading-relaxed">{item.desc}</p>
                           
-                          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-mono text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto">
+                          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 text-xs font-sans text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto">
                             {item.prompt}
                           </div>
                         </div>
@@ -2514,7 +2814,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                           <h3 className="font-bold text-sm text-slate-900 mb-1">{item.title}</h3>
                           <p className="text-xs text-slate-600 mb-3 leading-relaxed">{item.desc}</p>
                           
-                          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-mono text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto">
+                          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 text-xs font-sans text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-40 overflow-y-auto">
                             {item.prompt}
                           </div>
                         </div>
@@ -2649,7 +2949,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                           </span>
                           <h4 className="text-xs font-bold text-slate-900 mb-1 leading-snug">{p.title}</h4>
                           <p className="text-[11px] text-slate-500 mb-2 line-clamp-2">{p.description}</p>
-                          <div className="bg-slate-50 rounded-lg p-2 text-[11px] font-mono text-slate-700 line-clamp-3 mb-2.5">
+                          <div className="bg-slate-50 rounded-lg p-2.5 text-xs font-sans text-slate-700 leading-relaxed line-clamp-3 mb-2.5">
                             {p.content}
                           </div>
                         </div>
@@ -2736,7 +3036,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                 <div className="text-[11px] font-bold text-slate-500 mb-2">
                   Pola: {comparingPrompt.versions[0].frameworkUsed}
                 </div>
-                <div className="bg-slate-50 rounded-xl p-3 text-xs font-mono text-slate-800 whitespace-pre-line leading-relaxed flex-1 border border-slate-200/60">
+                <div className="bg-slate-50 rounded-xl p-3.5 text-xs font-sans text-slate-800 whitespace-pre-line leading-relaxed flex-1 border border-slate-200/60">
                   {comparingPrompt.versions[0].promptText}
                 </div>
                 {comparingPrompt.versions[0].notes && (
@@ -2759,7 +3059,7 @@ export default function App({ onBack }: { onBack?: () => void }) {
                     <div className="text-[11px] font-bold text-slate-800 mb-2">
                       Pola: {latest.frameworkUsed}
                     </div>
-                    <div className="bg-slate-50 rounded-xl p-3 text-xs font-mono text-slate-900 whitespace-pre-line leading-relaxed flex-1 border border-slate-200/60">
+                    <div className="bg-slate-50 rounded-xl p-3.5 text-xs font-sans text-slate-900 whitespace-pre-line leading-relaxed flex-1 border border-slate-200/60">
                       {latest.promptText}
                     </div>
                     {latest.notes && (
@@ -2768,38 +3068,12 @@ export default function App({ onBack }: { onBack?: () => void }) {
                       </p>
                     )}
 
-                    {(latest.facilitatorScore || latest.facilitatorFeedback) && (
-                      <div className="mt-2.5 p-3 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-bold text-amber-900 flex items-center gap-1 text-[11px]">
-                            <Award size={13} className="text-[#C9A23E]" /> Evaluasi Fasilitator AIF:
-                          </span>
-                          {latest.facilitatorScore && (
-                            <span className="font-mono font-bold text-[#C9A23E] bg-white px-2 py-0.5 rounded border border-amber-200 text-[11px]">
-                              {latest.facilitatorScore.toFixed(1)} ★
-                            </span>
-                          )}
-                        </div>
-                        {latest.facilitatorFeedback && (
-                          <p className="text-slate-700 text-[11px] leading-relaxed italic">
-                            "{latest.facilitatorFeedback}"
-                          </p>
-                        )}
-                      </div>
-                    )}
                   </div>
                 );
               })()}
             </div>
 
-            <div className="px-5 py-2.5 bg-white border-t border-slate-200 flex items-center justify-between">
-              <button
-                onClick={() => handleOpenReview(comparingPrompt)}
-                className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 font-bold text-xs flex items-center gap-1.5 transition-colors"
-              >
-                <Award size={12} className="text-[#C9A23E]" />
-                Beri / Edit Nilai Fasilitator
-              </button>
+            <div className="px-5 py-2.5 bg-white border-t border-slate-200 flex items-center justify-end">
               <button
                 onClick={() => setComparingPrompt(null)}
                 className="px-4 py-1.5 rounded-xl bg-[#141210] hover:bg-slate-800 text-white text-xs font-bold"
@@ -2807,136 +3081,6 @@ export default function App({ onBack }: { onBack?: () => void }) {
                 Tutup
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* MODAL: TRAINER / FACILITATOR EVALUATION WORKBENCH */}
-      {/* ========================================================================= */}
-      {reviewingPrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
-            
-            {/* Header */}
-            <div className="px-5 py-4 bg-[#141210] text-white flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-mono text-[#E5C158] uppercase tracking-wider flex items-center gap-1.5">
-                  <Award size={12} className="text-[#E5C158]" /> Mode Fasilitator / Trainer
-                </span>
-                <h3 className="text-sm font-bold text-white mt-0.5">
-                  Evaluasi &amp; Penilaian Prompt Peserta
-                </h3>
-              </div>
-              <button onClick={() => setReviewingPrompt(null)} className="text-slate-400 hover:text-white">
-                <X size={16} />
-              </button>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSaveReview} className="p-5 overflow-y-auto space-y-4 flex-1">
-              {/* Target Prompt Info */}
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-slate-900">{reviewingPrompt.title}</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white text-slate-600 border border-slate-200">
-                    #{reviewingPrompt.tag || reviewingPrompt.departmentTag || 'Umum'} • v{reviewingPrompt.currentVersion}
-                  </span>
-                </div>
-                <div className="text-[11px] text-slate-500 mb-2">
-                  Penulis: <strong className="text-slate-800">{reviewingPrompt.authorName}</strong>
-                </div>
-                <div className="bg-white p-2.5 rounded-lg border border-slate-200/80 text-xs font-mono text-slate-700 max-h-24 overflow-y-auto">
-                  {reviewingPrompt.versions[reviewingPrompt.versions.length - 1].promptText}
-                </div>
-              </div>
-
-              {/* Score Input (1.0 to 10.0) */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                    <Star size={13} className="text-[#C9A23E] fill-[#C9A23E]" /> Skor Fasilitator (Skala 1.0 - 10.0)
-                  </label>
-                  <span className="font-mono text-base font-black text-slate-900 px-2.5 py-0.5 bg-amber-50 border border-amber-200 rounded-lg text-[#C9A23E]">
-                    {reviewScore.toFixed(1)} ★
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="5.0"
-                  max="10.0"
-                  step="0.1"
-                  value={reviewScore}
-                  onChange={(e) => setReviewScore(parseFloat(e.target.value))}
-                  className="w-full accent-slate-900 cursor-pointer"
-                />
-                <div className="flex justify-between text-[10px] font-mono text-slate-400 mt-1">
-                  <span>5.0 (Dasar)</span>
-                  <span>7.5 (Kompeten)</span>
-                  <span>9.0 (Mahir)</span>
-                  <span>10.0 (Mastery)</span>
-                </div>
-              </div>
-
-              {/* Quick Score Chips */}
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  { val: 8.5, label: "8.5 - Perlu Penajaman Output" },
-                  { val: 9.0, label: "9.0 - Terstruktur Baik" },
-                  { val: 9.5, label: "9.5 - Sangat Tajam & Leverage Jelas" },
-                  { val: 9.8, label: "9.8 - Kualitas Benchmark" }
-                ].map((chip) => (
-                  <button
-                    type="button"
-                    key={chip.val}
-                    onClick={() => setReviewScore(chip.val)}
-                    className={`text-[10px] font-mono px-2.5 py-1 rounded-lg border transition-all ${
-                      reviewScore === chip.val
-                        ? 'bg-slate-900 text-white border-slate-900 font-bold'
-                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    {chip.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Qualitative Written Feedback */}
-              <div>
-                <label className="block text-xs font-bold text-slate-900 mb-1">
-                  Catatan Evaluasi Formatif Fasilitator:
-                </label>
-                <textarea
-                  rows={3}
-                  value={reviewFeedback}
-                  onChange={(e) => setReviewFeedback(e.target.value)}
-                  placeholder="Berikan apresiasi dan catatan konstruktif (misal: 'Evolusi luar biasa. Penggunaan trade-off multi-year memberikan leverage nyata...')"
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#C9A23E] leading-relaxed"
-                />
-                <span className="text-[10px] text-slate-400 block mt-1">
-                  Feedback ini akan otomatis tertera di kartu jurnal peserta dan pada modal Before vs After.
-                </span>
-              </div>
-
-              {/* Buttons */}
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setReviewingPrompt(null)}
-                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold transition-colors shadow-sm flex items-center gap-1.5"
-                >
-                  <Check size={13} />
-                  Simpan Nilai &amp; Feedback
-                </button>
-              </div>
-            </form>
-
           </div>
         </div>
       )}
@@ -2991,8 +3135,18 @@ export default function App({ onBack }: { onBack?: () => void }) {
       {/* MODAL: EXERCISE LAB WORKBENCH */}
       {/* ========================================================================= */}
       {activeExercise && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+        <div 
+          onClick={() => {
+            setActiveExercise(null);
+            setShowExerciseSolution(false);
+          }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
+          >
+            {/* Modal Header */}
             <div className="px-5 py-3.5 bg-[#141210] text-white flex items-center justify-between">
               <div>
                 <span className="text-[10px] font-mono text-[#E5C158] uppercase tracking-wider">
@@ -3000,11 +3154,19 @@ export default function App({ onBack }: { onBack?: () => void }) {
                 </span>
                 <h3 className="text-sm font-bold text-white mt-0.5">{activeExercise.title}</h3>
               </div>
-              <button onClick={() => setActiveExercise(null)} className="text-slate-400 hover:text-white">
-                <X size={16} />
+              <button 
+                onClick={() => {
+                  setActiveExercise(null);
+                  setShowExerciseSolution(false);
+                }} 
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                title="Tutup (Esc)"
+              >
+                <X size={18} />
               </button>
             </div>
 
+            {/* Modal Body */}
             <div className="p-5 overflow-y-auto space-y-4 flex-1">
               <div>
                 <h4 className="text-xs font-bold text-slate-800 mb-1">Skenario Masalah:</h4>
@@ -3014,10 +3176,10 @@ export default function App({ onBack }: { onBack?: () => void }) {
               </div>
 
               <div>
-                <h4 className="text-xs font-mono font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Prompt Awal (Ad-hoc):
+                <h4 className="text-xs font-bold text-slate-700 mb-1">
+                  Contoh Prompt Awal (Ad-hoc):
                 </h4>
-                <p className="text-xs font-mono text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <p className="text-xs font-sans text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed">
                   "{activeExercise.poorPrompt}"
                 </p>
               </div>
@@ -3034,38 +3196,82 @@ export default function App({ onBack }: { onBack?: () => void }) {
               </div>
 
               {showExerciseSolution ? (
-                <div className="space-y-2 pt-2 border-t border-slate-100 animate-in fade-in">
-                  <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                    <CheckCircle2 size={13} className="text-slate-700" />
-                    Solusi Benchmark Fasilitator AIF:
-                  </h4>
-                  <pre className="text-xs font-mono text-slate-100 bg-slate-900 p-3.5 rounded-xl border border-slate-800 whitespace-pre-line leading-relaxed">
+                <div className="space-y-3 pt-3 border-t border-slate-200 animate-in fade-in">
+                  
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                      <CheckCircle2 size={15} className="text-emerald-600" />
+                      Solusi Benchmark Fasilitator
+                    </h4>
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200/80">
+                      Formula Rekomendasi
+                    </span>
+                  </div>
+
+                  <div className="text-sm font-sans text-slate-900 bg-slate-50 p-4 rounded-xl border border-slate-200 whitespace-pre-line leading-relaxed shadow-sm font-normal">
                     {activeExercise.benchmarkSolution}
-                  </pre>
-                  <button
-                    onClick={() => handleCopy(activeExercise.benchmarkSolution, 'ex-sol')}
-                    className="px-3 py-1.5 rounded-lg bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold flex items-center gap-1"
-                  >
-                    {copiedId === 'ex-sol' ? <Check size={12} /> : <Copy size={12} />}
-                    Salin Solusi ke Clipboard
-                  </button>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleCopy(activeExercise.benchmarkSolution, 'ex-sol')}
+                        className="px-4 py-2 rounded-xl bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                      >
+                        {copiedId === 'ex-sol' ? <Check size={13} /> : <Copy size={13} />}
+                        <span>{copiedId === 'ex-sol' ? 'Solusi Tersalin!' : 'Salin Solusi Benchmark'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleStartFormulaFromExercise(activeExercise)}
+                        className="px-4 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 text-xs font-bold flex items-center gap-1.5 transition-colors border border-amber-300 shadow-sm"
+                      >
+                        <Sparkles size={13} className="text-amber-800" />
+                        <span>Tulis di Studio</span>
+                        <ArrowRight size={13} />
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => setShowExerciseSolution(false)}
+                      className="text-xs text-slate-500 hover:text-slate-800 underline transition-colors"
+                    >
+                      Sembunyikan Solusi
+                    </button>
+                  </div>
+
                 </div>
               ) : (
-                <div className="pt-3 text-center">
+                <div className="pt-2 text-center bg-slate-50 border border-slate-200/80 rounded-2xl p-6">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-[#C9A23E] flex items-center justify-center mx-auto mb-2.5 border border-amber-200/60">
+                    <Sparkles size={20} />
+                  </div>
+                  <h4 className="font-bold text-sm text-slate-900 mb-1">Uji Ketajaman Prompt Anda</h4>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto mb-4 leading-relaxed">
+                    Tulis dan eksplorasi draf prompt Anda sendiri terlebih dahulu, lalu buka benchmark fasilitator untuk mempelajari formula dan bedah logikanya.
+                  </p>
                   <button
                     onClick={() => setShowExerciseSolution(true)}
-                    className="px-4 py-2 rounded-xl bg-[#E5C158] hover:bg-[#F0CF6B] text-slate-950 text-xs font-bold shadow-sm transition-all"
+                    className="px-5 py-2.5 rounded-xl bg-[#E5C158] hover:bg-[#F0CF6B] text-slate-950 text-xs font-bold shadow-md transition-all inline-flex items-center gap-2"
                   >
-                    Buka Solusi Benchmark Fasilitator
+                    <CheckCircle2 size={15} />
+                    <span>Buka Solusi Benchmark Fasilitator</span>
                   </button>
                 </div>
               )}
             </div>
 
-            <div className="px-5 py-2.5 bg-slate-50 border-t border-slate-200 flex justify-end">
+            {/* Modal Footer */}
+            <div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+              <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">
+                Tekan <kbd className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-slate-600">Esc</kbd> atau klik di luar untuk menutup
+              </span>
               <button
-                onClick={() => setActiveExercise(null)}
-                className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold"
+                onClick={() => {
+                  setActiveExercise(null);
+                  setShowExerciseSolution(false);
+                }}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-colors ml-auto"
               >
                 Tutup Latihan
               </button>

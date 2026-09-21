@@ -6,7 +6,7 @@ interface EntranceLoadingProps {
 
 export const EntranceLoading: React.FC<EntranceLoadingProps> = ({ onComplete }) => {
   const [progress, setProgress] = useState(0);
-  const [statusText, setStatusText] = useState('Memuat Prompt Database...');
+  const [statusText, setStatusText] = useState('Memuat Prompt Studio...');
   const [isExiting, setIsExiting] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [isFlashing, setIsFlashing] = useState(false);
@@ -42,9 +42,9 @@ export const EntranceLoading: React.FC<EntranceLoadingProps> = ({ onComplete }) 
         }
 
         if (nextVal > 70) {
-          setStatusText('Menghubungkan Growth Journal...');
+          setStatusText('Menyiapkan Prompt Studio...');
         } else if (nextVal > 35) {
-          setStatusText('Menyusun SCQA Framework...');
+          setStatusText('Menyusun Formula Framework...');
         }
 
         return nextVal;
@@ -58,7 +58,7 @@ export const EntranceLoading: React.FC<EntranceLoadingProps> = ({ onComplete }) 
   }, [onComplete]);
 
   const promptLetters = 'PROMPT'.split('');
-  const databaseLetters = 'DATABASE'.split('');
+  const studioLetters = 'STUDIO'.split('');
 
   return (
     <div className={`entrance-overlay ${isExiting ? 'fade-out' : ''}`}>
@@ -184,7 +184,7 @@ export const EntranceLoading: React.FC<EntranceLoadingProps> = ({ onComplete }) 
           text-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
         }
 
-        .entrance-word-database {
+        .entrance-word-studio {
           color: #C69222;
           background: linear-gradient(135deg, #8E6510 0%, #C69222 28%, #F2C95C 50%, #C69222 75%, #7D570A 100%);
           -webkit-background-clip: text;
@@ -347,10 +347,10 @@ export const EntranceLoading: React.FC<EntranceLoadingProps> = ({ onComplete }) 
                 </span>
               ))}
             </div>
-            <div className="entrance-word-database">
-              {databaseLetters.map((char, i) => (
+            <div className="entrance-word-studio">
+              {studioLetters.map((char, i) => (
                 <span
-                  key={`d-${i}`}
+                  key={`s-${i}`}
                   className="entrance-char"
                   style={{ animationDelay: `${(0.32 + i * 0.045) * 1.333}s` }}
                 >
