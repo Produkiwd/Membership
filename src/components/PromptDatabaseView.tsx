@@ -663,10 +663,29 @@ const exercisesData: ExerciseCase[] = [
 // Community Prompts Seed (Empty by default - pure user community contributions)
 const SEED_COMMUNITY_PROMPTS: JournalPrompt[] = [];
 
-export default function App({ onBack }: { onBack?: () => void }) {
+export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () => void; initialMenu?: string }) {
   // Navigation State (WJG Style)
   // 'beranda' | 'my-journal' | 'prompt-studio' | 'community' | 'techniques' | 'reading-learning' | 'exercise' | 'vault'
-  const [activeMenu, setActiveMenu] = useState<string>('beranda');
+  const [activeMenu, setActiveMenu] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.replace('#', '');
+      if (['exercise', 'prompt-studio', 'my-journal', 'community', 'techniques', 'reading-learning', 'vault'].includes(hash)) {
+        return hash;
+      }
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab && ['exercise', 'prompt-studio', 'my-journal', 'community', 'techniques', 'reading-learning', 'vault'].includes(tab)) {
+        return tab;
+      }
+    }
+    return initialMenu || 'beranda';
+  });
+
+  useEffect(() => {
+    if (initialMenu && initialMenu !== 'beranda') {
+      setActiveMenu(initialMenu);
+    }
+  }, [initialMenu]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 

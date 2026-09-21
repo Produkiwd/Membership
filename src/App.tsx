@@ -1111,10 +1111,12 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   };
 
   const canOpenPromptDatabase = canAccessPromptDatabase(sinadAccess.tier, allowedPortals, isAdmin);
+  const [promptStudioInitialMenu, setPromptStudioInitialMenu] = useState<string>('beranda');
 
-  const openPromptDatabase = () => {
+  const openPromptDatabase = (menu: string = 'beranda') => {
     if (!canOpenPromptDatabase) return;
     localStorage.setItem('appToken', 'iwdemy123');
+    setPromptStudioInitialMenu(menu);
     setActiveTab('prompts');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -1804,6 +1806,49 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   <iframe srcDoc={selectedHtmlData.htmls[selectedHtmlData.activeIndex].content} className="w-full h-full min-h-[70vh] border-0" title="Materi" />
                 )}
               </div>
+
+              {/* Bridge CTA to Prompt Studio (Per Spec v2) */}
+              {canOpenPromptDatabase && (
+                <div className="border-t border-border-dark-subtle/30 bg-[#141210] px-5 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-gold-muted/10 border border-gold-muted/30 flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4 text-gold-muted" />
+                    </div>
+                    <div>
+                      <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-gold-muted">
+                        Praktik &amp; Evaluasi Mandiri
+                      </div>
+                      <div className="text-xs sm:text-sm font-sans font-semibold text-dark-hi">
+                        Selesai membaca? Uji pemahamanmu di Prompt Studio.
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <button
+                      onClick={() => {
+                        setSelectedHtmlData(null);
+                        setIsFullscreen(false);
+                        openPromptDatabase('exercise');
+                      }}
+                      className="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg bg-gold-muted hover:bg-gold text-slate-950 font-sans font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                    >
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>Mulai Latihan Kasus</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedHtmlData(null);
+                        setIsFullscreen(false);
+                        openPromptDatabase('prompt-studio');
+                      }}
+                      className="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg bg-[#24201c] hover:bg-[#2e2924] text-dark-hi font-sans font-semibold text-xs flex items-center justify-center gap-1.5 transition-all border border-border-dark-subtle/40 cursor-pointer"
+                    >
+                      <span>Buat Formulamu Sendiri</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1921,7 +1966,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
           </>
         ) : activeTab === 'prompts' ? (
           canOpenPromptDatabase
-            ? <PromptDatabaseView onBack={() => { setActiveTab('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+            ? <PromptDatabaseView initialMenu={promptStudioInitialMenu} onBack={() => { setActiveTab('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
             : <div className="p-12 text-center font-body text-light-md">Akses Prompt Database tidak tersedia untuk akun ini.</div>
         ) : activeTab === 'admin' ? (
           <AdminView />
