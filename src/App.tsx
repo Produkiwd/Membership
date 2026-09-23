@@ -1,5 +1,5 @@
 import { Monitor, Sparkles, BookOpen, Calendar, ChevronRight, ChevronLeft, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2, ExternalLink } from 'lucide-react';
-import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent, type ChangeEvent } from 'react';
+import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent, type ChangeEvent, type SyntheticEvent } from 'react';
 import { cn } from './lib/utils';
 import { AI_OS_GROUP, AI_OS_TIER, canAccessAifModule, canAccessPromptDatabase } from './lib/access';
 import {
@@ -33,6 +33,25 @@ import aiKnowledgeOperatingSystemHtml from '../materi/ACT/AI_Knowledge_Operating
 import SinadPortal from './components/SinadPortal';
 import PromptDatabaseView from './components/PromptDatabaseView';
 import KnowledgeArtifactPortal, { isKnowledgeArtifactId } from './components/KnowledgeArtifactPortal';
+
+function keepEmbeddedHashNavigationInsideFrame(event: SyntheticEvent<HTMLIFrameElement>) {
+  const document = event.currentTarget.contentDocument;
+  if (!document || document.documentElement.dataset.hashNavigationBound === 'true') return;
+
+  document.documentElement.dataset.hashNavigationBound = 'true';
+  document.addEventListener('click', (clickEvent) => {
+    const clickedElement = clickEvent.target as Element | null;
+    const anchor = clickedElement?.closest?.('a[href^="#"]') as HTMLAnchorElement | null;
+    const hash = anchor?.getAttribute('href');
+    if (!hash || hash === '#') return;
+
+    const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+    if (!target) return;
+
+    clickEvent.preventDefault();
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
 
 function Eyebrow({ children, variant = 'light' }: { children: ReactNode, variant?: 'light' | 'dark' | 'flat' }) {
   return (
@@ -1803,7 +1822,12 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                     ))}
                   </div>
                 ) : (
-                  <iframe srcDoc={selectedHtmlData.htmls[selectedHtmlData.activeIndex].content} className="w-full h-full min-h-[70vh] border-0" title="Materi" />
+                  <iframe
+                    srcDoc={selectedHtmlData.htmls[selectedHtmlData.activeIndex].content}
+                    onLoad={keepEmbeddedHashNavigationInsideFrame}
+                    className="w-full h-full min-h-[70vh] border-0"
+                    title="Materi"
+                  />
                 )}
               </div>
 
