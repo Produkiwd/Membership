@@ -2029,69 +2029,6 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (!user) return;
-
-    const idleLimitMs = 60 * 60 * 1000;
-    const storageKey = 'member_last_activity_at';
-    const stored = Number(localStorage.getItem(storageKey));
-    let lastActivityAt = stored > 0 ? stored : Date.now();
-    let lastSavedAt = stored > 0 ? stored : 0;
-    let timeoutId: ReturnType<typeof setTimeout>;
-    let loggingOut = false;
-    if (!stored) localStorage.setItem(storageKey, String(lastActivityAt));
-
-    const expireIfIdle = () => {
-      if (loggingOut) return true;
-      const sharedActivityAt = Number(localStorage.getItem(storageKey));
-      if (sharedActivityAt > lastActivityAt) lastActivityAt = sharedActivityAt;
-      if (Date.now() - lastActivityAt < idleLimitMs) return false;
-      loggingOut = true;
-      void signOutMember().catch((error) => {
-        console.error('Gagal mengakhiri sesi tidak aktif:', error);
-        setUser(null);
-      });
-      return true;
-    };
-
-    const scheduleExpiry = () => {
-      clearTimeout(timeoutId);
-      if (expireIfIdle()) return;
-      timeoutId = setTimeout(scheduleExpiry, Math.max(1000, idleLimitMs - (Date.now() - lastActivityAt)));
-    };
-
-    const recordActivity = () => {
-      if (expireIfIdle()) return;
-      lastActivityAt = Date.now();
-      if (lastActivityAt - lastSavedAt >= 15000) {
-        localStorage.setItem(storageKey, String(lastActivityAt));
-        lastSavedAt = lastActivityAt;
-      }
-      scheduleExpiry();
-    };
-
-    const checkOnReturn = () => {
-      if (!document.hidden) scheduleExpiry();
-    };
-
-    const events = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart', 'member-artifact-activity'];
-    events.forEach((event) => window.addEventListener(event, recordActivity, true));
-    document.addEventListener('visibilitychange', checkOnReturn);
-    window.addEventListener('focus', checkOnReturn);
-    window.addEventListener('pageshow', checkOnReturn);
-    window.addEventListener('storage', checkOnReturn);
-    scheduleExpiry();
-
-    return () => {
-      clearTimeout(timeoutId);
-      events.forEach((event) => window.removeEventListener(event, recordActivity, true));
-      document.removeEventListener('visibilitychange', checkOnReturn);
-      window.removeEventListener('focus', checkOnReturn);
-      window.removeEventListener('pageshow', checkOnReturn);
-      window.removeEventListener('storage', checkOnReturn);
-    };
-  }, [user?.id]);
-
   if (!authInitialized) {
     return <div className="min-h-screen bg-bg-dark flex items-center justify-center text-gold font-mono uppercase tracking-widest text-xs font-bold">Memuat...</div>;
   }
