@@ -1,6 +1,12 @@
 import { Monitor, Sparkles, BookOpen, Calendar, ChevronRight, ChevronLeft, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2, ExternalLink } from 'lucide-react';
 import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent, type ChangeEvent, type SyntheticEvent } from 'react';
 import { cn } from './lib/utils';
+import { filterMembers } from './lib/memberSearch';
+import { memberExpiryTime, memberState, memberStatusLabel } from './lib/memberStatus';
+import PortalConstellation from './components/PortalConstellation';
+import { MODULE_IDS } from './lib/moduleProgress';
+import { useArtifactProgress } from './lib/useArtifactProgress';
+import { artifactStats, buildArtifactList, type LearningArtifact } from './lib/artifactProgress';
 import { AI_OS_GROUP, AI_OS_TIER, canAccessAifModule, canAccessPromptDatabase } from './lib/access';
 import {
   createPendingMember,
@@ -14,8 +20,9 @@ import {
   updateMember,
   updateMemberPassword,
   type User,
+  type MemberRecord,
 } from './lib/membership';
-import { addMateri, deleteMateri, getMateriByModule, uploadMateriFile, type Materi } from './lib/materi';
+import { addMateri, deleteMateri, getMateriByModule, getMateriCatalog, uploadMateriFile, type Materi } from './lib/materi';
 import aifPromptingHtml from '../materi/Prompt day1/aif-prompting-level2-day1.html?raw';
 import aifReadingHtml from '../materi/Prompt day1/aif-reading-level2-day1.html?raw';
 import aifPkmHtml from '../materi/Prompt day2/aif-pkm-level2-day2.html?raw';
@@ -56,7 +63,7 @@ function keepEmbeddedHashNavigationInsideFrame(event: SyntheticEvent<HTMLIFrameE
 function Eyebrow({ children, variant = 'light' }: { children: ReactNode, variant?: 'light' | 'dark' | 'flat' }) {
   return (
     <span className={cn(
-      "inline-block font-mono font-bold tracking-eyebrow uppercase px-4 py-1.5 rounded-full text-xs",
+      "inline-block font-sans font-bold tracking-eyebrow uppercase px-4 py-1.5 rounded-full text-xs",
       variant === 'light' && "bg-bg-light-eyebrow border border-border-light-eyebrow text-gold-muted",
       variant === 'dark' && "bg-bg-dark-eyebrow border border-border-dark-eyebrow text-gold",
       variant === 'flat' && "text-gold-muted px-0"
@@ -71,7 +78,7 @@ function Button({ children, variant = 'primary', className, ...props }: ButtonHT
     <button className={cn(
       "font-sans font-bold uppercase tracking-eyebrow transition-all duration-300 rounded flex-shrink-0 cursor-pointer",
       "px-8 py-4 text-sm inline-flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed",
-      variant === 'primary' && "bg-gold text-bg-dark hover:-translate-y-0.5 hover:shadow-card disabled:hover:translate-y-0",
+      variant === 'primary' && "bg-[#00AACC] text-white hover:-translate-y-0.5 hover:shadow-card disabled:hover:translate-y-0",
       variant === 'secondary' && "bg-transparent border border-gold text-gold hover:-translate-y-0.5 disabled:hover:translate-y-0",
       variant === 'tertiary' && "bg-transparent text-gold hover:opacity-80 px-0 py-0 disabled:hover:opacity-50",
       className
@@ -79,6 +86,43 @@ function Button({ children, variant = 'primary', className, ...props }: ButtonHT
       {children}
     </button>
   );
+}
+
+const defaultModuleMaterials: Record<string, any[]> = {
+  '01': [{ title: "Thinking and Working with Claude", htmls: [{ title: "Thinking and Working with Claude", content: aifWithClaudeHtml }] }, { title: "Responsible, Ethic dan Safety", htmls: [{ title: "Responsible AI untuk Pemimpin", content: responsibleAiUntukPemimpinHtml }] }, { title: "Asesmen dan Peta Kerja AI", htmls: [{ title: "Materi Visual", images: [] }, { title: "APT Assessment", content: aptAssessmentHtml }, { title: "Peta Use Case AI 2026", content: petaUsecaseAi2026Html }, { title: "Format Data untuk AI", content: formatDataUntukAiHtml }] }],
+  '02': [{ title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }, { title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }],
+  '03': [{ day: "Day 1", title: "Materi Level 3 Day 1", htmls: [{ title: "AI Skills Manual", content: level3Day1Html }, { title: "CIS Prompting", content: level3Day1_1Html }] }],
+  '04': [{ day: "Materi", title: "Thinking with Claude", htmls: [{ title: "Thinking w/ Claude AI", content: twcHtml2 }, { title: "Setup Claude", content: twcHtml1 }] }],
+  '05': [{ day: "Day 1", title: "Materi Day 1" }, { day: "Day 2", title: "Materi Day 2" }],
+  '06': [{ title: "AI Knowledge Operating System", htmls: [{ title: "AI Knowledge Operating System", content: aiKnowledgeOperatingSystemHtml }] }],
+  '07': [],
+};
+
+const moduleOutcomes: Record<string, string> = {
+  '01': 'memetakan pekerjaan dan memilih titik awal AI yang tepat.',
+  '02': 'menulis instruksi AI yang lebih jelas untuk tugas sehari-hari.',
+  '03': 'mengubah hasil AI menjadi keluaran kerja yang bisa dipakai.',
+  '04': 'menjelaskan cara berpikir di balik penggunaan Claude.',
+  '05': 'merancang alur kerja AI sederhana tanpa kode.',
+  '06': 'menerapkan AI ke perubahan kerja yang nyata.',
+  '07': 'menyusun sistem kerja AI yang bisa dikembangkan.',
+};
+
+const moduleDescriptions: Record<string, string> = {
+  '01': 'Tentukan arah penggunaan AI',
+  '02': 'Berikan instruksi yang jelas kepada AI',
+  '03': 'Buat hasil kerja dengan bantuan AI',
+  '04': 'Asah cara berpikir bersama AI',
+  '05': 'Bangun alat dan alur kerja AI',
+  '06': 'Terapkan AI dalam pekerjaan',
+  '07': 'Susun sistem kerja berbasis AI',
+};
+
+function materialOrientation(title: string): string | null {
+  if (title === 'Thinking and Working with Claude') return 'Setelah ini, kamu bisa menjelaskan ke timmu kenapa AI-mu bekerja lebih konsisten dari mereka.';
+  if (title === 'Responsible AI untuk Pemimpin') return 'Setelah ini, kamu bisa memutuskan data apa yang boleh dan tidak boleh masuk ke AI di konteks kerjamu.';
+  if (title === 'APT Assessment') return 'Setelah ini, kamu tahu persis di mana kamu sekarang — dan satu langkah konkret yang paling tepat untuk kamu selanjutnya.';
+  return null;
 }
 
 function LoginView() {
@@ -148,35 +192,19 @@ function LoginView() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-dark flex items-center justify-center p-6 lg:p-12 relative overflow-hidden">
-      <video autoPlay loop muted playsInline className="absolute top-0 left-0 w-full h-full object-cover z-0" style={{ pointerEvents: 'none' }}>
-        <source src="https://uyqgionbubycyfdmweai.supabase.co/storage/v1/object/public/Asset%20WEB/Character_and_robots_idle_animation_202607311145.mp4" type="video/mp4" />
-      </video>
-      <div className="absolute top-0 left-0 w-full h-full bg-black/40 z-0"></div>
+    <div className="min-h-screen bg-[#001E3C] flex items-center justify-center p-6 lg:p-12 relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(0,170,204,0.12),transparent_35%),radial-gradient(circle_at_85%_75%,rgba(252,181,40,0.08),transparent_35%)] z-0"></div>
       
-      {/* Decorative Tech Nodes */}
-      <svg className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-20 z-0" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice" fill="none">
-        <line x1="200" y1="200" x2="400" y2="300" stroke="#D4A84B" strokeWidth="1" strokeOpacity="0.2"/>
-        <line x1="400" y1="300" x2="600" y2="150" stroke="#D4A84B" strokeWidth="1" strokeOpacity="0.2"/>
-        <line x1="400" y1="300" x2="350" y2="600" stroke="#D4A84B" strokeWidth="1" strokeOpacity="0.2"/>
-        <circle cx="200" cy="200" r="4.5" fill="#D4A84B" fillOpacity="0.4"/>
-        <circle cx="400" cy="300" r="6" fill="#D4A84B" fillOpacity="0.6"/>
-        <circle cx="600" cy="150" r="4.5" fill="#D4A84B" fillOpacity="0.4"/>
-        <circle cx="350" cy="600" r="4.5" fill="#D4A84B" fillOpacity="0.4"/>
-        
-        <line x1="700" y1="600" x2="800" y2="800" stroke="#D4A84B" strokeWidth="1" strokeOpacity="0.2"/>
-        <circle cx="700" cy="600" r="6" fill="#D4A84B" fillOpacity="0.4"/>
-        <circle cx="800" cy="800" r="4.5" fill="#D4A84B" fillOpacity="0.4"/>
-      </svg>
+      <PortalConstellation />
       
-      <div className="w-full max-w-md bg-[#161412] border border-border-dark-subtle/30 rounded-2xl p-8 md:p-12 shadow-2xl relative z-10">
+      <div className="w-full max-w-md bg-[#001E3C]/90 border border-white/20 rounded-2xl p-8 md:p-12 shadow-2xl relative z-10 backdrop-blur-xl">
         <div className="font-sans font-extrabold text-3xl tracking-tighter text-dark-hi flex items-center gap-2 mb-12">
-          AIF Community <span className="w-2 h-2 rounded-full bg-gold inline-block"></span>
+          sinau.tech <span className="w-2 h-2 rounded-full bg-gold inline-block"></span>
         </div>
         
         <h1 className="font-sans font-bold text-2xl text-dark-hi mb-2">Portal Akses.</h1>
         <p className="font-body text-dark-md mb-8">
-          Community AI First
+          Kamu sudah mulai berpikir berbeda. Di sini kamu memperkuatnya.
         </p>
         
         {errorMsg && (
@@ -193,13 +221,13 @@ function LoginView() {
 
         <form onSubmit={handleAuth} className="space-y-6">
           <div className="space-y-2">
-            <label className="font-mono text-xs font-bold text-dark-md tracking-eyebrow uppercase block">Email</label>
+            <label className="font-body text-xs font-bold text-dark-md tracking-eyebrow uppercase block">Alamat email</label>
             <input 
               type="email" 
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="nama@perusahaan.com"
+              placeholder="Alamat email"
               className="w-full px-4 py-3 bg-bg-dark border border-border-dark-subtle rounded text-dark-hi placeholder:text-dark-lo focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all"
               disabled={isLoading}
             />
@@ -207,7 +235,7 @@ function LoginView() {
           
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
-              <label className="font-mono text-xs font-bold text-dark-md tracking-eyebrow uppercase block">Kata Sandi</label>
+              <label className="font-body text-xs font-bold text-dark-md tracking-eyebrow uppercase block">Kata Sandi</label>
               <button
                 type="button"
                 onClick={handlePasswordReset}
@@ -223,7 +251,7 @@ function LoginView() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Kata sandi"
                 className="w-full px-4 py-3 bg-bg-dark border border-border-dark-subtle rounded text-dark-hi placeholder:text-dark-lo focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all pr-12"
                 disabled={isLoading}
               />
@@ -244,11 +272,22 @@ function LoginView() {
             </Button>
           </div>
         </form>
+        <div className="mt-6 pt-6 border-t border-white/15 text-center">
+          <p className="font-body text-sm text-dark-md mb-3">Belum memiliki akun?</p>
+          <a
+            href="https://wa.me/6285211168871"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg border border-[#00AACC] font-body font-bold text-sm text-[#00AACC] hover:bg-[#00AACC]/10 focus-visible:outline-2 focus-visible:outline-[#00AACC] transition-colors"
+          >
+            Hubungi kami via WhatsApp <ExternalLink className="w-4 h-4" />
+          </a>
+        </div>
       </div>
 
       {isExpiredOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0a0a09]/80 backdrop-blur-sm">
-          <div className="bg-[#161412] border border-border-dark-subtle/30 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-8 text-center transform transition-all relative z-10">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg-dark/80 backdrop-blur-sm">
+          <div className="bg-bg-dark border border-border-dark-subtle/30 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden p-8 text-center transform transition-all relative z-10">
             <div className="mx-auto w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-6">
               <Lock className="w-8 h-8 text-red-400" />
             </div>
@@ -266,7 +305,7 @@ function LoginView() {
   );
 }
 
-function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allGroups, allTiers }: { key?: string | number, mb: any, isUpdating: boolean, handleUpdate: (id: string, role: string, tier: string, exp: string, portals: string[], sinadMateri: boolean, sinadExercise: boolean, group: string) => void, handleSendPasswordReset: (email: string) => void, allGroups: string[], allTiers: string[] }) {
+function MemberRow({ mb, now, isUpdating, handleUpdate, handleSendPasswordReset, allGroups, allTiers }: { key?: string | number, mb: any, now: number, isUpdating: boolean, handleUpdate: (id: string, role: string, tier: string, exp: string, portals: string[], sinadMateri: boolean, sinadExercise: boolean, group: string) => void, handleSendPasswordReset: (email: string) => void, allGroups: string[], allTiers: string[] }) {
   const [tier, setTier] = useState(mb.tier || 'Professional');
   const [role, setRole] = useState(mb.role || 'member');
   const [portals, setPortals] = useState<string[]>(mb.allowedPortals || ['aif']);
@@ -274,23 +313,29 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
   const [sinadExercise, setSinadExercise] = useState(mb.sinadExercise || false);
   const [group, setGroup] = useState(mb.group || '');
   const [isCustomGroup, setIsCustomGroup] = useState(false);
-  const currentExp = mb.expiresAt ? mb.expiresAt.toDate().toISOString().split('T')[0] : '';
+  const expiryTime = memberExpiryTime(mb);
+  const invalidExpiry = expiryTime !== null && !Number.isFinite(expiryTime);
+  const currentExp = expiryTime !== null && !invalidExpiry ? new Date(expiryTime).toISOString().split('T')[0] : '';
   const [exp, setExp] = useState(currentExp);
   
   const togglePortal = (p: string) => {
     setPortals(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
   };
   
-  let sisaWaktu = 'Selamanya';
-  if (mb.expiresAt) {
-    const diffTime = mb.expiresAt.toDate().getTime() - new Date().getTime();
+  let sisaWaktu = memberState(mb, now) === 'expired' ? 'Batas waktu tidak tersedia' : 'Tanpa batas tanggal';
+  if (invalidExpiry) sisaWaktu = 'Tanggal tidak valid';
+  else if (expiryTime !== null) {
+    const diffTime = expiryTime - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     sisaWaktu = diffDays > 0 ? `${diffDays} hari lagi` : 'Kedaluwarsa';
   }
   
   return (
     <tr className="border-b border-border-light-subtle/50">
-      <td className="py-3 px-2 font-mono text-xs max-w-[150px] truncate" title={mb.email}>{mb.email}</td>
+      <td className="py-3 px-2 max-w-[200px]">
+        {mb.name && <div className="font-body text-sm font-bold text-light-hi truncate" title={mb.name}>{mb.name}</div>}
+        <div className="font-body text-xs text-light-md truncate" title={mb.email}>{mb.email}</div>
+      </td>
       <td className="py-3 px-2 align-top">
         {!isCustomGroup && (allGroups.includes(group) || group === '') ? (
           <select 
@@ -356,6 +401,7 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
       <td className="py-3 px-2 align-top">
         <select 
           value={tier} 
+          disabled={isUpdating || (invalidExpiry && !exp)}
           onChange={e => {
             const newTier = e.target.value;
             const nextGroup = newTier === AI_OS_TIER ? AI_OS_GROUP : group;
@@ -390,16 +436,18 @@ function MemberRow({ mb, isUpdating, handleUpdate, handleSendPasswordReset, allG
             className="border border-border-light-subtle rounded px-2 py-1 bg-transparent block w-full focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted text-xs"
           />
         </div>
+        {invalidExpiry && <p className="font-body text-xs text-red-700 mt-2">Tanggal tersimpan tidak valid. Isi tanggal yang benar sebelum menyimpan perubahan.</p>}
       </td>
       <td className="py-3 px-2 text-xs align-top">
-        <span className={cn("px-2 py-1 rounded inline-block", sisaWaktu === 'Selamanya' ? 'bg-green-100 text-green-700' : sisaWaktu === 'Kedaluwarsa' ? 'bg-red-100 text-red-700' : 'bg-gold-muted/20 text-gold-muted font-semibold')}>
+        <p className={cn('font-bold mb-2', memberState(mb, now) === 'active' ? 'text-green-700' : memberState(mb, now) === 'expired' ? 'text-red-700' : 'text-light-md')}>{memberStatusLabel(mb, now)}</p>
+        <span className={cn("px-2 py-1 rounded inline-block", sisaWaktu === 'Kedaluwarsa' || invalidExpiry ? 'bg-red-100 text-red-700' : 'bg-bg-light text-light-md')}>
            {sisaWaktu}
         </span>
       </td>
       <td className="py-3 px-2 align-top">
         <div className="flex flex-col gap-2">
           <Button 
-            disabled={isUpdating}
+            disabled={isUpdating || (invalidExpiry && !exp)}
             onClick={() => handleUpdate(mb.id, role, tier, exp, portals, sinadMateri, sinadExercise, group)}
             variant="primary" 
             className="py-1.5 px-4 text-[10px]"
@@ -444,7 +492,7 @@ function MateriView() {
   const STRATEGIZE_SECTIONS = [
     { id: 'thinking-with-claude', name: 'Thinking and Working with Claude' },
     { id: 'responsible-ethic-safety', name: 'Responsible, Ethic dan Safety' },
-    { id: 'umum', name: 'Umum' },
+    { id: 'umum', name: 'Asesmen dan Peta Kerja AI' },
   ];
 
   useEffect(() => {
@@ -546,10 +594,10 @@ function MateriView() {
 
   return (
     <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
-      <Eyebrow variant="flat">Materi Panel</Eyebrow>
+      <Eyebrow variant="flat">Pengelolaan</Eyebrow>
       <div className="h-6"></div>
       <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-12">
-        Manajemen Materi
+        Kelola Materi
       </h1>
 
       <div className="bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card mb-8">
@@ -577,7 +625,7 @@ function MateriView() {
         <form onSubmit={handleSaveMateri} className="flex flex-col gap-4">
           {selectedModule === '01' && (
             <div className="flex-1 w-full min-w-[200px]">
-              <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Subbagian Strategize</label>
+              <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Subbagian Strategize</label>
               <select
                 value={materiSection}
                 onChange={(e) => setMateriSection(e.target.value)}
@@ -591,7 +639,7 @@ function MateriView() {
           )}
           <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
             <div className="flex-1 w-full min-w-[200px]">
-              <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Judul Materi</label>
+              <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Judul Materi</label>
               <input 
                 type="text" 
                 value={materiTitle}
@@ -603,7 +651,7 @@ function MateriView() {
           </div>
           <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
             <div className="flex-1 w-full min-w-[200px]">
-              <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Link Materi</label>
+              <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Link Materi</label>
               <input 
                 type="text" 
                 value={materiLink}
@@ -615,7 +663,7 @@ function MateriView() {
           </div>
           <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
              <div className="flex-1 w-full min-w-[200px]">
-                <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Upload File Materi</label>
+                <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Upload File Materi</label>
                 <input
                   type="file"
                   accept=".html,.pdf,.png,.jpg,.jpeg,.webp"
@@ -639,7 +687,7 @@ function MateriView() {
                  <div>
                     <div className="font-sans font-bold text-light-hi text-sm">{m.title}</div>
                     {selectedModule === '01' && (
-                      <div className="font-body text-xs text-light-md">{STRATEGIZE_SECTIONS.find((section) => section.id === (m.section || 'umum'))?.name || 'Umum'}</div>
+                      <div className="font-body text-xs text-light-md">{STRATEGIZE_SECTIONS.find((section) => section.id === (m.section || 'umum'))?.name || 'Asesmen dan Peta Kerja AI'}</div>
                     )}
                     <div className="font-mono text-[10px] text-light-lo truncate max-w-xs sm:max-w-md">{m.stored_url?.startsWith('storage:') ? 'File Supabase Storage' : m.url}</div>
                  </div>
@@ -656,9 +704,20 @@ function MateriView() {
 }
 
 function AdminView() {
-  const [members, setMembers] = useState<any[]>([]);
+  const [members, setMembers] = useState<MemberRecord[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
   const [filterGroup, setFilterGroup] = useState('');
+  const [memberQuery, setMemberQuery] = useState('');
+  const [memberNow, setMemberNow] = useState(Date.now);
+  const [membersLoading, setMembersLoading] = useState(true);
+  const [membersLoadError, setMembersLoadError] = useState(false);
+
+  useEffect(() => {
+    const refreshTime = () => setMemberNow(Date.now());
+    const timer = window.setInterval(refreshTime, 60_000);
+    window.addEventListener('focus', refreshTime);
+    return () => { window.clearInterval(timer); window.removeEventListener('focus', refreshTime); };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -667,9 +726,8 @@ function AdminView() {
       .then((rows) => {
         if (isMounted) setMembers(rows);
       })
-      .catch((error) => {
-        console.error("Gagal mendapatkan member", error);
-      });
+      .catch(() => { if (isMounted) setMembersLoadError(true); })
+      .finally(() => { if (isMounted) setMembersLoading(false); });
 
     return () => {
       isMounted = false;
@@ -747,12 +805,14 @@ function AdminView() {
     ...members.map(m => m.tier).filter(Boolean)
   ])).sort();
 
+  const visibleMembers = filterMembers<MemberRecord>(members, memberQuery, filterGroup);
+
   return (
     <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
-      <Eyebrow variant="flat">Admin Panel</Eyebrow>
+      <Eyebrow variant="flat">Pengelolaan</Eyebrow>
       <div className="h-6"></div>
       <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-12">
-        Manajemen Keanggotaan
+        Kelola Member
       </h1>
 
       <div className="bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card mb-8">
@@ -761,7 +821,7 @@ function AdminView() {
         
         <form onSubmit={handleCreateUser} className="flex gap-4 items-end flex-wrap">
           <div className="flex-1 w-full min-w-[200px]">
-            <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Email</label>
+            <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Email</label>
             <input 
               type="email" 
               value={newEmail}
@@ -773,7 +833,7 @@ function AdminView() {
             />
           </div>
           <div className="flex-1 w-full min-w-[200px]">
-            <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Password</label>
+            <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Password</label>
             <input
               type="password"
               value={newPassword}
@@ -786,7 +846,7 @@ function AdminView() {
             />
           </div>
           <div className="flex-1 w-full min-w-[180px]">
-            <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Tier</label>
+            <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Tier</label>
             <select
               value={newTier}
               onChange={(e) => {
@@ -800,7 +860,7 @@ function AdminView() {
             </select>
           </div>
           <div className="flex-1 w-full min-w-[180px]">
-            <label className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Grup / Batch</label>
+            <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Grup / Batch</label>
             <input
               type="text"
               list="groupList"
@@ -812,7 +872,7 @@ function AdminView() {
             />
           </div>
           <fieldset className="flex-1 w-full min-w-[180px]">
-            <legend className="font-mono text-xs font-bold text-light-md tracking-eyebrow uppercase mb-2">Akses Portal</legend>
+            <legend className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase mb-2">Akses Portal</legend>
             <div className="flex flex-wrap gap-3 py-3 text-sm text-light-hi">
               {(['aif', 'sinad', 'idl'] as const).map((portal) => (
                 <label key={portal} className="flex items-center gap-1 cursor-pointer">
@@ -845,8 +905,14 @@ function AdminView() {
             <h3 className="font-sans font-bold text-xl text-light-hi mb-2">Daftar Member</h3>
             <p className="font-body text-sm text-light-md">Atur role, tingkat keanggotaan (Tier), akses portal, dan batas waktu akses.</p>
           </div>
-          <div>
-            <select 
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div>
+              <label htmlFor="member-search" className="block font-body text-sm font-bold text-light-md mb-1">Cari member</label>
+              <input id="member-search" type="search" value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder="Nama atau alamat email" className="w-full sm:w-60 px-4 py-2 border border-border-light-subtle rounded-lg font-body text-sm text-light-hi focus:outline-none focus:ring-2 focus:ring-[#00AACC]" />
+            </div>
+            <div>
+            <label htmlFor="member-group" className="block font-body text-sm font-bold text-light-md mb-1">Grup</label>
+            <select id="member-group"
               value={filterGroup} 
               onChange={e => setFilterGroup(e.target.value)}
               className="px-4 py-2 border border-border-light-subtle rounded text-sm text-light-hi bg-white focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted min-w-[200px]"
@@ -856,8 +922,15 @@ function AdminView() {
                 <option key={group} value={group}>{group}</option>
               ))}
             </select>
+            </div>
           </div>
         </div>
+        {!membersLoading && !membersLoadError && (
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-4 font-body text-sm text-light-md">
+            <p role="status">Menampilkan {visibleMembers.length} dari {members.length} member.</p>
+            {(memberQuery || filterGroup) && <button type="button" onClick={() => { setMemberQuery(''); setFilterGroup(''); }} className="text-[#005287] font-bold cursor-pointer">Reset pencarian dan filter</button>}
+          </div>
+        )}
 
         <datalist id="groupList">
           {allGroups.map((group: any) => (
@@ -868,24 +941,24 @@ function AdminView() {
         <table className="w-full text-left font-body text-sm">
           <thead>
             <tr className="border-b border-border-light-subtle">
-              <th className="py-3 px-2 font-bold text-light-hi w-40">Email</th>
+              <th className="py-3 px-2 font-bold text-light-hi w-40">Nama / email</th>
               <th className="py-3 px-2 font-bold text-light-hi min-w-[150px]">Grup / Batch</th>
               <th className="py-3 px-2 font-bold text-light-hi w-28">Role</th>
               <th className="py-3 px-2 font-bold text-light-hi w-24">Akses Portal</th>
               <th className="py-3 px-2 font-bold text-light-hi w-32">Tier</th>
               <th className="py-3 px-2 font-bold text-light-hi min-w-[130px]">Atur Waktu</th>
-              <th className="py-3 px-2 font-bold text-light-hi min-w-[100px]">Sisa Waktu</th>
+              <th className="py-3 px-2 font-bold text-light-hi min-w-[130px]">Status / Sisa Waktu</th>
               <th className="py-3 px-2 font-bold text-light-hi min-w-[120px]">Aksi</th>
             </tr>
           </thead>
           <tbody>
-            {members.length === 0 && (
+            {(membersLoading || membersLoadError || visibleMembers.length === 0) && (
               <tr>
-                <td colSpan={8} className="py-4 px-2 text-light-md text-center">Memuat data...</td>
+                <td colSpan={8} className="py-4 px-2 text-light-md text-center">{membersLoading ? 'Memuat data…' : membersLoadError ? 'Daftar member belum dapat dimuat. Silakan muat ulang halaman.' : members.length === 0 ? 'Belum ada member.' : 'Tidak ada member yang sesuai. Coba kata kunci atau grup lain.'}</td>
               </tr>
             )}
-            {members.filter(mb => filterGroup ? mb.group === filterGroup : true).map(mb => (
-              <MemberRow key={mb.id} mb={mb} isUpdating={isUpdating} handleUpdate={handleUpdate} handleSendPasswordReset={handleSendPasswordReset} allGroups={allGroups} allTiers={allTiers} />
+            {visibleMembers.map(mb => (
+              <MemberRow key={mb.id} mb={mb} now={memberNow} isUpdating={isUpdating} handleUpdate={handleUpdate} handleSendPasswordReset={handleSendPasswordReset} allGroups={allGroups} allTiers={allTiers} />
             ))}
           </tbody>
         </table>
@@ -894,111 +967,10 @@ function AdminView() {
   );
 }
 
-const timelineHtml = `
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Timeline 2026</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
-<style>
-:root {
-  --bg-dark: #0E0E0E;
-  --bg-light: #F8F6F2;
-  --gold: #D4A84B;
-  --gold-muted: #8B7340;
-  --gold-bg: rgba(212,168,75,0.08);
-  --gold-border: rgba(212,168,75,0.22);
-  --gold-hover: rgba(212,168,75,0.06);
-  --text-hi: #F5F2EB;
-  --text-md: rgba(245,242,235,0.95);
-  --text-lo: rgba(240,236,228,0.75);
-  --text-xs: rgba(235,230,220,0.22);
-  --dark-text: #0A0A0A;
-  --card-border-dark: rgba(212,168,75,0.16);
-  --font-heading: 'Plus Jakarta Sans','Calibri','Arial',sans-serif;
-  --font-body: 'Inter','Calibri','Arial',sans-serif;
-  --font-mono: 'JetBrains Mono','Consolas','Courier New',monospace;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-body { font-family: var(--font-body); background: var(--bg-dark); color: var(--text-hi); }
-.page { max-width: 1040px; margin: 0 auto; padding: 40px 16px; }
-.panel { display: none; animation: fadeIn 0.4s ease; }
-.panel.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.level-head { display: grid; grid-template-columns: 1fr; gap: 6px; align-items: start; padding-bottom: 18px; margin-bottom: 18px; border-bottom: 1px solid var(--text-xs); }
-.level-num { font-family: var(--font-heading); font-weight: 800; font-size: 36px; line-height: 1; letter-spacing: -3px; color: var(--gold); opacity: 0.20; text-align: left; }
-.level-eyebrow { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; display: inline-flex; padding: 5px 14px; border-radius: 999px; background: var(--gold-bg); border: 1px solid var(--gold-border); }
-.level-title { font-family: var(--font-heading); font-size: clamp(20px, 4vw, 26px); font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; color: var(--text-hi); margin-bottom: 10px; }
-.level-desc { font-size: 14px; font-weight: 500; color: var(--text-md); line-height: 1.7; max-width: 540px; }
-.timeline { position: relative; display: flex; flex-direction: column; }
-.tl-row { display: grid; grid-template-columns: 72px 28px 1fr; gap: 0; align-items: stretch; }
-.tl-date { text-align: left; padding-top: 18px; }
-.tl-date .month { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-lo); }
-.tl-date .days { font-family: var(--font-heading); font-size: 22px; font-weight: 800; color: var(--text-hi); letter-spacing: -1.5px; line-height: 1.15; margin-top: 1px; }
-.tl-track { display: flex; flex-direction: column; align-items: center; }
-.tl-dot { width: 10px; height: 10px; border-radius: 50%; border: 2.5px solid var(--gold); background: var(--bg-dark); z-index: 2; margin-top: 20px; flex-shrink: 0; }
-.tl-line { width: 1px; flex: 1; background: linear-gradient(to bottom, var(--gold-border), var(--text-xs)); }
-.tl-card { padding: 14px 12px 14px 16px; border-bottom: 1px solid var(--card-border-dark); border-radius: 8px; transition: background 0.3s ease, box-shadow 0.3s ease; }
-.tl-row:last-child .tl-card { border-bottom: none; }
-.tl-row:not(.past) .tl-card:hover { background: var(--gold-bg); box-shadow: 0 4px 16px rgba(212,168,75,0.08); }
-.tl-row.next .tl-card { background: rgba(212,168,75,0.06); border: 1px solid rgba(212,168,75,0.15); }
-.tl-level { font-family: var(--font-heading); font-size: 15px; font-weight: 700; color: var(--gold); letter-spacing: -0.02em; line-height: 1.2; margin-bottom: 3px; }
-.tl-title { font-size: 12px; font-weight: 500; color: var(--text-md); margin-bottom: 4px; }
-.tl-sub { font-size: 12px; font-weight: 500; color: var(--text-lo); line-height: 1.5; }
-.tl-format { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.05em; color: var(--text-lo); margin-top: 8px; padding: 4px 12px; background: rgba(255,255,255,0.05); border-radius: 999px; display: inline-block; }
-.tl-row.graduation .tl-dot { width: 12px; height: 12px; background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 4px rgba(139,115,64,0.18); }
-.tl-row.graduation .tl-level { color: var(--gold); font-size: 17px; }
-.tl-row.past { opacity: 0.4; }
-.tl-row.past .tl-dot { background: var(--text-lo); border-color: var(--text-lo); }
-.tl-row.past .tl-level { text-decoration: line-through; text-decoration-color: var(--text-xs); }
-.tl-row.next .tl-dot { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 4px rgba(139,115,64,0.18); }
-.tl-badge { font-family: var(--font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; margin-left: 8px; display: inline-block; vertical-align: middle; }
-.tl-badge.done { background: var(--text-xs); color: var(--text-lo); }
-.tl-badge.next { background: var(--gold-bg); color: var(--gold); }
-@media (min-width: 640px) { .page { padding: 60px 32px; } .level-head { grid-template-columns: auto 1fr; gap: 28px; padding-bottom: 22px; margin-bottom: 22px; } .level-num { display: block; text-align: right; font-size: 52px; min-width: 64px; } .level-title { font-size: clamp(22px, 3vw, 28px); } .tl-row { grid-template-columns: 80px 32px 1fr; } .tl-date .days { font-size: 24px; } }
-@media (min-width: 960px) { .page { padding: 60px 48px; } .level-head { gap: 24px; } .level-num { font-size: 64px; min-width: 80px; opacity: 0.18; } .level-title { font-size: clamp(26px, 2.8vw, 32px); margin-bottom: 12px; } .level-desc { font-size: 15px; } .tl-row { grid-template-columns: 88px 32px 1fr; } .tl-date .days { font-size: 26px; } .tl-card { padding: 16px 0 16px 24px; } .tl-level { font-size: 17px; } }
-@media (max-width: 639px) { .level-num { display: none; } .tl-row { grid-template-columns: 60px 24px 1fr; } .tl-card { padding: 12px 0 12px 12px; } .tl-level { font-size: 14px; } .tl-title, .tl-sub { font-size: 12px; } .tl-date .days { font-size: 20px; } .tl-date .month { font-size: 10px; } .level-head { padding-bottom: 14px; margin-bottom: 14px; } .level-title { font-size: clamp(18px, 5vw, 24px); margin-bottom: 6px; } .tl-sub, .tl-format { max-height: 0; opacity: 0; overflow: hidden; transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.25s ease; margin-top: 0; } .tl-row.tl-open .tl-sub, .tl-row.tl-open .tl-format { max-height: 200px; opacity: 1; margin-top: 4px; } .tl-card { cursor: pointer; } }
-</style>
-</head>
-<body>
-<div class="page">
-  <section class="panel active" id="p-calendar">
-    <div class="level-head">
-      <div class="level-num" style="opacity:0.3; color: var(--gold);">&#9673;</div>
-      <div class="level-meta">
-        <div class="level-eyebrow" style="color: var(--gold);">Timeline 2026</div>
-        <h2 class="level-title">Calendar</h2>
-        <p class="level-desc">3 bulan &middot; 7&times; tatap muka &middot; 4 level<br>Dari Strategize hingga Build.</p>
-      </div>
-    </div>
-    <div class="timeline">
-      <div class="tl-row past"><div class="tl-date"><div class="month">April</div><div class="days">11</div></div><div class="tl-track"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-card"><div class="tl-level">01 &mdash; Strategize <span class="tl-badge done">done</span></div><div class="tl-title">Awareness Session</div><div class="tl-sub">Tren, potensi, dan batasan AI untuk leaders</div><div class="tl-format">Sabtu &middot; 08.00 &ndash; 11.00 &middot; 1 sesi</div></div></div>
-      <div class="tl-row next"><div class="tl-date"><div class="month">Mei</div><div class="days">6 &amp; 7</div></div><div class="tl-track"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-card"><div class="tl-level">02 &mdash; Prompt <span class="tl-badge next">next</span></div><div class="tl-title">Chat Mastery</div><div class="tl-sub">Kuasai AI untuk chatting, reading, writing</div><div class="tl-format">In-Person Sabtu &middot; 08.00 &ndash; 16.30 &middot; 2 hari + Live Streaming Rabu</div></div></div>
-      <div class="tl-row"><div class="tl-date"><div class="month">Mei</div><div class="days">16 &amp; 23</div></div><div class="tl-track"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-card"><div class="tl-level">03 &mdash; Create</div><div class="tl-title">Output Creation</div><div class="tl-sub">Dari prompt ke produk &mdash; docs, artifacts, files</div><div class="tl-format">In-Person Sabtu &middot; 08.00 &ndash; 16.30 &middot; 2 hari + Live Streaming Rabu</div></div></div>
-      <div class="tl-row"><div class="tl-date"><div class="month">Juni</div><div class="days">6 &amp; 20</div></div><div class="tl-track"><div class="tl-dot"></div><div class="tl-line"></div></div><div class="tl-card"><div class="tl-level">04 &mdash; Build</div><div class="tl-title">NoCode AI Build</div><div class="tl-sub">Bangun workflows, tools &amp; system berbasis AI</div><div class="tl-format">In-Person &middot; Project Based &middot; 2 hari</div></div></div>
-      <div class="tl-row graduation"><div class="tl-date"><div class="month">Juli</div><div class="days">4</div></div><div class="tl-track"><div class="tl-dot"></div></div><div class="tl-card"><div class="tl-level">Graduation</div><div class="tl-sub">Showcase hasil karya &amp; sertifikasi dari IWDemy</div></div></div>
-    </div>
-  </section>
-</div>
-<script>
-  if (window.matchMedia('(max-width: 639px)').matches) {
-    document.querySelectorAll('.tl-row').forEach(row => {
-      row.addEventListener('click', () => {
-        row.classList.toggle('tl-open');
-      });
-    });
-  }
-</script>
-</body>
-</html>
-`;
-
 function DashboardView({ user, forcePasswordReset = false }: { user: User, forcePasswordReset?: boolean }) {
+  const artifactProgress = useArtifactProgress(user.id);
+  const [artifactCatalog, setArtifactCatalog] = useState<Record<string, LearningArtifact[]>>({});
+  const [catalogState, setCatalogState] = useState<'loading' | 'ready' | 'error'>('loading');
   const userEmail = user.email || '';
   const [allowedPortals, setAllowedPortals] = useState<string[]>(['aif']);
   const [currentPortal, setCurrentPortal] = useState<'hub' | 'aif' | 'idl' | 'sinad'>('hub');
@@ -1007,18 +979,18 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   const [profileError, setProfileError] = useState(false);
 
   const getPortalName = (id: string) => {
-    if (id === 'aif') return 'AIF Community';
+    if (id === 'aif') return 'AI First';
     if (id === 'idl') return 'IWDemy Digital Labs (IDL)';
     if (id === 'sinad') return 'SinaD';
-    return 'TSS Group Hub';
+    return 'sinau.tech — Area Member';
   };
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'admin' | 'materi' | 'prompts'>('dashboard');
   const [isAdmin, setIsAdmin] = useState(userEmail === 'stephen.tssgroup@gmail.com');
   const [selectedModule, setSelectedModule] = useState<any>(null);
+  const [loadingModule, setLoadingModule] = useState<string | null>(null);
   const [selectedHtmlData, setSelectedHtmlData] = useState<{ activeIndex: number; htmls: { title: string; content?: string; url?: string; images?: string[] }[] } | null>(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [isTimelineModalOpen, setIsTimelineModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -1028,71 +1000,28 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   const [iframeModalUrl, setIframeModalUrl] = useState<{url: string, title: string} | null>(null);
 
   const handleModuleClick = async (moduleId: string, defaultTitle: string, defaultSubtitle: string, defaultMaterials: any[]) => {
-    if (!allowedPortals.includes('aif') || !canAccessAifModule(sinadAccess.tier, moduleId)) return;
+    if (loadingModule || !allowedPortals.includes('aif') || !canAccessAifModule(sinadAccess.tier, moduleId)) return;
+    setLoadingModule(moduleId);
+    let materialLoadFailed = false;
     let materials: Materi[] = [];
     try {
       materials = await getMateriByModule(moduleId);
     } catch (error) {
+      materialLoadFailed = true;
       console.error('Materi Supabase belum dapat dimuat:', error);
     }
 
-    let finalMaterials = [...defaultMaterials];
-
-    const remoteVisuals = materials
-      .filter((materi) => /^Materi Visual \d+$/.test(materi.title))
-      .sort((a, b) => a.title.localeCompare(b.title, undefined, { numeric: true }))
-      .map((materi) => materi.url);
-    if (remoteVisuals.length > 0) {
-      finalMaterials = finalMaterials.map((section) => ({
-        ...section,
-        htmls: section.htmls?.map((item: any) => item.title === 'Materi Visual' ? { ...item, images: remoteVisuals } : item),
-      }));
-    }
-
-    const builtInTitles = new Set<string>();
-    for (const section of defaultMaterials) {
-      if (section.title) builtInTitles.add(section.title);
-      for (const item of section.htmls || []) {
-        if (item.title) builtInTitles.add(item.title);
-      }
-    }
-    const additionalMaterials = materials.filter((materi) => !builtInTitles.has(materi.title) && !/^Materi Visual \d+$/.test(materi.title));
-    if (moduleId === '01' && additionalMaterials.length > 0) {
-      const sectionTitles: Record<string, string> = {
-        'thinking-with-claude': 'Thinking and Working with Claude',
-        'responsible-ethic-safety': 'Responsible, Ethic dan Safety',
-        umum: 'Umum',
-      };
-      finalMaterials = finalMaterials.map((section) => {
-        const sectionId = Object.entries(sectionTitles).find(([, title]) => title === section.title)?.[0];
-        if (!sectionId) return section;
-        const sectionMaterials = additionalMaterials.filter((materi) => (materi.section || 'umum') === sectionId);
-        if (sectionMaterials.length === 0) return section;
-        return {
-          ...section,
-          htmls: [
-            ...(section.htmls || []),
-            ...sectionMaterials.map((materi) => materi.content
-              ? { title: materi.title, content: materi.content }
-              : { title: materi.title, url: materi.url }),
-          ],
-        };
-      });
-    } else if (additionalMaterials.length > 0) {
-      finalMaterials.push({
-        title: "Materi Tambahan",
-        htmls: additionalMaterials.map((materi) => materi.content
-          ? { title: materi.title, content: materi.content }
-          : { title: materi.title, url: materi.url }),
-      });
-    }
+    const finalMaterials = buildArtifactList(moduleId, defaultMaterials, materials);
+    if (!materialLoadFailed) setArtifactCatalog(previous => ({ ...previous, [moduleId]: finalMaterials }));
 
     setSelectedModule({
       id: moduleId,
       title: defaultTitle,
       subtitle: defaultSubtitle,
+      materialLoadFailed,
       materials: finalMaterials
     });
+    setLoadingModule(null);
   };
 
   useEffect(() => {
@@ -1127,6 +1056,28 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
   const canAccessModule = (moduleId: string) => {
     return allowedPortals.includes('aif') && canAccessAifModule(sinadAccess.tier, moduleId);
+  };
+
+  useEffect(() => {
+    if (isLoadingPortals || currentPortal !== 'aif') return;
+    let mounted = true;
+    const ids = MODULE_IDS.filter(id => allowedPortals.includes('aif') && canAccessAifModule(sinadAccess.tier, id));
+    setCatalogState('loading');
+    getMateriCatalog([...ids]).then((rows) => {
+      if (!mounted) return;
+      setArtifactCatalog(Object.fromEntries(ids.map(id => [id, buildArtifactList(id, defaultModuleMaterials[id], rows.filter(row => row.module_id === id))])));
+      setCatalogState('ready');
+    }).catch(() => { if (mounted) setCatalogState('error'); });
+    return () => { mounted = false; };
+  }, [isLoadingPortals, currentPortal, allowedPortals, sinadAccess.tier, user.id]);
+
+  const accessibleArtifacts = MODULE_IDS.filter(canAccessModule).flatMap(id => artifactCatalog[id] || []);
+  const learningStats = artifactStats(accessibleArtifacts, artifactProgress.opened);
+  const openedHistoryCount = artifactProgress.opened.filter(id => canAccessModule(id.split(':')[0])).length;
+  const moduleProgressSummary = (id: string) => {
+    if (!artifactCatalog[id]) return null;
+    const stats = artifactStats(artifactCatalog[id], artifactProgress.opened);
+    return stats.total > 0 ? <p className="font-body text-xs text-light-md mt-4">{stats.opened} dari {stats.total} materi dibuka</p> : null;
   };
 
   const canOpenPromptDatabase = canAccessPromptDatabase(sinadAccess.tier, allowedPortals, isAdmin);
@@ -1265,54 +1216,77 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
   return (
     <div className="min-h-screen bg-bg-light antialiased selection:bg-gold selection:text-bg-dark flex flex-col">
-      <nav className="sticky top-0 z-50 backdrop-blur-2xl bg-bg-light/90 border-b border-border-light-subtle px-6 md:px-12 h-20 flex items-center justify-between shrink-0">
+      <nav aria-label="Navigasi portal member" className="sticky top-0 z-40 bg-bg-light/95 backdrop-blur-xl border-b border-border-light-subtle px-4 md:px-12 py-4 flex flex-wrap items-center justify-between gap-3 shrink-0">
         <div className="font-sans font-extrabold text-xl tracking-tighter text-light-hi flex items-center gap-2">
-          {currentPortal === 'hub' ? 'TSS Portal' : getPortalName(currentPortal)} <span className="w-1.5 h-1.5 rounded-full bg-gold inline-block"></span>
+          {currentPortal === 'hub' ? 'sinau.tech' : getPortalName(currentPortal)} <span className="w-1.5 h-1.5 rounded-full bg-gold inline-block"></span>
         </div>
-        <div className="flex items-center gap-6">
-          {allowedPortals.length > 1 && currentPortal !== 'hub' && activeTab === 'dashboard' && (
+        <div className="flex flex-wrap items-center gap-2 md:gap-3 font-body text-sm">
+          {allowedPortals.length > 1 && currentPortal !== 'hub' && (
             <button 
-              onClick={() => setCurrentPortal('hub')} 
-              className="hidden sm:inline-block transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow text-light-lo hover:text-light-hi"
+              onClick={() => { setCurrentPortal('hub'); setActiveTab('dashboard'); }}
+              className="px-3 py-2 rounded-lg text-light-md hover:bg-white hover:text-light-hi cursor-pointer"
             >
-              Kembali ke Hub
+              Pilih Portal
             </button>
           )}
-
-          {activeTab !== 'dashboard' && (
+          {allowedPortals.includes('aif') && currentPortal === 'aif' && (
+            <button
+              onClick={() => { setActiveTab('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              aria-current={activeTab === 'dashboard' ? 'page' : undefined}
+              className={cn("px-3 py-2 rounded-lg cursor-pointer", activeTab === 'dashboard' ? 'bg-[#001E3C] text-white font-bold' : 'text-light-md hover:bg-white')}
+            >Modul Belajar</button>
+          )}
+          {canOpenPromptDatabase ? (
+            <button
+              onClick={() => openPromptDatabase()}
+              aria-current={activeTab === 'prompts' ? 'page' : undefined}
+              className={cn("px-3 py-2 rounded-lg cursor-pointer", activeTab === 'prompts' ? 'bg-[#001E3C] text-white font-bold' : 'text-light-md hover:bg-white')}
+            >
+              Prompt Database
+            </button>
+          ) : null}
+          {activeTab !== 'dashboard' && currentPortal !== 'aif' && (
             <button 
               onClick={() => {
                 setActiveTab('dashboard');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }} 
-              className="transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow text-light-lo hover:text-light-hi"
+              className="px-3 py-2 rounded-lg text-light-md hover:bg-white cursor-pointer"
             >
-              Dashboard
+              Kembali ke Portal
             </button>
           )}
           {isAdmin && (
-            <div className="hidden sm:flex items-center gap-4">
+            <details className="relative">
+              <summary className="list-none px-3 py-2 rounded-lg text-light-md hover:bg-white cursor-pointer">Pengelolaan ▾</summary>
+              <div className="absolute right-0 top-full mt-2 w-48 rounded-xl bg-white border border-border-light-card shadow-lg p-2 z-50">
               <button 
-                onClick={() => setActiveTab('materi')} 
-                className={cn("transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow", activeTab === 'materi' ? 'text-gold-muted' : 'text-light-lo hover:text-light-hi')}
+                onClick={(event) => { setActiveTab('materi'); event.currentTarget.closest('details')?.removeAttribute('open'); }}
+                className={cn("w-full text-left px-3 py-2 rounded-lg cursor-pointer hover:bg-bg-light", activeTab === 'materi' ? 'text-gold-muted font-bold' : 'text-light-md')}
               >
-                Materi Panel
+                Kelola Materi
               </button>
               <button 
-                onClick={() => setActiveTab('admin')} 
-                className={cn("transition-colors font-mono uppercase text-xs font-bold tracking-eyebrow", activeTab === 'admin' ? 'text-gold-muted' : 'text-light-lo hover:text-light-hi')}
+                onClick={(event) => { setActiveTab('admin'); event.currentTarget.closest('details')?.removeAttribute('open'); }}
+                className={cn("w-full text-left px-3 py-2 rounded-lg cursor-pointer hover:bg-bg-light", activeTab === 'admin' ? 'text-gold-muted font-bold' : 'text-light-md')}
               >
-                Member Panel
+                Kelola Member
+              </button>
+              </div>
+            </details>
+          )}
+          <details className="relative">
+            <summary className="list-none px-3 py-2 rounded-lg text-light-md hover:bg-white cursor-pointer">Akun ▾</summary>
+            <div className="absolute right-0 top-full mt-2 w-64 max-w-[85vw] rounded-xl bg-white border border-border-light-card shadow-lg p-2 z-50">
+              <p className="px-3 py-2 text-xs text-light-md break-all border-b border-border-light-card mb-1">{user.user_metadata?.name || user.email}</p>
+              <button onClick={(event) => { setIsPasswordModalOpen(true); event.currentTarget.closest('details')?.removeAttribute('open'); }} className="w-full flex items-center gap-2 text-left px-3 py-2 text-light-md hover:bg-bg-light rounded-lg cursor-pointer">
+                <Key className="w-4 h-4" /> Ganti kata sandi
+              </button>
+              <button onClick={handleLogout} className="w-full flex items-center gap-2 text-left px-3 py-2 text-light-md hover:bg-bg-light rounded-lg cursor-pointer">
+                <LogOut className="w-4 h-4" /> Keluar
               </button>
             </div>
-          )}
-          <span className="hidden md:inline-block font-body text-sm font-semibold text-light-md">{user.user_metadata?.name || user.email}</span>
-          <button onClick={() => setIsPasswordModalOpen(true)} className="text-light-lo hover:text-light-hi transition-colors p-2 cursor-pointer" title="Ganti Password">
-            <Key className="w-5 h-5" />
-          </button>
-          <button onClick={handleLogout} className="text-light-lo hover:text-light-hi transition-colors p-2 -mr-2 cursor-pointer" title="Keluar">
-            <LogOut className="w-5 h-5" />
-          </button>
+          </details>
         </div>
       </nav>
 
@@ -1321,26 +1295,26 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
           <>
             {currentPortal === 'hub' && (
               <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
-                <Eyebrow variant="flat">Central Hub</Eyebrow>
+                <Eyebrow variant="flat">Portal Member</Eyebrow>
                 <div className="h-6"></div>
                 <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-4">
-                  Selamat datang di Portal Utama TSS Group.
+                  sinau.tech — Area Member
                 </h1>
-                <h3 className="font-body text-xl text-light-md mb-12">
-                  Silakan pilih platform yang ingin Anda akses.
-                </h3>
+                <p className="font-body text-xl text-light-md mb-12">
+                  Pilih portal yang ingin kamu akses.
+                </p>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {allowedPortals.includes('aif') && (
-                    <div onClick={() => setCurrentPortal('aif')} className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
+                    <button type="button" onClick={() => setCurrentPortal('aif')} className="text-left border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-[#00AACC] focus-visible:outline-2 focus-visible:outline-[#00AACC] transition-colors cursor-pointer group">
                       <div>
-                        <div className="font-sans font-bold text-2xl text-light-hi mb-2 group-hover:text-gold transition-colors">AIF Community</div>
-                        <p className="font-body text-sm text-light-md mt-4">Akses portal member Artificial Intelligence First.</p>
+                         <div className="font-sans font-bold text-2xl text-light-hi mb-2 group-hover:text-gold transition-colors">AI First</div>
+                         <p className="font-body text-sm text-light-md mt-4">Kamu ikut AI First. Di sini materi, timeline, dan teman satu cohort-mu.</p>
                       </div>
-                      <div className="mt-8 flex justify-end">
-                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                      <div className="mt-8 flex items-center justify-end gap-1 font-body text-sm font-bold text-[#005287]">
+                        Buka portal <ChevronRight className="w-4 h-4" />
                       </div>
-                    </div>
+                    </button>
                   )}
                   {allowedPortals.includes('idl') && (
                     <a href="https://idl.iwdemy.com" onClick={handleIdlClick} target="_blank" rel="noopener noreferrer" className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group block">
@@ -1348,95 +1322,107 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                         <div className="font-sans font-bold text-2xl text-light-hi mb-2 group-hover:text-gold transition-colors">IWDemy Digital Labs</div>
                         <p className="font-body text-sm text-light-md mt-4">Akses platform IDL untuk pembelajaran digital.</p>
                       </div>
-                      <div className="mt-8 flex justify-end">
-                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                      <div className="mt-8 flex items-center justify-end gap-1 font-body text-sm font-bold text-[#005287]">
+                        Buka di tab baru <ExternalLink className="w-4 h-4" />
                       </div>
                     </a>
                   )}
                   {allowedPortals.includes('sinad') && (
-                    <div onClick={() => setCurrentPortal('sinad')} className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer group">
+                    <button type="button" onClick={() => setCurrentPortal('sinad')} className="text-left border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-[#00AACC] focus-visible:outline-2 focus-visible:outline-[#00AACC] transition-colors cursor-pointer group">
                       <div>
                         <div className="font-sans font-bold text-2xl text-light-hi mb-2 group-hover:text-gold transition-colors">SinaD</div>
-                        <p className="font-body text-sm text-light-md mt-4">Akses portal SinaD untuk inisiatif edukasi.</p>
+                         <p className="font-body text-sm text-light-md mt-4">Peserta program SinaD. Akses portal edukasi kamu.</p>
                       </div>
-                      <div className="mt-8 flex justify-end">
-                        <ChevronRight className="w-5 h-5 text-light-lo group-hover:text-gold transition-colors" />
+                      <div className="mt-8 flex items-center justify-end gap-1 font-body text-sm font-bold text-[#005287]">
+                        Buka portal <ChevronRight className="w-4 h-4" />
                       </div>
-                    </div>
+                    </button>
                   )}
                 </div>
               </main>
             )}
 
             {currentPortal === 'aif' && (
-              <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
-        <Eyebrow variant="flat">Membership AI First</Eyebrow>
+              <main className="max-w-6xl mx-auto px-6 md:px-12 py-10 md:py-14">
+        <Eyebrow variant="flat">AI First · Area Belajar</Eyebrow>
         <div className="h-6"></div>
         <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-4">
-          Selamat datang di Portal Member AIF Community.
+           Selamat datang di AI First.
         </h1>
-        <h3 className="font-body text-xl text-light-md mb-12">
-          Mari lanjutkan progres Anda hari ini dan Lihat modul terbaru serta jadwal sesi Anda di sini.
-        </h3>
+        <p className="font-body text-lg text-light-md mb-8 max-w-3xl">
+           Setiap modul melatih satu cara berpikir tentang pekerjaan. Ikuti dari 01 — urutannya bukan kebetulan. Dan tidak perlu selesai sekarang.
+        </p>
         
-        {/* Progress Insight */}
+        <section aria-label="Progres belajar" className="mb-8 p-5 rounded-xl bg-white border border-border-light-card shadow-card">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h2 className="font-sans font-bold text-lg text-light-hi">Progres belajar</h2>
+            <p role="status" className="font-body font-bold text-sm text-light-hi">{catalogState === 'ready' ? `${learningStats.opened} dari ${learningStats.total} materi dibuka · ${learningStats.percent}%` : catalogState === 'loading' ? 'Memuat daftar materi…' : `${openedHistoryCount} materi pernah dibuka`}</p>
+          </div>
+          {catalogState === 'ready' && <progress aria-label="Jumlah materi yang sudah dibuka" value={learningStats.opened} max={learningStats.total || 1} className="module-progress w-full h-3 block" />}
+          <p className="font-body text-sm text-light-md mt-3">Progres bertambah otomatis saat kamu membuka materi. Materi yang sama dihitung sekali. Persentase berdasarkan materi yang tersedia untuk akunmu.</p>
+          {catalogState === 'error' && <p role="status" className="font-body text-sm text-light-md mt-2">Daftar materi belum dapat dimuat lengkap. Persentase akan tampil setelah daftar berhasil dimuat; muat ulang halaman untuk mencoba lagi.</p>}
+          <p className="font-body text-xs text-light-md mt-2">Tersimpan untuk akunmu di browser ini. Membuka materi belum menunjukkan penguasaan materi.</p>
+          {artifactProgress.error && <p role="alert" className="font-body text-sm text-red-700 mt-3">{artifactProgress.error}</p>}
+        </section>
+
+        {/* Module list */}
         <div className="mb-12">
-          <div className="flex items-center justify-between border-b border-border-light-subtle pb-4 mb-8">
-            <h2 className="font-sans font-bold text-xl text-light-hi">Akses Cepat</h2>
+          <div className="border-b border-border-light-subtle pb-4 mb-6">
+            <h2 className="font-sans font-bold text-xl text-light-hi mb-2">Modul Belajar</h2>
+            <p className="font-body text-base text-light-md">Mulai dari Modul 01. Pilih modul, lalu pilih materi yang ingin kamu pelajari.</p>
+            {loadingModule && <p role="status" className="font-body text-sm text-[#005287] mt-3">Memuat daftar materi Modul {loadingModule}…</p>}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Module 01 - Strategize */}
             {canAccessModule("01") ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", [{ title: "Thinking and Working with Claude", htmls: [{ title: "Thinking and Working with Claude", content: aifWithClaudeHtml }] }, { title: "Responsible, Ethic dan Safety", htmls: [{ title: "Responsible, Ethic dan Safety", content: responsibleAiUntukPemimpinHtml }] }, { title: "Umum", htmls: [{ title: "Materi Visual", images: [] }, { title: "APT Assessment", content: aptAssessmentHtml }, { title: "Peta Use Case AI 2026", content: petaUsecaseAi2026Html }, { title: "Format Data untuk AI", content: formatDataUntukAiHtml }] }])}>
-                <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">01</span>
+              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", defaultModuleMaterials['01'])}>
+                <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">01</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Strategize</div>
-                  <p className="font-body text-sm text-light-md">Awareness Session</p>
-                  <div className="mt-6 flex items-center gap-3">
-                     <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                        <div className="bg-gold h-full rounded-full w-[100%]"></div>
-                     </div>
-                     <span className="font-mono text-xs text-light-lo">100%</span>
-                  </div>
+                  <p className="font-body text-sm text-light-md">{moduleDescriptions['01']}</p>
+                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['01']}</p>
+                  {moduleProgressSummary('01')}
+                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 01 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
                 </div>
-              </div>
+              </button>
             ) : (
-              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
-                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">01</span>
+              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
+                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">01</span>
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-sans font-bold text-lg text-light-md">Strategize</div>
                     <Lock className="w-4 h-4 text-light-lo" />
                   </div>
-                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
+                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['01']}</p>
+                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['01']}</p>
+                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
                   <p className="font-body text-[10px] text-light-lo">Tier Anda tidak memiliki akses ke modul ini.</p>
                 </div>
               </div>
             )}
             {/* Module 02 - Prompt */}
             {canAccessModule('02') ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("02", "Prompt", "Chat Mastery", [{ title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }, { title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }])}>
-                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">02</span>
+              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("02", "Prompt", "Chat Mastery", defaultModuleMaterials['02'])}>
+                 <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">02</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Prompt</div>
-                  <p className="font-body text-sm text-light-md">Chat Mastery</p>
-                  <div className="mt-6 flex items-center gap-3">
-                     <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                        <div className="bg-gold h-full rounded-full w-[100%]"></div>
-                     </div>
-                     <span className="font-mono text-xs text-light-lo">100%</span>
-                  </div>
+                  <p className="font-body text-sm text-light-md">{moduleDescriptions['02']}</p>
+                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['02']}</p>
+                  {moduleProgressSummary('02')}
+                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 02 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
                 </div>
-              </div>
+              </button>
             ) : (
-              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
-                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">02</span>
+              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
+                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">02</span>
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-sans font-bold text-lg text-light-md">Prompt</div>
                     <Lock className="w-4 h-4 text-light-lo" />
                   </div>
-                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
+                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['02']}</p>
+                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['02']}</p>
+                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
                   <p className="font-body text-[10px] text-light-lo">Tingkatkan tier Anda ke Professional untuk mengakses.</p>
                 </div>
               </div>
@@ -1444,115 +1430,111 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
             {/* Module 03 - Create */}
             {canAccessModule('03') ? (
-              <div className="border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("03", "Create", "Output Creation", [{ day: "Day 1", title: "Materi Level 3 Day 1", htmls: [{ title: "AI Skills Manual", content: level3Day1Html }, { title: "CIS Prompting", content: level3Day1_1Html }] }])}>
-                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">03</span>
+              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("03", "Create", "Output Creation", defaultModuleMaterials['03'])}>
+                 <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">03</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Create</div>
-                  <p className="font-body text-sm text-light-md">Output Creation</p>
-                  <div className="mt-6 flex items-center gap-3">
-                     <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                        <div className="bg-gold h-full rounded-full w-[100%]"></div>
-                     </div>
-                     <span className="font-mono text-xs text-light-lo">100%</span>
-                  </div>
+                  <p className="font-body text-sm text-light-md">{moduleDescriptions['03']}</p>
+                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['03']}</p>
+                  {moduleProgressSummary('03')}
+                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 03 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
                 </div>
-              </div>
+              </button>
             ) : (
-              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
-                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">03</span>
+              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
+                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">03</span>
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-sans font-bold text-lg text-light-md">Create</div>
                     <Lock className="w-4 h-4 text-light-lo" />
                   </div>
-                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
+                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['03']}</p>
+                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['03']}</p>
+                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
                   <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
                 </div>
               </div>
             )}
             
-            {/* Module 05 - Build */}
-            {canAccessModule('05') ? (
-              <div className="order-5 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("05", "Build", "NoCode AI Build", [{ day: "Day 1", title: "Materi Day 1" }, { day: "Day 2", title: "Materi Day 2" }])}>
-                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">05</span>
-                <div>
-                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Build</div>
-                  <p className="font-body text-sm text-light-md">NoCode AI Build</p>
-                  <div className="mt-6 flex items-center gap-3">
-                     <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                        <div className="bg-gold h-full rounded-full w-[100%]"></div>
-                     </div>
-                     <span className="font-mono text-xs text-light-lo">100%</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="order-5 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
-                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">05</span>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-sans font-bold text-lg text-light-md">Build</div>
-                    <Lock className="w-4 h-4 text-light-lo" />
-                  </div>
-                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
-                  <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
-                </div>
-              </div>
-            )}
-
             {/* Module 04 - Think */}
             {canAccessModule('04') ? (
-              <div className="order-4 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("04", "Think", "One Day Intensive", [{ day: "Materi", title: "Thinking with Claude", htmls: [{ title: "Thinking w/ Claude AI", content: twcHtml2 }, { title: "Setup Claude", content: twcHtml1 }] }])}>
-                 <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">04</span>
+              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait order-4 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("04", "Think", "One Day Intensive", defaultModuleMaterials['04'])}>
+                 <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">04</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">Think</div>
-                  <p className="font-body text-sm text-light-md">One Day Intensive</p>
-                  <div className="mt-6 flex items-center gap-3">
-                     <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                        <div className="bg-gold h-full rounded-full w-[100%]"></div>
-                     </div>
-                     <span className="font-mono text-xs text-light-lo">100%</span>
-                  </div>
+                  <p className="font-body text-sm text-light-md">{moduleDescriptions['04']}</p>
+                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['04']}</p>
+                  {moduleProgressSummary('04')}
+                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 04 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
                 </div>
-              </div>
+              </button>
             ) : (
-              <div className="order-4 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
-                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">04</span>
+              <div className="order-4 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
+                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">04</span>
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-sans font-bold text-lg text-light-md">Think</div>
                     <Lock className="w-4 h-4 text-light-lo" />
                   </div>
-                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
+                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['04']}</p>
+                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['04']}</p>
+                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
                   <p className="font-body text-[10px] text-light-lo">Tier Internal atau TWC diperlukan untuk modul ini.</p>
+                </div>
+              </div>
+            )}
+
+            {/* Module 05 - Build */}
+            {canAccessModule('05') ? (
+              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait order-5 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("05", "Build", "NoCode AI Build", defaultModuleMaterials['05'])}>
+                 <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">05</span>
+                <div>
+                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Build</div>
+                  <p className="font-body text-sm text-light-md">{moduleDescriptions['05']}</p>
+                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['05']}</p>
+                  {moduleProgressSummary('05')}
+                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 05 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
+                </div>
+              </button>
+            ) : (
+              <div className="order-5 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
+                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">05</span>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="font-sans font-bold text-lg text-light-md">Build</div>
+                    <Lock className="w-4 h-4 text-light-lo" />
+                  </div>
+                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['05']}</p>
+                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['05']}</p>
+                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
+                  <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
                 </div>
               </div>
             )}
 
             {/* Module 06 - ACT */}
             {canAccessModule('06') ? (
-              <div className="order-6 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("06", "ACT", "Action & Transformation", [{ title: "AI Knowledge Operating System", htmls: [{ title: "AI Knowledge Operating System", content: aiKnowledgeOperatingSystemHtml }] }])}>
-                <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">06</span>
+              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait order-6 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("06", "ACT", "Action & Transformation", defaultModuleMaterials['06'])}>
+                <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">06</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">ACT</div>
-                  <p className="font-body text-sm text-light-md">Action &amp; Transformation</p>
-                  <div className="mt-6 flex items-center gap-3">
-                    <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                      <div className="bg-gold h-full rounded-full w-[100%]"></div>
-                    </div>
-                    <span className="font-mono text-xs text-light-lo">100%</span>
-                  </div>
+                  <p className="font-body text-sm text-light-md">{moduleDescriptions['06']}</p>
+                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['06']}</p>
+                  {moduleProgressSummary('06')}
+                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 06 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
                 </div>
-              </div>
+              </button>
             ) : (
-              <div className="order-6 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
-                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">06</span>
+              <div className="order-6 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
+                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">06</span>
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-sans font-bold text-lg text-light-md">ACT</div>
                     <Lock className="w-4 h-4 text-light-lo" />
                   </div>
-                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
+                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['06']}</p>
+                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['06']}</p>
+                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
                   <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
                 </div>
               </div>
@@ -1560,28 +1542,27 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
             {/* Module 07 - AI OS */}
             {canAccessModule('07') ? (
-              <div className="order-7 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("07", "AI OS", "AI Operating System", [])}>
-                <span className="font-mono text-[10px] font-bold text-gold-muted tracking-eyebrow uppercase mb-6 block">07</span>
+              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait order-7 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("07", "AI OS", "AI Operating System", defaultModuleMaterials['07'])}>
+                <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">07</span>
                 <div>
                   <div className="font-sans font-bold text-lg text-light-hi mb-2">AI OS</div>
-                  <p className="font-body text-sm text-light-md">AI Operating System</p>
-                  <div className="mt-6 flex items-center gap-3">
-                    <div className="flex-1 bg-border-light-subtle h-1 rounded-full overflow-hidden">
-                      <div className="bg-gold h-full rounded-full w-[100%]"></div>
-                    </div>
-                    <span className="font-mono text-xs text-light-lo">100%</span>
-                  </div>
+                  <p className="font-body text-sm text-light-md">{moduleDescriptions['07']}</p>
+                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['07']}</p>
+                  {moduleProgressSummary('07')}
+                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 07 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
                 </div>
-              </div>
+              </button>
             ) : (
-              <div className="order-7 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl opacity-60 flex flex-col justify-between">
-                <span className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase mb-6 block">07</span>
+              <div className="order-7 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
+                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">07</span>
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <div className="font-sans font-bold text-lg text-light-md">AI OS</div>
                     <Lock className="w-4 h-4 text-light-lo" />
                   </div>
-                  <p className="font-body text-sm text-light-lo mb-4">Akses Terkunci</p>
+                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['07']}</p>
+                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['07']}</p>
+                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
                   <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
                 </div>
               </div>
@@ -1589,187 +1570,74 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
           </div>
         </div>
         
-        {/* Main Content Modules */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
-          <div className="lg:col-span-8">
-            <div className="flex items-center justify-between border-b border-border-light-subtle pb-4 mb-8">
-              <h2 className="font-sans font-bold text-xl text-light-hi">Jalur Kepemimpinan Teknis</h2>
-            </div>
-            
-            <div className="space-y-4">
-              {/* Module Item Active */}
-              {allowedPortals.includes('idl') && (
-              <a href="https://idl.iwdemy.com" onClick={handleIdlClick} target="_blank" rel="noopener noreferrer" className="group bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card flex flex-col sm:flex-row gap-6 lg:gap-8 items-start sm:items-center hover:border-gold/30 transition-all cursor-pointer block">
-                <div className="w-14 h-14 rounded-lg bg-bg-light border border-border-light-subtle flex items-center justify-center shrink-0">
-                  <BookOpen className="w-6 h-6 text-gold-muted" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-sans font-bold text-lg text-light-hi mb-2 group-hover:text-gold-muted transition-colors">Akses Ke IWDemy Digital Labs</h3>
-                  <p className="font-body text-sm text-light-md">Akses platform IDL untuk pembelajaran digital.</p>
-                </div>
-                <div className="shrink-0 flex items-center gap-2 font-mono text-xs text-gold-muted tracking-eyebrow font-bold uppercase">
-                  Lanjutkan <ChevronRight className="w-4 h-4 ml-1" />
-                </div>
+        <section aria-label="Portal dan jadwal">
+          <h2 className="font-sans font-bold text-xl text-light-hi mb-5">Portal dan Jadwal</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {allowedPortals.includes('idl') && (
+              <a href="https://idl.iwdemy.com" onClick={handleIdlClick} target="_blank" rel="noopener noreferrer" className="bg-white border border-border-light-card p-6 rounded-xl shadow-card hover:border-[#00AACC] focus-visible:outline-2 focus-visible:outline-[#00AACC] transition-colors">
+                <BookOpen className="w-5 h-5 text-[#005287] mb-3" />
+                <h3 className="font-sans font-bold text-base text-light-hi mb-2">IWDemy Digital Labs</h3>
+                <p className="font-body text-sm text-light-md">Lanjutkan pembelajaran digital di portal IDL.</p>
+                <span className="mt-4 inline-flex items-center gap-2 font-body text-sm font-bold text-[#005287]">Buka portal di tab baru <ExternalLink className="w-4 h-4" /></span>
               </a>
-              )}
-
-              {/* Module Item Locked */}
-              <div className="group bg-bg-light border border-transparent p-6 md:p-8 rounded-xl flex flex-col sm:flex-row gap-6 lg:gap-8 items-start sm:items-center opacity-80 mix-blend-multiply">
-                <div className="w-14 h-14 rounded-lg border border-border-light-subtle flex items-center justify-center shrink-0">
-                  <Lock className="w-5 h-5 text-light-lo" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-sans font-bold text-lg text-light-hi mb-2">Optimasi Jutaan Row</h3>
-                  <p className="font-body text-sm text-light-md">Strategi sharding dan read-replicas yang tidak diajarkan di dokumentasi.</p>
-                </div>
-                <div className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase shrink-0">
-                  Terkunci
-                </div>
-              </div>
-
-              {/* Module Item Locked 2 */}
-              <div className="group bg-bg-light border border-transparent p-6 md:p-8 rounded-xl flex flex-col sm:flex-row gap-6 lg:gap-8 items-start sm:items-center opacity-80 mix-blend-multiply">
-                <div className="w-14 h-14 rounded-lg border border-border-light-subtle flex items-center justify-center shrink-0">
-                  <Lock className="w-5 h-5 text-light-lo" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-sans font-bold text-lg text-light-hi mb-2">Engineering Topology</h3>
-                  <p className="font-body text-sm text-light-md">Merancang struktur tim di atas struktur microservice.</p>
-                </div>
-                <div className="font-mono text-[10px] font-bold text-light-lo tracking-eyebrow uppercase shrink-0">
-                  Terkunci
-                </div>
-              </div>
+            )}
+            <div className="bg-white border border-border-light-card p-6 rounded-xl shadow-card">
+              <Calendar className="w-5 h-5 text-[#005287] mb-3" />
+              <h3 className="font-sans font-bold text-base text-light-hi mb-2">Jadwal Sesi Tatap Muka</h3>
+              <p className="font-body text-sm text-light-md">Jadwal cohort berikutnya akan diumumkan. Pantau di sini.</p>
             </div>
           </div>
-          
-          <div className="lg:col-span-4">
-            <h2 className="font-sans font-bold text-sm text-light-hi tracking-eyebrow uppercase mb-6 border-b border-border-light-subtle pb-4">Akses Lainnya</h2>
-            <div className="space-y-4">
-              {sinadAccess.tier === 'Internal' || isAdmin ? (
-                <a href="#" onClick={(e) => { e.preventDefault(); setIsTimelineModalOpen(true); }} className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
-                  <div className="flex items-center gap-4">
-                    <Calendar className="w-4 h-4 text-gold-muted" />
-                    <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Sesi Tatap Muka</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
-                </a>
-              ) : (
-                <div className="flex justify-between p-5 bg-bg-light border border-border-light-subtle opacity-60 rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <Calendar className="w-4 h-4 text-light-lo" />
-                    <span className="font-body font-medium text-sm text-light-lo">Sesi Tatap Muka</span>
-                  </div>
-                  <Lock className="w-4 h-4 text-light-lo" />
-                </div>
-              )}
-              {sinadAccess.tier === 'Internal' || isAdmin ? (
-                <a href="#" className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
-                  <div className="flex items-center gap-4">
-                    <Video className="w-4 h-4 text-gold-muted" />
-                    <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Pustaka Rekaman</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
-                </a>
-              ) : (
-                <div className="flex justify-between p-5 bg-bg-light border border-border-light-subtle opacity-60 rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <Video className="w-4 h-4 text-light-lo" />
-                    <span className="font-body font-medium text-sm text-light-lo">Pustaka Rekaman</span>
-                  </div>
-                  <Lock className="w-4 h-4 text-light-lo" />
-                </div>
-              )}
-              {sinadAccess.tier === 'Internal' || isAdmin ? (
-                <a href="#" className="flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group">
-                  <div className="flex items-center gap-4">
-                    <FileText className="w-4 h-4 text-gold-muted" />
-                    <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Arsip Arsitektur</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
-                </a>
-              ) : (
-                <div className="flex justify-between p-5 bg-bg-light border border-border-light-subtle opacity-60 rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <FileText className="w-4 h-4 text-light-lo" />
-                    <span className="font-body font-medium text-sm text-light-lo">Arsip Arsitektur</span>
-                  </div>
-                  <Lock className="w-4 h-4 text-light-lo" />
-                </div>
-              )}
-              {canOpenPromptDatabase ? (
-                <button
-                  type="button"
-                  onClick={openPromptDatabase}
-                  className="w-full text-left flex justify-between p-5 bg-white border border-border-light-card rounded-lg hover:border-border-light-subtle transition-colors group cursor-pointer"
-                >
-                  <div className="flex items-center gap-4">
-                    <BookOpen className="w-4 h-4 text-gold-muted" />
-                    <span className="font-body font-medium text-sm text-light-hi group-hover:text-gold-muted transition-colors">Prompt Studio</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-light-lo group-hover:text-light-md transition-colors" />
-                </button>
-              ) : (
-                <div className="flex justify-between p-5 bg-bg-light border border-border-light-subtle opacity-60 rounded-lg">
-                  <div className="flex items-center gap-4">
-                    <BookOpen className="w-4 h-4 text-light-lo" />
-                    <span className="font-body font-medium text-sm text-light-lo">Prompt Studio</span>
-                  </div>
-                  <Lock className="w-4 h-4 text-light-lo" />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        </section>
 
         {/* Selected Module Modal */}
-        {selectedModule && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0a0a09]/80 backdrop-blur-sm">
-            <div className="bg-[#161412] border border-border-dark-subtle/30 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden p-8 transform transition-all relative z-10">
+        {selectedModule && !selectedHtmlData && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg-dark/80 backdrop-blur-sm">
+            <div role="dialog" aria-modal="true" aria-label={`Materi ${selectedModule.title}`} className="bg-bg-dark border border-white/20 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden p-6 md:p-8 relative z-10 flex flex-col">
+              <p className="font-body text-sm text-gold mb-2 shrink-0">Modul {Number(selectedModule.id)} dari 7</p>
               <h3 className="text-2xl font-bold font-sans text-dark-hi mb-1">{selectedModule.title}</h3>
-              <p className="text-dark-md font-body mb-8 opacity-80">{selectedModule.subtitle}</p>
+              <p className="text-dark-md font-body mb-6">{moduleDescriptions[selectedModule.id] || selectedModule.subtitle}</p>
+              {selectedModule.materialLoadFailed && (
+                <p role="status" className="font-body text-sm text-gold mb-4">Sebagian materi belum dapat dimuat. Kembali ke modul, lalu coba buka lagi.</p>
+              )}
               
-              <div className="space-y-4 mb-8">
+              <p className="font-body text-sm text-dark-md mb-4">Pilih materi yang ingin kamu pelajari.</p>
+              <div className="space-y-3 mb-8 overflow-y-auto min-h-0">
                 {selectedModule.materials.map((mat: any, idx: number) => (
-                  <div 
+                  <button
+                    type="button"
                     key={idx} 
-                    onClick={() => {
-                      if (mat.htmls) {
-                        setSelectedHtmlData({ activeIndex: 0, htmls: mat.htmls });
-                      } else if (mat.html) {
-                        setSelectedHtmlData({ activeIndex: 0, htmls: [{ title: mat.title, content: mat.html }] });
-                      }
-                    }}
-                    className="p-4 border border-border-dark-subtle/30 rounded-xl bg-bg-dark flex justify-between items-center group hover:border-gold/30 transition-all cursor-pointer"
+                    onClick={() => { if (!canAccessModule(selectedModule.id)) return; artifactProgress.recordOpen(mat.id); setSelectedHtmlData({ activeIndex: 0, htmls: [mat] }); }}
+                    className="w-full text-left p-4 border border-border-dark-subtle/30 rounded-xl bg-bg-dark flex justify-between items-center gap-3 group hover:border-gold/30 focus-visible:outline-2 focus-visible:outline-[#00AACC] transition-all cursor-pointer"
                   >
                     <div>
                       <div className="font-sans font-medium text-dark-hi">{mat.title}</div>
+                      {artifactProgress.opened.includes(mat.id) && <p className="font-body text-xs text-gold mt-1">Pernah dibuka</p>}
                     </div>
                     <ChevronRight className="w-5 h-5 text-dark-md group-hover:text-gold-muted transition-colors" />
-                  </div>
+                  </button>
                 ))}
                 {selectedModule.materials.length === 0 && (
                   <div className="p-4 border border-border-dark-subtle/30 rounded-xl bg-bg-dark text-center">
-                    <p className="font-body text-sm text-dark-md">Materi belum tersedia.</p>
+                    <p className="font-body text-sm text-dark-md">{selectedModule.materialLoadFailed ? 'Daftar materi belum dapat dimuat. Silakan coba lagi.' : 'Materi modul ini belum tersedia. Kamu bisa kembali dan memilih modul lain.'}</p>
                   </div>
                 )}
               </div>
 
               <button 
                 onClick={() => setSelectedModule(null)} 
-                className="w-full py-3 bg-bg-dark border border-border-dark-subtle/30 text-dark-hi rounded-lg font-bold font-mono tracking-wider hover:bg-border-dark-subtle/20 transition-colors"
+                className="w-full py-3 bg-bg-dark border border-border-dark-subtle/30 text-dark-hi rounded-lg font-bold font-body hover:bg-border-dark-subtle/20 transition-colors shrink-0"
               >
-                TUTUP
+                Kembali ke modul
               </button>
             </div>
           </div>
         )}
         {/* Selected Html Modal */}
         {selectedHtmlData && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#0a0a09]/80 backdrop-blur-sm">
-            <div className={`bg-[#161412] border border-border-dark-subtle/30 shadow-2xl w-full overflow-hidden p-0 transform transition-all relative z-[61] flex flex-col ${isFullscreen ? 'fixed inset-0 rounded-none max-w-none max-h-none h-screen' : 'rounded-2xl max-w-5xl max-h-[90vh]'}`}>
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-bg-dark/80 backdrop-blur-sm">
+            <div role="dialog" aria-modal="true" aria-label={selectedHtmlData.htmls[selectedHtmlData.activeIndex]?.title || 'Materi AI First'} className={`bg-bg-dark border border-white/20 shadow-2xl w-full overflow-hidden p-0 relative z-[61] flex flex-col ${isFullscreen ? 'fixed inset-0 rounded-none max-w-none max-h-none h-screen' : 'rounded-2xl max-w-5xl max-h-[90vh]'}`}>
               <div className="flex flex-col border-b border-border-dark-subtle/30">
-                <div className="flex justify-between items-center p-4">
+                <div className="flex flex-wrap justify-between items-center gap-3 p-4">
                   <h3 className="text-xl font-bold font-sans text-dark-hi">
                     {selectedHtmlData.htmls[selectedHtmlData.activeIndex]?.title || "Materi AI First"}
                   </h3>
@@ -1789,10 +1657,15 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                       {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
                     </button>
                     <button onClick={() => { setSelectedHtmlData(null); setIsFullscreen(false); }} className="text-dark-md hover:text-gold-muted transition-colors px-2 py-1">
-                      <span className="font-mono text-sm tracking-wider uppercase">Tutup</span>
+                      <span className="font-body text-sm font-bold inline-flex items-center gap-1"><ChevronLeft className="w-4 h-4" /> Kembali ke daftar materi</span>
                     </button>
                   </div>
                 </div>
+                {materialOrientation(selectedHtmlData.htmls[selectedHtmlData.activeIndex]?.title) && (
+                  <p className="px-4 pb-4 font-body text-sm text-dark-hi">
+                    {selectedHtmlData.htmls[selectedHtmlData.activeIndex]?.title} — {materialOrientation(selectedHtmlData.htmls[selectedHtmlData.activeIndex]?.title)}
+                  </p>
+                )}
                 {selectedHtmlData.htmls.length > 1 && (
                   <div className="flex px-4 gap-4 overflow-x-auto pb-0 border-b border-border-dark-subtle/10">
                     {selectedHtmlData.htmls.map((h, i) => (
@@ -1833,7 +1706,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
               {/* Bridge CTA to Prompt Studio (Per Spec v2) */}
               {canOpenPromptDatabase && (
-                <div className="border-t border-border-dark-subtle/30 bg-[#141210] px-5 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
+                <div className="border-t border-border-dark-subtle/30 bg-bg-dark px-5 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-gold-muted/10 border border-gold-muted/30 flex items-center justify-center shrink-0">
                       <Sparkles className="w-4 h-4 text-gold-muted" />
@@ -1854,7 +1727,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                         setIsFullscreen(false);
                         openPromptDatabase('exercise');
                       }}
-                      className="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg bg-gold-muted hover:bg-gold text-slate-950 font-sans font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                      className="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg bg-[#00AACC] hover:bg-[#005287] text-white font-sans font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
                     >
                       <BookOpen className="w-3.5 h-3.5" />
                       <span>Mulai Latihan Kasus</span>
@@ -1866,7 +1739,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                         setIsFullscreen(false);
                         openPromptDatabase('prompt-studio');
                       }}
-                      className="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg bg-[#24201c] hover:bg-[#2e2924] text-dark-hi font-sans font-semibold text-xs flex items-center justify-center gap-1.5 transition-all border border-border-dark-subtle/40 cursor-pointer"
+                      className="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg bg-bg-dark hover:bg-[#005287] text-dark-hi font-sans font-semibold text-xs flex items-center justify-center gap-1.5 transition-all border border-border-dark-subtle/40 cursor-pointer"
                     >
                       <span>Buat Formulamu Sendiri</span>
                     </button>
@@ -1876,26 +1749,10 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
             </div>
           </div>
         )}
-        {/* Timeline Modal */}
-        {isTimelineModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0a0a09]/80 backdrop-blur-sm">
-            <div className="bg-[#161412] border border-border-dark-subtle/30 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden p-0 sm:p-2 transform transition-all relative z-10 flex flex-col max-h-[90vh]">
-              <div className="flex justify-between items-center p-4 border-b border-border-dark-subtle/30">
-                <h3 className="text-xl font-bold font-sans text-dark-hi">Timeline Sesi Tatap Muka</h3>
-                <button onClick={() => setIsTimelineModalOpen(false)} className="text-dark-md hover:text-gold-muted transition-colors">
-                  <span className="font-mono text-sm tracking-wider uppercase">Tutup</span>
-                </button>
-              </div>
-              <div className="flex-1 overflow-auto bg-black p-0">
-                <iframe srcDoc={timelineHtml} className="w-full h-full min-h-[70vh] border-0" title="Timeline Sesi Tatap Muka" />
-              </div>
-            </div>
-          </div>
-        )}
         {/* Password Modal */}
         {isPasswordModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0a0a09]/80 backdrop-blur-sm">
-            <div className="bg-[#161412] border border-border-dark-subtle/30 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden p-8 transform transition-all relative z-10">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg-dark/80 backdrop-blur-sm">
+            <div className="bg-bg-dark border border-border-dark-subtle/30 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden p-8 transform transition-all relative z-10">
               <h3 className="text-2xl font-bold font-sans text-dark-hi mb-6">Ganti Password</h3>
               <form onSubmit={handleChangePassword} className="space-y-6">
                 <div>
@@ -1935,7 +1792,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   <button 
                     type="submit"
                     disabled={isUpdatingPassword}
-                    className="flex-1 py-3 bg-gold-muted text-[#111] rounded-lg font-bold font-mono tracking-wider hover:bg-gold transition-colors disabled:opacity-50"
+                    className="flex-1 py-3 bg-gold-muted text-white rounded-lg font-bold font-body hover:bg-gold transition-colors disabled:opacity-50"
                   >
                     {isUpdatingPassword ? '...' : 'SIMPAN'}
                   </button>
@@ -1968,7 +1825,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
             {/* Generic Iframe Modal */}
             {iframeModalUrl && (
-              <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#0a0a09]/80 backdrop-blur-sm">
+              <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-bg-dark/80 backdrop-blur-sm">
                 <div className={`bg-bg-light border border-border-light-subtle/30 shadow-2xl w-full overflow-hidden p-0 transform transition-all relative z-[61] flex flex-col ${isFullscreen ? 'fixed inset-0 rounded-none max-w-none max-h-none h-screen' : 'rounded-2xl max-w-5xl max-h-[90vh]'}`}>
                   <div className="flex justify-between items-center p-4 border-b border-border-light-subtle/30 bg-white">
                     <h3 className="text-xl font-bold font-sans text-light-hi">{iframeModalUrl.title}</h3>

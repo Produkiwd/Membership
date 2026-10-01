@@ -1,37 +1,38 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", sans-serif;
-  --font-body: "Inter", sans-serif;
+  --font-sans: "Montserrat", "Arial Black", Arial, sans-serif;
+  --font-body: "Carlito", Calibri, Arial, sans-serif;
+  --font-display: "Montserrat", "Arial Black", Arial, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  --color-bg-dark: #0E0E0E;
-  --color-bg-light: #F8F6F2;
-  --color-gold: #D4A84B;
-  --color-gold-muted: #8B7340;
+  --color-bg-dark: #001E3C;
+  --color-bg-light: #F7F9FC;
+  --color-gold: #FCB528;
+  --color-gold-muted: #005287;
 
-  --color-dark-hi: rgba(230,225,215,0.92);
-  --color-dark-md: rgba(230,225,215,0.68);
-  --color-dark-lo: rgba(230,225,215,0.45);
+  --color-dark-hi: rgba(247,249,252,0.96);
+  --color-dark-md: rgba(247,249,252,0.76);
+  --color-dark-lo: rgba(247,249,252,0.55);
   --color-border-dark-subtle: rgba(230,225,215,0.16);
-  --color-border-dark-gold: rgba(212,168,75,0.16);
-  --color-bg-dark-eyebrow: rgba(212,168,75,0.10);
-  --color-border-dark-eyebrow: rgba(212,168,75,0.30);
+  --color-border-dark-gold: rgba(252,181,40,0.16);
+  --color-bg-dark-eyebrow: rgba(252,181,40,0.10);
+  --color-border-dark-eyebrow: rgba(252,181,40,0.30);
 
-  --color-light-hi: rgba(14,14,14,0.90);
-  --color-light-md: rgba(30,28,24,0.65);
-  --color-light-lo: rgba(30,28,24,0.52);
+  --color-light-hi: #1A1A2E;
+  --color-light-md: #4C5564;
+  --color-light-lo: #6A6A6A;
   --color-border-light-subtle: rgba(30,28,24,0.25);
   --color-border-light-card: rgba(0,0,0,0.06);
-  --color-bg-light-eyebrow: rgba(212,168,75,0.08);
-  --color-border-light-eyebrow: rgba(212,168,75,0.22);
+  --color-bg-light-eyebrow: rgba(252,181,40,0.08);
+  --color-border-light-eyebrow: rgba(252,181,40,0.22);
 
   --shadow-card: 0 2px 8px rgba(0,0,0,0.04);
 
-  --color-brand-dark: #0E0E0E;
-  --color-brand-light: #F8F6F2;
-  --color-brand-gold: #D4A84B;
-  --color-brand-gold-muted: #8B7340;
+  --color-brand-dark: var(--color-bg-dark);
+  --color-brand-light: var(--color-bg-light);
+  --color-brand-gold: var(--color-gold);
+  --color-brand-gold-muted: var(--color-gold-muted);
 
   --color-text-hi-dark: rgba(248, 246, 242, 0.92);
   --color-text-md-dark: rgba(248, 246, 242, 0.68);
@@ -43,9 +44,18 @@
   
   --color-border-subtle: rgba(0, 0, 0, 0.08);
   --color-border-light: rgba(30, 28, 24, 0.12);
-  --color-border-gold: rgba(212, 168, 75, 0.22);
-  --color-bg-gold-subtle: rgba(212, 168, 75, 0.08);
+  --color-border-gold: rgba(252, 181, 40, 0.22);
+  --color-bg-gold-subtle: rgba(252, 181, 40, 0.08);
 }
+
+.portal-constellation__paths { stroke: rgba(247, 249, 252, .18); stroke-width: 1.15; stroke-dasharray: 6 11; }
+.portal-constellation__nodes { fill: #FCB528; opacity: .45; }
+.portal-constellation__pulses { stroke: #FCB528; stroke-width: 1.2; opacity: .22; }
+
+.module-progress { appearance: none; border: none; border-radius: 999px; overflow: hidden; background: #e5eaf0; color: #FCB528; }
+.module-progress::-webkit-progress-bar { background: #e5eaf0; border-radius: 999px; }
+.module-progress::-webkit-progress-value { background: #FCB528; border-radius: 999px; }
+.module-progress::-moz-progress-bar { background: #FCB528; border-radius: 999px; }
 
 @layer utilities {
   .tracking-eyebrow {

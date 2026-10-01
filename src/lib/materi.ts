@@ -63,6 +63,14 @@ export const getMateriByModule = async (moduleId: string): Promise<Materi[]> => 
   return Promise.all((data || []).map(resolveMaterialUrl));
 };
 
+// Fetch only catalog metadata for the progress denominator, without downloading files.
+export const getMateriCatalog = async (moduleIds: string[]): Promise<Materi[]> => {
+  const { data, error } = await supabase.from('module_materials')
+    .select('id,module_id,title,url,section,created_at').in('module_id', moduleIds).order('created_at', { ascending: true });
+  if (error) throw error;
+  return data || [];
+};
+
 export const addMateri = async (moduleId: string, title: string, url: string, section?: string | null): Promise<Materi | null> => {
   const { data, error } = await supabase
     .from('module_materials')
