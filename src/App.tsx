@@ -475,7 +475,6 @@ function MateriView() {
   const [materiTitle, setMateriTitle] = useState('');
   const [materiLink, setMateriLink] = useState('');
   const [materiFile, setMateriFile] = useState<File | null>(null);
-  const [materiSection, setMateriSection] = useState('umum');
   const [materiList, setMateriList] = useState<Materi[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [materiError, setMateriError] = useState('');
@@ -488,12 +487,6 @@ function MateriView() {
     { id: '05', name: 'Build' },
     { id: '06', name: 'Act' },
     { id: '07', name: 'AI Operating System' },
-  ];
-
-  const STRATEGIZE_SECTIONS = [
-    { id: 'thinking-with-claude', name: 'Thinking and Working with Claude' },
-    { id: 'responsible-ethic-safety', name: 'Responsible, Ethic dan Safety' },
-    { id: 'umum', name: 'Asesmen dan Peta Kerja AI' },
   ];
 
   useEffect(() => {
@@ -552,7 +545,7 @@ function MateriView() {
       const materialUrl = materiFile
         ? await uploadMateriFile(selectedModule, materiFile)
         : materiLink.trim();
-      await addMateri(selectedModule, materiTitle.trim(), materialUrl, selectedModule === '01' ? materiSection : null);
+      await addMateri(selectedModule, materiTitle.trim(), materialUrl);
       setMateriList(await getMateriByModule(selectedModule));
       setMateriTitle('');
       setMateriLink('');
@@ -624,20 +617,6 @@ function MateriView() {
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{materiError}</div>
         )}
         <form onSubmit={handleSaveMateri} className="flex flex-col gap-4">
-          {selectedModule === '01' && (
-            <div className="flex-1 w-full min-w-[200px]">
-              <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Subbagian Strategize</label>
-              <select
-                value={materiSection}
-                onChange={(e) => setMateriSection(e.target.value)}
-                className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted bg-white"
-              >
-                {STRATEGIZE_SECTIONS.map((section) => (
-                  <option key={section.id} value={section.id}>{section.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
           <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
             <div className="flex-1 w-full min-w-[200px]">
               <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Judul Materi</label>
@@ -687,9 +666,6 @@ function MateriView() {
               <div key={m.id} className="flex justify-between items-center p-4 border border-border-light-subtle rounded-lg bg-bg-light">
                  <div>
                     <div className="font-sans font-bold text-light-hi text-sm">{m.title}</div>
-                    {selectedModule === '01' && (
-                      <div className="font-body text-xs text-light-md">{STRATEGIZE_SECTIONS.find((section) => section.id === (m.section || 'umum'))?.name || 'Asesmen dan Peta Kerja AI'}</div>
-                    )}
                     <div className="font-mono text-[10px] text-light-lo truncate max-w-xs sm:max-w-md">{m.stored_url?.startsWith('storage:') ? 'File Supabase Storage' : m.url}</div>
                  </div>
                  <button onClick={() => handleDeleteMateri(m)} disabled={isLoading} className="text-red-500 hover:text-red-700 transition-colors p-2 disabled:opacity-50" aria-label={`Hapus ${m.title}`}>
