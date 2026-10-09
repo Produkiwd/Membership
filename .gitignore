@@ -7,3 +7,13 @@ coverage/
 .env*
 !.env.example
 supabase/.temp/
+
+# Local browser diagnostics
+.local-render-check/
+local-render-check.html
+
+.codex-worktrees/
+
+html-export/
+
+member.sinau.tech-html-export.zip

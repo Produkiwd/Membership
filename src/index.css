@@ -63,3 +63,51 @@
   }
 }
 
+
+/* Scoped member administration layout; column order stays unchanged. */
+.member-management .member-create-form input:not([type="checkbox"]),
+.member-management .member-create-form select {
+  height: 48px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+.member-management .member-create-form input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #001E3C;
+}
+.member-management #member-search,
+.member-management #member-group {
+  height: 42px;
+  border-radius: 8px;
+  width: 100%;
+}
+.member-management .member-table {
+  min-width: 1240px;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+.member-management .member-table th {
+  padding: 16px;
+  color: #001E3C;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  background: #F7F9FC;
+  border-bottom: 1px solid rgba(0, 30, 60, .15);
+  vertical-align: middle;
+}
+.member-management .member-table th:nth-child(1) { width: 19%; }
+.member-management .member-table th:nth-child(2) { width: 13%; }
+.member-management .member-table th:nth-child(3) { width: 7%; }
+.member-management .member-table th:nth-child(4) { width: 11%; }
+.member-management .member-table th:nth-child(5) { width: 12%; }
+.member-management .member-table th:nth-child(6) { width: 15%; }
+.member-management .member-table th:nth-child(7) { width: 12%; }
+.member-management .member-table th:nth-child(8) { width: 11%; }
+.member-management .member-table td {
+  border-bottom: 1px solid rgba(0, 30, 60, .08);
+}
+.member-management .member-table tbody tr:last-child td { border-bottom: 0; }

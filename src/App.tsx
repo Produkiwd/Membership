@@ -1,13 +1,21 @@
+import MemberManagement from './components/MemberManagement';
+import type { MemberAccessConfig } from './lib/memberAccessConfig';
+import { useDailySession } from './lib/useDailySession';
+import { markDailySession } from './lib/dailySession';
+import PortalAccessSummary from './components/PortalAccessSummary';
+import GroupBatchPicker from './components/GroupBatchPicker';
+import LocalNewMemberTier from './components/LocalNewMemberTier';
+import type { LocalAccessConfig } from './components/MemberAccessPreview';
+import LocalMemberAccessRow, { LocalMemberListPreview } from './components/LocalMemberAccessRow';
 import { Monitor, Sparkles, BookOpen, Calendar, ChevronRight, ChevronLeft, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2, ExternalLink } from 'lucide-react';
 import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent, type ChangeEvent, type SyntheticEvent } from 'react';
 import { cn } from './lib/utils';
 import { filterMembers } from './lib/memberSearch';
 import { memberExpiryTime, memberState, memberStatusLabel } from './lib/memberStatus';
-import PortalConstellation from './components/PortalConstellation';
-import { MODULE_IDS } from './lib/moduleProgress';
+import LoginVideoBackground from './components/LoginVideoBackground';
 import { useArtifactProgress } from './lib/useArtifactProgress';
-import { artifactStats, buildArtifactList, type LearningArtifact } from './lib/artifactProgress';
-import { AI_OS_GROUP, AI_OS_TIER, canAccessAifModule, canAccessPromptDatabase } from './lib/access';
+import { buildArtifactList, type LearningArtifact } from './lib/artifactProgress';
+import { AI_OS_GROUP, AI_OS_TIER, canAccessAifModule, canAccessPromptStudio } from './lib/access';
 import {
   createPendingMember,
   getCurrentUser,
@@ -22,7 +30,7 @@ import {
   type User,
   type MemberRecord,
 } from './lib/membership';
-import { addMateri, deleteMateri, getMateriByModule, getMateriCatalog, uploadMateriFile, type Materi } from './lib/materi';
+import { addMateri, deleteMateri, getMateriByModule, uploadMateriFile, type Materi } from './lib/materi';
 import aifPromptingHtml from '../materi/Prompt day1/aif-prompting-level2-day1.html?raw';
 import aifReadingHtml from '../materi/Prompt day1/aif-reading-level2-day1.html?raw';
 import aifPkmHtml from '../materi/Prompt day2/aif-pkm-level2-day2.html?raw';
@@ -98,16 +106,6 @@ const defaultModuleMaterials: Record<string, any[]> = {
   '07': [],
 };
 
-const moduleOutcomes: Record<string, string> = {
-  '01': 'memetakan pekerjaan dan memilih titik awal AI yang tepat.',
-  '02': 'menulis instruksi AI yang lebih jelas untuk tugas sehari-hari.',
-  '03': 'mengubah hasil AI menjadi keluaran kerja yang bisa dipakai.',
-  '04': 'menjelaskan cara berpikir di balik penggunaan Claude.',
-  '05': 'merancang alur kerja AI sederhana tanpa kode.',
-  '06': 'menerapkan AI ke perubahan kerja yang nyata.',
-  '07': 'menyusun sistem kerja AI yang bisa dikembangkan.',
-};
-
 const moduleDescriptions: Record<string, string> = {
   '01': 'Tentukan arah penggunaan AI',
   '02': 'Berikan instruksi yang jelas kepada AI',
@@ -125,7 +123,7 @@ function materialOrientation(title: string): string | null {
   return null;
 }
 
-function LoginView() {
+function LoginView({ onAuthenticated, notice }: { onAuthenticated?: () => void; notice?: string } = {}) {
   const [isResetLoading, setIsResetLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
@@ -134,7 +132,7 @@ function LoginView() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const handleAuth = async (e: FormEvent) => {
     e.preventDefault();
     if (!email || !password) return;
@@ -152,6 +150,7 @@ function LoginView() {
       } else {
         localStorage.setItem('temp_password', password);
       }
+      onAuthenticated?.();
     } catch (error: any) {
       localStorage.removeItem('member_last_activity_at');
       // Handle predictable errors without printing to console
@@ -194,19 +193,21 @@ function LoginView() {
   return (
     <div className="min-h-screen bg-[#001E3C] flex items-center justify-center p-6 lg:p-12 relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(0,170,204,0.12),transparent_35%),radial-gradient(circle_at_85%_75%,rgba(252,181,40,0.08),transparent_35%)] z-0"></div>
-      
-      <PortalConstellation />
-      
-      <div className="w-full max-w-md bg-[#001E3C]/90 border border-white/20 rounded-2xl p-8 md:p-12 shadow-2xl relative z-10 backdrop-blur-xl">
+
+      <LoginVideoBackground />
+
+      <div className="w-full max-w-md bg-[#001E3C]/85 border border-white/20 rounded-2xl p-8 md:p-12 shadow-2xl relative z-10 backdrop-blur-xl">
         <div className="font-sans font-extrabold text-3xl tracking-tighter text-dark-hi flex items-center gap-2 mb-12">
           sinau.tech <span className="w-2 h-2 rounded-full bg-gold inline-block"></span>
         </div>
-        
+
         <h1 className="font-sans font-bold text-2xl text-dark-hi mb-2">Portal Akses.</h1>
         <p className="font-body text-dark-md mb-8">
           Kamu sudah mulai berpikir berbeda. Di sini kamu memperkuatnya.
         </p>
-        
+
+        {notice && <p role="status" className="font-body text-sm text-[#F7F9FC] border border-[#00AACC]/40 bg-[#00AACC]/10 p-3 rounded-lg mb-6">{notice}</p>}
+
         {errorMsg && (
           <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded mb-6 text-sm">
             {errorMsg}
@@ -232,7 +233,7 @@ function LoginView() {
               disabled={isLoading}
             />
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-3">
               <label className="font-body text-xs font-bold text-dark-md tracking-eyebrow uppercase block">Kata Sandi</label>
@@ -317,11 +318,11 @@ function MemberRow({ mb, now, isUpdating, handleUpdate, handleSendPasswordReset,
   const invalidExpiry = expiryTime !== null && !Number.isFinite(expiryTime);
   const currentExp = expiryTime !== null && !invalidExpiry ? new Date(expiryTime).toISOString().split('T')[0] : '';
   const [exp, setExp] = useState(currentExp);
-  
+
   const togglePortal = (p: string) => {
     setPortals(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
   };
-  
+
   let sisaWaktu = memberState(mb, now) === 'expired' ? 'Batas waktu tidak tersedia' : 'Tanpa batas tanggal';
   if (invalidExpiry) sisaWaktu = 'Tanggal tidak valid';
   else if (expiryTime !== null) {
@@ -329,7 +330,7 @@ function MemberRow({ mb, now, isUpdating, handleUpdate, handleSendPasswordReset,
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     sisaWaktu = diffDays > 0 ? `${diffDays} hari lagi` : 'Kedaluwarsa';
   }
-  
+
   return (
     <tr className="border-b border-border-light-subtle/50">
       <td className="py-3 px-2 max-w-[200px]">
@@ -485,8 +486,8 @@ function MateriView() {
     { id: '03', name: 'Create' },
     { id: '04', name: 'Think' },
     { id: '05', name: 'Build' },
-    { id: '06', name: 'ACT' },
-    { id: '07', name: 'AI OS' },
+    { id: '06', name: 'Act' },
+    { id: '07', name: 'AI Operating System' },
   ];
 
   const STRATEGIZE_SECTIONS = [
@@ -616,7 +617,7 @@ function MateriView() {
             ))}
           </select>
         </div>
-        
+
         <h3 className="font-sans font-bold text-lg text-light-hi mb-2">Tambah/Ubah Materi: {MODULES.find(m => m.id === selectedModule)?.name}</h3>
         <p className="font-body text-sm text-light-md mb-6">Tambah link materi atau unggah file (HTML/PDF/gambar, max 10MB). Materi akan tersimpan di Supabase dan tersedia untuk semua member yang memiliki akses.</p>
         {materiError && (
@@ -703,275 +704,12 @@ function MateriView() {
   );
 }
 
-function AdminView() {
-  const [members, setMembers] = useState<MemberRecord[]>([]);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [filterGroup, setFilterGroup] = useState('');
-  const [memberQuery, setMemberQuery] = useState('');
-  const [memberNow, setMemberNow] = useState(Date.now);
-  const [membersLoading, setMembersLoading] = useState(true);
-  const [membersLoadError, setMembersLoadError] = useState(false);
-
-  useEffect(() => {
-    const refreshTime = () => setMemberNow(Date.now());
-    const timer = window.setInterval(refreshTime, 60_000);
-    window.addEventListener('focus', refreshTime);
-    return () => { window.clearInterval(timer); window.removeEventListener('focus', refreshTime); };
-  }, []);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    listMembers()
-      .then((rows) => {
-        if (isMounted) setMembers(rows);
-      })
-      .catch(() => { if (isMounted) setMembersLoadError(true); })
-      .finally(() => { if (isMounted) setMembersLoading(false); });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const handleUpdate = async (memberId: string, role: string, newTier: string, expiresAtStr: string, allowedPortals: string[], sinadMateri: boolean, sinadExercise: boolean, group: string) => {
-    setIsUpdating(true);
-    try {
-      await updateMember(memberId, role, newTier, expiresAtStr, allowedPortals, sinadMateri, sinadExercise, group);
-      setMembers(await listMembers());
-    } catch (err) {
-      console.error(err);
-      alert('Gagal update data member');
-    }
-    setIsUpdating(false);
-  };
-
-  const [newEmail, setNewEmail] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [newTier, setNewTier] = useState('Professional');
-  const [newGroup, setNewGroup] = useState('');
-  const [newPortals, setNewPortals] = useState<string[]>(['aif']);
-  const [isCreating, setIsCreating] = useState(false);
-  const [createMsg, setCreateMsg] = useState({ text: '', type: '' });
-
-  const handleCreateUser = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!newEmail || !newPassword) return;
-    setIsCreating(true);
-    setCreateMsg({ text: '', type: '' });
-    
-    try {
-      const emailFormatted = newEmail.trim().toLowerCase();
-      if (newPassword.length < 6) {
-        throw new Error('Password minimal 6 karakter.');
-      }
-      if (newPortals.length === 0) {
-        throw new Error('Pilih minimal satu akses portal.');
-      }
-
-      await createPendingMember(emailFormatted, newPassword, newTier, newGroup, newPortals);
-      setMembers(await listMembers());
-
-      setCreateMsg({ text: `Akun login dan akses ${emailFormatted} sudah dibuat. User bisa login dengan password yang kamu tentukan.`, type: 'success' });
-      setNewEmail('');
-      setNewPassword('');
-      setNewTier('Professional');
-      setNewGroup('');
-      setNewPortals(['aif']);
-    } catch (err: any) {
-      // Console error hidden for auth already in use etc to avoid false alarms
-      setCreateMsg({ text: err.message || 'Gagal membuat akun.', type: 'error' });
-    }
-    setIsCreating(false);
-  };
-
-  const handleSendPasswordReset = async (email: string) => {
-    try {
-      await sendMemberPasswordReset(email);
-      alert(`Email reset password berhasil dikirim ke ${email}. User dapat mengganti password melalui tautan di email tersebut.`);
-    } catch (err: any) {
-      alert(`Gagal mengirim email reset password: ${err.message}`);
-    }
-  };
-
-  const predefinedGroups = ["AIF Leaders Batch 1", "AIF Professional Batch 1", "Internal Office", "Community", AI_OS_GROUP];
-  const allGroups = Array.from(new Set([
-    ...predefinedGroups,
-    ...members.map(m => m.group).filter(Boolean)
-  ])).sort();
-
-  const allTiers = Array.from(new Set([
-    "Professional", "Leaders", "Community", "Internal", "Teacher", "Student", "TWC", AI_OS_TIER,
-    ...members.map(m => m.tier).filter(Boolean)
-  ])).sort();
-
-  const visibleMembers = filterMembers<MemberRecord>(members, memberQuery, filterGroup);
-
-  return (
-    <main className="max-w-6xl mx-auto px-6 md:px-12 py-12 md:py-24">
-      <Eyebrow variant="flat">Pengelolaan</Eyebrow>
-      <div className="h-6"></div>
-      <h1 className="font-sans font-bold text-3xl md:text-[42px] leading-[1.15] text-light-hi mb-12">
-        Kelola Member
-      </h1>
-
-      <div className="bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card mb-8">
-        <h3 className="font-sans font-bold text-xl text-light-hi mb-2">Tambah Member Baru</h3>
-        <p className="font-body text-sm text-light-md mb-6">Buat akun login dan akses portal dalam satu langkah.</p>
-        
-        <form onSubmit={handleCreateUser} className="flex gap-4 items-end flex-wrap">
-          <div className="flex-1 w-full min-w-[200px]">
-            <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Email</label>
-            <input 
-              type="email" 
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              required
-              placeholder="nama@perusahaan.com"
-              className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi placeholder:text-light-lo focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted transition-all"
-              disabled={isCreating}
-            />
-          </div>
-          <div className="flex-1 w-full min-w-[200px]">
-            <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Password</label>
-            <input
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              minLength={6}
-              placeholder="Minimal 6 karakter"
-              className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi placeholder:text-light-lo focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted transition-all"
-              disabled={isCreating}
-            />
-          </div>
-          <div className="flex-1 w-full min-w-[180px]">
-            <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Tier</label>
-            <select
-              value={newTier}
-              onChange={(e) => {
-                setNewTier(e.target.value);
-                if (e.target.value === AI_OS_TIER) setNewGroup(AI_OS_GROUP);
-              }}
-              className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi bg-white focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted"
-              disabled={isCreating}
-            >
-              {allTiers.map((tier) => <option key={tier} value={tier}>{tier}</option>)}
-            </select>
-          </div>
-          <div className="flex-1 w-full min-w-[180px]">
-            <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Grup / Batch</label>
-            <input
-              type="text"
-              list="groupList"
-              value={newGroup}
-              onChange={(e) => setNewGroup(e.target.value)}
-              placeholder="Pilih atau ketik grup"
-              className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted"
-              disabled={isCreating}
-            />
-          </div>
-          <fieldset className="flex-1 w-full min-w-[180px]">
-            <legend className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase mb-2">Akses Portal</legend>
-            <div className="flex flex-wrap gap-3 py-3 text-sm text-light-hi">
-              {(['aif', 'sinad', 'idl'] as const).map((portal) => (
-                <label key={portal} className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={newPortals.includes(portal)}
-                    onChange={() => setNewPortals((current) => current.includes(portal) ? current.filter((item) => item !== portal) : [...current, portal])}
-                    disabled={isCreating}
-                  />
-                  {portal === 'aif' ? 'AIF' : portal === 'sinad' ? 'SinaD' : 'IDL'}
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <Button type="submit" variant="primary" disabled={isCreating} className="py-3 px-8 border border-transparent w-full sm:w-auto mt-4 sm:mt-0">
-            {isCreating ? "Membuat..." : "Tambah"}
-          </Button>
-        </form>
-
-        {createMsg.text && (
-          <div className={cn("mt-6 p-4 rounded text-sm border font-body", createMsg.type === 'success' ? "bg-green-50 border-green-200 text-green-700" : "bg-red-50 border-red-200 text-red-700")}>
-            {createMsg.text}
-          </div>
-        )}
-      </div>
-      
-      <div className="bg-white border border-border-light-card p-6 md:p-8 rounded-xl shadow-card overflow-x-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <h3 className="font-sans font-bold text-xl text-light-hi mb-2">Daftar Member</h3>
-            <p className="font-body text-sm text-light-md">Atur role, tingkat keanggotaan (Tier), akses portal, dan batas waktu akses.</p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div>
-              <label htmlFor="member-search" className="block font-body text-sm font-bold text-light-md mb-1">Cari member</label>
-              <input id="member-search" type="search" value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} placeholder="Nama atau alamat email" className="w-full sm:w-60 px-4 py-2 border border-border-light-subtle rounded-lg font-body text-sm text-light-hi focus:outline-none focus:ring-2 focus:ring-[#00AACC]" />
-            </div>
-            <div>
-            <label htmlFor="member-group" className="block font-body text-sm font-bold text-light-md mb-1">Grup</label>
-            <select id="member-group"
-              value={filterGroup} 
-              onChange={e => setFilterGroup(e.target.value)}
-              className="px-4 py-2 border border-border-light-subtle rounded text-sm text-light-hi bg-white focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted min-w-[200px]"
-            >
-              <option value="">Semua Grup</option>
-              {allGroups.map((group: any) => (
-                <option key={group} value={group}>{group}</option>
-              ))}
-            </select>
-            </div>
-          </div>
-        </div>
-        {!membersLoading && !membersLoadError && (
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-4 font-body text-sm text-light-md">
-            <p role="status">Menampilkan {visibleMembers.length} dari {members.length} member.</p>
-            {(memberQuery || filterGroup) && <button type="button" onClick={() => { setMemberQuery(''); setFilterGroup(''); }} className="text-[#005287] font-bold cursor-pointer">Reset pencarian dan filter</button>}
-          </div>
-        )}
-
-        <datalist id="groupList">
-          {allGroups.map((group: any) => (
-            <option key={`dl-${group}`} value={group} />
-          ))}
-        </datalist>
-        
-        <table className="w-full text-left font-body text-sm">
-          <thead>
-            <tr className="border-b border-border-light-subtle">
-              <th className="py-3 px-2 font-bold text-light-hi w-40">Nama / email</th>
-              <th className="py-3 px-2 font-bold text-light-hi min-w-[150px]">Grup / Batch</th>
-              <th className="py-3 px-2 font-bold text-light-hi w-28">Role</th>
-              <th className="py-3 px-2 font-bold text-light-hi w-24">Akses Portal</th>
-              <th className="py-3 px-2 font-bold text-light-hi w-32">Tier</th>
-              <th className="py-3 px-2 font-bold text-light-hi min-w-[130px]">Atur Waktu</th>
-              <th className="py-3 px-2 font-bold text-light-hi min-w-[130px]">Status / Sisa Waktu</th>
-              <th className="py-3 px-2 font-bold text-light-hi min-w-[120px]">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(membersLoading || membersLoadError || visibleMembers.length === 0) && (
-              <tr>
-                <td colSpan={8} className="py-4 px-2 text-light-md text-center">{membersLoading ? 'Memuat data…' : membersLoadError ? 'Daftar member belum dapat dimuat. Silakan muat ulang halaman.' : members.length === 0 ? 'Belum ada member.' : 'Tidak ada member yang sesuai. Coba kata kunci atau grup lain.'}</td>
-              </tr>
-            )}
-            {visibleMembers.map(mb => (
-              <MemberRow key={mb.id} mb={mb} now={memberNow} isUpdating={isUpdating} handleUpdate={handleUpdate} handleSendPasswordReset={handleSendPasswordReset} allGroups={allGroups} allTiers={allTiers} />
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </main>
-  );
-}
+function AdminView() { return <MemberManagement />; }
 
 function DashboardView({ user, forcePasswordReset = false }: { user: User, forcePasswordReset?: boolean }) {
   const artifactProgress = useArtifactProgress(user.id);
-  const [artifactCatalog, setArtifactCatalog] = useState<Record<string, LearningArtifact[]>>({});
-  const [catalogState, setCatalogState] = useState<'loading' | 'ready' | 'error'>('loading');
   const userEmail = user.email || '';
+  const [accessConfig, setAccessConfig] = useState<MemberAccessConfig | undefined>();
   const [allowedPortals, setAllowedPortals] = useState<string[]>(['aif']);
   const [currentPortal, setCurrentPortal] = useState<'hub' | 'aif' | 'idl' | 'sinad'>('hub');
   const [sinadAccess, setSinadAccess] = useState({ tier: 'Professional', materi: false, exercise: false });
@@ -1000,19 +738,18 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   const [iframeModalUrl, setIframeModalUrl] = useState<{url: string, title: string} | null>(null);
 
   const handleModuleClick = async (moduleId: string, defaultTitle: string, defaultSubtitle: string, defaultMaterials: any[]) => {
-    if (loadingModule || !allowedPortals.includes('aif') || !canAccessAifModule(sinadAccess.tier, moduleId)) return;
+    if (loadingModule || !allowedPortals.includes('aif') || !canAccessAifModule(sinadAccess.tier, moduleId, accessConfig)) return;
     setLoadingModule(moduleId);
     let materialLoadFailed = false;
     let materials: Materi[] = [];
     try {
-      materials = await getMateriByModule(moduleId);
+      materials = await getMateriByModule(moduleId === '08' ? '04' : moduleId);
     } catch (error) {
       materialLoadFailed = true;
       console.error('Materi Supabase belum dapat dimuat:', error);
     }
 
     const finalMaterials = buildArtifactList(moduleId, defaultMaterials, materials);
-    if (!materialLoadFailed) setArtifactCatalog(previous => ({ ...previous, [moduleId]: finalMaterials }));
 
     setSelectedModule({
       id: moduleId,
@@ -1037,15 +774,15 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
     if (user.email && tempPassword) {
       // 1. Gabungkan email dan password dengan pemisah titik dua ':'
       const rawCredentials = `${user.email}:${tempPassword}`;
-      
+
       const stringToHex = (str: string) => {
         return Array.from(str)
           .map(c => c.charCodeAt(0).toString(16).padStart(2, '0'))
           .join('');
       };
-      
+
       const hexCredentials = stringToHex(rawCredentials);
-      
+
       // 3. Arahkan browser langsung ke aplikasi IDL dengan hash param s
       window.open(`https://idl.iwdemy.com/#s=${hexCredentials}`, '_blank');
     } else {
@@ -1055,35 +792,14 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   };
 
   const canAccessModule = (moduleId: string) => {
-    return allowedPortals.includes('aif') && canAccessAifModule(sinadAccess.tier, moduleId);
+    return allowedPortals.includes('aif') && canAccessAifModule(sinadAccess.tier, moduleId, accessConfig);
   };
 
-  useEffect(() => {
-    if (isLoadingPortals || currentPortal !== 'aif') return;
-    let mounted = true;
-    const ids = MODULE_IDS.filter(id => allowedPortals.includes('aif') && canAccessAifModule(sinadAccess.tier, id));
-    setCatalogState('loading');
-    getMateriCatalog([...ids]).then((rows) => {
-      if (!mounted) return;
-      setArtifactCatalog(Object.fromEntries(ids.map(id => [id, buildArtifactList(id, defaultModuleMaterials[id], rows.filter(row => row.module_id === id))])));
-      setCatalogState('ready');
-    }).catch(() => { if (mounted) setCatalogState('error'); });
-    return () => { mounted = false; };
-  }, [isLoadingPortals, currentPortal, allowedPortals, sinadAccess.tier, user.id]);
+  const canOpenPromptDatabase = !isLoadingPortals && !profileError && canAccessPromptStudio(sinadAccess.tier, accessConfig);
 
-  const accessibleArtifacts = MODULE_IDS.filter(canAccessModule).flatMap(id => artifactCatalog[id] || []);
-  const learningStats = artifactStats(accessibleArtifacts, artifactProgress.opened);
-  const openedHistoryCount = artifactProgress.opened.filter(id => canAccessModule(id.split(':')[0])).length;
-  const moduleProgressSummary = (id: string) => {
-    if (!artifactCatalog[id]) return null;
-    const stats = artifactStats(artifactCatalog[id], artifactProgress.opened);
-    return stats.total > 0 ? <p className="font-body text-xs text-light-md mt-4">{stats.opened} dari {stats.total} materi dibuka</p> : null;
-  };
+  const [promptStudioInitialMenu, setPromptStudioInitialMenu] = useState('beranda');
 
-  const canOpenPromptDatabase = canAccessPromptDatabase(sinadAccess.tier, allowedPortals, isAdmin);
-  const [promptStudioInitialMenu, setPromptStudioInitialMenu] = useState<string>('beranda');
-
-  const openPromptDatabase = (menu: string = 'beranda') => {
+  const openPromptDatabase = (menu = 'beranda') => {
     if (!canOpenPromptDatabase) return;
     localStorage.setItem('appToken', 'iwdemy123');
     setPromptStudioInitialMenu(menu);
@@ -1135,13 +851,14 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
       try {
         if (!isMounted) return;
 
-        if (data.role === 'admin') setIsAdmin(true);
+        setIsAdmin(data.role === 'admin');
 
+        setAccessConfig(data.accessConfig);
         let portals = data.allowedPortals || ["aif"];
-        if (data.tier === "TWC" && !portals.includes("idl")) {
+        if (!data.accessV2 && data.tier === "TWC" && !portals.includes("idl")) {
           portals.push("idl");
         }
-        if (user.email === 'stephen.tssgroup@gmail.com') {
+        if (!data.accessV2 && user.email === 'stephen.tssgroup@gmail.com') {
            if (!portals.includes('idl')) portals.push('idl');
            if (!portals.includes('sinad')) portals.push('sinad');
            if (!portals.includes('aif')) portals.push('aif');
@@ -1149,7 +866,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
         }
         setAllowedPortals(portals);
         // Only set current portal once to avoid jumping around on updates
-        setCurrentPortal(prev => prev === 'hub' ? (portals.length > 1 ? 'hub' : (portals[0] as any)) : prev);
+        setCurrentPortal(prev => prev !== 'hub' && portals.includes(prev) ? prev : portals.length === 1 ? (portals[0] as any) : 'hub');
 
         setSinadAccess({
           tier: data.tier || 'Professional',
@@ -1165,10 +882,20 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
       }
     };
     loadMemberData();
+    window.addEventListener('membership-access-saved', loadMemberData);
+    window.addEventListener('focus', loadMemberData);
     return () => {
       isMounted = false;
+      window.removeEventListener('membership-access-saved', loadMemberData);
+      window.removeEventListener('focus', loadMemberData);
     };
   }, [user.id, user.email]);
+
+  useEffect(() => {
+    if (isLoadingPortals) return;
+    if (selectedModule && !canAccessModule(selectedModule.id)) { setSelectedModule(null); setSelectedHtmlData(null); }
+    if (activeTab === 'prompts' && !canOpenPromptDatabase || activeTab === 'admin' && !isAdmin) setActiveTab('dashboard');
+  }, [accessConfig, allowedPortals, isLoadingPortals, isAdmin, activeTab]);
 
   const handleLogout = async () => {
     try {
@@ -1242,7 +969,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               aria-current={activeTab === 'prompts' ? 'page' : undefined}
               className={cn("px-3 py-2 rounded-lg cursor-pointer", activeTab === 'prompts' ? 'bg-[#001E3C] text-white font-bold' : 'text-light-md hover:bg-white')}
             >
-              Prompt Database
+              Prompt Studio
             </button>
           ) : null}
           {activeTab !== 'dashboard' && currentPortal !== 'aif' && (
@@ -1303,7 +1030,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                 <p className="font-body text-xl text-light-md mb-12">
                   Pilih portal yang ingin kamu akses.
                 </p>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {allowedPortals.includes('aif') && (
                     <button type="button" onClick={() => setCurrentPortal('aif')} className="text-left border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-[#00AACC] focus-visible:outline-2 focus-visible:outline-[#00AACC] transition-colors cursor-pointer group">
@@ -1352,235 +1079,120 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
         <p className="font-body text-lg text-light-md mb-8 max-w-3xl">
            Setiap modul melatih satu cara berpikir tentang pekerjaan. Ikuti dari 01 — urutannya bukan kebetulan. Dan tidak perlu selesai sekarang.
         </p>
-        
-        <section aria-label="Progres belajar" className="mb-8 p-5 rounded-xl bg-white border border-border-light-card shadow-card">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <h2 className="font-sans font-bold text-lg text-light-hi">Progres belajar</h2>
-            <p role="status" className="font-body font-bold text-sm text-light-hi">{catalogState === 'ready' ? `${learningStats.opened} dari ${learningStats.total} materi dibuka · ${learningStats.percent}%` : catalogState === 'loading' ? 'Memuat daftar materi…' : `${openedHistoryCount} materi pernah dibuka`}</p>
-          </div>
-          {catalogState === 'ready' && <progress aria-label="Jumlah materi yang sudah dibuka" value={learningStats.opened} max={learningStats.total || 1} className="module-progress w-full h-3 block" />}
-          <p className="font-body text-sm text-light-md mt-3">Progres bertambah otomatis saat kamu membuka materi. Materi yang sama dihitung sekali. Persentase berdasarkan materi yang tersedia untuk akunmu.</p>
-          {catalogState === 'error' && <p role="status" className="font-body text-sm text-light-md mt-2">Daftar materi belum dapat dimuat lengkap. Persentase akan tampil setelah daftar berhasil dimuat; muat ulang halaman untuk mencoba lagi.</p>}
-          <p className="font-body text-xs text-light-md mt-2">Tersimpan untuk akunmu di browser ini. Membuka materi belum menunjukkan penguasaan materi.</p>
-          {artifactProgress.error && <p role="alert" className="font-body text-sm text-red-700 mt-3">{artifactProgress.error}</p>}
-        </section>
 
         {/* Module list */}
         <div className="mb-12">
           <div className="border-b border-border-light-subtle pb-4 mb-6">
             <h2 className="font-sans font-bold text-xl text-light-hi mb-2">Modul Belajar</h2>
-            <p className="font-body text-base text-light-md">Mulai dari Modul 01. Pilih modul, lalu pilih materi yang ingin kamu pelajari.</p>
-            {loadingModule && <p role="status" className="font-body text-sm text-[#005287] mt-3">Memuat daftar materi Modul {loadingModule}…</p>}
+            <p className="font-body text-base text-light-md">Pilih modul, lalu pilih materi yang ingin kamu pelajari.</p>
+            {loadingModule && <p role="status" className="font-body text-sm text-[#005287] mt-3">Memuat daftar materi…</p>}
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Module 01 - Strategize */}
-            {canAccessModule("01") ? (
-              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", defaultModuleMaterials['01'])}>
-                <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">01</span>
-                <div>
-                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Strategize</div>
-                  <p className="font-body text-sm text-light-md">{moduleDescriptions['01']}</p>
-                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['01']}</p>
-                  {moduleProgressSummary('01')}
-                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 01 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
-                </div>
-              </button>
-            ) : (
-              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
-                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">01</span>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-sans font-bold text-lg text-light-md">Strategize</div>
-                    <Lock className="w-4 h-4 text-light-lo" />
-                  </div>
-                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['01']}</p>
-                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['01']}</p>
-                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
-                  <p className="font-body text-[10px] text-light-lo">Tier Anda tidak memiliki akses ke modul ini.</p>
-                </div>
-              </div>
-            )}
-            {/* Module 02 - Prompt */}
-            {canAccessModule('02') ? (
-              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("02", "Prompt", "Chat Mastery", defaultModuleMaterials['02'])}>
-                 <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">02</span>
-                <div>
-                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Prompt</div>
-                  <p className="font-body text-sm text-light-md">{moduleDescriptions['02']}</p>
-                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['02']}</p>
-                  {moduleProgressSummary('02')}
-                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 02 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
-                </div>
-              </button>
-            ) : (
-              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
-                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">02</span>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-sans font-bold text-lg text-light-md">Prompt</div>
-                    <Lock className="w-4 h-4 text-light-lo" />
-                  </div>
-                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['02']}</p>
-                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['02']}</p>
-                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
-                  <p className="font-body text-[10px] text-light-lo">Tingkatkan tier Anda ke Professional untuk mengakses.</p>
-                </div>
-              </div>
-            )}
-
-            {/* Module 03 - Create */}
-            {canAccessModule('03') ? (
-              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("03", "Create", "Output Creation", defaultModuleMaterials['03'])}>
-                 <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">03</span>
-                <div>
-                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Create</div>
-                  <p className="font-body text-sm text-light-md">{moduleDescriptions['03']}</p>
-                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['03']}</p>
-                  {moduleProgressSummary('03')}
-                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 03 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
-                </div>
-              </button>
-            ) : (
-              <div className="border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
-                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">03</span>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-sans font-bold text-lg text-light-md">Create</div>
-                    <Lock className="w-4 h-4 text-light-lo" />
-                  </div>
-                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['03']}</p>
-                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['03']}</p>
-                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
-                  <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
-                </div>
-              </div>
-            )}
-            
-            {/* Module 04 - Think */}
-            {canAccessModule('04') ? (
-              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait order-4 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("04", "Think", "One Day Intensive", defaultModuleMaterials['04'])}>
-                 <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">04</span>
-                <div>
-                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Think</div>
-                  <p className="font-body text-sm text-light-md">{moduleDescriptions['04']}</p>
-                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['04']}</p>
-                  {moduleProgressSummary('04')}
-                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 04 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
-                </div>
-              </button>
-            ) : (
-              <div className="order-4 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
-                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">04</span>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-sans font-bold text-lg text-light-md">Think</div>
-                    <Lock className="w-4 h-4 text-light-lo" />
-                  </div>
-                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['04']}</p>
-                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['04']}</p>
-                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
-                  <p className="font-body text-[10px] text-light-lo">Tier Internal atau TWC diperlukan untuk modul ini.</p>
-                </div>
-              </div>
-            )}
-
-            {/* Module 05 - Build */}
-            {canAccessModule('05') ? (
-              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait order-5 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("05", "Build", "NoCode AI Build", defaultModuleMaterials['05'])}>
-                 <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">05</span>
-                <div>
-                  <div className="font-sans font-bold text-lg text-light-hi mb-2">Build</div>
-                  <p className="font-body text-sm text-light-md">{moduleDescriptions['05']}</p>
-                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['05']}</p>
-                  {moduleProgressSummary('05')}
-                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 05 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
-                </div>
-              </button>
-            ) : (
-              <div className="order-5 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
-                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">05</span>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-sans font-bold text-lg text-light-md">Build</div>
-                    <Lock className="w-4 h-4 text-light-lo" />
-                  </div>
-                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['05']}</p>
-                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['05']}</p>
-                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
-                  <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
-                </div>
-              </div>
-            )}
-
-            {/* Module 06 - ACT */}
-            {canAccessModule('06') ? (
-              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait order-6 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("06", "ACT", "Action & Transformation", defaultModuleMaterials['06'])}>
-                <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">06</span>
-                <div>
-                  <div className="font-sans font-bold text-lg text-light-hi mb-2">ACT</div>
-                  <p className="font-body text-sm text-light-md">{moduleDescriptions['06']}</p>
-                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['06']}</p>
-                  {moduleProgressSummary('06')}
-                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 06 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
-                </div>
-              </button>
-            ) : (
-              <div className="order-6 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
-                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">06</span>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-sans font-bold text-lg text-light-md">ACT</div>
-                    <Lock className="w-4 h-4 text-light-lo" />
-                  </div>
-                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['06']}</p>
-                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['06']}</p>
-                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
-                  <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
-                </div>
-              </div>
-            )}
-
-            {/* Module 07 - AI OS */}
-            {canAccessModule('07') ? (
-              <button type="button" disabled={loadingModule !== null} className="text-left focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:cursor-wait order-7 border border-border-light-card bg-white p-6 md:p-8 rounded-xl shadow-card flex flex-col justify-between hover:border-gold/30 transition-colors cursor-pointer" onClick={() => handleModuleClick("07", "AI OS", "AI Operating System", defaultModuleMaterials['07'])}>
-                <span className="font-sans text-xs font-bold text-gold-muted tracking-wide uppercase mb-6 block">07</span>
-                <div>
-                  <div className="font-sans font-bold text-lg text-light-hi mb-2">AI OS</div>
-                  <p className="font-body text-sm text-light-md">{moduleDescriptions['07']}</p>
-                  <p className="font-body text-sm text-light-md mt-3">Setelah modul ini, kamu bisa {moduleOutcomes['07']}</p>
-                  {moduleProgressSummary('07')}
-                  <div className="mt-6 pt-4 border-t border-border-light-card flex items-center justify-between gap-2 font-body text-xs"><span className="text-light-md">Modul 07 dari 7</span><span className="text-[#005287] font-bold">Pilih materi →</span></div>
-                </div>
-              </button>
-            ) : (
-              <div className="order-7 border border-border-light-subtle bg-bg-light p-6 md:p-8 rounded-xl flex flex-col justify-between">
-                <span className="font-sans text-xs font-bold text-light-lo tracking-wide uppercase mb-6 block">07</span>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-sans font-bold text-lg text-light-md">AI OS</div>
-                    <Lock className="w-4 h-4 text-light-lo" />
-                  </div>
-                  <p className="font-body text-sm text-light-md mb-2">{moduleDescriptions['07']}</p>
-                  <p className="font-body text-sm text-light-md mb-4">Setelah modul ini, kamu bisa {moduleOutcomes['07']}</p>
-                  <p className="font-body text-sm font-bold text-light-md mb-2">Akses terkunci</p>
-                  <p className="font-body text-[10px] text-light-lo">Tier Leaders atau Internal diperlukan untuk modul ini.</p>
-                </div>
-              </div>
-            )}
+            {/* Strategize */}
+            <button
+              type="button"
+              disabled={!canAccessModule('01') || loadingModule !== null}
+              aria-label={'Strategize' + (canAccessModule('01') ? '' : ' — akses terkunci')}
+              className="relative text-left border border-[#001E3C]/10 bg-[#FCB528] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", defaultModuleMaterials['01'])}
+            >
+              <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF</span>
+              <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Strategize</h3>
+            </button>
+            {/* Prompt */}
+            <button
+              type="button"
+              disabled={!canAccessModule('02') || loadingModule !== null}
+              aria-label={'Prompt' + (canAccessModule('02') ? '' : ' — akses terkunci')}
+              className="relative text-left border border-[#001E3C]/10 bg-[#FCB528] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={() => handleModuleClick("02", "Prompt", "Chat Mastery", defaultModuleMaterials['02'])}
+            >
+              <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF</span>
+              <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Prompt</h3>
+            </button>
+            {/* Create */}
+            <button
+              type="button"
+              disabled={!canAccessModule('03') || loadingModule !== null}
+              aria-label={'Create' + (canAccessModule('03') ? '' : ' — akses terkunci')}
+              className="relative text-left border border-[#001E3C]/10 bg-[#FCB528] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={() => handleModuleClick("03", "Create", "Output Creation", defaultModuleMaterials['03'])}
+            >
+              <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF</span>
+              <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Create</h3>
+            </button>
+            {/* Think */}
+            <button
+              type="button"
+              disabled={!canAccessModule('04') || loadingModule !== null}
+              aria-label={'Think' + (canAccessModule('04') ? '' : ' — akses terkunci')}
+              className="relative text-left border border-[#001E3C]/10 bg-[#FCB528] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={() => handleModuleClick("04", "Think", "One Day Intensive", defaultModuleMaterials['04'])}
+            >
+              <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF</span>
+              <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Think</h3>
+            </button>
+            {/* Build */}
+            <button
+              type="button"
+              disabled={!canAccessModule('05') || loadingModule !== null}
+              aria-label={'Build' + (canAccessModule('05') ? '' : ' — akses terkunci')}
+              className="relative text-left border border-[#001E3C]/10 bg-[#FCB528] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={() => handleModuleClick("05", "Build", "NoCode AI Build", defaultModuleMaterials['05'])}
+            >
+              <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF</span>
+              <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Build</h3>
+            </button>
+            {/* ACT */}
+            <button
+              type="button"
+              disabled={!canAccessModule('06') || loadingModule !== null}
+              aria-label={'Act' + (canAccessModule('06') ? '' : ' — akses terkunci')}
+              className="relative text-left border border-[#001E3C]/10 bg-[#FCB528] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={() => handleModuleClick("06", "Act", "Action & Transformation", defaultModuleMaterials['06'])}
+            >
+              <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF</span>
+              <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Act</h3>
+            </button>
+            {/* Thinking With Claude */}
+            <button
+              type="button"
+              disabled={!canAccessModule('08') || loadingModule !== null}
+              aria-label={'Thinking With Claude' + (canAccessModule('08') ? '' : ' — akses terkunci')}
+              className="relative text-left border border-[#001E3C]/10 bg-[#00AACC] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={() => handleModuleClick("08", "Thinking With Claude", "One Day Intensive", defaultModuleMaterials['04'])}
+            >
+              <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF How To</span>
+              <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Thinking With Claude</h3>
+            </button>
+            {/* AI OS */}
+            <button
+              type="button"
+              disabled={!canAccessModule('07') || loadingModule !== null}
+              aria-label={'AI Operating System' + (canAccessModule('07') ? '' : ' — akses terkunci')}
+              className="relative text-left border border-[#001E3C]/10 bg-[#00AACC] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={() => handleModuleClick("07", "AI Operating System", "AI Operating System", defaultModuleMaterials['07'])}
+            >
+              <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF How To</span>
+              <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">AI Operating System</h3>
+            </button>
+            {/* Selling Idea With AI — content to be added later */}
+            <div aria-label="Selling Idea With AI — materi belum tersedia" className="relative border border-[#001E3C]/10 bg-[#00AACC] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end">
+              <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF How To</span>
+              <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Selling Idea With AI</h3>
+            </div>
           </div>
         </div>
-        
+
         <section aria-label="Portal dan jadwal">
           <h2 className="font-sans font-bold text-xl text-light-hi mb-5">Portal dan Jadwal</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {allowedPortals.includes('idl') && (
-              <a href="https://idl.iwdemy.com" onClick={handleIdlClick} target="_blank" rel="noopener noreferrer" className="bg-white border border-border-light-card p-6 rounded-xl shadow-card hover:border-[#00AACC] focus-visible:outline-2 focus-visible:outline-[#00AACC] transition-colors">
+              <a href="https://idl.iwdemy.com" target="_blank" rel="noopener noreferrer" className="bg-white border border-border-light-card p-6 rounded-xl shadow-card hover:border-[#00AACC] focus-visible:outline-2 focus-visible:outline-[#00AACC] transition-colors">
                 <BookOpen className="w-5 h-5 text-[#005287] mb-3" />
                 <h3 className="font-sans font-bold text-base text-light-hi mb-2">IWDemy Digital Labs</h3>
-                <p className="font-body text-sm text-light-md">Lanjutkan pembelajaran digital di portal IDL.</p>
+                <p className="font-body text-sm text-light-md">Tersedia untuk semua tier. Lanjutkan pembelajaran digital di IDL.</p>
                 <span className="mt-4 inline-flex items-center gap-2 font-body text-sm font-bold text-[#005287]">Buka portal di tab baru <ExternalLink className="w-4 h-4" /></span>
               </a>
-            )}
             <div className="bg-white border border-border-light-card p-6 rounded-xl shadow-card">
               <Calendar className="w-5 h-5 text-[#005287] mb-3" />
               <h3 className="font-sans font-bold text-base text-light-hi mb-2">Jadwal Sesi Tatap Muka</h3>
@@ -1593,13 +1205,13 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
         {selectedModule && !selectedHtmlData && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg-dark/80 backdrop-blur-sm">
             <div role="dialog" aria-modal="true" aria-label={`Materi ${selectedModule.title}`} className="bg-bg-dark border border-white/20 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-hidden p-6 md:p-8 relative z-10 flex flex-col">
-              <p className="font-body text-sm text-gold mb-2 shrink-0">Modul {Number(selectedModule.id)} dari 7</p>
+              <p className="font-body text-sm text-gold mb-2 shrink-0">Daftar materi</p>
               <h3 className="text-2xl font-bold font-sans text-dark-hi mb-1">{selectedModule.title}</h3>
               <p className="text-dark-md font-body mb-6">{moduleDescriptions[selectedModule.id] || selectedModule.subtitle}</p>
               {selectedModule.materialLoadFailed && (
                 <p role="status" className="font-body text-sm text-gold mb-4">Sebagian materi belum dapat dimuat. Kembali ke modul, lalu coba buka lagi.</p>
               )}
-              
+
               <p className="font-body text-sm text-dark-md mb-4">Pilih materi yang ingin kamu pelajari.</p>
               <div className="space-y-3 mb-8 overflow-y-auto min-h-0">
                 {selectedModule.materials.map((mat: any, idx: number) => (
@@ -1703,7 +1315,6 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   />
                 )}
               </div>
-
               {/* Bridge CTA to Prompt Studio (Per Spec v2) */}
               {canOpenPromptDatabase && (
                 <div className="border-t border-border-dark-subtle/30 bg-bg-dark px-5 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
@@ -1848,7 +1459,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
         ) : activeTab === 'prompts' ? (
           canOpenPromptDatabase
             ? <PromptDatabaseView initialMenu={promptStudioInitialMenu} onBack={() => { setActiveTab('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
-            : <div className="p-12 text-center font-body text-light-md">Akses Prompt Database tidak tersedia untuk akun ini.</div>
+            : <div className="p-12 text-center font-body text-light-md">Akses Prompt Studio tidak tersedia untuk akun ini.</div>
         ) : activeTab === 'admin' ? (
           <AdminView />
         ) : (
@@ -1859,10 +1470,11 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   );
 }
 
-export default function App() {
+function Application() {
   const [user, setUser] = useState<User | null>(null);
   const [authInitialized, setAuthInitialized] = useState(false);
   const [forcePasswordReset, setForcePasswordReset] = useState(false);
+  const dailySession = useDailySession(user);
   const requestedArtifact = new URLSearchParams(window.location.search).get('artifact');
 
   useEffect(() => {
@@ -1877,8 +1489,10 @@ export default function App() {
 
     const unsubscribe = onAuthUserChange((currentUser, event) => {
       if (event === 'PASSWORD_RECOVERY') {
+        if (currentUser) markDailySession(currentUser.id);
         setForcePasswordReset(true);
       }
+      if (!currentUser) setForcePasswordReset(false);
       setUser(currentUser);
       setAuthInitialized(true);
     });
@@ -1890,9 +1504,28 @@ export default function App() {
     return <div className="min-h-screen bg-bg-dark flex items-center justify-center text-gold font-mono uppercase tracking-widest text-xs font-bold">Memuat...</div>;
   }
 
+  if (user && dailySession.expired) {
+    if (dailySession.error) return <LoginView notice={dailySession.error} />;
+    return <div role="status" className="min-h-screen bg-[#001E3C] flex items-center justify-center p-6 font-body text-[#F7F9FC]">Hari telah berganti. Mengeluarkan akun…</div>;
+  }
+
   return (
     <>
-      {!user ? <LoginView /> : isKnowledgeArtifactId(requestedArtifact) ? <KnowledgeArtifactPortal initialId={requestedArtifact} /> : <DashboardView user={user} forcePasswordReset={forcePasswordReset} />}
+      {!user ? <LoginView notice={dailySession.notice} /> : isKnowledgeArtifactId(requestedArtifact) ? <KnowledgeArtifactPortal initialId={requestedArtifact} /> : <DashboardView user={user} forcePasswordReset={forcePasswordReset} />}
     </>
   );
+}
+
+export default function App() {
+  const [loginPreview, setLoginPreview] = useState(() => import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview') === 'login');
+  if (loginPreview) return <LoginView onAuthenticated={() => {
+    const destination = new URL(window.location.href);
+    destination.searchParams.delete('preview');
+    window.history.replaceState(window.history.state, '', destination.pathname + destination.search + destination.hash);
+    setLoginPreview(false);
+  }} />;
+  if (import.meta.env.DEV && new URLSearchParams(window.location.search).get('preview') === 'member-access') {
+    return <main className="min-h-screen bg-[#F7F9FC] p-4 md:p-10"><div className="max-w-5xl mx-auto"><a href="/" className="inline-block font-body text-[#005287] mb-6">← Kembali ke portal</a><LocalMemberListPreview /></div></main>;
+  }
+  return <Application />;
 }
