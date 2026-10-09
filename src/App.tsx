@@ -39,11 +39,6 @@ import level3Day1Html from './Level 3/Level 3 day 1.html?raw';
 import level3Day1_1Html from './Level 3/Level 3 day 1.1.html?raw';
 import twcHtml1 from '../ThinkingWithClaude/setup.html?raw';
 import twcHtml2 from '../ThinkingWithClaude/thinking.html?raw';
-import aptAssessmentHtml from './Strategize/apt-assessment.html?raw';
-import responsibleAiUntukPemimpinHtml from '../materi/Strategize/responsible-ai-untuk-pemimpin-v0.html?raw';
-import petaUsecaseAi2026Html from '../materi/Strategize/peta-usecase-ai-2026-v0.html?raw';
-import formatDataUntukAiHtml from '../materi/Strategize/Format-Data-untuk-AI-v0.html?raw';
-import aifWithClaudeHtml from '../materi/Strategize/aif-with-claude-v0.html?raw';
 import aiKnowledgeOperatingSystemHtml from '../materi/ACT/AI_Knowledge_Operating_System_v0.html?raw';
 import SinadPortal from './components/SinadPortal';
 import PromptDatabaseView from './components/PromptDatabaseView';
@@ -97,7 +92,8 @@ function Button({ children, variant = 'primary', className, ...props }: ButtonHT
 }
 
 const defaultModuleMaterials: Record<string, any[]> = {
-  '01': [{ title: "Thinking and Working with Claude", htmls: [{ title: "Thinking and Working with Claude", content: aifWithClaudeHtml }] }, { title: "Responsible, Ethic dan Safety", htmls: [{ title: "Responsible AI untuk Pemimpin", content: responsibleAiUntukPemimpinHtml }] }, { title: "Asesmen dan Peta Kerja AI", htmls: [{ title: "Materi Visual", images: [] }, { title: "APT Assessment", content: aptAssessmentHtml }, { title: "Peta Use Case AI 2026", content: petaUsecaseAi2026Html }, { title: "Format Data untuk AI", content: formatDataUntukAiHtml }] }],
+  // Strategize is managed in Supabase; preserve the old source files for recovery.
+  '01': [],
   '02': [{ title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }, { title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }],
   '03': [{ day: "Day 1", title: "Materi Level 3 Day 1", htmls: [{ title: "AI Skills Manual", content: level3Day1Html }, { title: "CIS Prompting", content: level3Day1_1Html }] }],
   '04': [{ day: "Materi", title: "Thinking with Claude", htmls: [{ title: "Thinking w/ Claude AI", content: twcHtml2 }, { title: "Setup Claude", content: twcHtml1 }] }],

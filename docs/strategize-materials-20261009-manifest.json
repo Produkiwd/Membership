@@ -1,0 +1,50 @@
+[
+  {
+    "title": "01 AI Readiness",
+    "file": "01 AI Readiness.html",
+    "bytes": 37323,
+    "sha256": "b5ba4a6535ad6afac3be28d8f52b63fa50e08dcde53b789b693eb440316501b6",
+    "storage_path": "strategize/20261009/01-ai-readiness.html",
+    "id": "b24cc6da-5850-59d3-a320-279e8001ca5e"
+  },
+  {
+    "title": "02 Token - Data x Biaya",
+    "file": "02 Token - Data x Biaya.html",
+    "bytes": 98929,
+    "sha256": "8024a9632d6073bc2dfa7b96a0857a2647380b1ab6fd70602c1e14c89cbae612",
+    "storage_path": "strategize/20261009/02-token-data-biaya.html",
+    "id": "662b29d2-9781-5086-93f3-b80079b633cf"
+  },
+  {
+    "title": "03 AI Usecase",
+    "file": "03 AI Usecase.html",
+    "bytes": 459604,
+    "sha256": "e3a8fbba8cdec830da3e60f5dd88ebefa2d274c6cea3da344b1a8ee7ba47388d",
+    "storage_path": "strategize/20261009/03-ai-usecase.html",
+    "id": "b05d082d-8bba-5bc9-93d4-a65795b74ade"
+  },
+  {
+    "title": "04 Responsible AI",
+    "file": "04 Responsible AI.html",
+    "bytes": 144427,
+    "sha256": "e4009081dd4a7a3fb5d7fa832595c495686e0ec013ea2884801bffa9302497f2",
+    "storage_path": "strategize/20261009/04-responsible-ai.html",
+    "id": "2dcc1dff-2d89-5105-ac2e-578698006feb"
+  },
+  {
+    "title": "05 Claude - Thinking",
+    "file": "05 Claude - Thinking.html",
+    "bytes": 365124,
+    "sha256": "b2050ea5d2905feaced6825e7b47ce12abfe86835200ab05a7c8331283310876",
+    "storage_path": "strategize/20261009/05-claude-thinking.html",
+    "id": "a967577f-4fd8-543c-83da-0322ba26f480"
+  },
+  {
+    "title": "06 Materi Visual Strategize",
+    "file": "06 Materi Visual Strategize.pdf",
+    "bytes": 9032836,
+    "sha256": "00e1b103e6fa123f4932691f68b2471a4efdff5ab470b560cc8a030985dd4b65",
+    "storage_path": "strategize/20261009/06-materi-visual-strategize.pdf",
+    "id": "7c62dd59-170e-5cc8-9a84-9d98221fb3a7"
+  }
+]
