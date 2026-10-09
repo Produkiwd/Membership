@@ -478,6 +478,8 @@ function MateriView() {
   const [materiList, setMateriList] = useState<Materi[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [materiError, setMateriError] = useState('');
+  const [previewBuiltin, setPreviewBuiltin] = useState<string | null>(null);
+  const builtinMaterials = buildArtifactList(selectedModule, defaultModuleMaterials[selectedModule] || [], []);
 
   const MODULES = [
     { id: '01', name: 'Strategize' },
@@ -602,7 +604,7 @@ function MateriView() {
           </div>
           <select 
             value={selectedModule}
-            onChange={(e) => setSelectedModule(e.target.value)}
+            onChange={(e) => { setSelectedModule(e.target.value); setPreviewBuiltin(null); }}
             className="w-full sm:w-auto px-4 py-2 border border-border-light-subtle rounded text-light-hi focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted bg-white min-w-[200px]"
           >
             {MODULES.map(m => (
@@ -659,9 +661,32 @@ function MateriView() {
         {isLoading && materiList.length === 0 && (
           <p className="mt-8 font-body text-sm text-light-md">Memuat materi dari Supabase...</p>
         )}
-        {materiList.length > 0 && (
+        {(builtinMaterials.length > 0 || materiList.length > 0) && (
           <div className="mt-8 space-y-3">
             <h4 className="font-sans font-bold text-sm text-light-hi tracking-eyebrow uppercase mb-4 border-b border-border-light-subtle pb-2">Daftar Materi</h4>
+            {builtinMaterials.map(material => (
+              <div key={material.id} className="p-4 border border-border-light-subtle rounded-lg bg-bg-light">
+                <div className="flex justify-between items-center gap-4">
+                  <div>
+                    <div className="font-sans font-bold text-light-hi text-sm">{material.title}</div>
+                    <p className="font-body text-xs text-light-md mt-1">Materi bawaan situs</p>
+                  </div>
+                  {material.url ? (
+                    <a href={material.url} target="_blank" rel="noopener noreferrer" className="font-body text-sm text-light-md hover:underline">Lihat materi</a>
+                  ) : (
+                    <button type="button" onClick={() => setPreviewBuiltin(current => current === material.id ? null : material.id)} aria-expanded={previewBuiltin === material.id} className="font-body text-sm text-light-md hover:underline">
+                      {previewBuiltin === material.id ? 'Tutup pratinjau' : 'Lihat materi'}
+                    </button>
+                  )}
+                </div>
+                {previewBuiltin === material.id && material.content && (
+                  <iframe srcDoc={material.content} onLoad={keepEmbeddedHashNavigationInsideFrame} title={material.title} className="w-full h-[65vh] border border-border-light-subtle rounded-lg mt-4 bg-white" />
+                )}
+                {previewBuiltin === material.id && material.images?.map((image, index) => (
+                  <img key={image} src={image} alt={`${material.title} ${index + 1}`} className="max-w-full rounded-lg mt-4" />
+                ))}
+              </div>
+            ))}
             {materiList.map((m) => (
               <div key={m.id} className="flex justify-between items-center p-4 border border-border-light-subtle rounded-lg bg-bg-light">
                  <div>
