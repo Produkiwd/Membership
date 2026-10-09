@@ -1176,11 +1176,17 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF How To</span>
               <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">AI Operating System</h3>
             </button>
-            {/* Selling Idea With AI — content to be added later */}
-            <div aria-label="Selling Idea With AI — materi belum tersedia" className="relative border border-[#001E3C]/10 bg-[#00AACC] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end">
+            {/* Selling Idea With AI */}
+            <button
+              type="button"
+              disabled={!canAccessModule('09') || loadingModule !== null}
+              aria-label={'Selling Idea With AI' + (canAccessModule('09') ? '' : ' — akses terkunci')}
+              className="relative text-left border border-[#001E3C]/10 bg-[#00AACC] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
+              onClick={() => handleModuleClick("09", "Selling Idea With AI", "", [])}
+            >
               <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF How To</span>
               <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Selling Idea With AI</h3>
-            </div>
+            </button>
           </div>
         </div>
 
