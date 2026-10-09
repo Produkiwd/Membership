@@ -1193,7 +1193,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
         <section aria-label="Portal dan jadwal">
           <h2 className="font-sans font-bold text-xl text-light-hi mb-5">Portal dan Jadwal</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <a href="https://idl.iwdemy.com" target="_blank" rel="noopener noreferrer" className="bg-white border border-border-light-card p-6 rounded-xl shadow-card hover:border-[#00AACC] focus-visible:outline-2 focus-visible:outline-[#00AACC] transition-colors">
+              <a href="https://idl.iwdemy.com" onClick={handleIdlClick} target="_blank" rel="noopener noreferrer" className="bg-white border border-border-light-card p-6 rounded-xl shadow-card hover:border-[#00AACC] focus-visible:outline-2 focus-visible:outline-[#00AACC] transition-colors">
                 <BookOpen className="w-5 h-5 text-[#005287] mb-3" />
                 <h3 className="font-sans font-bold text-base text-light-hi mb-2">IWDemy Digital Labs</h3>
                 <p className="font-body text-sm text-light-md">Tersedia untuk semua tier. Lanjutkan pembelajaran digital di IDL.</p>
