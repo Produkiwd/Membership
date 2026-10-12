@@ -7,7 +7,7 @@ import GroupBatchPicker from './components/GroupBatchPicker';
 import LocalNewMemberTier from './components/LocalNewMemberTier';
 import type { LocalAccessConfig } from './components/MemberAccessPreview';
 import LocalMemberAccessRow, { LocalMemberListPreview } from './components/LocalMemberAccessRow';
-import { Monitor, Sparkles, BookOpen, Calendar, ChevronRight, ChevronLeft, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2, ExternalLink } from 'lucide-react';
+import { Monitor, BookOpen, Calendar, ChevronRight, ChevronLeft, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2, ExternalLink } from 'lucide-react';
 import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent, type ChangeEvent, type SyntheticEvent } from 'react';
 import { cn } from './lib/utils';
 import { filterMembers } from './lib/memberSearch';
@@ -1318,48 +1318,6 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                   />
                 )}
               </div>
-              {/* Bridge CTA to Prompt Studio (Per Spec v2) */}
-              {canOpenPromptDatabase && (
-                <div className="border-t border-border-dark-subtle/30 bg-bg-dark px-5 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-left">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gold-muted/10 border border-gold-muted/30 flex items-center justify-center shrink-0">
-                      <Sparkles className="w-4 h-4 text-gold-muted" />
-                    </div>
-                    <div>
-                      <div className="text-[10px] font-mono font-bold uppercase tracking-wider text-gold-muted">
-                        Praktik &amp; Evaluasi Mandiri
-                      </div>
-                      <div className="text-xs sm:text-sm font-sans font-semibold text-dark-hi">
-                        Selesai membaca? Uji pemahamanmu di Prompt Studio.
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <button
-                      onClick={() => {
-                        setSelectedHtmlData(null);
-                        setIsFullscreen(false);
-                        openPromptDatabase('exercise');
-                      }}
-                      className="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg bg-[#00AACC] hover:bg-[#005287] text-white font-sans font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm cursor-pointer"
-                    >
-                      <BookOpen className="w-3.5 h-3.5" />
-                      <span>Mulai Latihan Kasus</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedHtmlData(null);
-                        setIsFullscreen(false);
-                        openPromptDatabase('prompt-studio');
-                      }}
-                      className="flex-1 sm:flex-initial px-3.5 py-2 rounded-lg bg-bg-dark hover:bg-[#005287] text-dark-hi font-sans font-semibold text-xs flex items-center justify-center gap-1.5 transition-all border border-border-dark-subtle/40 cursor-pointer"
-                    >
-                      <span>Buat Formulamu Sendiri</span>
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}
