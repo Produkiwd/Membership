@@ -9,7 +9,7 @@ import {
   Sparkles, BookOpen, Library, ArrowRight, Layers, 
   Target, Shield, TrendingUp, Share2, 
   Plus, RefreshCw, Eye, Award, BookmarkCheck, 
-  FileEdit, Menu, Home, CheckCircle2, SlidersHorizontal, Dumbbell,
+  FileEdit, Menu, Home, CheckCircle2, SlidersHorizontal,
   Lightbulb, Brain, Compass, MessageSquare, Zap, AlertTriangle, Trash2
 } from 'lucide-react';
 export interface Prompt { id: string; title: string; description: string; content: string; category: string; }
@@ -522,115 +522,37 @@ What insights does this analysis provide?`
   }
 ];
 
-// Interactive Exercises Data Interface
-export interface ExerciseCase {
-  id: string;
-  title: string;
-  department: string;
-  scenario: string;
-  poorPrompt: string;
-  hints: string[];
-  benchmarkSolution: string;
-  whyEffective: string;
-  comparativeAnalysis: {
-    adHocLimit: string;
-    actionsAdvantage: string;
-  };
-  actionsBreakdown: {
-    letter: string;
-    label: string;
-    detail: string;
-  }[];
-}
-
-// Enriched Interactive Exercises Data
-const exercisesData: ExerciseCase[] = [
+// Exercise: ready-to-use prompts, same content as Prompt Database v2.0.
+const exercisePromptsData: { title: string; desc: string; prompt: string }[] = [
   {
-    id: "ex-1",
-    title: "Studi Kasus 1: Negosiasi Kontrak Vendor",
-    department: "Finance",
-    scenario: "Vendor perangkat lunak menaikkan biaya lisensi tahunan sebesar 12%. Dewan direksi meminta Anda menegosiasikan agar kenaikan maksimal 3% atau ditukar dengan SLA tambahan.",
-    poorPrompt: "Tolong buatkan email ke vendor agar jangan naikkan harga 12%, kami minta 3% saja ya.",
-    hints: ["Gunakan A.C.T.I.O.N.S.", "Masukkan trade-off durasi kontrak", "Terapkan format Minto SCQA"],
-    benchmarkSolution: `[A - Actor] Senior Procurement Director ke Account Executive Vendor Software Enterprise
-[C - Context] Notifikasi kenaikan lisensi 12% sepihak, batas pagu anggaran korporasi maksimal 3%
-[T - Task] Susun surat balasan negosiasi yang menolak kenaikan 12% dan menawarkan batas 3% yang ditukar dengan komitmen kontrak perpanjangan 3 tahun (multi-year)
-[I - Impact] Menjaga kontinuitas operasional sistem ERP tanpa deviasi pagu belanja operasional (OPEX)
-[O - Output] Surat formal korporat 3 paragraf Minto SCQA + klausul addendum SLA
-[N - Nuance] Tegas, profesional, menghargai kemitraan historis 3 tahun, solutif win-win
-[S - Structure] Situasi Kemitraan → Komplikasi Anggaran → Solusi Trade-off Komitmen 3 Tahun`,
-    whyEffective: "Formula ini menggeser dinamika negosiasi dari 'konflik harga zero-sum' menjadi 'kolaborasi nilai jangka panjang'. Dengan menetapkan peran Senior Procurement Director, AI memposisikan komunikasi secara profesional dan terukur. Penyebutan batas kenaikan 3% disertai counter-offer komitmen multi-year 3 tahun memberi ruang gerak (leverage) bagi vendor tanpa melanggar batasan anggaran direksi. Format Minto SCQA memastikan eksekutif vendor dapat langsung membaca situasi dan opsi dalam 60 detik tanpa retorika defensif.",
-    comparativeAnalysis: {
-      adHocLimit: "Prompt ad-hoc sekadar menolak harga ('jangan naikkan 12%') tanpa landasan bisnis dan tanpa alternatif kompromi. Menghasilkan email kaku yang mudah ditolak oleh account director vendor.",
-      actionsAdvantage: "Memberikan anchor target 3%, trade-off perpanjangan kontrak multi-year, serta menyajikan 2 opsi win-win terstruktur menggunakan standar piramida Minto SCQA."
-    },
-    actionsBreakdown: [
-      { letter: "A", label: "Actor", detail: "Senior Procurement Director ke Account Executive Vendor" },
-      { letter: "C", label: "Context", detail: "Kemitraan 3 tahun sukses, restriksi budget korporat 3%" },
-      { letter: "T", label: "Task", detail: "Negosiasi cap 3% dengan opsi kompensasi multi-year contract" },
-      { letter: "I", label: "Impact", detail: "Mencegah pembengkakan OPEX tanpa memutus hubungan kerja sama" },
-      { letter: "O", label: "Output", detail: "Format Minto SCQA, maksimal 3 paragraf, 2 opsi solusi" },
-      { letter: "N", label: "Nuance", detail: "Tegas solutif, menghormati relasi historis, zero defensiveness" },
-      { letter: "S", label: "Structure", detail: "Situation → Complication → Question → Proposed Options" }
-    ]
+    "title": "Image Enhancement Prompt",
+    "desc": "Enhance the portrait while strictly preserving the subject's identity.",
+    "prompt": "Enhance the portrait while strictly preserving the subject's identity with accurate facial geometry. Do not change their expression or face shape. Only allow subtle feature cleanup without altering who they are. Keep the exact same background from the reference image. No replacements, no changes, no new objects.\n\nThe image must be recreated as if it was shot on a Sony A1, using an 85mm f1.4 lens, at f1.6, ISO 100, 1/200 shutter speed, cinematic shallow depth of field, perfect facial focus, and an editorial-neutral color profile.\n\nLighting must match the exact direction of the reference photo. Upgrade the lighting into a cinematic style: soft directional light, warm highlights, cool shadows. Maintain real skin texture [not plastic], and subtle film grain. Render in 4K resolution."
   },
   {
-    id: "ex-2",
-    title: "Studi Kasus 2: Memo Restrukturisasi Internal",
-    department: "HR",
-    scenario: "Divisi operasional akan digabungkan dengan tim digital. Anda harus mengumumkan perubahan peran tanpa memicu kecemasan PHK di kalangan karyawan.",
-    poorPrompt: "Buatkan memo pengumuman restrukturisasi divisi untuk karyawan kantor.",
-    hints: ["Terapkan prinsip Psychological Safety", "Jelaskan apa yang berubah vs apa yang TETAP STABIL", "Sediakan jadwal dialog terbuka"],
-    benchmarkSolution: `[A - Actor] Chief People Officer bersama COO ke Seluruh Karyawan Divisi Operasi & Digital
-[C - Context] Penyelarasan divisi operasional ke dalam agile squad baru untuk efisiensi alur kerja tanpa ada pemutusan hubungan kerja (Zero Layoff)
-[T - Task] Tuliskan memo kepemimpinan yang menjelaskan latar belakang strategis perubahan, jaminan stabilitas pekerjaan, dan jalur program reskilling
-[I - Impact] Menghilangkan kecemasan psikologis, mempertahankan retensi talenta kunci, dan memicu antusiasme adaptasi
-[O - Output] Memo empati 400 kata + Matriks Perubahan Peran + Jadwal Townhall Q&A terbuka
-[N - Nuance] Empatik, transparan, apresiatif atas kontribusi masa lalu, menenangkan
-[S - Structure] Narasi Visi Masa Depan → Klarifikasi Hal yang Tetap Stabil → Garis Besar Perubahan → FAQ Terbuka`,
-    whyEffective: "Dalam restrukturisasi tim, risiko terbesar adalah eksodus talenta dan kepanikan rumor PHK akibat ambiguitas informasi. Formula fasilitator memanfaatkan empati kepemimpinan tingkat CPO/COO, memisahkan secara eksplisit antara apa yang BERUBAH vs apa yang TETAP STABIL (anchor psikologis). Lampiran FAQ dan sesi townhall langsung menutup ruang spekulasi, sekaligus menegaskan jaminan reskilling tanpa pemutusan hubungan kerja.",
-    comparativeAnalysis: {
-      adHocLimit: "Prompt ad-hoc menghasilkan memo administratif birokratis yang dingin. Karyawan akan fokus membaca 'antara baris' dan mencurigai agenda PHK tersembunyi.",
-      actionsAdvantage: "Membangun Psychological Safety melalui transparansi alasan strategis, penegasan komitmen zero-layoff, dan jalur dukungan reskilling yang konkret."
-    },
-    actionsBreakdown: [
-      { letter: "A", label: "Actor", detail: "Chief People Officer & COO ke Seluruh Karyawan" },
-      { letter: "C", label: "Context", detail: "Transisi organisasi menuju squad lincah tanpa pemutusan hubungan kerja" },
-      { letter: "T", label: "Task", detail: "Pengumuman perubahan struktur tim dan jalur program reskilling" },
-      { letter: "I", label: "Impact", detail: "Menjaga ketenangan emosional dan stabilitas kinerja tim" },
-      { letter: "O", label: "Output", detail: "Struktur empati kepemimpinan, FAQ terlampir, jadwal sesi townhall" },
-      { letter: "N", label: "Nuance", detail: "Transparan, suportif, menghargai kontribusi lama, menenangkan" },
-      { letter: "S", label: "Structure", detail: "Konteks Transformasi → Jaminan Stabilitas → Detail Peran → Dialog" }
-    ]
+    "title": "Minimalist Infographic Prompt",
+    "desc": "Create a high-end, minimalist corporate infographic layout.",
+    "prompt": "Create a high-end, minimalist corporate infographic layout. Visual Style: Premium 3D isometric design, highly detailed, clean, and forward-thinking. \n\nRendered with Unreal Engine 5 and Octane Render aesthetics, cinematic lighting, soft shadows, and a subtle depth of field equivalent to a Sony A1 85mm lens. Color Palette: Clean White and Silver base, with strategic 3D elements highlighted in Yellow Mustard (#FCB528) and Maroon (#660000). Use Forest Green and Navy Blue only for minor secondary data nodes. \n\nLayout: Asymmetrical composition. Leave ample negative space (white space) on the top and left side for text insertion. Position the main 3D visual representation on the bottom right. Design Elements: Include layout placeholders indicating Montserrat for modern bold headings and Satoshi/Inter for body text. Include a sleek footer placeholder at the bottom reading 'Insight Web Academy, 2026'. Overall aesthetic: Maximum clarity, highly professional, and uncluttered."
   },
   {
-    id: "ex-3",
-    title: "Studi Kasus 3: Sintesis Risiko Laporan Bisnis",
-    department: "Strategy",
-    scenario: "Anda menerima laporan 70 halaman tentang rencana ekspansi pasar baru. Direksi ingin mengetahui titik blind-spot yang sengaja dipercantik oleh tim penyusun.",
-    poorPrompt: "Ringkas laporan ekspansi pasar ini dan apa kesimpulannya.",
-    hints: ["Gunakan pendekatan Devil's Advocate", "Dekonstruksi premis paling rapuh", "Buat matriks keputusan 3 skenario"],
-    benchmarkSolution: `[A - Actor] Senior Strategic Risk Auditor & Investment Committee Advisor
-[C - Context] Laporan ekspansi pasar 70 halaman dengan indikasi optimisme berlebih pada asumsi penetrasi pasar
-[T - Task] Dekonstruksi laporan dengan First-Principles: (1) Uji 3 asumsi pertumbuhan paling rapuh, (2) Sebutkan skenario terburuk (Worst Case), (3) Buat Decision Matrix Opsi Konservatif vs Agresif
-[I - Impact] Mencegah kesalahan alokasi belanja modal (CAPEX) fatal oleh Dewan Direksi
-[O - Output] Executive Risk Memo 1 halaman + Decision Matrix Konservatif vs Agresif
-[N - Nuance] Kritis objektif, tanpa kompromi, analitis berbasis bukti angka riil
-[S - Structure] Dekonstruksi Asumsi Rapuh → Simulasi Worst Case → Matriks Rekomendasi Mitigasi`,
-    whyEffective: "Laporan bisnis 70 halaman sering kali disusun dengan bias konfirmasi (hanya menonjolkan data optimis). Dengan memberi instruksi spesifik kepada AI untuk bertindak sebagai Senior Strategic Risk Auditor independen dan menerapkan dekonstruksi First-Principles, model dipaksa melucuti narasi persuasif dan langsung menguji titik-titik asumsi paling rapuh. Matriks keputusan 3 skenario memberikan direksi peta jalan mitigasi yang objektif.",
-    comparativeAnalysis: {
-      adHocLimit: "Prompt ad-hoc ('ringkas laporan ini') hanya mengulang ringkasan eksekutif yang sudah dipercantik (cherry-picked) oleh penyusun laporan tanpa daya kritis.",
-      actionsAdvantage: "Membedah laporan dengan lensa Devil's Advocate: menguji asumsi dasar, memodelkan skenario terburuk (Worst Case), dan menghasilkan Decision Matrix komparatif."
-    },
-    actionsBreakdown: [
-      { letter: "A", label: "Actor", detail: "Senior Strategic Risk Auditor & Investment Committee Advisor" },
-      { letter: "C", label: "Context", detail: "Laporan ekspansi pasar 70 halaman dengan bias optimisme berlebih" },
-      { letter: "T", label: "Task", detail: "Dekonstruksi 3 asumsi pertumbuhan paling rapuh dengan First-Principles" },
-      { letter: "I", label: "Impact", detail: "Mencegah risiko keputusan alokasi modal bernilai miliaran rupiah" },
-      { letter: "O", label: "Output", detail: "Executive Risk Memo 1 halaman + Matriks Keputusan 3 Skenario" },
-      { letter: "N", label: "Nuance", detail: "Objektif, skeptis ilmiah, tanpa toleransi pada klaim tanpa data" },
-      { letter: "S", label: "Structure", detail: "Audit Premis Dasar → Kalkulasi Skenario Downside → Opsi Aksi" }
-    ]
+    "title": "Flow Cinematic Director",
+    "desc": "Sutradara Film Pemenang Penghargaan & Art Director Brand Mewah.",
+    "prompt": "# SYSTEM INSTRUCTION: FLOW CINEMATIC DIRECTOR & ART DESIGNER\n\n## 1. ACTOR & AUDIENCE\n* **Actor (Peran AI):** Anda adalah duet elit yang terdiri dari **Sutradara Film Pemenang Penghargaan** dan **Art Director / Production Designer Brand Mewah**. Anda memiliki pemahaman mendalam tentang teori warna, psikologi visual, komposisi desain, serta aspek teknis sinematografi (jenis lensa, pencahayaan, gerakan kamera, dan kontinuitas adegan).\n* **Audience (Target Pembaca):** Prompt yang Anda hasilkan akan digunakan langsung oleh kreator konten, produser video, dan tim pemasaran pada generator gambar AI (seperti ImageFX/Nano Banana/Imagen 3) dan generator video AI (seperti Google Flow/Veo 3). Hasil akhir instruksi harus sangat taktis, siap salin-tempel (copy-pasteable), dan profesional.\n\n## 2. CONTEXT & CONDITIONS\n* **Latar Belakang Operasional:** Pengguna ingin membuat video AI berdurasi standar 8 detik menggunakan metode **Image-to-Video** pada **Google Flow**. Alur kerja ini membutuhkan tiga elemen krusial:\n  1. **Frame Awal (Initial Frame):** Gambar berkualitas tinggi sebagai titik awal video.\n  2. **Frame Akhir (End Frame):** Gambar berkualitas tinggi sebagai titik akhir video yang tetap konsisten secara aset, pencahayaan, dan subjek.\n  3. **Prompt Video (Motion Path):** Deskripsi gerakan kamera, pencahayaan, dan aksi fisik untuk menjembatani Frame Awal ke Frame Akhir selama 8 detik.\n* **Kondisi Brand & Gaya Bahasa:** Pengguna mungkin melampirkan berkas panduan merek (brand guidelines), dokumen Tone of Voice, palet warna HEX, atau contoh teks pemasaran. Anda **wajib** menganalisis berkas tersebut terlebih dahulu untuk mengekstrak elemen estetika merek (warna dominan, suasana emosional, batasan gaya visual) sebelum memformulasikan prompt.\n\n## 3. TARGET & TASK\nTugas utama Anda adalah menerjemahkan ide sederhana dari pengguna menjadi **3 buah prompt terpisah** yang sangat detail dan profesional:\n1. **[PROMPT 1] - FRAME AWAL (Initial Image Prompt):** Prompt pembuatan gambar diam untuk frame pembuka video.\n2. **[PROMPT 2] - FRAME AKHIR (End Image Prompt):** Prompt pembuatan gambar diam untuk frame penutup video, mempertahankan kontinuitas objek dan latar, namun menunjukkan perubahan posisi/waktu/kondisi setelah 8 detik.\n3. **[PROMPT 3] - PROMPT VIDEO GOOGLE FLOW (8-Second Motion):** Prompt video yang mendiktekan dinamika pergerakan kamera, pergeseran pencahayaan, kecepatan gerak subjek, dan fisika transisi yang menjembatani kedua frame tersebut.\n\n## 4. INTENTION & IMPACT\n* **Tujuan utama:** Menghilangkan proses tebak-tebakan (trial-and-error) dalam pembuatan video AI, memastikan konsistensi aset yang tinggi, serta menyelaraskan setiap klip video dengan identitas merek pengguna secara presisi.\n* **Dampak Visual:** Hasil video yang dihasilkan harus terasa premium, dramatis, memiliki kedalaman ruang (depth of field) yang indah, dan tampak seolah-olah diproduksi menggunakan kamera bioskop berbiaya tinggi (seperti ARRI Alexa LF atau RED V-Raptor).\n\n## 5. OUTPUT & ORGANIZATION\nSetiap respons dari Anda harus memiliki struktur organisasi dokumen sebagai berikut:\n---\n### 🎬 ANALISIS SENI & VISI SUTRADARA\n(Tuliskan analisis singkat 2-3 kalimat mengenai pendekatan visual yang Anda ambil berdasarkan brief pengguna dan dokumen brand yang terlampir. Jelaskan mengapa palet warna, jenis lensa, dan gaya pencahayaan ini dipilih).\n\n### 🖼️ [PROMPT 1] FRAME AWAL (Initial Frame - Image Generation)\n[Salin dan Tempel Prompt Gambar Awal di Sini]\n(Catatan Teknis untuk Desainer: Jelaskan secara singkat lensa, framing, dan pencahayaan yang digunakan).\n\n### 🖼️ [PROMPT 2] FRAME AKHIR (End Frame - Image Generation)\n[Salin dan Tempel Prompt Gambar Akhir di Sini]\n(Catatan Teknis Kontinuitas: Jelaskan apa yang berubah dari Frame Awal untuk menjaga konsistensi).\n\n### 🎥 [PROMPT 3] PROMPT VIDEO GOOGLE FLOW (8-Second Motion Path)\n[Salin dan Tempel Prompt Gerakan Video 8 Detik di Sini]\n(Catatan Sutradara: Jelaskan jenis pergerakan kamera dan durasi transisi).\n\n## 6. NEGATIVES & NON-NEGO (Pantangan Ketat)\n* **DILARANG Keras Menggunakan Kata Sifat Klise & Subjektif:** Jangan pernah menggunakan kata-kata seperti: beautiful, stunning, photorealistic, hyperrealistic, 4K, 8K, high quality, masterpiece, detailed. Kata-kata ini tidak dipahami dengan baik oleh AI model generasi gambar/video.\n* **Gunakan Istilah Teknis sebagai Gantinya:** Gunakan deskripsi fisik konkret, seperti: \"shot on ARRI Alexa LF, 35mm anamorphic lens, T1.8 aperture, cinematic color grading, natural volumetric dust motes, Rembrandt lighting, photorealistic textures of concrete and brushed steel, highly detailed micro-pores on skin.\"\n* **Jangan Melanggar Aturan Brand:** Jika dokumen merek menetapkan palet warna pastel, jangan pernah menghasilkan prompt dengan warna neon atau kontras tinggi yang gelap.\n* **Hindari Lompatan Gerakan yang Mustahil:** Perubahan dari Frame Awal ke Frame Akhir harus logis untuk diselesaikan dalam durasi 8 detik (misalnya, jika Frame Awal adalah mobil berhenti, Frame Akhir adalah mobil melaju kencang di jalan tol 100 meter di depan; jangan buat mobil tiba-tiba terbang ke luar angkasa).\n\n## 7. STEPS & SEQUENCING (Alur Proses Berpikir Anda)\nSaat pengguna memberikan ide atau melampirkan file, jalankan langkah kognitif berikut secara berurutan sebelum menulis jawaban:\n\n* **Langkah 1 (Analisis Berkas):** Ekstrak kata kunci estetika, warna dominan, batasan gaya visual, dan nilai emosional dari berkas panduan merek yang diunggah pengguna.\n* **Langkah 2 (Konseptualisasi Sutradara):** Tentukan sudut pandang kamera (framing seperti extreme close-up, medium wide, dll.), pilihan lensa (35mm anamorphic untuk sinematik lebar, 85mm untuk potret dramatis), dan jenis pencahayaan (golden hour, low-key lighting, chiaroscuro).\n* **Langkah 3 (Penyusunan Frame Awal):** Susun detail komposisi visual pembuka (subjek, latar belakang, atmosfer).\n* **Langkah 4 (Penyusunan Kontinuitas Frame Akhir):** Evaluasi apa yang terjadi setelah 8 detik. Ubah posisi subjek atau sudut kamera secara logis tanpa mengubah detail inti subjek dan lingkungan.\n* **Langkah 5 (Penyusunan Jembatan Gerak Video):** Deskripsikan gerakan kamera (slow push-in, tracking shot, pan right, crane down) serta interaksi fisik/cahaya selama rentang 8 detik tersebut.\n* **Langkah 6 (Filter Kualitas):** Lakukan sensor mandiri untuk memastikan tidak ada kata-kata terlarang (hyperrealistic, dsb.) yang lolos ke dalam prompt akhir."
+  },
+  {
+    "title": "Cinematic Video Prompt Architect",
+    "desc": "Film Director and AI Prompt Engineer specializing in generative AI video models.",
+    "prompt": "[ACTOR & AUDIENCE]\nYou are the \"Cinematic Video Prompt Architect,\" a world-class Film Director and AI Prompt Engineer specializing in generative AI video models (e.g., Sora, Kling, Runway Gen-3, Luma). Your primary audience is the creator providing raw concepts and attached brand guideline files. Your ultimate audience is the AI video generation engine that requires hyper-precise, sequential, and technically sound English prompts. Your tone is sharp, analytical, collaborative, and strictly detail-oriented.\n\n[CONTEXT & CONDITIONS]\nAI video generators have strict technical limitations: they generate clips in specific durations (usually 5, 8, 10, or 15 seconds), they hallucinate if instructions are abstract, and they suffer from visual glitches if too much action is crammed into a single short clip. Furthermore, commercial videos must strictly adhere to brand guidelines (colors, typography, mood) provided via attached files.\n\n[TARGET & TASK]\nYour core task is to transform rough user ideas into production-ready, highly detailed English text-to-video prompts. You must act as a production consultant: analyze any attached files for brand compliance, establish the exact duration constraints, and extract missing visual details before assembling the final prompt.\n\n[INTENTION & IMPACT]\nThe goal is to bridge the gap between human imagination, strict brand guidelines, and AI technical limits. The impact is a flawless, brand-compliant, cinematic video prompt that maps realistic physics and actions perfectly to the chosen clip duration, eliminating wasted generations.\n\n[OUTPUT & ORGANIZATION]\nYou must strictly divide your response into two distinct phases:\n\nPhase 1: Assessment & Clarification (The Director's Cut): If the user provides a rough idea or an attached file, DO NOT generate the prompt yet. Ask 3-4 sharp questions focusing on:\n- Duration & Sequencing: \"Is this for a single clip (e.g., 5, 8, 10, or 15 seconds) or part of a larger sequence? How many clips total?\"\n- Missing Visuals: Clarify clothing, lighting, camera movement, or specific subject details.\n- Brand Alignment: Acknowledge the attached file and confirm how the brand elements (colors, logos, vibe) should manifest in the scene.\n\nPhase 2: Prompt Execution: Once the user answers, output the final prompt as a dense, continuous narrative paragraph (no bullet points) organized by the \"5 Structural Pillars\" (see Steps).\n\n[NEGATIVES & NON-NEGO]\n- DO NOT generate a prompt immediately upon receiving a vague idea. You must ask for the intended clip duration first.\n- DO NOT cram 15 seconds of action into a 5-second prompt constraint. Match the action density to the duration.\n- DO NOT ignore attached files. You must extract and apply brand color palettes, moods, and styling rules to the prompt.\n- DO NOT use abstract emotional verbs/adjectives (e.g., \"she feels happy\"). Translate them into physical actions (e.g., \"she smiles warmly with relaxed shoulders\").\n- DO NOT use bullet points or lists in the final Phase 2 prompt output. It must be a cohesive block of text.\n\n[STEPS & SEQUENCING]\nExecute this cognitive sequence for every interaction:\n- Analyze Input & Assets: Read the user's idea and scan any attached files for brand rules.\n- Verify Constraints: Identify if the clip duration and physical actions are defined. If not, trigger Phase 1.\n- Construct the 5 Pillars: Once all data is gathered, assemble the final English prompt using this exact structural flow:\n  - [REFERENCE, SUBJECT & BRAND]: Extreme physical description. If an image is provided, mandate: \"Character features and likeness strictly match the provided reference photo.\" Integrate brand colors/clothing explicitly.\n  - [ENVIRONMENT & ATMOSPHERE]: Spatial layout, weather, time of day, and background elements aligned with the brand mood.\n  - [CHRONOLOGY OF ACTION]: Sequential physical choreography tailored precisely to fit the designated duration (e.g., 8 seconds).\n  - [CAMERA DIRECTION]: Camera movement (e.g., smooth tracking, handheld), lens type (e.g., extreme macro, anamorphic), and depth of field.\n  - [LIGHTING & TECHNICAL AESTHETICS]: Lighting setup, color grading, and render specs (e.g., 4K, ultra-realistic, cinematic, realistic clothing physics, commercial advertisement aesthetic)."
+  },
+  {
+    "title": "Gesture Puzzle HTML Game",
+    "desc": "Write a complete HTML game using MediaPipe Hands and Tailwind CSS.",
+    "prompt": "Act as an expert Front-end Engineer and Creative Technologist. Write a complete, single-file HTML game that uses Google MediaPipe Hands (via CDN) and Tailwind CSS (via CDN) to create a highly stable, premium, and fully responsive gesture-controlled calibration puzzle game.\nThe branding must be clean, modern, and generic (no specific company names, just generic terms like \"Gesture Calibration\" and \"Start Session\").\nTECHNICAL REQUIREMENTS & STACK\nLibraries & CDN:\nTailwind CSS: https://cdn.tailwindcss.com\nFonts: Google Fonts (Inter, Plus Jakarta Sans, JetBrains Mono)\nMediaPipe Hands & Camera Utils:\nhttps://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js\nhttps://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js\nhttps://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js\nhttps://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js\nDesign System & Aesthetics:\nBackground: Deep modern dark theme (#090D16).\nAccents: Emerald Green (#10B981) for Player 1, Royal Blue (#3B82F6) for Player 2.\nPremium UI/UX: Glassmorphism elements (backdrop-blur, semi-transparent borders), glowing button effects, smooth transitions.\nDynamic feedback: Visual pulses and neon glows for the hands skeleton and selected pieces.\nRobust Architecture & State Machine:\nStates:\n'MENU': Initial screen to select game mode and turn on the camera.\n'CALIBRATING': Calibration phase where players frame their face.\n'PLAYING': The puzzle-solving phase.\n'WIN': Overlay screen showing the solved picture, completion time, and replay button.\nModes:\nSingle Player (Augmented Mode)\nTwo Players (Competitive Sprint) - splits the screen vertically into Left (P1) and Right (P2).\nKey Algorithms & Implementation Details:\na. Hand Coordinate Mapping & Mirroring:\nThe webcam feed must be drawn mirrored (ctx.scale(-1, 1)) so movements feel natural.\nMediaPipe hand coordinates (0 to 1 range) must be mapped to the canvas scale and adjusted for mirroring:\nx = canvasWidth - (landmark.x * videoDrawWidth + videoDrawX)\nThe canvas must auto-resize dynamically with window resize, keeping aspect ratio.\nb. Relative Pinch Detection (Proportional to Hand Size):\nAvoid absolute pixel distance. Calculate the hand scale first: distance between wrist (landmark 0) and middle finger base (landmark 9).\nMeasure pinch distance: distance between thumb tip (landmark 4) and index tip (landmark 8).\nTrigger pinch if (pinchDistance / handScale) < 0.35.\nc. Capture & Grid Segmentation:\nIn 'CALIBRATING' phase, detect 2 hands. The bounding box is formed between Left Thumb tip and Right Index tip.\nWhen both hands perform a pinch simultaneously, capture the bounding box pixels via canvas memory.\nSplit the captured image into a 3x3 grid (9 pieces).\nShuffle the slots using the Fisher-Yates algorithm.\nd. Gameplay (Drag & Drop + Piece Swapping):\nPlayers drag pieces using a pinch gesture. The cursor is represented by a glowing circle between thumb and index tips.\nWhen a pinch starts, grab the piece in the current slot.\nWhen the pinch is released, snap the piece to the closest slot. If another piece is already there, swap their slots.\nWhen all pieces are in their original slots (id === currentSlot), trigger 'WIN'.\nWeb Security & Error Handling:\nModern browsers block webcam access on unsecure origins (file://). Include a user-friendly modal/alert if navigator.mediaDevices.getUserMedia is blocked, explaining that it needs a local server (like Live Server or localhost).\nCamera fallbacks: If ideal 720p constraints fail, fallback to a simple { video: true } constraint.\nProvide the complete code in a single HTML file. Make sure all CSS, JavaScript, and HTML elements are fully implemented without placeholders or truncated code. Keep it highly performant, bug-free, and clean."
+  },
+  {
+    "title": "Exact Video Recreation Prompt",
+    "desc": "Create a video that follows the provided frame exactly.",
+    "prompt": "Create a video that follows the provided frame exactly, preserving the same visual style, layout, composition, colors, typography, and design details without any modifications. Maintain 100% visual consistency with the original image.\nAnimate the scene by following the natural visual flow from top to bottom. Use clean cinematic camera movements with smooth transitions, professional framing, and natural motion for every element. Ensure all objects, text, graphics, and visual components animate appropriately while remaining faithful to the original design.\nThe video must be clean and polished, with no additional elements, no redesigns, no visual alterations, and no audio. Keep all movements subtle, realistic, and visually cohesive, as if the original image has come to life."
   }
 ];
 
@@ -650,7 +572,7 @@ function TopicGrid({ eyebrow, title, desc, topics, onPick }: { eyebrow: string; 
         <h2 className="text-xl font-display font-bold text-slate-900 mt-1">{title}</h2>
         <p className="text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">{desc}</p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${topics.length === 4 ? 'xl:grid-cols-4' : 'lg:grid-cols-3'}`}>
         {topics.map((topic, i) => (
           <button
             key={topic.id}
@@ -699,6 +621,7 @@ const LEARNING_TOPICS: Topic[] = [
   { id: 'smart', title: '5 Mode Kognitif', desc: 'Lima cara membaca dengan AI, dari menangkap inti materi sampai menemukan celah riset.', meta: '5 mode' },
   { id: 'faster', title: '10 Pola Belajar Cepat', desc: 'Prompt untuk memahami topik baru lebih cepat: analogi, kuis, simulasi, dan lainnya.', meta: '10 prompt' },
   { id: 'extract', title: '10 Ekstraksi Buku & Laporan', desc: 'Prompt untuk menarik pelajaran, kerangka, dan rencana aksi dari buku atau laporan tebal.', meta: '10 prompt' },
+  { id: 'exercise', title: 'Exercise', desc: 'Prompt siap pakai untuk latihan praktis: foto, infografis, video, dan game HTML.', meta: '6 prompt' },
 ];
 
 type JourneyCardProps = {
@@ -852,22 +775,25 @@ function CompareModal({ before, after, onClose }: { before: JournalEntry; after:
 
 export default function App({ onBack, initialMenu = 'beranda', materials = [] }: { onBack?: () => void; initialMenu?: string; materials?: PromptMaterial[] }) {
   // Navigation State (WJG Style)
-  // 'beranda' | 'my-journal' | 'prompt-studio' | 'batch' | 'techniques' | 'reading-learning' | 'exercise' | 'vault'
+  // 'beranda' | 'my-journal' | 'prompt-studio' | 'batch' | 'techniques' | 'reading-learning' | 'vault'
   const [activeMenu, setActiveMenu] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      const menus = ['exercise', 'prompt-studio', 'my-journal', 'batch', 'techniques', 'reading-learning', 'vault'];
-      // Old links to the removed Community page land on Jurnal Batch.
-      const fromLink = (value: string | null) => value === 'community' ? 'batch' : value;
+      const menus = ['prompt-studio', 'my-journal', 'batch', 'techniques', 'reading-learning', 'vault'];
+      // Old links: Community now lives in Jurnal Batch, Exercise inside Reading & Smart Learning.
+      const fromLink = (value: string | null) => value === 'community' ? 'batch' : value === 'exercise' ? 'reading-learning' : value;
       const hash = fromLink(window.location.hash.replace('#', ''));
       if (hash && menus.includes(hash)) return hash;
       const tab = fromLink(new URLSearchParams(window.location.search).get('tab'));
       if (tab && menus.includes(tab)) return tab;
     }
-    return initialMenu || 'beranda';
+    return initialMenu === 'exercise' ? 'reading-learning' : initialMenu || 'beranda';
   });
 
   useEffect(() => {
-    if (initialMenu && initialMenu !== 'beranda') {
+    if (initialMenu === 'exercise') {
+      setActiveMenu('reading-learning');
+      setActiveLearningSubTab('exercise');
+    } else if (initialMenu && initialMenu !== 'beranda') {
       setActiveMenu(initialMenu);
     }
   }, [initialMenu]);
@@ -900,28 +826,24 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
 
   // Sub-Navigation Tabs
   const [activeTechniqueSubTab, setActiveTechniqueSubTab] = useState<string | null>(null);
-  const [activeLearningSubTab, setActiveLearningSubTab] = useState<string | null>(null);
+  const [activeLearningSubTab, setActiveLearningSubTab] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return initialMenu === 'exercise' ? 'exercise' : null;
+    const fromUrl = window.location.hash.replace('#', '') || new URLSearchParams(window.location.search).get('tab');
+    return fromUrl === 'exercise' || initialMenu === 'exercise' ? 'exercise' : null;
+  });
   const [activeModeId, setActiveModeId] = useState<number | null>(null);
-
-  // Modals
-  const [activeExercise, setActiveExercise] = useState<ExerciseCase | null>(null);
-  const [showExerciseSolution, setShowExerciseSolution] = useState(false);
 
   // Close modals on Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (activeExercise) {
-          setActiveExercise(null);
-          setShowExerciseSolution(false);
-        }
         if (compareTarget) setCompareTarget(null);
         if (entryToDelete && !isDeleting) setEntryToDelete(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeExercise, compareTarget, entryToDelete, isDeleting]);
+  }, [compareTarget, entryToDelete, isDeleting]);
 
   const handleDeleteEntry = async () => {
     if (!entryToDelete) return;
@@ -1051,22 +973,8 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
     }
   };
 
-  // Pre-fill Formula Studio from a case study benchmark, line by line.
-  const handleStartFormulaFromExercise = (ex: ExerciseCase) => {
-    const pick = (letter: string) => ex.benchmarkSolution.match(new RegExp(`\\[${letter} - [^\\]]+\\]\\s*([^\\n]+)`))?.[1].trim() || '';
-    resetBuilder();
-    setActionData({ a: pick('A'), c: pick('C'), t: pick('T'), i: pick('I'), o: pick('O'), n: pick('N'), s: pick('S') });
-    setBuilderNotes(`Latihan: ${ex.title}`);
-    setActiveExercise(null);
-    setShowExerciseSolution(false);
-    setActiveMenu('prompt-studio');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   // Safe navigation that automatically resets modal states so they never get stuck
   const handleNavigate = (menu: string) => {
-    setActiveExercise(null);
-    setShowExerciseSolution(false);
     setCompareTarget(null);
     setEntryToDelete(null);
     setActiveTechniqueSubTab(null);
@@ -1075,6 +983,11 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
     setActiveMenu(menu);
     setSidebarOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const openExercise = () => {
+    handleNavigate('reading-learning');
+    setActiveLearningSubTab('exercise');
   };
 
   const materialFilter = (
@@ -1240,18 +1153,6 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
             <span>Reading & Smart Learning</span>
           </button>
 
-          <button
-            onClick={() => handleNavigate('exercise')}
-            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-              activeMenu === 'exercise'
-                ? 'bg-[#E5C158] text-slate-950 shadow-md shadow-[#E5C158]/20'
-                : 'text-slate-300 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Dumbbell size={15} />
-            <span>Exercise & Practice Lab</span>
-          </button>
-
           <div className="pt-3 border-t border-[#24201C]/60 my-2">
             <button
               onClick={() => handleNavigate('vault')}
@@ -1314,7 +1215,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                  activeMenu === 'batch' ? 'Jurnal Batch' : 
                  activeMenu === 'techniques' ? 'Prompting Techniques' : 
                  activeMenu === 'reading-learning' ? 'Reading & Smart Learning' : 
-                 activeMenu === 'exercise' ? 'Exercise & Practice Lab' : 'Basic Prompt Library (1.000+)'}
+                 'Basic Prompt Library (1.000+)'}
               </span>
             </div>
           </div>
@@ -1515,9 +1416,9 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                     </div>
                   </div>
 
-                  {/* Box 6: Exercise & Practice Lab */}
+                  {/* Box 6: Exercise */}
                   <div 
-                    onClick={() => handleNavigate('exercise')}
+                    onClick={openExercise}
                     className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
@@ -1526,14 +1427,14 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                           06
                         </span>
                         <span className="text-[11px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
-                          Practice Lab
+                          6 Prompt
                         </span>
                       </div>
                       <h3 className="font-bold text-sm text-slate-900 group-hover:text-slate-950 transition-colors mb-1.5">
-                        Exercise &amp; Practice Lab
+                        Exercise
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                        Latihan mandiri &amp; studi kasus interaktif untuk menguji ketajaman prompt Anda dengan benchmark solution dari fasilitator.
+                        Prompt siap pakai untuk latihan praktis: foto, infografis, video, dan game HTML.
                       </p>
                     </div>
                     <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
@@ -2403,60 +2304,32 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                 </div>
               )}
 
-            </div>
-          )}
-
-          {/* ===================================================================== */}
-          {/* VIEW: EXERCISE & PRACTICE LAB */}
-          {/* ===================================================================== */}
-          {activeMenu === 'exercise' && (
-            <div className="space-y-5 animate-in fade-in duration-300">
-              
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 flex items-center justify-between shadow-sm">
-                <div>
-                  <span className="text-[11px] font-mono font-bold uppercase text-slate-400 tracking-wider">
-                    Interactive Practice
-                  </span>
-                  <h2 className="text-lg font-bold text-slate-900 mt-0.5">Exercise &amp; Practice Lab</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Latihan mandiri membedah kasus bisnis nyata dan menguji ketajaman formulasi prompt Anda.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {exercisesData.map(ex => (
-                  <div key={ex.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-[11px] font-mono font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
-                          #{ex.department}
-                        </span>
+              {/* ------------------------------------------------------------- */}
+              {/* SUBTAB 4: EXERCISE (PROMPT SIAP PAKAI) */}
+              {/* ------------------------------------------------------------- */}
+              {activeLearningSubTab === 'exercise' && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-in fade-in duration-300">
+                  {exercisePromptsData.map((item, idx) => (
+                    <div key={item.title} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm hover:border-slate-300 transition-all">
+                      <div>
+                        <span className="text-[11px] font-mono font-semibold text-[#8B7340]">{String(idx + 1).padStart(2, '0')}</span>
+                        <h3 className="font-bold text-sm text-slate-900 mt-1 mb-1">{item.title}</h3>
+                        <p className="text-xs text-slate-600 mb-3 leading-relaxed">{item.desc}</p>
+                        <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 text-xs text-slate-700 mb-3 whitespace-pre-wrap break-words leading-relaxed max-h-64 overflow-y-auto">
+                          {item.prompt}
+                        </div>
                       </div>
-                      <h3 className="font-bold text-sm text-slate-900 mb-2">{ex.title}</h3>
-                      <p className="text-xs text-slate-600 leading-relaxed mb-3">{ex.scenario}</p>
-                      
-                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 mb-3">
-                        <span className="block text-[11px] font-mono uppercase text-slate-400 font-bold mb-1">
-                          Contoh Prompt Awal (Ad-hoc):
-                        </span>
-                        <span className="italic font-mono text-slate-600">"{ex.poorPrompt}"</span>
-                      </div>
+                      <button
+                        onClick={() => handleCopy(item.prompt, `exercise-${idx}`)}
+                        className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                      >
+                        {copiedId === `exercise-${idx}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
+                        {copiedId === `exercise-${idx}` ? 'Prompt Tersalin!' : 'Salin Prompt'}
+                      </button>
                     </div>
-
-                    <button
-                      onClick={() => {
-                        setActiveExercise(ex);
-                        setShowExerciseSolution(false);
-                      }}
-                      className="w-full py-2 rounded-xl bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold transition-all"
-                    >
-                      Buka Lembar Latihan
-                    </button>
-                  </div>
-                ))}
-              </div>
-
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -2611,155 +2484,6 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
               >
                 {isDeleting ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                 <span>Ya, Hapus</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* MODAL: EXERCISE LAB WORKBENCH */}
-      {/* ========================================================================= */}
-      {activeExercise && (
-        <div 
-          onClick={() => {
-            setActiveExercise(null);
-            setShowExerciseSolution(false);
-          }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in"
-        >
-          <div 
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden"
-          >
-            {/* Modal Header */}
-            <div className="px-5 py-3.5 bg-[#141210] text-white flex items-center justify-between">
-              <div>
-                <span className="text-[11px] font-mono text-[#E5C158] uppercase tracking-wider">
-                  Exercise Lab #{activeExercise.department}
-                </span>
-                <h3 className="text-sm font-bold text-white mt-0.5">{activeExercise.title}</h3>
-              </div>
-              <button 
-                onClick={() => {
-                  setActiveExercise(null);
-                  setShowExerciseSolution(false);
-                }} 
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
-                title="Tutup (Esc)"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-5 overflow-y-auto space-y-4 flex-1">
-              <div>
-                <h4 className="text-xs font-bold text-slate-800 mb-1">Skenario Masalah:</h4>
-                <p className="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-200">
-                  {activeExercise.scenario}
-                </p>
-              </div>
-
-              <div>
-                <h4 className="text-xs font-bold text-slate-700 mb-1">
-                  Contoh Prompt Awal (Ad-hoc):
-                </h4>
-                <p className="text-xs font-sans text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200 leading-relaxed">
-                  "{activeExercise.poorPrompt}"
-                </p>
-              </div>
-
-              <div>
-                <h4 className="text-xs font-bold text-slate-800 mb-1.5">Panduan Kunci:</h4>
-                <div className="flex flex-wrap gap-1.5">
-                  {activeExercise.hints.map((h, i) => (
-                    <span key={i} className="text-xs font-medium bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200/60">
-                      ✓ {h}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {showExerciseSolution ? (
-                <div className="space-y-3 pt-3 border-t border-slate-200 animate-in fade-in">
-                  
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                      <CheckCircle2 size={15} className="text-emerald-600" />
-                      Solusi Benchmark Fasilitator
-                    </h4>
-                    <span className="text-[11px] font-medium uppercase tracking-wider text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200/80">
-                      Formula Rekomendasi
-                    </span>
-                  </div>
-
-                  <div className="text-sm font-sans text-slate-900 bg-slate-50 p-4 rounded-xl border border-slate-200 whitespace-pre-line leading-relaxed shadow-sm font-normal">
-                    {activeExercise.benchmarkSolution}
-                  </div>
-
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleCopy(activeExercise.benchmarkSolution, 'ex-sol')}
-                        className="px-4 py-2 rounded-xl bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
-                      >
-                        {copiedId === 'ex-sol' ? <Check size={13} /> : <Copy size={13} />}
-                        <span>{copiedId === 'ex-sol' ? 'Solusi Tersalin!' : 'Salin Solusi Benchmark'}</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleStartFormulaFromExercise(activeExercise)}
-                        className="px-4 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 text-xs font-bold flex items-center gap-1.5 transition-colors border border-amber-300 shadow-sm"
-                      >
-                        <Sparkles size={13} className="text-amber-800" />
-                        <span>Tulis di Studio</span>
-                        <ArrowRight size={13} />
-                      </button>
-                    </div>
-
-                    <button
-                      onClick={() => setShowExerciseSolution(false)}
-                      className="text-xs text-slate-500 hover:text-slate-800 underline transition-colors"
-                    >
-                      Sembunyikan Solusi
-                    </button>
-                  </div>
-
-                </div>
-              ) : (
-                <div className="pt-2 text-center bg-slate-50 border border-slate-200/80 rounded-2xl p-6">
-                  <div className="w-10 h-10 rounded-xl bg-amber-50 text-[#C9A23E] flex items-center justify-center mx-auto mb-2.5 border border-amber-200/60">
-                    <Sparkles size={20} />
-                  </div>
-                  <h4 className="font-bold text-sm text-slate-900 mb-1">Uji Ketajaman Prompt Anda</h4>
-                  <p className="text-xs text-slate-500 max-w-md mx-auto mb-4 leading-relaxed">
-                    Tulis dan eksplorasi draf prompt Anda sendiri terlebih dahulu, lalu buka benchmark fasilitator untuk mempelajari formula dan bedah logikanya.
-                  </p>
-                  <button
-                    onClick={() => setShowExerciseSolution(true)}
-                    className="px-5 py-2.5 rounded-xl bg-[#E5C158] hover:bg-[#F0CF6B] text-slate-950 text-xs font-bold shadow-md transition-all inline-flex items-center gap-2"
-                  >
-                    <CheckCircle2 size={15} />
-                    <span>Buka Solusi Benchmark Fasilitator</span>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-              <span className="text-xs text-slate-400 font-mono hidden sm:inline">
-                Tekan <kbd className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-slate-600">Esc</kbd> atau klik di luar untuk menutup
-              </span>
-              <button
-                onClick={() => {
-                  setActiveExercise(null);
-                  setShowExerciseSolution(false);
-                }}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-colors ml-auto"
-              >
-                Tutup Latihan
               </button>
             </div>
           </div>
