@@ -19,14 +19,22 @@ export type JournalEntry = {
   batch: string | null;
 };
 
-export const FORMULA_PARTS: { key: FormulaKey; letter: string; label: string; heading: string; act: boolean }[] = [
-  { key: 'a', letter: 'A', label: 'Peran & Audiens', heading: 'Peran & Audiens', act: true },
-  { key: 'c', letter: 'C', label: 'Situasi & Latar Belakang', heading: 'Situasi & Latar Belakang', act: true },
-  { key: 't', letter: 'T', label: 'Tugas & Target Hasil', heading: 'Tugas & Target', act: true },
-  { key: 'i', letter: 'I', label: 'Dampak yang Diharapkan', heading: 'Dampak yang Diharapkan', act: false },
-  { key: 'o', letter: 'O', label: 'Format Keluaran', heading: 'Format Keluaran', act: false },
-  { key: 'n', letter: 'N', label: 'Batasan & Pantangan', heading: 'Batasan & Pantangan', act: false },
-  { key: 's', letter: 'S', label: 'Urutan Langkah', heading: 'Urutan Langkah', act: false },
+// `hint` is a guiding question shown under each field: it steers thinking without giving an answer to copy.
+export const FORMULA_PARTS: { key: FormulaKey; letter: string; label: string; heading: string; hint: string; act: boolean }[] = [
+  { key: 'a', letter: 'A', label: 'Peran & Audiens', heading: 'Peran & Audiens', act: true,
+    hint: 'Siapa AI saat menjawab, dan untuk siapa hasilnya ditulis?' },
+  { key: 'c', letter: 'C', label: 'Situasi & Latar Belakang', heading: 'Situasi & Latar Belakang', act: true,
+    hint: 'Apa yang sedang terjadi? Fakta, angka, atau kendala apa yang perlu AI ketahui?' },
+  { key: 't', letter: 'T', label: 'Tugas & Target Hasil', heading: 'Tugas & Target', act: true,
+    hint: 'Apa persisnya yang harus AI kerjakan? Mulai dengan kata kerja: susun, analisis, ringkas, bandingkan.' },
+  { key: 'i', letter: 'I', label: 'Dampak yang Diharapkan', heading: 'Dampak yang Diharapkan', act: false,
+    hint: 'Setelah membaca hasilnya, keputusan atau tindakan apa yang Anda harapkan dari pembacanya?' },
+  { key: 'o', letter: 'O', label: 'Format Keluaran', heading: 'Format Keluaran', act: false,
+    hint: 'Hasilnya berbentuk apa, dan seberapa panjang? Email, tabel, poin-poin, atau memo satu halaman?' },
+  { key: 'n', letter: 'N', label: 'Batasan & Pantangan', heading: 'Batasan & Pantangan', act: false,
+    hint: 'Apa yang tidak boleh dilakukan AI? Pikirkan nada bicara, asumsi tanpa data, atau batas jumlah kata.' },
+  { key: 's', letter: 'S', label: 'Urutan Langkah', heading: 'Urutan Langkah', act: false,
+    hint: 'Langkah berpikir apa yang perlu AI ikuti sebelum memberi jawaban akhir?' },
 ];
 
 export const partsFor = (framework: Framework) => FORMULA_PARTS.filter(part => framework === 'ACTIONS' || part.act);

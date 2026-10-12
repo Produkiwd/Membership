@@ -64,6 +64,23 @@
 }
 
 
+/* Prompt Studio uses the AI First web fonts: Plus Jakarta Sans for headings, Inter for text.
+   Scoped so the rest of the member hub keeps its own typography. */
+.prompt-studio {
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.55;
+  font-family: var(--font-sans);
+  letter-spacing: -0.005em;
+}
+.prompt-studio :is(h1, h2, h3, h4) {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
 /* Scoped member administration layout; column order stays unchanged. */
 .member-management .member-create-form input:not([type="checkbox"]),
 .member-management .member-create-form select {

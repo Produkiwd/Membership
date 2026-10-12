@@ -639,6 +639,68 @@ const EMPTY_FIELDS: Record<FormulaKey, string> = { a: '', c: '', t: '', i: '', o
 const formatDate = (value: string) => new Date(value).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
 // One prompt journey: every saved version of one person's prompt for one material.
+type Topic = { id: string; title: string; desc: string; meta: string };
+
+// Landing grid for a learning menu: pick one topic, then read only that topic.
+function TopicGrid({ eyebrow, title, desc, topics, onPick }: { eyebrow: string; title: string; desc: string; topics: Topic[]; onPick: (id: string) => void }) {
+  return (
+    <div className="space-y-5 animate-in fade-in duration-300">
+      <div className="px-1">
+        <span className="text-xs font-mono font-semibold uppercase text-[#8B7340] tracking-wider">{eyebrow}</span>
+        <h2 className="text-xl font-display font-bold text-slate-900 mt-1">{title}</h2>
+        <p className="text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">{desc}</p>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {topics.map((topic, i) => (
+          <button
+            key={topic.id}
+            onClick={() => onPick(topic.id)}
+            className="text-left bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-[#D4A84B] transition-all group flex flex-col justify-between min-h-44"
+          >
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <span className="font-mono text-xs font-semibold text-[#8B7340]">{String(i + 1).padStart(2, '0')}</span>
+                <span className="text-xs font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">{topic.meta}</span>
+              </div>
+              <h3 className="font-display font-bold text-base text-slate-900 mb-1.5">{topic.title}</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">{topic.desc}</p>
+            </div>
+            <span className="mt-5 text-sm font-semibold text-slate-800 flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+              Buka materi <ArrowRight size={14} />
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TopicBackBar({ backLabel, title, desc, onBack }: { backLabel: string; title: string; desc?: string; onBack: () => void }) {
+  return (
+    <div className="space-y-3">
+      <button onClick={onBack} className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-900">
+        <ChevronLeft size={16} /> {backLabel}
+      </button>
+      <div className="px-1">
+        <h2 className="text-xl font-display font-bold text-slate-900">{title}</h2>
+        {desc && <p className="text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">{desc}</p>}
+      </div>
+    </div>
+  );
+}
+
+const TECHNIQUE_TOPICS: Topic[] = [
+  { id: 'foundational', title: '8 Teknik Dasar', desc: 'Zero-Shot, Few-Shot, Chain-of-Thought, sampai ReAct. Setiap teknik dilengkapi alur dan contoh prompt.', meta: '8 teknik' },
+  { id: 'brutal', title: 'The Brutal Method', desc: 'Cara meminta AI memberi kritik yang jujur dan tajam untuk dokumen bernilai tinggi.', meta: '6 langkah' },
+  { id: 'jeffsu', title: 'Jeff Su Framework', desc: 'Template siap pakai, enam bagian prompt yang baik, dan kesalahan yang sering terjadi.', meta: '5 template' },
+];
+
+const LEARNING_TOPICS: Topic[] = [
+  { id: 'smart', title: '5 Mode Kognitif', desc: 'Lima cara membaca dengan AI, dari menangkap inti materi sampai menemukan celah riset.', meta: '5 mode' },
+  { id: 'faster', title: '10 Pola Belajar Cepat', desc: 'Prompt untuk memahami topik baru lebih cepat: analogi, kuis, simulasi, dan lainnya.', meta: '10 prompt' },
+  { id: 'extract', title: '10 Ekstraksi Buku & Laporan', desc: 'Prompt untuk menarik pelajaran, kerangka, dan rencana aksi dari buku atau laporan tebal.', meta: '10 prompt' },
+];
+
 type JourneyCardProps = {
   versions: JournalEntry[];
   showAuthor?: boolean;
@@ -659,7 +721,7 @@ const JourneyCard: React.FC<JourneyCardProps> = ({ versions, showAuthor, copiedI
       <div className="px-5 py-3.5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
           <h3 className="font-bold text-sm text-slate-900 truncate">{showAuthor ? latest.authorName : latest.materialTitle}</h3>
-          <p className="text-[11px] text-slate-500">
+          <p className="text-xs text-slate-500">
             {showAuthor ? `${latest.materialTitle} · ` : ''}{versions.length} versi · terakhir {formatDate(latest.createdAt)}
           </p>
         </div>
@@ -680,8 +742,8 @@ const JourneyCard: React.FC<JourneyCardProps> = ({ versions, showAuthor, copiedI
             <li key={entry.id} className="px-5 py-4 space-y-2.5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-slate-900 text-white">v{entry.version}</span>
-                  <span className="text-[11px] text-slate-500">{formatDate(entry.createdAt)} · {entry.framework === 'ACTIONS' ? 'A.C.T.I.O.N.S.' : 'ACT'}</span>
+                  <span className="px-2 py-0.5 rounded-md text-xs font-mono font-bold bg-slate-900 text-white">v{entry.version}</span>
+                  <span className="text-xs text-slate-500">{formatDate(entry.createdAt)} · {entry.framework === 'ACTIONS' ? 'A.C.T.I.O.N.S.' : 'ACT'}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {previous && (
@@ -753,13 +815,13 @@ function CompareModal({ before, after, onClose }: { before: JournalEntry; after:
       <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-3xl max-h-[88vh] flex flex-col overflow-hidden">
         <div className="px-5 py-3.5 bg-[#141210] text-white flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <span className="text-[10px] font-mono text-[#E5C158] uppercase tracking-wider">Perubahan v{before.version} → v{after.version}</span>
+            <span className="text-[11px] font-mono text-[#E5C158] uppercase tracking-wider">Perubahan v{before.version} → v{after.version}</span>
             <h3 className="text-sm font-bold truncate">{after.materialTitle}{after.isMine ? '' : ` · ${after.authorName}`}</h3>
           </div>
           <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-white" aria-label="Tutup"><X size={18} /></button>
         </div>
         <div className="p-5 overflow-y-auto space-y-4">
-          <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-600">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
             <span><strong className="text-slate-900">{changed}</strong> dari {parts.length} kolom berubah</span>
             <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-emerald-100 border border-emerald-300" /> ditambahkan</span>
             <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-rose-100 border border-rose-300" /> dihapus</span>
@@ -775,8 +837,8 @@ function CompareModal({ before, after, onClose }: { before: JournalEntry; after:
             return (
               <div key={part.key} className={`rounded-xl border p-3 ${oldText === newText ? 'border-slate-200 bg-slate-50/60' : 'border-amber-200 bg-white'}`}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[11px] font-bold text-slate-800"><span className="text-[#966A0E]">{part.letter}</span> · {part.label}</span>
-                  <span className="text-[10px] font-mono text-slate-400">{oldText === newText ? 'tetap' : !oldText ? 'baru' : !newText ? 'dihapus' : 'diubah'}</span>
+                  <span className="text-xs font-bold text-slate-800"><span className="text-[#966A0E]">{part.letter}</span> · {part.label}</span>
+                  <span className="text-[11px] font-mono text-slate-400">{oldText === newText ? 'tetap' : !oldText ? 'baru' : !newText ? 'dihapus' : 'diubah'}</span>
                 </div>
                 <DiffText before={oldText} after={newText} />
               </div>
@@ -837,8 +899,9 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
   useEffect(() => { loadJournal(); }, [loadJournal]);
 
   // Sub-Navigation Tabs
-  const [activeTechniqueSubTab, setActiveTechniqueSubTab] = useState<'foundational' | 'brutal' | 'jeffsu'>('foundational');
-  const [activeLearningSubTab, setActiveLearningSubTab] = useState<'smart' | 'faster' | 'extract'>('smart');
+  const [activeTechniqueSubTab, setActiveTechniqueSubTab] = useState<string | null>(null);
+  const [activeLearningSubTab, setActiveLearningSubTab] = useState<string | null>(null);
+  const [activeModeId, setActiveModeId] = useState<number | null>(null);
 
   // Modals
   const [activeExercise, setActiveExercise] = useState<ExerciseCase | null>(null);
@@ -1006,6 +1069,9 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
     setShowExerciseSolution(false);
     setCompareTarget(null);
     setEntryToDelete(null);
+    setActiveTechniqueSubTab(null);
+    setActiveLearningSubTab(null);
+    setActiveModeId(null);
     setActiveMenu(menu);
     setSidebarOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1049,7 +1115,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
   );
 
   return (
-    <div className="min-h-screen bg-[#f5f6f9] text-slate-900 flex font-sans antialiased selection:bg-[#E5C158] selection:text-slate-950">
+    <div className="prompt-studio min-h-screen bg-[#f5f6f9] text-slate-900 flex font-sans antialiased selection:bg-[#E5C158] selection:text-slate-950">
       
       {/* Entrance Loading Motion */}
       {isInitialLoading && (
@@ -1093,7 +1159,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
 
         {/* Main Navigation Items */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          <div className="px-3 pb-2 text-[10px] font-mono font-bold tracking-[2px] text-slate-400 uppercase">
+          <div className="px-3 pb-2 text-[11px] font-mono font-bold tracking-[2px] text-slate-400 uppercase">
             Menu Utama
           </div>
 
@@ -1121,7 +1187,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
               <BookmarkCheck size={15} />
               <span>My Prompt Journal</span>
             </div>
-            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${activeMenu === 'my-journal' ? 'bg-black/20 text-slate-950' : 'bg-white/10 text-slate-300'}`}>
+            <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-full ${activeMenu === 'my-journal' ? 'bg-black/20 text-slate-950' : 'bg-white/10 text-slate-300'}`}>
               {myEntries.length}
             </span>
           </button>
@@ -1204,12 +1270,12 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
         {/* User Card (Bottom of Sidebar) */}
         <div className="p-3.5 border-t border-[#24201C] bg-[#110F0D]">
           <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-[#E5C158]/10 border border-[#E5C158]/30 flex items-center justify-center text-[10px] font-mono font-bold text-[#E5C158]">
+            <div className="w-7 h-7 rounded-lg bg-[#E5C158]/10 border border-[#E5C158]/30 flex items-center justify-center text-[11px] font-mono font-bold text-[#E5C158]">
               PS
             </div>
             <div className="flex flex-col overflow-hidden">
               <span className="text-xs font-bold text-white truncate">Prompt Studio</span>
-              <span className="text-[10px] text-slate-400 truncate">Ruang Latihan Mandiri</span>
+              <span className="text-[11px] text-slate-400 truncate">Ruang Latihan Mandiri</span>
             </div>
           </div>
         </div>
@@ -1275,7 +1341,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
               {/* Clean Welcome Hero */}
               <section className="bg-gradient-to-br from-[#141210] to-[#1e1a17] rounded-2xl text-white p-7 sm:p-9 shadow-sm border border-[#2a2420]">
                 <div className="max-w-2xl">
-                  <span className="inline-block text-[10px] font-mono font-bold uppercase tracking-[2px] text-[#E5C158] mb-2">
+                  <span className="inline-block text-[11px] font-mono font-bold uppercase tracking-[2px] text-[#E5C158] mb-2">
                     Ruang Latihan Prompt Enterprise
                   </span>
                   <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-tight mb-2.5">
@@ -1305,7 +1371,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
               <section className="space-y-3.5">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest block mb-0.5">
+                    <span className="text-[11px] font-mono font-bold text-slate-400 uppercase tracking-widest block mb-0.5">
                       PILIHAN MODUL
                     </span>
                     <h2 className="text-base font-bold text-slate-900 tracking-tight">Pilih Kebutuhan Pembelajaran</h2>
@@ -1324,7 +1390,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-slate-700 transition-colors">
                           01
                         </span>
-                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
+                        <span className="text-[11px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
                           {myEntries.length} Versi
                         </span>
                       </div>
@@ -1332,7 +1398,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         My Prompt Journal
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                        Semua versi prompt kamu per materi. Lihat apa yang berubah dari satu versi ke versi berikutnya.
+                        Semua versi prompt Anda per materi. Lihat apa yang berubah dari satu versi ke versi berikutnya.
                       </p>
                     </div>
                     <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
@@ -1351,7 +1417,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-slate-700 transition-colors">
                           02
                         </span>
-                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
+                        <span className="text-[11px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
                           Formula Studio
                         </span>
                       </div>
@@ -1378,7 +1444,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-slate-700 transition-colors">
                           03
                         </span>
-                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
+                        <span className="text-[11px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
                           {myBatch || 'Satu Batch'}
                         </span>
                       </div>
@@ -1405,7 +1471,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-slate-700 transition-colors">
                           04
                         </span>
-                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
+                        <span className="text-[11px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
                           Materi &amp; Teknik
                         </span>
                       </div>
@@ -1432,7 +1498,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-slate-700 transition-colors">
                           05
                         </span>
-                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
+                        <span className="text-[11px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
                           Smart Learning
                         </span>
                       </div>
@@ -1459,7 +1525,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         <span className="font-mono text-xs font-bold text-slate-400 group-hover:text-slate-700 transition-colors">
                           06
                         </span>
-                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
+                        <span className="text-[11px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
                           Practice Lab
                         </span>
                       </div>
@@ -1492,7 +1558,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                     <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-slate-950 transition-colors">
                       Basic Prompt Library (1.000+ Vault)
                     </h4>
-                    <p className="text-[11px] text-slate-500">
+                    <p className="text-xs text-slate-500">
                       Koleksi 1.000+ prompt dasar dan referensi teknis lintas profesi siap pakai untuk berbagai kebutuhan operasional.
                     </p>
                   </div>
@@ -1515,7 +1581,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                 <div>
                   <h2 className="text-sm font-bold text-slate-900">My Prompt Journal</h2>
                   <p className="text-xs text-slate-500 mt-0.5 max-w-xl">
-                    Setiap kali kamu menyimpan prompt untuk satu materi, prompt itu menjadi versi baru. Bandingkan versinya untuk melihat apa yang berubah.
+                    Setiap kali Anda menyimpan prompt untuk satu materi, prompt itu menjadi versi baru. Bandingkan versinya untuk melihat apa yang berubah.
                   </p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-2">
@@ -1535,10 +1601,10 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                     <BookmarkCheck size={22} className="text-slate-600" />
                   </div>
                   <h3 className="font-bold text-sm text-slate-900 mb-1">
-                    {selectedMaterialKey ? 'Belum ada prompt untuk materi ini' : 'Jurnalmu masih kosong'}
+                    {selectedMaterialKey ? 'Belum ada prompt untuk materi ini' : 'Jurnal Anda masih kosong'}
                   </h3>
                   <p className="text-xs text-slate-500 leading-relaxed mb-4 max-w-md mx-auto">
-                    Pilih materi, tulis prompt pertamamu, lalu simpan. Setelah latihan berikutnya, perbaiki dan simpan lagi sebagai versi baru.
+                    Pilih materi, tulis prompt pertama Anda, lalu simpan. Setelah latihan berikutnya, perbaiki dan simpan lagi sebagai versi baru.
                   </p>
                   <button
                     onClick={openNewFormula}
@@ -1592,10 +1658,10 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                     {materials.map(item => <option key={item.key} value={item.key}>{item.title}</option>)}
                   </select>
                   {builderMaterial && (
-                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600 bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2">
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600 bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2">
                       <span>
                         Akan disimpan sebagai <strong className="text-slate-900">v{(builderLatest?.version || 0) + 1}</strong>
-                        {builderLatest ? ` untuk ${builderMaterial.title}.` : `, prompt pertamamu untuk ${builderMaterial.title}.`}
+                        {builderLatest ? ` untuk ${builderMaterial.title}.` : `, prompt pertama Anda untuk ${builderMaterial.title}.`}
                       </span>
                       {builderLatest && (
                         <button type="button" onClick={() => loadEntryIntoBuilder(builderLatest)} className="font-bold text-[#966A0E] hover:underline">
@@ -1618,15 +1684,20 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                     </button>
                   ))}
                 </div>
+                <p className="text-xs text-slate-500 -mt-2">
+                  ACT untuk tugas cepat dan sederhana. A.C.T.I.O.N.S. untuk dokumen penting yang hasilnya perlu presisi.
+                </p>
 
                 <div className="space-y-3">
                   {partsFor(builderType).map(part => (
                     <div key={part.key}>
-                      <label htmlFor={`field-${part.key}`} className="block text-xs font-bold text-slate-800 mb-1">
+                      <label htmlFor={`field-${part.key}`} className="block text-xs font-bold text-slate-800">
                         <span className="text-[#966A0E]">{part.letter} ·</span> {part.label}
                       </label>
+                      <p id={`hint-${part.key}`} className="text-xs text-slate-500 mt-0.5 mb-1.5">{part.hint}</p>
                       <textarea
                         id={`field-${part.key}`}
+                        aria-describedby={`hint-${part.key}`}
                         rows={2}
                         value={actionData[part.key]}
                         onChange={(e) => setActionData({ ...actionData, [part.key]: e.target.value })}
@@ -1638,7 +1709,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
 
                 <div>
                   <label htmlFor="builder-notes" className="block text-xs font-bold text-slate-700 mb-1">
-                    {builderLatest ? `Apa yang kamu ubah dari v${builderLatest.version}, dan kenapa?` : 'Catatan'} <span className="font-normal text-slate-400">(opsional)</span>
+                    {builderLatest ? `Apa yang Anda ubah dari v${builderLatest.version}, dan mengapa?` : 'Catatan'} <span className="font-normal text-slate-400">(opsional)</span>
                   </label>
                   <textarea
                     id="builder-notes"
@@ -1682,8 +1753,8 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
             <div className="space-y-5 animate-in fade-in duration-300">
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div>
-                  <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider block mb-0.5">
-                    {myBatch || 'Batch kamu'}
+                  <span className="text-[11px] font-mono font-bold uppercase text-slate-400 tracking-wider block mb-0.5">
+                    {myBatch || 'Batch Anda'}
                   </span>
                   <h2 className="text-sm font-bold text-slate-900">Jurnal Batch</h2>
                   <p className="text-xs text-slate-500 mt-0.5 max-w-xl">
@@ -1733,52 +1804,22 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
           {activeMenu === 'techniques' && (
             <div className="space-y-6 animate-in fade-in duration-300">
               
-              {/* Header & Sub-Navigation */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
-                    Framework &amp; Kurikulum Prompting
-                  </span>
-                  <h2 className="text-lg font-bold text-slate-900 mt-0.5">Prompting Techniques</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Kuasai 8 teknik fundamental, metode audit kritis The Brutal Method, dan Jeff Su Precision Framework.
-                  </p>
-                </div>
-
-                {/* Sub-Tabs Pills */}
-                <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200/80 self-start md:self-auto">
-                  <button
-                    onClick={() => setActiveTechniqueSubTab('foundational')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                      activeTechniqueSubTab === 'foundational'
-                        ? 'bg-slate-900 text-white shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    8 Foundational Techniques
-                  </button>
-                  <button
-                    onClick={() => setActiveTechniqueSubTab('brutal')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                      activeTechniqueSubTab === 'brutal'
-                        ? 'bg-slate-900 text-white shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    The Brutal Method
-                  </button>
-                  <button
-                    onClick={() => setActiveTechniqueSubTab('jeffsu')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                      activeTechniqueSubTab === 'jeffsu'
-                        ? 'bg-slate-900 text-white shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    Jeff Su Framework
-                  </button>
-                </div>
-              </div>
+              {activeTechniqueSubTab === null ? (
+                <TopicGrid
+                  eyebrow="Materi & Teknik"
+                  title="Prompting Techniques"
+                  desc="Pilih satu topik untuk dipelajari."
+                  topics={TECHNIQUE_TOPICS}
+                  onPick={(id) => { setActiveTechniqueSubTab(id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                />
+              ) : (
+                <TopicBackBar
+                  backLabel="Semua topik Prompting Techniques"
+                  title={TECHNIQUE_TOPICS.find(t => t.id === activeTechniqueSubTab)?.title || ''}
+                  desc={TECHNIQUE_TOPICS.find(t => t.id === activeTechniqueSubTab)?.desc}
+                  onBack={() => setActiveTechniqueSubTab(null)}
+                />
+              )}
 
               {/* ------------------------------------------------------------- */}
               {/* SUBTAB 1: 8 FOUNDATIONAL TECHNIQUES */}
@@ -1787,7 +1828,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                 <div className="space-y-4 animate-in fade-in duration-300">
                   <div className="flex items-center justify-between text-xs text-slate-500 px-1">
                     <span>Menampilkan 8 teknik dasar pemrosesan instruksi AI</span>
-                    <span className="font-mono text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                    <span className="font-mono text-[11px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                       Rujukan: Brij Kishore Pandey (@codewithbrij)
                     </span>
                   </div>
@@ -1797,10 +1838,10 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                       <div key={tech.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm hover:border-slate-300 transition-all">
                         <div>
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-mono font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
+                            <span className="text-[11px] font-mono font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
                               {tech.tag}
                             </span>
-                            <span className="text-[11px] font-mono font-bold text-slate-400">
+                            <span className="text-xs font-mono font-bold text-slate-400">
                               0{idx + 1}
                             </span>
                           </div>
@@ -1810,13 +1851,13 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                           
                           {/* Visual Step Flow */}
                           <div className="bg-slate-50/80 border border-slate-200/60 rounded-xl p-2.5 mb-3">
-                            <span className="text-[10px] font-mono uppercase text-slate-400 font-bold block mb-1.5">
+                            <span className="text-[11px] font-mono uppercase text-slate-400 font-bold block mb-1.5">
                               Alur Penalaran Model (Reasoning Path):
                             </span>
                             <div className="flex flex-wrap items-center gap-1.5">
                               {tech.steps.map((s, i) => (
                                 <React.Fragment key={i}>
-                                  <span className="inline-flex items-center text-[10px] font-medium bg-white text-slate-700 px-2 py-1 rounded-md border border-slate-200 shadow-2xs">
+                                  <span className="inline-flex items-center text-[11px] font-medium bg-white text-slate-700 px-2 py-1 rounded-md border border-slate-200 shadow-2xs">
                                     {s}
                                   </span>
                                   {i < tech.steps.length - 1 && (
@@ -1854,7 +1895,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                   
                   {/* The Problem Section */}
                   <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                    <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                    <span className="text-[11px] font-mono font-bold uppercase text-slate-400 tracking-wider">
                       Latar Belakang
                     </span>
                     <h3 className="font-bold text-base text-slate-900 mt-1 mb-4">
@@ -1877,7 +1918,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                   {/* The 6-Step Brutal Framework */}
                   <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
                     <div className="mb-4">
-                      <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                      <span className="text-[11px] font-mono font-bold uppercase text-slate-400 tracking-wider">
                         Metodologi Eksekusi
                       </span>
                       <h3 className="font-bold text-base text-slate-900 mt-0.5">
@@ -1893,7 +1934,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         <div key={step.num} className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
                           <div>
                             <div className="flex items-center gap-2 mb-2">
-                              <span className="w-5 h-5 rounded-full bg-slate-900 text-white font-mono text-[10px] font-bold flex items-center justify-center">
+                              <span className="w-5 h-5 rounded-full bg-slate-900 text-white font-mono text-[11px] font-bold flex items-center justify-center">
                                 {step.num}
                               </span>
                               <h4 className="font-bold text-xs text-slate-900">{step.title}</h4>
@@ -1910,7 +1951,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                     
                     {/* Model Spectrum */}
                     <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                      <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                      <span className="text-[11px] font-mono font-bold uppercase text-slate-400 tracking-wider">
                         Karakteristik Model
                       </span>
                       <h3 className="font-bold text-base text-slate-900 mt-0.5 mb-3">
@@ -1923,7 +1964,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                             <div>
                               <div className="flex items-center gap-2 mb-1">
                                 <h4 className="font-bold text-xs text-slate-900">{spec.name}</h4>
-                                <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200">
+                                <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded bg-white text-slate-700 border border-slate-200">
                                   {spec.badge}
                                 </span>
                               </div>
@@ -1937,7 +1978,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                     {/* Custom Instruction Box */}
                     <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col justify-between">
                       <div>
-                        <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                        <span className="text-[11px] font-mono font-bold uppercase text-slate-400 tracking-wider">
                           Bonus Permanen
                         </span>
                         <h3 className="font-bold text-sm text-slate-900 mt-0.5 mb-1">
@@ -1975,7 +2016,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                   {/* Templates */}
                   <div className="space-y-3">
                     <div className="px-1">
-                      <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                      <span className="text-[11px] font-mono font-bold uppercase text-slate-400 tracking-wider">
                         Bagian 1
                       </span>
                       <h3 className="font-bold text-base text-slate-900 mt-0.5">
@@ -1992,7 +2033,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                           <div>
                             <div className="flex items-center justify-between mb-1.5">
                               <h4 className="font-bold text-xs sm:text-sm text-slate-900">{tpl.title}</h4>
-                              <span className="text-[10px] font-mono text-slate-400 font-bold">Template #{i + 1}</span>
+                              <span className="text-[11px] font-mono text-slate-400 font-bold">Template #{i + 1}</span>
                             </div>
                             <p className="text-xs text-slate-600 mb-3 leading-relaxed">{tpl.desc}</p>
                             
@@ -2016,7 +2057,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                   {/* 6 Building Blocks */}
                   <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
                     <div className="mb-4">
-                      <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                      <span className="text-[11px] font-mono font-bold uppercase text-slate-400 tracking-wider">
                         Bagian 2
                       </span>
                       <h3 className="font-bold text-base text-slate-900 mt-0.5">
@@ -2042,7 +2083,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                     
                     {/* Best Practices */}
                     <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                      <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                      <span className="text-[11px] font-mono font-bold uppercase text-slate-400 tracking-wider">
                         Bagian 3
                       </span>
                       <h3 className="font-bold text-sm text-slate-900 mt-0.5 mb-3">
@@ -2052,7 +2093,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         {jeffSuData.bestPractices.map((bp, i) => (
                           <div key={i} className="p-3 rounded-xl bg-slate-50 border border-slate-200/80">
                             <h4 className="font-bold text-xs text-slate-900 mb-0.5 flex items-center gap-1.5">
-                              <span className="w-4 h-4 rounded-full bg-slate-200 font-mono text-[9px] font-bold flex items-center justify-center text-slate-700">
+                              <span className="w-4 h-4 rounded-full bg-slate-200 font-mono text-[11px] font-bold flex items-center justify-center text-slate-700">
                                 {i + 1}
                               </span>
                               {bp.title}
@@ -2065,7 +2106,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
 
                     {/* Mistakes */}
                     <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-                      <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                      <span className="text-[11px] font-mono font-bold uppercase text-slate-400 tracking-wider">
                         Bagian 4
                       </span>
                       <h3 className="font-bold text-sm text-slate-900 mt-0.5 mb-3">
@@ -2098,64 +2139,59 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
           {activeMenu === 'reading-learning' && (
             <div className="space-y-6 animate-in fade-in duration-300">
               
-              {/* Header & Sub-Navigation */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
-                    Materi Day 1 &amp; Day 2
-                  </span>
-                  <h2 className="text-lg font-bold text-slate-900 mt-0.5">Reading &amp; Smart Learning</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Mode pembelajaran kognitif, strategi percepatan penyerapan konsep, dan ekstraksi intisari buku tebal.
-                  </p>
-                </div>
-
-                {/* Sub-Tabs Pills */}
-                <div className="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200/80 self-start md:self-auto">
-                  <button
-                    onClick={() => setActiveLearningSubTab('smart')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                      activeLearningSubTab === 'smart'
-                        ? 'bg-slate-900 text-white shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    5 Mode Kognitif
-                  </button>
-                  <button
-                    onClick={() => setActiveLearningSubTab('faster')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                      activeLearningSubTab === 'faster'
-                        ? 'bg-slate-900 text-white shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    10 Pola Belajar Cepat
-                  </button>
-                  <button
-                    onClick={() => setActiveLearningSubTab('extract')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                      activeLearningSubTab === 'extract'
-                        ? 'bg-slate-900 text-white shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    10 Ekstraksi Buku/Laporan
-                  </button>
-                </div>
-              </div>
+              {activeLearningSubTab === null ? (
+                <TopicGrid
+                  eyebrow="Smart Learning"
+                  title="Reading & Smart Learning"
+                  desc="Pilih satu topik untuk dipelajari."
+                  topics={LEARNING_TOPICS}
+                  onPick={(id) => { setActiveLearningSubTab(id); setActiveModeId(null); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                />
+              ) : activeLearningSubTab === 'smart' && activeModeId !== null ? (
+                <TopicBackBar
+                  backLabel="Semua 5 Mode Kognitif"
+                  title={readingModesData.find(m => m.id === activeModeId)?.title || ''}
+                  desc={readingModesData.find(m => m.id === activeModeId)?.subtitle}
+                  onBack={() => setActiveModeId(null)}
+                />
+              ) : (
+                <TopicBackBar
+                  backLabel="Semua topik Reading & Smart Learning"
+                  title={LEARNING_TOPICS.find(t => t.id === activeLearningSubTab)?.title || ''}
+                  desc={LEARNING_TOPICS.find(t => t.id === activeLearningSubTab)?.desc}
+                  onBack={() => setActiveLearningSubTab(null)}
+                />
+              )}
 
               {/* ------------------------------------------------------------- */}
               {/* SUBTAB 1: 5 MODE KOGNITIF */}
               {/* ------------------------------------------------------------- */}
               {activeLearningSubTab === 'smart' && (
                 <div className="space-y-5 animate-in fade-in duration-300">
-                  <div className="px-1 text-xs text-slate-500">
-                    5 mode pembelajaran berbasis riset kognitif. Setiap mode memetakan teori pembelajaran ke dalam matriks kasus dan workflow nyata.
-                  </div>
+                  {activeModeId === null && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {readingModesData.map(mode => (
+                        <button
+                          key={mode.id}
+                          onClick={() => { setActiveModeId(mode.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                          className="text-left bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-[#D4A84B] transition-all group"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="font-mono text-xs font-semibold text-[#8B7340]">{mode.num}</span>
+                            <span className="text-xs font-mono font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">{mode.tag}</span>
+                          </div>
+                          <h3 className="font-display font-bold text-base text-slate-900 mb-1">{mode.title}</h3>
+                          <p className="text-sm text-slate-600 leading-relaxed">{mode.problem}</p>
+                          <span className="mt-4 text-sm font-semibold text-slate-800 flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+                            Buka mode <ArrowRight size={14} />
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="space-y-5">
-                    {readingModesData.map(mode => (
+                    {readingModesData.filter(mode => mode.id === activeModeId).map(mode => (
                       <div key={mode.id} className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5 hover:border-slate-300 transition-all">
                         
                         {/* Mode Title & Tag */}
@@ -2167,7 +2203,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                             <div>
                               <div className="flex items-center gap-2">
                                 <h3 className="font-bold text-base text-slate-900">{mode.title}</h3>
-                                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                                <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
                                   {mode.tag}
                                 </span>
                               </div>
@@ -2184,12 +2220,12 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                             <div>
                               <div className="flex items-center gap-1.5 mb-2">
                                 <Brain size={14} className="text-slate-700" />
-                                <span className="text-[10px] font-mono font-bold uppercase text-slate-500 tracking-wider">
+                                <span className="text-[11px] font-mono font-bold uppercase text-slate-500 tracking-wider">
                                   Landasan Teori Ilmiah
                                 </span>
                               </div>
                               <h4 className="font-bold text-xs text-slate-900">{mode.theory}</h4>
-                              <span className="text-[10px] font-mono text-slate-500 block mb-2">
+                              <span className="text-[11px] font-mono text-slate-500 block mb-2">
                                 Penggagas: {mode.theorist}
                               </span>
                               <p className="text-xs text-slate-600 leading-relaxed">{mode.theoryDesc}</p>
@@ -2201,21 +2237,21 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                             <div>
                               <div className="flex items-center gap-1.5 mb-2">
                                 <Target size={14} className="text-slate-700" />
-                                <span className="text-[10px] font-mono font-bold uppercase text-slate-500 tracking-wider">
+                                <span className="text-[11px] font-mono font-bold uppercase text-slate-500 tracking-wider">
                                   Matriks Masalah &amp; Solusi
                                 </span>
                               </div>
                               <div className="space-y-2 text-xs">
                                 <div>
-                                  <strong className="text-slate-800 block text-[10px] uppercase font-mono">Masalah:</strong>
+                                  <strong className="text-slate-800 block text-[11px] uppercase font-mono">Masalah:</strong>
                                   <p className="text-slate-600">{mode.problem}</p>
                                 </div>
                                 <div>
-                                  <strong className="text-slate-800 block text-[10px] uppercase font-mono">Solusi:</strong>
+                                  <strong className="text-slate-800 block text-[11px] uppercase font-mono">Solusi:</strong>
                                   <p className="text-slate-600">{mode.solution}</p>
                                 </div>
                                 <div>
-                                  <strong className="text-slate-800 block text-[10px] uppercase font-mono">Dampak Akhir:</strong>
+                                  <strong className="text-slate-800 block text-[11px] uppercase font-mono">Dampak Akhir:</strong>
                                   <p className="text-slate-700 font-medium">{mode.impact}</p>
                                 </div>
                               </div>
@@ -2227,15 +2263,15 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                             <div>
                               <div className="flex items-center gap-1.5 mb-2">
                                 <Layers size={14} className="text-slate-700" />
-                                <span className="text-[10px] font-mono font-bold uppercase text-slate-500 tracking-wider">
+                                <span className="text-[11px] font-mono font-bold uppercase text-slate-500 tracking-wider">
                                   Taktik &amp; Workflow 4 Langkah
                                 </span>
                               </div>
                               <p className="text-xs text-slate-700 font-medium mb-2.5 leading-relaxed">{mode.tactic}</p>
                               <div className="space-y-1">
                                 {mode.workflow.map((step, sIdx) => (
-                                  <div key={sIdx} className="flex items-start gap-1.5 text-[11px] text-slate-600">
-                                    <span className="w-3.5 h-3.5 rounded-full bg-slate-200 text-slate-700 font-mono text-[9px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                                  <div key={sIdx} className="flex items-start gap-1.5 text-xs text-slate-600">
+                                    <span className="w-3.5 h-3.5 rounded-full bg-slate-200 text-slate-700 font-mono text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                                       {sIdx + 1}
                                     </span>
                                     <span>{step}</span>
@@ -2250,14 +2286,14 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         {/* Bottom: Prompt Box & Quick Win */}
                         <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                           <div className="flex-1 w-full bg-slate-50 rounded-xl p-3.5 border border-slate-200 text-xs font-sans text-slate-700 leading-relaxed">
-                            <span className="text-[10px] font-bold text-slate-400 block mb-1 uppercase tracking-wider flex items-center gap-1">
+                            <span className="text-[11px] font-bold text-slate-400 block mb-1 uppercase tracking-wider flex items-center gap-1">
                               <MessageSquare size={11} /> Sample Prompt:
                             </span>
                             "{mode.samplePrompt}"
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                            <div className="hidden xl:flex items-center gap-1 text-[11px] text-slate-500 bg-amber-50/80 border border-amber-200/60 px-2.5 py-1.5 rounded-lg max-w-xs">
+                            <div className="hidden xl:flex items-center gap-1 text-xs text-slate-500 bg-amber-50/80 border border-amber-200/60 px-2.5 py-1.5 rounded-lg max-w-xs">
                               <Zap size={12} className="text-amber-600 shrink-0" />
                               <span className="truncate"><strong>Quick Win:</strong> {mode.quickWin}</span>
                             </div>
@@ -2285,7 +2321,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                 <div className="space-y-4 animate-in fade-in duration-300">
                   <div className="flex items-center justify-between text-xs text-slate-500 px-1">
                     <span>10 Prompt Templates untuk akselerasi penguasaan materi baru</span>
-                    <span className="font-mono text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                    <span className="font-mono text-[11px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                       Rujukan: Moritz Kremb (@moritzkremb)
                     </span>
                   </div>
@@ -2295,10 +2331,10 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                       <div key={idx} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm hover:border-slate-300 transition-all">
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
+                            <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
                               Pola 0{idx + 1}
                             </span>
-                            <span className="text-[10px] font-mono text-slate-400">
+                            <span className="text-[11px] font-mono text-slate-400">
                               {item.author}
                             </span>
                           </div>
@@ -2331,7 +2367,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                 <div className="space-y-4 animate-in fade-in duration-300">
                   <div className="flex items-center justify-between text-xs text-slate-500 px-1">
                     <span>10 Strategi membedah intisari buku bisnis tebal, laporan tahunan, dan studi kasus</span>
-                    <span className="font-mono text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                    <span className="font-mono text-[11px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                       Book &amp; Long-Form Analysis
                     </span>
                   </div>
@@ -2341,7 +2377,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                       <div key={idx} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm hover:border-slate-300 transition-all">
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
+                            <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
                               Strategi 0{idx + 1}
                             </span>
                           </div>
@@ -2378,7 +2414,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
               
               <div className="bg-white p-5 rounded-2xl border border-slate-200 flex items-center justify-between shadow-sm">
                 <div>
-                  <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider">
+                  <span className="text-[11px] font-mono font-bold uppercase text-slate-400 tracking-wider">
                     Interactive Practice
                   </span>
                   <h2 className="text-lg font-bold text-slate-900 mt-0.5">Exercise &amp; Practice Lab</h2>
@@ -2393,7 +2429,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                   <div key={ex.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm">
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-mono font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
+                        <span className="text-[11px] font-mono font-medium uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
                           #{ex.department}
                         </span>
                       </div>
@@ -2401,7 +2437,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                       <p className="text-xs text-slate-600 leading-relaxed mb-3">{ex.scenario}</p>
                       
                       <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-700 mb-3">
-                        <span className="block text-[10px] font-mono uppercase text-slate-400 font-bold mb-1">
+                        <span className="block text-[11px] font-mono uppercase text-slate-400 font-bold mb-1">
                           Contoh Prompt Awal (Ad-hoc):
                         </span>
                         <span className="italic font-mono text-slate-600">"{ex.poorPrompt}"</span>
@@ -2479,11 +2515,11 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                     {displayedRaw.map(p => (
                       <div key={p.id} className="bg-white rounded-2xl border border-slate-200 p-3.5 flex flex-col justify-between">
                         <div>
-                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 uppercase mb-1.5 inline-block">
+                          <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 uppercase mb-1.5 inline-block">
                             {p.category}
                           </span>
                           <h4 className="text-xs font-bold text-slate-900 mb-1 leading-snug">{p.title}</h4>
-                          <p className="text-[11px] text-slate-500 mb-2 line-clamp-2">{p.description}</p>
+                          <p className="text-xs text-slate-500 mb-2 line-clamp-2">{p.description}</p>
                           <div className="bg-slate-50 rounded-lg p-2.5 text-xs font-sans text-slate-700 leading-relaxed line-clamp-3 mb-2.5">
                             {p.content}
                           </div>
@@ -2549,7 +2585,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
               <div className="flex-1">
                 <h3 className="font-bold text-sm text-slate-900 leading-snug">Hapus versi ini?</h3>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                  Versi ini hilang permanen dari jurnalmu dan dari Jurnal Batch. Versi lain tetap ada.
+                  Versi ini hilang permanen dari jurnal Anda dan dari Jurnal Batch. Versi lain tetap ada.
                 </p>
               </div>
             </div>
@@ -2599,7 +2635,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
             {/* Modal Header */}
             <div className="px-5 py-3.5 bg-[#141210] text-white flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-mono text-[#E5C158] uppercase tracking-wider">
+                <span className="text-[11px] font-mono text-[#E5C158] uppercase tracking-wider">
                   Exercise Lab #{activeExercise.department}
                 </span>
                 <h3 className="text-sm font-bold text-white mt-0.5">{activeExercise.title}</h3>
@@ -2653,7 +2689,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                       <CheckCircle2 size={15} className="text-emerald-600" />
                       Solusi Benchmark Fasilitator
                     </h4>
-                    <span className="text-[10px] font-medium uppercase tracking-wider text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200/80">
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-amber-900 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-200/80">
                       Formula Rekomendasi
                     </span>
                   </div>
@@ -2713,7 +2749,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
 
             {/* Modal Footer */}
             <div className="px-5 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-              <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">
+              <span className="text-xs text-slate-400 font-mono hidden sm:inline">
                 Tekan <kbd className="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-slate-600">Esc</kbd> atau klik di luar untuk menutup
               </span>
               <button
