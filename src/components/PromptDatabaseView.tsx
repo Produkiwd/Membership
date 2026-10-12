@@ -10,7 +10,7 @@ import {
   Target, Shield, TrendingUp, Share2, 
   Plus, RefreshCw, Eye, Award, BookmarkCheck, 
   FileEdit, Menu, Home, CheckCircle2, SlidersHorizontal,
-  Lightbulb, Brain, Compass, MessageSquare, Zap, AlertTriangle, Trash2
+  Lightbulb, Brain, Compass, MessageSquare, AlertTriangle, Trash2
 } from 'lucide-react';
 export interface Prompt { id: string; title: string; description: string; content: string; category: string; }
 import { EntranceLoading } from './EntranceLoading';
@@ -279,117 +279,93 @@ const jeffSuData = {
   ]
 };
 
-// 4. Smart Learning & Research (5 Mode Kognitif Pembelajaran Berbasis Riset)
+// 4. Grounded Thinking and Learning: 5 mode. Sumber kanonik: GT v6 content.js (window.MODES).
+// Arah belajar: peserta menjelaskan dulu, AI memeriksa ke sumber.
 const readingModesData = [
   {
     id: 1,
     tag: "100 → 1",
     num: "01",
-    title: "Get the Gist Instantly",
-    subtitle: "Big Picture First (Memahami Intisari Utama)",
+    title: "Big Picture First",
+    subtitle: "Lihat gambaran besarnya, lalu ingat intinya tanpa melihat.",
     theory: "Cognitive Load Theory",
     theorist: "John Sweller",
     theoryDesc: "Kapasitas memori kerja manusia sangat terbatas. Pembelajaran efektif membutuhkan pengelolaan beban kognitif dengan meminimalisir gangguan (extraneous load) dan memaksimalkan skema pemahaman konseptual (germane load).",
-    tactic: "Sebelum membaca teks mentah secara mendetail, gunakan AI untuk membuat Briefing Docs dan Study Guides otomatis. Ini memberikan peta struktural awal yang secara drastis mengurangi beban kognitif dan membebaskan pikiran Anda untuk menganalisis konsep.",
-    samplePrompt: "What is the single most important concept that connects all of these materials? Explain in one paragraph.",
-    problem: "Terlalu banyak materi dan dokumen tebal, tidak tahu harus mulai dari mana.",
-    solution: "Mengubah tumpukan konten menjadi satu pemahaman inti (core understanding) yang mudah dicerna.",
-    impact: "Memahami gambaran besar dengan cepat, memberikan arah pembelajaran yang lebih terfokus.",
-    workflow: [
-      "Upload semua materi — slides, PDFs, artikel, transkrip",
-      "Minta AI menemukan satu konsep pemersatu utamanya",
-      "Simpan jawaban sebagai Catatan — ini menjadi peta belajar Anda",
-      "Gunakan Audio Overview untuk mencerna materi dengan mendengarkan"
-    ],
-    quickWin: "Dalam 5 menit, dapatkan peta utuh tanpa harus membaca seluruh tumpukan halaman terlebih dahulu."
+    problem: "Materi banyak, belum tahu mulai dari mana.",
+    trap: "Membaca ringkasan terasa sudah paham.",
+    move: "Picture walk: lihat gambaran besar. Active recall: ingat tanpa melihat.",
+    source: "Semua materi modul dicentang.",
+    chat: "Default. Buka ringkasan sumber sebagai orientasi.",
+    workflow: ["Lihat gambaran besar", "Tutup ringkasan", "Ingat lalu cek ke sumber", "Simpan ke Note: satu gagasan inti beserta sumber pendukung."],
+    samplePrompt: "[Mode 1] Dari materi modul AIF ini, tunjukkan satu gagasan inti dan sumber pendukungnya. Setelah saya menutup ringkasan dan menulis ingatan saya, periksa bagian yang keliru atau hilang."
   },
   {
     id: 2,
     tag: "100 → 10",
     num: "02",
-    title: "Create Structured Outlines",
-    subtitle: "Organize & Chunk (Mendekonstruksi Dokumen)",
+    title: "Organize & Chunk",
+    subtitle: "Kelompokkan gagasan, lalu jelaskan kenapa dikelompokkan begitu.",
     theory: "Connectivism",
     theorist: "George Siemens",
     theoryDesc: "Di era digital, pembelajaran bukan sekadar konstruksi pengetahuan internal, melainkan tentang mengenali pola dan membangun koneksi antar informasi dari berbagai sumber lintas domain.",
-    tactic: "Kumpulkan materi acak lintas sumber. Minta AI bertindak sebagai mesin konektivis — memetakan hubungan antar domain dan merapikannya secara struktural dalam matriks keputusan.",
-    samplePrompt: "Act as a strategic advisor. Synthesize these sources to find three unexpected connections between [Concept A] and [Concept B]. Provide citations.",
-    problem: "Informasi berhasil diserap namun tersebar berantakan dan tidak terorganisir.",
-    solution: "Mengubah materi yang berserakan menjadi poin-poin terstruktur melalui proses chunking (pengelompokan).",
-    impact: "Materi menjadi terorganisir rapi, mudah dipelajari, dan siap dipresentasikan ke stakeholder.",
-    workflow: [
-      "Gunakan materi yang sudah ada di dalam ruang kerja AI",
-      "Minta AI menyusunnya menjadi 10 poin utama atau sebuah outline terstruktur",
-      "Simpan output yang terstruktur sebagai Catatan",
-      "Buat Mind Map untuk memvisualisasikan koneksi antar konsep"
-    ],
-    quickWin: "Materi yang super berantakan berubah menjadi outline super rapi dalam waktu kurang dari 10 menit."
+    problem: "Sudah baca, isinya masih berserakan.",
+    trap: "Mind Map yang rapi dikira sudah paham.",
+    move: "Chunking: satukan gagasan yang bermakna. Tulis konsep kunci dengan kata sendiri.",
+    source: "Semua materi modul dicentang.",
+    chat: "Default.",
+    workflow: ["Kelompokkan", "Jelaskan hubungannya", "Tutup lalu susun ulang", "Simpan ke Note: kerangka dan hubungan antargagasan."],
+    samplePrompt: "[Mode 2] Bantu saya mengelompokkan gagasan modul AIF ini menjadi kerangka. Minta saya menjelaskan alasan setiap kelompok dan hubungan antarkelompok. Periksa penjelasan saya ke sumber. Angka 10 tidak wajib."
   },
   {
     id: 3,
     tag: "0 → 1",
     num: "03",
-    title: "Spark New Ideas",
-    subtitle: "Beat the Blank Page (Menumpas Sindrom Halaman Kosong)",
+    title: "Beat the Blank Page",
+    subtitle: "Fokus dulu, beri jeda, lalu kembali.",
     theory: "Constructivism",
     theorist: "Piaget & Vygotsky",
     theoryDesc: "Pembelajar secara aktif membangun (mengkonstruksi) pemahaman dengan mengalami berbagai hal dan merefleksikannya, membangun di atas skema kognitif yang telah ada sebelumnya.",
-    tactic: "Gunakan Active Reading: tuliskan pemikiran, refleksi, atau hipotesis awal Anda pada kolom chat AI. Lalu minta AI untuk memeriksa interpretasi tersebut berdasarkan teks sumber aslinya.",
-    samplePrompt: "Based on the text, is my interpretation here accurate? What evidence supports or contradicts my thought?",
-    problem: "Kesulitan atau mengalami 'blank page syndrome' saat harus memulai proses analisis dari layar putih.",
-    solution: "Menjadikan AI sebagai partner brainstorming yang pandangannya tertambat kuat pada dokumen referensi.",
-    impact: "Mendapatkan banyak inspirasi dan ide segar serta pijakan awal penulisan yang tajam.",
-    workflow: [
-      "Upload satu dokumen utama sebagai jangkar (silabus, brief, proposal)",
-      "Lakukan curah pendapat (brainstorming) sudut pandang kritis dengan AI",
-      "Simpan ide-ide menarik sebagai Catatan Baru",
-      "Kembangkan catatan tersebut menjadi draf kerja awal melalui format FAQ"
-    ],
-    quickWin: "Dalam waktu 5 menit sesi brainstorming terarah dengan AI, Anda akan menumpas sindrom halaman kosong."
+    problem: "Buntu saat memulai tugas.",
+    trap: "Einstellung: terpaku pada ide pertama.",
+    move: "Focused mode: perhatian terarah. Diffuse mode: beri ruang saat jeda.",
+    source: "Satu dokumen jangkar, misalnya brief tugas AIF.",
+    chat: "Default atau Custom sesuai tugas.",
+    workflow: ["Tulis ide awal", "Jeda sejenak", "Cek ke dokumen jangkar", "Simpan ke Note: satu ide; pisahkan dasar sumber dan asumsi."],
+    samplePrompt: "[Mode 3] Dokumen jangkar saya: [...]. Ide awal saya: [...]. Tunjukkan dukungan sumber dan asumsi saya. Ajukan satu sudut pandang lain. Saya akan jeda sebentar, lalu kembali memilih ide dan memeriksa dasarnya."
   },
   {
     id: 4,
     tag: "100 → 100+",
     num: "04",
     title: "Deep Mastery",
-    subtitle: "From Learner to Expert (Dari Pemula Menjadi Mahir)",
+    subtitle: "Jelaskan alasannya sebelum melihat jawaban.",
     theory: "Elaborative Interrogation",
     theorist: "Feynman Technique",
-    theoryDesc: "Pembelajaran aktif melalui pertanyaan 'Mengapa?' dan 'Bagaimana?' mengintegrasikan fakta baru dengan pengetahuan dasar. Ini pergeseran dari membaca pasif menjadi menjelaskan secara aktif — pondasi utama menuju keahlian sejati.",
-    tactic: "Upload konsep/framework yang Anda miliki, lalu gunakan AI sebagai Socratic sparring partner (rekan debat). Minta AI untuk mengkritisi asumsi Anda, dan paksa diri Anda menjawab tantangan tersebut.",
-    samplePrompt: "Review my uploaded framework. Ask me one deep, challenging question about the underlying assumptions of this model, and wait for my answer.",
-    problem: "Pemahaman masih terasa berada di permukaan, sering gugup saat menghadapi skenario di luar materi teks.",
-    solution: "Memperdalam tingkat pemahaman hingga selevel pakar melalui pola Socratic dialog bertingkat.",
-    impact: "Mampu mempertahankan argumen dan menjawab pertanyaan fundamental stakeholder dengan percaya diri.",
-    workflow: [
-      "Pastikan seluruh materi suatu topik sudah berada di dalam sistem",
-      "Minta AI mengajukan pertanyaan fundamental (pertanyaan 'why', 'what if')",
-      "Simpan analogi dan jawaban krusial Anda menjadi Catatan pemahaman utuh",
-      "Kembangkan menjadi Study Guide beserta kumpulan flashcard pengujiannya"
-    ],
-    quickWin: "Dalam 3-4 putaran pertanyaan sokratik kritis, temukan blind spot (sisi gelap pemahaman) yang tidak Anda sadari."
+    theoryDesc: "Pembelajaran aktif melalui pertanyaan 'Mengapa?' dan 'Bagaimana?' mengintegrasikan fakta baru dengan pengetahuan dasar. Membaca pasif bergeser menjadi menjelaskan secara aktif, fondasi utama menuju keahlian.",
+    problem: "Bisa mengulang isi, sulit menjelaskan alasannya.",
+    trap: "Melihat jawaban lalu merasa “oh iya, saya tahu”.",
+    move: "Uji diri. Deliberate practice: latih bagian tersulit secara sengaja.",
+    source: "Satu bagian yang belum Anda pahami.",
+    chat: "Configure Chat ke Learning Guide, atau Custom: tutor yang bertanya, bukan memberi jawaban.",
+    workflow: ["Jelaskan sendiri", "Cek celah ke sumber", "Coba lagi", "Simpan ke Note: penjelasan versi sendiri yang sudah diperbaiki."],
+    samplePrompt: "[Mode 4] Jadilah tutor yang bertanya, bukan langsung memberi jawaban. Ajukan satu pertanyaan tentang bagian ini dan tunggu jawaban saya. Setelah saya menjelaskan, cek ke sumber, tunjukkan celahnya, lalu uji lagi bagian yang sulit."
   },
   {
     id: 5,
     tag: "10 → 10+",
     num: "05",
-    title: "Accelerate Your Research",
-    subtitle: "Synthesize & Discover (Sintesis Celah Riset)",
+    title: "Synthesize & Discover",
+    subtitle: "Hubungkan beberapa sumber, lalu temukan pola dan celahnya.",
     theory: "Dual Coding Theory",
     theorist: "Allan Paivio",
-    theoryDesc: "Manusia jauh lebih mudah memproses dan mengingat informasi jika disampaikan via dua saluran kognitif sekaligus secara berbarengan — visual/tekstual serta auditori.",
-    tactic: "Hasilkan sintesis komprehensif bagi dokumen kompleks Anda. Identifikasi di mana titik konsensus para ahli, titik yang masih diperdebatkan, serta temukan research gap yang belum terjawab.",
-    samplePrompt: "What is the consensus across all these sources? What is still debated? Where is the research gap I could fill?",
-    problem: "Kesulitan menyari atau mensintesis tumpukan sumber riset atau dokumen referensi multi-sumber.",
-    solution: "Sintesis mendalam difasilitasi AI guna memetakan konsensus, perdebatan, dan celah kosong (research gap).",
-    impact: "Penemuan gagasan inovatif baru yang memandu percepatan riset dan pengambilan keputusan strategis.",
-    workflow: [
-      "Upload jurnal riset, memo, regulasi, dan berbagai artikel pendukung",
-      "Beri instruksi sintesis dan analisis literature gap pada materi rujukan tersebut",
-      "Tandai ide hasil sintesis ini dan simpan sebagai referensi terpercaya",
-      "Satukan dalam tinjauan komparatif menggunakan format matriks atau timeline"
-    ],
-    quickWin: "Buat pemetaan lanskap riset dalam waktu 15 menit, tugas yang biasanya memakan waktu berhari-hari."
+    theoryDesc: "Informasi lebih mudah diingat bila tersimpan dalam dua bentuk: kata dan gambar. Karena itu, tuangkan hasil sintesis ke tabel, peta, atau timeline, lalu jelaskan polanya dengan kata Anda sendiri.",
+    problem: "Banyak sumber, sulit melihat benang merahnya.",
+    trap: "Ringkasan gabungan dari AI dikira sudah sintesis.",
+    move: "Chunking lintas sumber. Dual coding: tuangkan ke tabel atau timeline, lalu jelaskan dengan kata sendiri.",
+    source: "Beberapa sumber terkurasi tentang satu topik: artikel, laporan, materi AIF.",
+    chat: "Default. Minta setiap baris peta disertai kutipan sumbernya.",
+    workflow: ["Pilih sumber terkurasi", "Petakan sepakat, beda, celah", "Jelaskan lalu cek kutipan", "Simpan ke Note: peta sintesis (titik sepakat, yang diperdebatkan, dan celah), masing-masing dengan sumber."],
+    samplePrompt: "[Mode 5] Dari sumber yang saya pilih, buat tabel: di mana sumber sepakat, di mana berbeda, dan pertanyaan apa yang belum dijawab. Sertakan kutipan untuk setiap baris. Setelah itu saya akan menjelaskan pola utamanya dengan kata sendiri. Periksa penjelasan saya ke sumber."
   }
 ];
 
@@ -618,7 +594,7 @@ const TECHNIQUE_TOPICS: Topic[] = [
 ];
 
 const LEARNING_TOPICS: Topic[] = [
-  { id: 'smart', title: '5 Mode Kognitif', desc: 'Lima cara membaca dengan AI, dari menangkap inti materi sampai menemukan celah riset.', meta: '5 mode' },
+  { id: 'smart', title: 'Grounded Thinking and Learning', desc: 'Lima mode berpikir dan belajar bersama AI. Anda menjelaskan dulu, AI memeriksa ke sumber.', meta: '5 mode' },
   { id: 'faster', title: '10 Pola Belajar Cepat', desc: 'Prompt untuk memahami topik baru lebih cepat: analogi, kuis, simulasi, dan lainnya.', meta: '10 prompt' },
   { id: 'extract', title: '10 Ekstraksi Buku & Laporan', desc: 'Prompt untuk menarik pelajaran, kerangka, dan rencana aksi dari buku atau laporan tebal.', meta: '10 prompt' },
   { id: 'exercise', title: 'Exercise', desc: 'Prompt siap pakai untuk latihan praktis: foto, infografis, video, dan game HTML.', meta: '6 prompt' },
@@ -1407,7 +1383,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         Reading &amp; Smart Learning
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                        5 Mode Baca berbasis teori kognitif (Syntopical Reading, Dual Coding, Schema Theory) untuk sintesis laporan dan pembelajaran cepat.
+                        Grounded Thinking and Learning: lima mode berpikir dan belajar bersama AI, ditambah pola belajar cepat, ekstraksi buku, dan Exercise.
                       </p>
                     </div>
                     <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
@@ -2050,9 +2026,9 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                 />
               ) : activeLearningSubTab === 'smart' && activeModeId !== null ? (
                 <TopicBackBar
-                  backLabel="Semua 5 Mode Kognitif"
+                  backLabel="Semua mode Grounded Thinking and Learning"
                   title={readingModesData.find(m => m.id === activeModeId)?.title || ''}
-                  desc={readingModesData.find(m => m.id === activeModeId)?.subtitle}
+                  desc={(() => { const m = readingModesData.find(x => x.id === activeModeId); return m ? `${m.tag} · ${m.subtitle}` : undefined; })()}
                   onBack={() => setActiveModeId(null)}
                 />
               ) : (
@@ -2095,24 +2071,6 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                     {readingModesData.filter(mode => mode.id === activeModeId).map(mode => (
                       <div key={mode.id} className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-5 hover:border-slate-300 transition-all">
                         
-                        {/* Mode Title & Tag */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-2">
-                          <div className="flex items-center gap-3">
-                            <span className="w-9 h-9 rounded-xl bg-slate-900 text-white font-mono font-bold text-sm flex items-center justify-center">
-                              {mode.num}
-                            </span>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-bold text-base text-slate-900">{mode.title}</h3>
-                                <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                                  {mode.tag}
-                                </span>
-                              </div>
-                              <p className="text-xs text-slate-500">{mode.subtitle}</p>
-                            </div>
-                          </div>
-                        </div>
-
                         {/* 3-Column Structured Breakdown */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                           
@@ -2139,21 +2097,21 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                               <div className="flex items-center gap-1.5 mb-2">
                                 <Target size={14} className="text-slate-700" />
                                 <span className="text-[11px] font-mono font-bold uppercase text-slate-500 tracking-wider">
-                                  Matriks Masalah &amp; Solusi
+                                  Kapan &amp; Cara Belajar
                                 </span>
                               </div>
                               <div className="space-y-2 text-xs">
                                 <div>
-                                  <strong className="text-slate-800 block text-[11px] uppercase font-mono">Masalah:</strong>
+                                  <strong className="text-slate-800 block text-[11px] uppercase font-mono">Kapan dipakai:</strong>
                                   <p className="text-slate-600">{mode.problem}</p>
                                 </div>
                                 <div>
-                                  <strong className="text-slate-800 block text-[11px] uppercase font-mono">Solusi:</strong>
-                                  <p className="text-slate-600">{mode.solution}</p>
+                                  <strong className="text-slate-800 block text-[11px] uppercase font-mono">Jebakan:</strong>
+                                  <p className="text-slate-600">{mode.trap}</p>
                                 </div>
                                 <div>
-                                  <strong className="text-slate-800 block text-[11px] uppercase font-mono">Dampak Akhir:</strong>
-                                  <p className="text-slate-700 font-medium">{mode.impact}</p>
+                                  <strong className="text-slate-800 block text-[11px] uppercase font-mono">Gerakan belajar:</strong>
+                                  <p className="text-slate-700 font-medium">{mode.move}</p>
                                 </div>
                               </div>
                             </div>
@@ -2165,10 +2123,13 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                               <div className="flex items-center gap-1.5 mb-2">
                                 <Layers size={14} className="text-slate-700" />
                                 <span className="text-[11px] font-mono font-bold uppercase text-slate-500 tracking-wider">
-                                  Taktik &amp; Workflow 4 Langkah
+                                  Setelan &amp; Langkah
                                 </span>
                               </div>
-                              <p className="text-xs text-slate-700 font-medium mb-2.5 leading-relaxed">{mode.tactic}</p>
+                              <div className="space-y-1 text-xs text-slate-700 mb-2.5 leading-relaxed">
+                                <p><strong className="text-slate-800">Source:</strong> {mode.source}</p>
+                                <p><strong className="text-slate-800">Chat:</strong> {mode.chat}</p>
+                              </div>
                               <div className="space-y-1">
                                 {mode.workflow.map((step, sIdx) => (
                                   <div key={sIdx} className="flex items-start gap-1.5 text-xs text-slate-600">
@@ -2184,21 +2145,16 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
 
                         </div>
 
-                        {/* Bottom: Prompt Box & Quick Win */}
+                        {/* Bottom: Prompt Box */}
                         <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                           <div className="flex-1 w-full bg-slate-50 rounded-xl p-3.5 border border-slate-200 text-xs font-sans text-slate-700 leading-relaxed">
                             <span className="text-[11px] font-bold text-slate-400 block mb-1 uppercase tracking-wider flex items-center gap-1">
-                              <MessageSquare size={11} /> Sample Prompt:
+                              <MessageSquare size={11} /> Prompt Mode:
                             </span>
                             "{mode.samplePrompt}"
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                            <div className="hidden xl:flex items-center gap-1 text-xs text-slate-500 bg-amber-50/80 border border-amber-200/60 px-2.5 py-1.5 rounded-lg max-w-xs">
-                              <Zap size={12} className="text-amber-600 shrink-0" />
-                              <span className="truncate"><strong>Quick Win:</strong> {mode.quickWin}</span>
-                            </div>
-
                             <button
                               onClick={() => handleCopy(mode.samplePrompt, `mode-${mode.num}`)}
                               className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1.5 transition-colors whitespace-nowrap"
