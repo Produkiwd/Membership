@@ -8,41 +8,15 @@ import {
   Search, Copy, Check, X, ChevronLeft, ChevronRight, Loader2, 
   Sparkles, BookOpen, Library, ArrowRight, Layers, 
   Target, Shield, TrendingUp, Share2, 
-  Star, Plus, RefreshCw, Eye, Tag, Award, BookmarkCheck, 
+  Plus, RefreshCw, Eye, Award, BookmarkCheck, 
   FileEdit, Menu, Home, CheckCircle2, SlidersHorizontal, Dumbbell,
   Lightbulb, Brain, Compass, MessageSquare, Zap, AlertTriangle, Trash2
 } from 'lucide-react';
 export interface Prompt { id: string; title: string; description: string; content: string; category: string; }
 import { EntranceLoading } from './EntranceLoading';
 
-// ==========================================
-// 1. DATA TYPES & INTERFACES
-// ==========================================
-export interface PromptVersion {
-  version: number;
-  date: string;
-  frameworkUsed: string;
-  promptText: string;
-  notes?: string;
-}
-
-export interface JournalPrompt {
-  id: string;
-  title: string;
-  description: string;
-  tag: string; // Dynamic user-defined tag
-  departmentTag?: string; // backwards-compatibility alias
-  currentVersion: number;
-  versions: PromptVersion[];
-  isPublic: boolean;
-  authorName: string;
-  score: number; // 1 to 5 scale
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Initial Curated Data (Clean & Realistic - Production)
-const INITIAL_JOURNAL_PROMPTS: JournalPrompt[] = [];
+import { compilePrompt, diffWords, FORMULA_PARTS, groupJourneys, partsFor, type FormulaKey, type Framework, type JournalEntry, type PromptMaterial } from '../lib/promptJournal';
+import { deleteJournalEntry, listJournal, saveJournalEntry } from '../lib/promptJournalApi';
 
 // ============================================================================
 // COMPREHENSIVE CURRICULUM DATASETS (UNTRUNCATED)
@@ -660,23 +634,172 @@ const exercisesData: ExerciseCase[] = [
   }
 ];
 
-// Community Prompts Seed (Empty by default - pure user community contributions)
-const SEED_COMMUNITY_PROMPTS: JournalPrompt[] = [];
+const EMPTY_FIELDS: Record<FormulaKey, string> = { a: '', c: '', t: '', i: '', o: '', n: '', s: '' };
 
-export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () => void; initialMenu?: string }) {
+const formatDate = (value: string) => new Date(value).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+// One prompt journey: every saved version of one person's prompt for one material.
+type JourneyCardProps = {
+  versions: JournalEntry[];
+  showAuthor?: boolean;
+  copiedId: string | null;
+  onCopy: (text: string, id: string) => void;
+  onCompare: (before: JournalEntry, after: JournalEntry) => void;
+  onDelete?: (entry: JournalEntry) => void;
+  onContinue?: (entry: JournalEntry) => void;
+};
+
+const JourneyCard: React.FC<JourneyCardProps> = ({ versions, showAuthor, copiedId, onCopy, onCompare, onDelete, onContinue }) => {
+  const [expanded, setExpanded] = useState(!showAuthor);
+  const latest = versions[versions.length - 1];
+  const shown = expanded ? [...versions].reverse() : [latest];
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div className="px-5 py-3.5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="font-bold text-sm text-slate-900 truncate">{showAuthor ? latest.authorName : latest.materialTitle}</h3>
+          <p className="text-[11px] text-slate-500">
+            {showAuthor ? `${latest.materialTitle} · ` : ''}{versions.length} versi · terakhir {formatDate(latest.createdAt)}
+          </p>
+        </div>
+        {onContinue && (
+          <button
+            onClick={() => onContinue(latest)}
+            className="px-3 py-1.5 rounded-lg bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold flex items-center gap-1.5"
+          >
+            <RefreshCw size={11} /> Lanjutkan ke v{latest.version + 1}
+          </button>
+        )}
+      </div>
+
+      <ol className="divide-y divide-slate-100">
+        {shown.map(entry => {
+          const previous = versions.filter(item => item.version < entry.version).pop();
+          return (
+            <li key={entry.id} className="px-5 py-4 space-y-2.5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-md text-[11px] font-mono font-bold bg-slate-900 text-white">v{entry.version}</span>
+                  <span className="text-[11px] text-slate-500">{formatDate(entry.createdAt)} · {entry.framework === 'ACTIONS' ? 'A.C.T.I.O.N.S.' : 'ACT'}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  {previous && (
+                    <button
+                      onClick={() => onCompare(previous, entry)}
+                      className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold text-xs flex items-center gap-1"
+                    >
+                      <TrendingUp size={11} /> Bandingkan dengan v{previous.version}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => onCopy(entry.promptText, entry.id)}
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1"
+                  >
+                    {copiedId === entry.id ? <Check size={11} /> : <Copy size={11} />}
+                    {copiedId === entry.id ? 'Tersalin' : 'Salin'}
+                  </button>
+                  {onDelete && (
+                    <button onClick={() => onDelete(entry)} className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50" title={`Hapus v${entry.version}`}>
+                      <Trash2 size={13} />
+                    </button>
+                  )}
+                </div>
+              </div>
+              {entry.notes && (
+                <p className="text-xs text-slate-700 bg-amber-50/60 border-l-2 border-[#C9A23E] px-3 py-1.5 rounded-r-lg">{entry.notes}</p>
+              )}
+              <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs text-slate-700 leading-relaxed whitespace-pre-wrap max-h-56 overflow-y-auto">
+                {entry.promptText}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+
+      {versions.length > 1 && (
+        <button
+          onClick={() => setExpanded(value => !value)}
+          className="w-full px-5 py-2 border-t border-slate-100 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+        >
+          {expanded ? 'Tampilkan versi terakhir saja' : `Lihat perjalanan lengkap (${versions.length} versi)`}
+        </button>
+      )}
+    </div>
+  );
+};
+
+function DiffText({ before, after }: { before: string; after: string }) {
+  return (
+    <p className="text-xs leading-relaxed whitespace-pre-wrap text-slate-700">
+      {diffWords(before, after).map((part, i) => (
+        <span
+          key={i}
+          className={part.type === 'added' ? 'bg-emerald-100 text-emerald-900 rounded-sm' : part.type === 'removed' ? 'bg-rose-100 text-rose-800 line-through rounded-sm' : ''}
+        >
+          {part.text}
+        </span>
+      ))}
+    </p>
+  );
+}
+
+// Field-by-field comparison of two versions in one journey.
+function CompareModal({ before, after, onClose }: { before: JournalEntry; after: JournalEntry; onClose: () => void }) {
+  const parts = FORMULA_PARTS.filter(part => before.fields[part.key] || after.fields[part.key]);
+  const changed = parts.filter(part => (before.fields[part.key] || '') !== (after.fields[part.key] || '')).length;
+  return (
+    <div onClick={onClose} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
+      <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-3xl max-h-[88vh] flex flex-col overflow-hidden">
+        <div className="px-5 py-3.5 bg-[#141210] text-white flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <span className="text-[10px] font-mono text-[#E5C158] uppercase tracking-wider">Perubahan v{before.version} → v{after.version}</span>
+            <h3 className="text-sm font-bold truncate">{after.materialTitle}{after.isMine ? '' : ` · ${after.authorName}`}</h3>
+          </div>
+          <button onClick={onClose} className="p-1 rounded-lg text-slate-400 hover:text-white" aria-label="Tutup"><X size={18} /></button>
+        </div>
+        <div className="p-5 overflow-y-auto space-y-4">
+          <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-600">
+            <span><strong className="text-slate-900">{changed}</strong> dari {parts.length} kolom berubah</span>
+            <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-emerald-100 border border-emerald-300" /> ditambahkan</span>
+            <span className="inline-flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-rose-100 border border-rose-300" /> dihapus</span>
+          </div>
+          {after.notes && (
+            <div className="text-xs text-slate-700 bg-amber-50/60 border-l-2 border-[#C9A23E] px-3 py-2 rounded-r-lg">
+              <strong>Catatan v{after.version}:</strong> {after.notes}
+            </div>
+          )}
+          {parts.map(part => {
+            const oldText = before.fields[part.key] || '';
+            const newText = after.fields[part.key] || '';
+            return (
+              <div key={part.key} className={`rounded-xl border p-3 ${oldText === newText ? 'border-slate-200 bg-slate-50/60' : 'border-amber-200 bg-white'}`}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] font-bold text-slate-800"><span className="text-[#966A0E]">{part.letter}</span> · {part.label}</span>
+                  <span className="text-[10px] font-mono text-slate-400">{oldText === newText ? 'tetap' : !oldText ? 'baru' : !newText ? 'dihapus' : 'diubah'}</span>
+                </div>
+                <DiffText before={oldText} after={newText} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function App({ onBack, initialMenu = 'beranda', materials = [] }: { onBack?: () => void; initialMenu?: string; materials?: PromptMaterial[] }) {
   // Navigation State (WJG Style)
-  // 'beranda' | 'my-journal' | 'prompt-studio' | 'community' | 'techniques' | 'reading-learning' | 'exercise' | 'vault'
+  // 'beranda' | 'my-journal' | 'prompt-studio' | 'batch' | 'techniques' | 'reading-learning' | 'exercise' | 'vault'
   const [activeMenu, setActiveMenu] = useState<string>(() => {
     if (typeof window !== 'undefined') {
-      const hash = window.location.hash.replace('#', '');
-      if (['exercise', 'prompt-studio', 'my-journal', 'community', 'techniques', 'reading-learning', 'vault'].includes(hash)) {
-        return hash;
-      }
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get('tab');
-      if (tab && ['exercise', 'prompt-studio', 'my-journal', 'community', 'techniques', 'reading-learning', 'vault'].includes(tab)) {
-        return tab;
-      }
+      const menus = ['exercise', 'prompt-studio', 'my-journal', 'batch', 'techniques', 'reading-learning', 'vault'];
+      // Old links to the removed Community page land on Jurnal Batch.
+      const fromLink = (value: string | null) => value === 'community' ? 'batch' : value;
+      const hash = fromLink(window.location.hash.replace('#', ''));
+      if (hash && menus.includes(hash)) return hash;
+      const tab = fromLink(new URLSearchParams(window.location.search).get('tab'));
+      if (tab && menus.includes(tab)) return tab;
     }
     return initialMenu || 'beranda';
   });
@@ -689,73 +812,37 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  // Journal Prompts (LocalStorage Persisted)
-  const [journalPrompts, setJournalPrompts] = useState<JournalPrompt[]>(() => {
-    try {
-      const saved = localStorage.getItem('aif_prod_journal_v1');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          return parsed.filter((p: any) => !['jp-1', 'jp-2', 'jp-3'].includes(p.id));
-        }
-      }
-    } catch (e) {
-      console.error('Failed to parse journal', e);
-    }
-    return INITIAL_JOURNAL_PROMPTS;
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('aif_prod_journal_v1', JSON.stringify(journalPrompts));
-    } catch (e) {
-      console.error('Failed to save journal', e);
-    }
-  }, [journalPrompts]);
-
-  // Filters & State
-  const [selectedTag, setSelectedTag] = useState<string>('Semua');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  // Prompt Journal (Supabase): own entries plus batchmates' entries
+  const [entries, setEntries] = useState<JournalEntry[]>([]);
+  const [journalStatus, setJournalStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [journalError, setJournalError] = useState('');
+  const [selectedMaterialKey, setSelectedMaterialKey] = useState('');
+  const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [compareTarget, setCompareTarget] = useState<{ before: JournalEntry; after: JournalEntry } | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  
+
+  const loadJournal = React.useCallback(async () => {
+    setJournalStatus('loading');
+    setJournalError('');
+    try {
+      setEntries(await listJournal());
+      setJournalStatus('ready');
+    } catch (error) {
+      setJournalError(error instanceof Error ? error.message : 'Jurnal belum dapat dimuat.');
+      setJournalStatus('error');
+    }
+  }, []);
+
+  useEffect(() => { loadJournal(); }, [loadJournal]);
+
   // Sub-Navigation Tabs
   const [activeTechniqueSubTab, setActiveTechniqueSubTab] = useState<'foundational' | 'brutal' | 'jeffsu'>('foundational');
   const [activeLearningSubTab, setActiveLearningSubTab] = useState<'smart' | 'faster' | 'extract'>('smart');
-  
+
   // Modals
-  const [comparingPrompt, setComparingPrompt] = useState<JournalPrompt | null>(null);
   const [activeExercise, setActiveExercise] = useState<ExerciseCase | null>(null);
   const [showExerciseSolution, setShowExerciseSolution] = useState(false);
-  const [promptToDelete, setPromptToDelete] = useState<JournalPrompt | null>(null);
-
-  // Community & Journal 1 to 5 Star Rating System (Direct, Simple & Interactive)
-  const [userRatings, setUserRatings] = useState<Record<string, number>>(() => {
-    try {
-      const saved = localStorage.getItem('prompt_user_ratings_v1');
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
-
-  const handleRatePrompt = (promptId: string, star: number) => {
-    setUserRatings(prev => {
-      const updated = { ...prev, [promptId]: star };
-      try {
-        localStorage.setItem('prompt_user_ratings_v1', JSON.stringify(updated));
-      } catch (e) {
-        console.error(e);
-      }
-      return updated;
-    });
-  };
-
-  const getEffectiveRating = (item: JournalPrompt) => {
-    if (userRatings[item.id] !== undefined) {
-      return userRatings[item.id];
-    }
-    return item.score > 5 ? Number((item.score / 2).toFixed(1)) : item.score;
-  };
 
   // Close modals on Escape key
   useEffect(() => {
@@ -765,29 +852,35 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
           setActiveExercise(null);
           setShowExerciseSolution(false);
         }
-        if (comparingPrompt) setComparingPrompt(null);
-        if (promptToDelete) setPromptToDelete(null);
+        if (compareTarget) setCompareTarget(null);
+        if (entryToDelete && !isDeleting) setEntryToDelete(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeExercise, comparingPrompt, promptToDelete]);
+  }, [activeExercise, compareTarget, entryToDelete, isDeleting]);
 
-  const handleDeletePrompt = (id: string) => {
-    setJournalPrompts(prev => prev.filter(item => item.id !== id));
-    if (comparingPrompt && comparingPrompt.id === id) setComparingPrompt(null);
-    setPromptToDelete(null);
+  const handleDeleteEntry = async () => {
+    if (!entryToDelete) return;
+    setIsDeleting(true);
+    try {
+      await deleteJournalEntry(entryToDelete.id);
+      setEntries(prev => prev.filter(item => item.id !== entryToDelete.id));
+      setEntryToDelete(null);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Entri belum dapat dihapus.');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // Builder Form State
-  const [iteratingPromptId, setIteratingPromptId] = useState<string | null>(null);
-  const [builderTitle, setBuilderTitle] = useState('');
-  const [builderTag, setBuilderTag] = useState('');
-  const [builderType, setBuilderType] = useState<'ACTIONS' | 'ACT'>('ACTIONS');
+  const [builderMaterialKey, setBuilderMaterialKey] = useState('');
+  const [builderType, setBuilderType] = useState<Framework>('ACTIONS');
   const [builderNotes, setBuilderNotes] = useState('');
-  const [actionData, setActionData] = useState({
-    a: '', c: '', t: '', i: '', o: '', n: '', s: ''
-  });
+  const [actionData, setActionData] = useState<Record<FormulaKey, string>>(EMPTY_FIELDS);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   // 1000+ Raw Prompts State
   const [rawPrompts, setRawPrompts] = useState<Prompt[]>([]);
@@ -828,169 +921,79 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const getCompiledPrompt = () => {
-    if (builderType === 'ACT') {
-      const parts = [];
-      if (actionData.a) parts.push(`[Peran & Audiens]\n${actionData.a}`);
-      if (actionData.c) parts.push(`[Situasi & Latar Belakang]\n${actionData.c}`);
-      if (actionData.t) parts.push(`[Tugas & Target]\n${actionData.t}`);
-      if (parts.length === 0) {
-        return `[Peran & Audiens]\nBertindaklah sebagai Senior Specialist.\n\n[Situasi & Latar Belakang]\nSituasi saat ini memerlukan solusi terukur dan efisien.\n\n[Tugas & Target]\nTugas Anda adalah menyusun rencana tindakan konkret.`;
-      }
-      return parts.join('\n\n');
-    }
-    const parts = [];
-    if (actionData.a) parts.push(`[Peran & Audiens]\n${actionData.a}`);
-    if (actionData.c) parts.push(`[Situasi & Latar Belakang]\n${actionData.c}`);
-    if (actionData.t) parts.push(`[Tugas & Target]\n${actionData.t}`);
-    if (actionData.i) parts.push(`[Dampak yang Diharapkan]\n${actionData.i}`);
-    if (actionData.o) parts.push(`[Format Keluaran]\n${actionData.o}`);
-    if (actionData.n) parts.push(`[Batasan & Pantangan]\n${actionData.n}`);
-    if (actionData.s) parts.push(`[Urutan Langkah]\n${actionData.s}`);
-    if (parts.length === 0) {
-      return `[Peran & Audiens]\nBertindaklah sebagai [Peran/Keahlian Anda]. Audiens: [Target Pemangku Kepentingan].\n\n[Situasi & Latar Belakang]\nLatar belakang situasi bisnis: [Jelaskan fakta dan kondisi saat ini].\n\n[Tugas & Target]\nTugas spesifik Anda: [Jelaskan dokumen/output yang harus dibuat].\n\n[Dampak yang Diharapkan]\nDampak yang ingin dicapai: [Tujuan perubahan perilaku/keputusan].\n\n[Format Keluaran]\nFormat keluaran: [Gunakan Minto Pyramid / SCQA / Tabel Ringkas].\n\n[Batasan & Pantangan]\nDILARANG: [Sebutkan pantangan nada, asumsi tanpa data, atau batasan kata].\n\n[Urutan Langkah]\nIkuti urutan pemikiran ini:\n1. [Langkah 1]\n2. [Langkah 2]\n3. [Langkah 3]`;
-    }
-    return parts.join('\n\n');
-  };
+  // Materials offered in filters: current Prompt materials plus any older title still present in saved entries.
+  const materialOptions: PromptMaterial[] = React.useMemo(() => {
+    const titles = new Map(materials.map(item => [item.key, item.title]));
+    entries.forEach(entry => { if (!titles.has(entry.materialKey)) titles.set(entry.materialKey, entry.materialTitle); });
+    return [...titles].map(([key, title]) => ({ key, title }));
+  }, [materials, entries]);
 
-  const handleSavePrompt = (e: React.FormEvent) => {
-    e.preventDefault();
-    const compiled = getCompiledPrompt();
-    const today = new Date().toISOString().split('T')[0];
-    const finalTag = (builderTag.trim() || 'Umum');
+  const myEntries = entries.filter(entry => entry.isMine);
+  const matchesMaterial = (entry: JournalEntry) => !selectedMaterialKey || entry.materialKey === selectedMaterialKey;
+  const myJourneys = groupJourneys(myEntries.filter(matchesMaterial));
+  const peerJourneys = groupJourneys(entries.filter(entry => !entry.isMine && matchesMaterial(entry)));
+  const myBatch = myEntries.find(entry => entry.batch)?.batch || entries.find(entry => entry.batch)?.batch || null;
 
-    if (iteratingPromptId) {
-      setJournalPrompts(prev => prev.map(item => {
-        if (item.id === iteratingPromptId) {
-          const nextV = item.currentVersion + 1;
-          const newVersion: PromptVersion = {
-            version: nextV,
-            date: `${today} (v${nextV})`,
-            frameworkUsed: builderType === 'ACTIONS' ? 'A.C.T.I.O.N.S.' : 'ACT',
-            promptText: compiled,
-            notes: builderNotes || `Iterasi ke versi ${nextV} dengan penajaman parameter kerja.`
-          };
-          return {
-            ...item,
-            title: builderTitle || item.title,
-            tag: finalTag,
-            departmentTag: finalTag,
-            currentVersion: nextV,
-            score: Math.min(5.0, item.score > 5 ? Number((item.score / 2).toFixed(1)) : item.score),
-            updatedAt: today,
-            versions: [...item.versions, newVersion]
-          };
-        }
-        return item;
-      }));
-    } else {
-      const newPrompt: JournalPrompt = {
-        id: `jp-${Date.now()}`,
-        title: builderTitle || 'Prompt Kerja Baru',
-        description: builderNotes || 'Prompt terstruktur hasil formula A.C.T.I.O.N.S.',
-        tag: finalTag,
-        departmentTag: finalTag,
-        currentVersion: 1,
-        score: 5.0,
-        isPublic: true,
-        authorName: 'Saya (Personal)',
-        createdAt: today,
-        updatedAt: today,
-        versions: [
-          {
-            version: 1,
-            date: `${today} (v1)`,
-            frameworkUsed: builderType === 'ACTIONS' ? 'A.C.T.I.O.N.S.' : 'ACT',
-            promptText: compiled,
-            notes: builderNotes || 'Draft awal (Versi 1).'
-          }
-        ]
-      };
-      setJournalPrompts(prev => [newPrompt, ...prev]);
-    }
+  const builderMaterial = materials.find(item => item.key === builderMaterialKey) || null;
+  const builderHistory = myEntries.filter(entry => entry.materialKey === builderMaterialKey).sort((a, b) => a.version - b.version);
+  const builderLatest = builderHistory[builderHistory.length - 1] || null;
+  const compiledPreview = compilePrompt(actionData, builderType);
+  const builderIsEmpty = compiledPreview === '';
 
-    setIteratingPromptId(null);
-    setBuilderTitle('');
-    setBuilderTag('');
-    setBuilderNotes('');
-    setActionData({ a: '', c: '', t: '', i: '', o: '', n: '', s: '' });
-    setActiveMenu('my-journal');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const startIteration = (prompt: JournalPrompt) => {
-    setIteratingPromptId(prompt.id);
-    setBuilderTitle(prompt.title);
-    setBuilderTag(prompt.tag || prompt.departmentTag || '');
+  const resetBuilder = (materialKey = '') => {
+    setBuilderMaterialKey(materialKey);
     setBuilderType('ACTIONS');
-    setBuilderNotes(`Catatan Perbaikan v${prompt.currentVersion + 1}: `);
-    
-    const latest = prompt.versions[prompt.versions.length - 1];
-    setActionData({
-      a: `[Lanjutkan peran dari v${prompt.currentVersion}]`,
-      c: '',
-      t: latest.promptText.slice(0, 150) + '...',
-      i: '',
-      o: 'Format Minto Pyramid / Eksekutif',
-      n: 'Hindari asumsi tanpa data pendukung',
-      s: '1. Analisis masalah inti\n2. Rekomendasi solusi\n3. Mitigasi risiko'
-    });
+    setBuilderNotes('');
+    setActionData(EMPTY_FIELDS);
+    setSaveError('');
+  };
 
+  const loadEntryIntoBuilder = (entry: JournalEntry) => {
+    setBuilderType(entry.framework);
+    setActionData({ ...EMPTY_FIELDS, ...entry.fields });
+    setBuilderNotes('');
+    setSaveError('');
+  };
+
+  // Continue a journey: open the studio with the latest version, ready to be improved.
+  const startNextVersion = (entry: JournalEntry) => {
+    setBuilderMaterialKey(entry.materialKey);
+    loadEntryIntoBuilder(entry);
     setActiveMenu('prompt-studio');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const adoptToMyJournal = (item: JournalPrompt) => {
-    const latest = item.versions[item.versions.length - 1];
-    const itemTag = item.tag || item.departmentTag || 'Umum';
-    const adopted: JournalPrompt = {
-      ...item,
-      id: `jp-adp-${Date.now()}`,
-      title: `${item.title} (Adaptasi Saya)`,
-      tag: itemTag,
-      departmentTag: itemTag,
-      authorName: `Saya (Adaptasi dari ${item.authorName})`,
-      currentVersion: 1,
-      isPublic: false,
-      createdAt: new Date().toISOString().split('T')[0],
-      updatedAt: new Date().toISOString().split('T')[0],
-      versions: [
-        {
-          version: 1,
-          date: 'Day 1 (Adopsi)',
-          frameworkUsed: latest.frameworkUsed,
-          promptText: latest.promptText,
-          notes: `Diadaptasi dari karya ${item.authorName}. Siap diiterasi.`
-        }
-      ]
-    };
-    setJournalPrompts(prev => [adopted, ...prev]);
-    setCopiedId(`adp-${item.id}`);
-    setTimeout(() => setCopiedId(null), 2500);
+  const openNewFormula = () => {
+    resetBuilder(selectedMaterialKey && materials.some(item => item.key === selectedMaterialKey) ? selectedMaterialKey : '');
+    handleNavigate('prompt-studio');
   };
 
-  // Pre-fill Formula Studio directly from Case Study Benchmark
+  const handleSavePrompt = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!builderMaterial) { setSaveError('Pilih materi terlebih dahulu.'); return; }
+    if (builderIsEmpty) { setSaveError('Isi minimal satu kolom formula.'); return; }
+    setIsSaving(true);
+    setSaveError('');
+    try {
+      const saved = await saveJournalEntry({ material: builderMaterial, framework: builderType, fields: actionData, notes: builderNotes });
+      setEntries(prev => [...prev, saved]);
+      resetBuilder();
+      setSelectedMaterialKey(saved.materialKey);
+      setActiveMenu('my-journal');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Prompt belum dapat disimpan.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Pre-fill Formula Studio from a case study benchmark, line by line.
   const handleStartFormulaFromExercise = (ex: ExerciseCase) => {
-    setIteratingPromptId(null);
-    setBuilderTitle(`Solusi: ${ex.title}`);
-    setBuilderTag(ex.department);
-    setBuilderType('ACTIONS');
-    setBuilderNotes(`Berdasarkan studi kasus ${ex.title}.\nSkenario: ${ex.scenario}`);
-
-    const actorMatch = ex.benchmarkSolution.match(/\[A - Actor\]\s*([^\n]+)/i);
-    const taskMatch = ex.benchmarkSolution.match(/\[T - Task\]\s*([^\n]+)/i);
-    const outputMatch = ex.benchmarkSolution.match(/\[O - Output\]\s*([^\n]+)/i);
-
-    setActionData({
-      a: actorMatch ? actorMatch[1].trim() : `Senior ${ex.department} Director`,
-      c: `Skenario Bisnis: ${ex.scenario}`,
-      t: taskMatch ? taskMatch[1].trim() : 'Menyusun rencana tindakan strategis terukur.',
-      i: 'Menghasilkan kesepakatan win-win tanpa memutus hubungan kerja sama.',
-      o: outputMatch ? outputMatch[1].trim() : 'Format Minto SCQA, maksimal 3 paragraf, opsi solusi jelas.',
-      n: 'Tegas profesional, berbasis data, zero defensiveness.',
-      s: 'Konteks Situasi → Komplikasi Utama → Solusi Trade-off'
-    });
-
+    const pick = (letter: string) => ex.benchmarkSolution.match(new RegExp(`\\[${letter} - [^\\]]+\\]\\s*([^\\n]+)`))?.[1].trim() || '';
+    resetBuilder();
+    setActionData({ a: pick('A'), c: pick('C'), t: pick('T'), i: pick('I'), o: pick('O'), n: pick('N'), s: pick('S') });
+    setBuilderNotes(`Latihan: ${ex.title}`);
     setActiveExercise(null);
     setShowExerciseSolution(false);
     setActiveMenu('prompt-studio');
@@ -1001,44 +1004,36 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
   const handleNavigate = (menu: string) => {
     setActiveExercise(null);
     setShowExerciseSolution(false);
-    setComparingPrompt(null);
-    setPromptToDelete(null);
+    setCompareTarget(null);
+    setEntryToDelete(null);
     setActiveMenu(menu);
     setSidebarOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Merged Community Prompts: Curated Seed Prompts + User's Public Prompts
-  const communityPrompts = React.useMemo(() => {
-    const userPublic = journalPrompts.filter(p => p.isPublic);
-    const combined: JournalPrompt[] = [...SEED_COMMUNITY_PROMPTS];
-    userPublic.forEach(up => {
-      if (!combined.some(cp => cp.id === up.id)) {
-        combined.unshift(up);
-      }
-    });
-    return combined;
-  }, [journalPrompts]);
-
-  // Dynamic tags derived from existing prompts (typed as string[])
-  const existingTags: string[] = Array.from(
-    new Set<string>(
-      journalPrompts
-        .map(item => (item.tag || item.departmentTag || '').trim())
-        .filter((t): t is string => Boolean(t))
-    )
+  const materialFilter = (
+    <select
+      value={selectedMaterialKey}
+      onChange={(e) => setSelectedMaterialKey(e.target.value)}
+      className="w-full md:w-64 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#C9A23E]"
+      aria-label="Filter materi"
+    >
+      <option value="">Semua materi</option>
+      {materialOptions.map(item => <option key={item.key} value={item.key}>{item.title}</option>)}
+    </select>
   );
-  const availableFilterTags: string[] = ['Semua', ...existingTags];
 
-  // Filtered lists
-  const filteredJournal = journalPrompts.filter(item => {
-    const itemTag = item.tag || item.departmentTag || 'Umum';
-    const matchTag = selectedTag === 'Semua' || itemTag.toLowerCase() === selectedTag.toLowerCase();
-    const matchQ = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                   item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                   itemTag.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchTag && matchQ;
-  });
+  const journalStatusView = journalStatus === 'loading' ? (
+    <div className="p-10 text-center bg-white rounded-2xl border border-slate-200">
+      <Loader2 size={20} className="animate-spin text-[#C9A23E] mx-auto mb-2" />
+      <span className="text-xs text-slate-500">Memuat jurnal...</span>
+    </div>
+  ) : journalStatus === 'error' ? (
+    <div className="p-6 text-center bg-white rounded-2xl border border-rose-200 space-y-3">
+      <p className="text-xs text-rose-700">{journalError}</p>
+      <button onClick={loadJournal} className="px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold">Coba lagi</button>
+    </div>
+  ) : null;
 
   const filteredRaw = rawPrompts.filter(p => {
     const matchCat = selectedRawCategory === 'All' || p.category === selectedRawCategory;
@@ -1127,7 +1122,7 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
               <span>My Prompt Journal</span>
             </div>
             <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${activeMenu === 'my-journal' ? 'bg-black/20 text-slate-950' : 'bg-white/10 text-slate-300'}`}>
-              {journalPrompts.length}
+              {myEntries.length}
             </span>
           </button>
 
@@ -1144,15 +1139,15 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
           </button>
 
           <button
-            onClick={() => handleNavigate('community')}
+            onClick={() => handleNavigate('batch')}
             className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-              activeMenu === 'community'
+              activeMenu === 'batch'
                 ? 'bg-[#E5C158] text-slate-950 shadow-md shadow-[#E5C158]/20'
                 : 'text-slate-300 hover:text-white hover:bg-white/5'
             }`}
           >
             <Share2 size={15} />
-            <span>Prompt Community</span>
+            <span>Jurnal Batch</span>
           </button>
 
           <button
@@ -1250,7 +1245,7 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
                 {activeMenu === 'beranda' ? 'Beranda' : 
                  activeMenu === 'my-journal' ? 'My Prompt Journal' : 
                  activeMenu === 'prompt-studio' ? 'Prompt Formula Studio' : 
-                 activeMenu === 'community' ? 'Prompt Community' : 
+                 activeMenu === 'batch' ? 'Jurnal Batch' : 
                  activeMenu === 'techniques' ? 'Prompting Techniques' : 
                  activeMenu === 'reading-learning' ? 'Reading & Smart Learning' : 
                  activeMenu === 'exercise' ? 'Exercise & Practice Lab' : 'Basic Prompt Library (1.000+)'}
@@ -1260,12 +1255,7 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                setIteratingPromptId(null);
-                setBuilderTitle('');
-                setBuilderNotes('');
-                handleNavigate('prompt-studio');
-              }}
+              onClick={openNewFormula}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold shadow-sm transition-all"
             >
               <Plus size={13} /> Buat Formula Baru
@@ -1302,11 +1292,7 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
                       Buka Jurnal Saya <ArrowRight size={13} />
                     </button>
                     <button
-                      onClick={() => {
-                        setIteratingPromptId(null);
-                        setBuilderTitle('');
-                        handleNavigate('prompt-studio');
-                      }}
+                      onClick={openNewFormula}
                       className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold flex items-center gap-1.5 transition-all border border-white/10"
                     >
                       Buat Formula Baru
@@ -1339,14 +1325,14 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
                           01
                         </span>
                         <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
-                          {journalPrompts.length} Tersimpan
+                          {myEntries.length} Versi
                         </span>
                       </div>
                       <h3 className="font-bold text-sm text-slate-900 group-hover:text-slate-950 transition-colors mb-1.5">
                         My Prompt Journal
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                        Repositori personal Anda untuk melacak riwayat evolusi Before &amp; After, catatan revisi, dan kematangan prompt dari waktu ke waktu.
+                        Semua versi prompt kamu per materi. Lihat apa yang berubah dari satu versi ke versi berikutnya.
                       </p>
                     </div>
                     <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
@@ -1373,7 +1359,7 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
                         Prompt Formula Studio
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                        Susun instruksi berbobot tinggi dengan panduan 7 parameter A.C.T.I.O.N.S. atau 3 parameter ACT cepat.
+                        Pilih materi, susun prompt dengan 7 kolom A.C.T.I.O.N.S. atau 3 kolom ACT, lalu simpan sebagai versi baru.
                       </p>
                     </div>
                     <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
@@ -1384,7 +1370,7 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
 
                   {/* Box 3: Prompt Community */}
                   <div 
-                    onClick={() => handleNavigate('community')}
+                    onClick={() => handleNavigate('batch')}
                     className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer group flex flex-col justify-between"
                   >
                     <div>
@@ -1393,18 +1379,18 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
                           03
                         </span>
                         <span className="text-[10px] font-mono font-medium uppercase tracking-wider text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200/60">
-                          Community Hub
+                          {myBatch || 'Satu Batch'}
                         </span>
                       </div>
                       <h3 className="font-bold text-sm text-slate-900 group-hover:text-slate-950 transition-colors mb-1.5">
-                        Prompt Community
+                        Jurnal Batch
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                        Jelajahi dan adaptasi formula teruji dari rekan komunitas lintas topik dan bidang kerja lengkap dengan feedback dan skor kurasi fasilitator.
+                        Lihat prompt rekan satu batch untuk materi yang sama, lengkap dengan perjalanan versinya.
                       </p>
                     </div>
                     <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
-                      <span>Jelajahi Komunitas</span>
+                      <span>Buka Jurnal Batch</span>
                       <ArrowRight size={13} />
                     </div>
                   </div>
@@ -1521,182 +1507,62 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
           )}
 
           {/* ===================================================================== */}
-          {/* VIEW: MY PROMPT JOURNAL (CLEAN CARDS, SIMPLE STAR RATING) */}
+          {/* VIEW: MY PROMPT JOURNAL (JOURNEY PER MATERI) */}
           {/* ===================================================================== */}
           {activeMenu === 'my-journal' && (
             <div className="space-y-5 animate-in fade-in duration-300">
-              
-              {/* Filter Bar */}
-              <div className="bg-white p-3.5 rounded-2xl border border-slate-200 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-                <div className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 no-scrollbar">
-                  <span className="text-[11px] font-mono font-bold uppercase text-slate-400 mr-1 flex items-center gap-1">
-                    <Tag size={11} /> Tag:
-                  </span>
-                  {availableFilterTags.map(tag => (
-                    <button
-                      key={tag}
-                      onClick={() => setSelectedTag(tag)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                        selectedTag.toLowerCase() === tag.toLowerCase()
-                          ? 'bg-[#141210] text-white'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                    >
-                      #{tag}
-                    </button>
-                  ))}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900">My Prompt Journal</h2>
+                  <p className="text-xs text-slate-500 mt-0.5 max-w-xl">
+                    Setiap kali kamu menyimpan prompt untuk satu materi, prompt itu menjadi versi baru. Bandingkan versinya untuk melihat apa yang berubah.
+                  </p>
                 </div>
-
-                <div className="relative w-full md:w-60">
-                  <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Cari prompt saya..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C9A23E]"
-                  />
+                <div className="flex flex-col sm:flex-row gap-2">
+                  {materialFilter}
+                  <button
+                    onClick={openNewFormula}
+                    className="px-3.5 py-2 rounded-xl bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold flex items-center justify-center gap-1.5 whitespace-nowrap"
+                  >
+                    <Plus size={13} /> Tulis Prompt
+                  </button>
                 </div>
               </div>
 
-              {/* Cards Grid / Empty State */}
-              {filteredJournal.length === 0 ? (
+              {journalStatusView || (myJourneys.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-10 text-center max-w-xl mx-auto my-6 shadow-sm">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-3.5">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3.5">
                     <BookmarkCheck size={22} className="text-slate-600" />
                   </div>
-                  <h3 className="font-bold text-sm text-slate-900 mb-1">Belum Ada Prompt di Jurnal Pribadi</h3>
+                  <h3 className="font-bold text-sm text-slate-900 mb-1">
+                    {selectedMaterialKey ? 'Belum ada prompt untuk materi ini' : 'Jurnalmu masih kosong'}
+                  </h3>
                   <p className="text-xs text-slate-500 leading-relaxed mb-4 max-w-md mx-auto">
-                    Mulai simpan formula instruksi kerja Anda di Prompt Formula Studio, atau pelajari teknik-teknik prompting dari pustaka materi.
+                    Pilih materi, tulis prompt pertamamu, lalu simpan. Setelah latihan berikutnya, perbaiki dan simpan lagi sebagai versi baru.
                   </p>
                   <button
-                    onClick={() => {
-                      setIteratingPromptId(null);
-                      setBuilderTitle('');
-                      setActiveMenu('prompt-studio');
-                    }}
-                    className="px-4 py-2 rounded-xl bg-[#141210] hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-2 transition-colors shadow-sm"
+                    onClick={openNewFormula}
+                    className="px-4 py-2 rounded-xl bg-[#141210] hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-2 shadow-sm"
                   >
                     <Plus size={14} className="text-[#E5C158]" />
-                    <span>Buat Formula Baru</span>
+                    <span>Tulis Prompt Pertama</span>
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredJournal.map(item => {
-                    const latest = item.versions[item.versions.length - 1];
-                    const hasBeforeAfter = item.versions.length > 1;
-
-                    return (
-                      <div 
-                        key={item.id}
-                        className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-400 transition-all flex flex-col justify-between shadow-sm"
-                      >
-                        <div>
-                          {/* Meta Header with Simple Star & Delete */}
-                          <div className="flex items-center justify-between gap-2 mb-2.5">
-                            <div className="flex items-center gap-1.5">
-                              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200/60">
-                                #{item.tag || item.departmentTag || 'Umum'}
-                              </span>
-                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200/60">
-                                v{item.currentVersion}
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-1.5">
-                              {/* 1-5 Star Interactive Community Rating */}
-                              <div className="flex items-center gap-1 bg-slate-50 hover:bg-amber-50/50 px-2 py-0.5 rounded-xl border border-slate-200/80 transition-colors">
-                                <div className="flex items-center gap-0.5">
-                                  {[1, 2, 3, 4, 5].map((starNum) => {
-                                    const effScore = getEffectiveRating(item);
-                                    const isFilled = starNum <= Math.round(effScore);
-                                    return (
-                                      <button
-                                        key={starNum}
-                                        type="button"
-                                        onClick={() => handleRatePrompt(item.id, starNum)}
-                                        title={`Beri nilai ${starNum} bintang`}
-                                        className="p-0.5 text-slate-300 hover:text-amber-400 hover:scale-125 transition-all focus:outline-none"
-                                      >
-                                        <Star
-                                          size={12}
-                                          className={isFilled ? "text-amber-500 fill-amber-400" : "text-slate-300"}
-                                        />
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                                <span className="text-[11px] font-mono font-bold text-slate-700 ml-0.5">
-                                  {getEffectiveRating(item).toFixed(1)}
-                                </span>
-                              </div>
-
-                              {/* Delete Action */}
-                              <button
-                                onClick={() => setPromptToDelete(item)}
-                                className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                                title="Hapus Prompt dari Jurnal"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Title */}
-                          <h3 className="font-bold text-sm text-slate-900 mb-1 leading-snug">
-                            {item.title}
-                          </h3>
-                          <p className="text-[11px] text-slate-500 mb-3 leading-relaxed">
-                            {item.description}
-                          </p>
-
-                          {/* Clean Short Excerpt */}
-                          <div className="bg-slate-50/80 border border-slate-200/80 rounded-xl p-3 mb-3 text-xs font-sans text-slate-700 leading-relaxed line-clamp-3">
-                            {latest.promptText}
-                          </div>
-                        </div>
-
-                        {/* Card Footer Actions */}
-                        <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            {hasBeforeAfter && (
-                              <button
-                                onClick={() => setComparingPrompt(item)}
-                                className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1 transition-colors"
-                              >
-                                <TrendingUp size={11} className="text-slate-600" />
-                                Before vs After
-                              </button>
-                            )}
-                            <button
-                              onClick={() => startIteration(item)}
-                              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs flex items-center gap-1 transition-colors"
-                            >
-                              <RefreshCw size={10} className="text-slate-600" />
-                              v{item.currentVersion + 1}
-                            </button>
-                          </div>
-
-                          <button
-                            onClick={() => handleCopy(latest.promptText, item.id)}
-                            className={`px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition-all ${
-                              copiedId === item.id
-                                ? 'bg-slate-800 text-[#E5C158]'
-                                : 'bg-[#141210] hover:bg-slate-800 text-white'
-                            }`}
-                          >
-                            {copiedId === item.id ? <Check size={11} /> : <Copy size={11} />}
-                            {copiedId === item.id ? 'Tersalin' : 'Salin'}
-                          </button>
-                        </div>
-
-                      </div>
-                    );
-                  })}
+                <div className="space-y-4">
+                  {myJourneys.map(versions => (
+                    <JourneyCard
+                      key={versions[0].materialKey}
+                      versions={versions}
+                      copiedId={copiedId}
+                      onCopy={handleCopy}
+                      onCompare={(before, after) => setCompareTarget({ before, after })}
+                      onDelete={setEntryToDelete}
+                      onContinue={startNextVersion}
+                    />
+                  ))}
                 </div>
-              )}
-
+              ))}
             </div>
           )}
 
@@ -1705,362 +1571,159 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
           {/* ===================================================================== */}
           {activeMenu === 'prompt-studio' && (
             <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 animate-in fade-in duration-300">
-              
-              {iteratingPromptId ? (
-                <div className="bg-amber-50 border-l-4 border-[#C9A23E] p-3 rounded-r-xl mb-5 flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-mono font-bold uppercase text-amber-800">Mode Iterasi</span>
-                    <h3 className="text-xs font-bold text-slate-900">Meningkatkan: "{builderTitle}"</h3>
-                  </div>
-                  <button
-                    onClick={() => { setIteratingPromptId(null); setBuilderTitle(''); }}
-                    className="text-xs text-slate-500 hover:text-slate-800 underline"
+              <div className="mb-5 pb-3 border-b border-slate-100">
+                <h2 className="text-lg font-bold text-slate-900">Prompt Formula Studio</h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Pilih materi, susun prompt dengan formula, lalu simpan ke jurnal.
+                </p>
+              </div>
+
+              <form onSubmit={handleSavePrompt} className="space-y-4">
+                <div>
+                  <label htmlFor="builder-material" className="block text-xs font-bold text-slate-700 mb-1">Materi *</label>
+                  <select
+                    id="builder-material"
+                    required
+                    value={builderMaterialKey}
+                    onChange={(e) => { setBuilderMaterialKey(e.target.value); setSaveError(''); }}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#C9A23E]"
                   >
-                    Batal (Buat Baru)
-                  </button>
-                </div>
-              ) : (
-                <div className="mb-5 pb-3 border-b border-slate-100">
-                  <h2 className="text-lg font-bold text-slate-900">Prompt Studio</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Susun parameter bisnis Anda secara terstruktur menggunakan panduan konsultan.
-                  </p>
-                </div>
-              )}
-
-              <form onSubmit={handleSavePrompt} className="space-y-3.5">
-                
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Judul Prompt *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Contoh: Evaluasi Kinerja Vendor IT"
-                      value={builderTitle}
-                      onChange={(e) => setBuilderTitle(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C9A23E]"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-bold text-slate-700">Tag / Kategori</label>
-                      <span className="text-[10px] text-slate-400">Bebas buat tag baru</span>
+                    <option value="">Pilih materi Prompt...</option>
+                    {materials.map(item => <option key={item.key} value={item.key}>{item.title}</option>)}
+                  </select>
+                  {builderMaterial && (
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-600 bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2">
+                      <span>
+                        Akan disimpan sebagai <strong className="text-slate-900">v{(builderLatest?.version || 0) + 1}</strong>
+                        {builderLatest ? ` untuk ${builderMaterial.title}.` : `, prompt pertamamu untuk ${builderMaterial.title}.`}
+                      </span>
+                      {builderLatest && (
+                        <button type="button" onClick={() => loadEntryIntoBuilder(builderLatest)} className="font-bold text-[#966A0E] hover:underline">
+                          Mulai dari v{builderLatest.version}
+                        </button>
+                      )}
                     </div>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="Ketik tag bebas (cth: Negosiasi, Strategi, People, Sales, Tech...)"
-                        value={builderTag}
-                        onChange={(e) => setBuilderTag(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-[#C9A23E]"
-                        list="existing-tags-datalist"
-                      />
-                      <datalist id="existing-tags-datalist">
-                        {existingTags.map(t => (
-                          <option key={t} value={t} />
-                        ))}
-                      </datalist>
-                    </div>
-                    {existingTags.length > 0 && (
-                      <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                        <span className="text-[10px] text-slate-400 font-mono">Pilih dari tag yang ada:</span>
-                        {existingTags.map(t => (
-                          <button
-                            key={t}
-                            type="button"
-                            onClick={() => setBuilderTag(t)}
-                            className={`text-[10px] px-2 py-0.5 rounded-md border transition-all ${
-                              builderTag.toLowerCase() === t.toLowerCase()
-                                ? 'bg-[#141210] text-white border-[#141210]'
-                                : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
-                            }`}
-                          >
-                            #{t}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl w-fit">
-                  <button
-                    type="button"
-                    onClick={() => setBuilderType('ACTIONS')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      builderType === 'ACTIONS' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
-                    }`}
-                  >
-                    A.C.T.I.O.N.S. (Strategis)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setBuilderType('ACT')}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      builderType === 'ACT' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
-                    }`}
-                  >
-                    ACT (Cepat)
-                  </button>
-                </div>
-
-                <div className="space-y-3 pt-1">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">A -</span> Peran &amp; Audiens (Actor &amp; Target)</label>
-                    <textarea
-                      rows={2}
-                      placeholder="Bertindaklah sebagai Senior Procurement Manager. Audiens adalah Direktur Vendor..."
-                      value={actionData.a}
-                      onChange={(e) => setActionData({ ...actionData, a: e.target.value })}
-                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">C -</span> Situasi &amp; Latar Belakang (Context &amp; Situation)</label>
-                    <textarea
-                      rows={2}
-                      placeholder="Kemitraan berjalan 2 tahun. Ada penyesuaian budget 15% dari direksi..."
-                      value={actionData.c}
-                      onChange={(e) => setActionData({ ...actionData, c: e.target.value })}
-                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">T -</span> Tugas &amp; Target Hasil (Task &amp; Deliverables)</label>
-                    <textarea
-                      rows={2}
-                      placeholder="Susun email negosiasi perpanjangan kontrak dengan opsi trade-off komitmen jangka panjang..."
-                      value={actionData.t}
-                      onChange={(e) => setActionData({ ...actionData, t: e.target.value })}
-                      className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
-                    />
-                  </div>
-
-                  {builderType === 'ACTIONS' && (
-                    <>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">I -</span> Dampak yang Diharapkan (Intention &amp; Impact)</label>
-                        <textarea
-                          rows={2}
-                          placeholder="Membangun kemitraan jangka panjang saling menguntungkan (win-win)..."
-                          value={actionData.i}
-                          onChange={(e) => setActionData({ ...actionData, i: e.target.value })}
-                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">O -</span> Format Keluaran (Output &amp; Structure)</label>
-                        <textarea
-                          rows={2}
-                          placeholder="Format Minto Pyramid (SCQA). Maksimal 4 paragraf lugas..."
-                          value={actionData.o}
-                          onChange={(e) => setActionData({ ...actionData, o: e.target.value })}
-                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">N -</span> Batasan &amp; Pantangan (Negatives &amp; Guardrails)</label>
-                        <textarea
-                          rows={2}
-                          placeholder="DILARANG menggunakan nada agresif, ancaman pemutusan kontrak sepihak, atau asumsi tanpa data..."
-                          value={actionData.n}
-                          onChange={(e) => setActionData({ ...actionData, n: e.target.value })}
-                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-800 mb-1"><span className="text-[#966A0E]">S -</span> Urutan Langkah (Steps &amp; Reasoning)</label>
-                        <textarea
-                          rows={2}
-                          placeholder="1. Beri apresiasi pencapaian SLA, 2. Paparkan situasi anggaran, 3. Tawarkan opsi perpanjangan multi-year..."
-                          value={actionData.s}
-                          onChange={(e) => setActionData({ ...actionData, s: e.target.value })}
-                          className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans text-slate-800 focus:outline-none focus:border-slate-400"
-                        />
-                      </div>
-                    </>
                   )}
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const compiled = getCompiledPrompt();
-                      handleCopy(compiled, 'preview-builder');
-                    }}
-                    className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold flex items-center gap-1.5"
-                  >
-                    {copiedId === 'preview-builder' ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
-                    Salin Formula
-                  </button>
-
-                  <button
-                    type="submit"
-                    className="px-4 py-1.5 rounded-xl bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold shadow-sm"
-                  >
-                    {iteratingPromptId ? 'Simpan Versi Baru' : 'Simpan ke Jurnal'}
-                  </button>
+                <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl w-fit">
+                  {(['ACTIONS', 'ACT'] as Framework[]).map(type => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setBuilderType(type)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${builderType === type ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
+                    >
+                      {type === 'ACTIONS' ? 'A.C.T.I.O.N.S. (Lengkap)' : 'ACT (Cepat)'}
+                    </button>
+                  ))}
                 </div>
 
-              </form>
+                <div className="space-y-3">
+                  {partsFor(builderType).map(part => (
+                    <div key={part.key}>
+                      <label htmlFor={`field-${part.key}`} className="block text-xs font-bold text-slate-800 mb-1">
+                        <span className="text-[#966A0E]">{part.letter} ·</span> {part.label}
+                      </label>
+                      <textarea
+                        id={`field-${part.key}`}
+                        rows={2}
+                        value={actionData[part.key]}
+                        onChange={(e) => setActionData({ ...actionData, [part.key]: e.target.value })}
+                        className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-400"
+                      />
+                    </div>
+                  ))}
+                </div>
 
+                <div>
+                  <label htmlFor="builder-notes" className="block text-xs font-bold text-slate-700 mb-1">
+                    {builderLatest ? `Apa yang kamu ubah dari v${builderLatest.version}, dan kenapa?` : 'Catatan'} <span className="font-normal text-slate-400">(opsional)</span>
+                  </label>
+                  <textarea
+                    id="builder-notes"
+                    rows={2}
+                    maxLength={2000}
+                    value={builderNotes}
+                    onChange={(e) => setBuilderNotes(e.target.value)}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-400"
+                  />
+                </div>
+
+                {saveError && <p className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">{saveError}</p>}
+
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    disabled={builderIsEmpty}
+                    onClick={() => handleCopy(compiledPreview, 'preview-builder')}
+                    className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-bold flex items-center gap-1.5 disabled:opacity-40"
+                  >
+                    {copiedId === 'preview-builder' ? <Check size={12} /> : <Copy size={12} />}
+                    Salin Prompt
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className="px-4 py-1.5 rounded-xl bg-[#141210] hover:bg-slate-800 text-[#E5C158] text-xs font-bold shadow-sm flex items-center gap-1.5 disabled:opacity-60"
+                  >
+                    {isSaving && <Loader2 size={12} className="animate-spin" />}
+                    {builderLatest ? `Simpan sebagai v${builderLatest.version + 1}` : 'Simpan ke Jurnal'}
+                  </button>
+                </div>
+              </form>
             </div>
           )}
 
           {/* ===================================================================== */}
-          {/* VIEW: PROMPT COMMUNITY */}
+          {/* VIEW: JURNAL BATCH (PROMPT REKAN SATU BATCH, PER MATERI) */}
           {/* ===================================================================== */}
-          {activeMenu === 'community' && (
+          {activeMenu === 'batch' && (
             <div className="space-y-5 animate-in fade-in duration-300">
-              
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-sm">
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div>
                   <span className="text-[10px] font-mono font-bold uppercase text-slate-400 tracking-wider block mb-0.5">
-                    Peer Learning
+                    {myBatch || 'Batch kamu'}
                   </span>
-                  <h2 className="text-sm font-bold text-slate-900">Prompt Community</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Jelajahi dan adaptasi formula teruji dari rekan kerja ke dalam jurnal pribadi Anda.
+                  <h2 className="text-sm font-bold text-slate-900">Jurnal Batch</h2>
+                  <p className="text-xs text-slate-500 mt-0.5 max-w-xl">
+                    Lihat bagaimana rekan satu batch menyusun dan memperbaiki prompt mereka untuk materi yang sama.
                   </p>
                 </div>
+                {materialFilter}
               </div>
 
-              {/* Cards Grid / Empty State */}
-              {communityPrompts.length === 0 ? (
+              {journalStatusView || (peerJourneys.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-10 text-center max-w-xl mx-auto my-6 shadow-sm">
-                  <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto mb-3.5">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3.5">
                     <Share2 size={22} className="text-slate-600" />
                   </div>
-                  <h3 className="font-bold text-sm text-slate-900 mb-1">Prompt Community Masih Kosong</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed mb-4 max-w-md mx-auto">
-                    Setiap prompt yang disimpan dan diatur publik akan muncul di sini agar dapat dipelajari, diadaptasi, serta diberi rating bintang oleh seluruh anggota komunitas.
+                  <h3 className="font-bold text-sm text-slate-900 mb-1">Belum ada prompt dari rekan batch</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed max-w-md mx-auto">
+                    Prompt rekan satu batch akan muncul di sini setelah mereka menyimpannya.
                   </p>
-                  <button
-                    onClick={() => {
-                      setIteratingPromptId(null);
-                      setBuilderTitle('');
-                      handleNavigate('prompt-studio');
-                    }}
-                    className="px-4 py-2 rounded-xl bg-[#141210] hover:bg-slate-800 text-white text-xs font-bold inline-flex items-center gap-2 transition-colors shadow-sm"
-                  >
-                    <Plus size={14} className="text-[#E5C158]" />
-                    <span>Buat Formula Pertama</span>
-                  </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {communityPrompts.map(item => {
-                    const latest = item.versions[item.versions.length - 1];
-                    const isAdoptionSuccess = copiedId === `adp-${item.id}`;
-                    return (
-                      <div 
-                        key={item.id}
-                        className="bg-white rounded-2xl border border-slate-200 p-5 hover:border-slate-400 transition-all flex flex-col justify-between shadow-sm"
-                      >
-                        <div>
-                          <div className="flex items-center justify-between gap-2 mb-2.5">
-                            <div className="flex flex-wrap items-center gap-1.5">
-                              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium uppercase tracking-wider bg-slate-100 text-slate-600 border border-slate-200/60">
-                                #{item.tag || item.departmentTag || 'Umum'}
-                              </span>
-                              <span className="text-[11px] text-slate-500">
-                                oleh: <strong className="text-slate-800">{item.authorName}</strong>
-                              </span>
-                            </div>
-
-                            <div className="flex items-center gap-1.5">
-                              {/* 1-5 Star Interactive Community Rating */}
-                              <div className="flex items-center gap-1 bg-slate-50 hover:bg-amber-50/50 px-2 py-0.5 rounded-xl border border-slate-200/80 transition-colors">
-                                <div className="flex items-center gap-0.5">
-                                  {[1, 2, 3, 4, 5].map((starNum) => {
-                                    const effScore = getEffectiveRating(item);
-                                    const isFilled = starNum <= Math.round(effScore);
-                                    return (
-                                      <button
-                                        key={starNum}
-                                        type="button"
-                                        onClick={() => handleRatePrompt(item.id, starNum)}
-                                        title={`Beri nilai ${starNum} bintang`}
-                                        className="p-0.5 text-slate-300 hover:text-amber-400 hover:scale-125 transition-all focus:outline-none"
-                                      >
-                                        <Star
-                                          size={12}
-                                          className={isFilled ? "text-amber-500 fill-amber-400" : "text-slate-300"}
-                                        />
-                                      </button>
-                                    );
-                                  })}
-                                </div>
-                                <span className="text-[11px] font-mono font-bold text-slate-700 ml-0.5">
-                                  {getEffectiveRating(item).toFixed(1)}
-                                </span>
-                              </div>
-
-                              {item.authorName.includes('Saya') && (
-                                <button
-                                  onClick={() => setPromptToDelete(item)}
-                                  className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                                  title="Hapus Prompt"
-                                >
-                                  <Trash2 size={13} />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-
-                          <h3 className="font-bold text-sm text-slate-900 mb-1 leading-snug">
-                            {item.title}
-                          </h3>
-                          <p className="text-[11px] text-slate-500 mb-3 leading-relaxed">
-                            {item.description}
-                          </p>
-
-                          <div className="bg-slate-50/80 border border-slate-200/80 rounded-xl p-3 mb-3 text-xs font-sans text-slate-700 leading-relaxed line-clamp-3">
-                            {latest.promptText}
-                          </div>
-                        </div>
-
-                        <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
-                          <button
-                            onClick={() => adoptToMyJournal(item)}
-                            className={`px-2.5 py-1 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-all ${
-                              isAdoptionSuccess 
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-300' 
-                                : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
-                            }`}
-                            title="Duplikasi formula ini ke dalam Jurnal Pribadi Anda"
-                          >
-                            {isAdoptionSuccess ? <Check size={12} className="text-emerald-600" /> : <BookmarkCheck size={12} className="text-slate-600" />}
-                            <span>{isAdoptionSuccess ? 'Tersimpan ke Jurnal!' : 'Simpan ke Jurnalku'}</span>
-                          </button>
-
-                          <button
-                            onClick={() => handleCopy(latest.promptText, `comm-${item.id}`)}
-                            className={`px-3 py-1 rounded-lg font-bold text-xs flex items-center gap-1 transition-all ${
-                              copiedId === `comm-${item.id}`
-                                ? 'bg-slate-800 text-[#E5C158]'
-                                : 'bg-[#141210] hover:bg-slate-800 text-white'
-                            }`}
-                          >
-                            {copiedId === `comm-${item.id}` ? <Check size={11} /> : <Copy size={11} />}
-                            {copiedId === `comm-${item.id}` ? 'Tersalin' : 'Salin'}
-                          </button>
-                        </div>
-
+                <div className="space-y-6">
+                  {materialOptions.filter(item => peerJourneys.some(j => j[0].materialKey === item.key)).map(item => (
+                    <section key={item.key} className="space-y-3">
+                      <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 px-1">{item.title}</h3>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+                        {peerJourneys.filter(j => j[0].materialKey === item.key).map(versions => (
+                          <JourneyCard
+                            key={`${versions[0].authorId}-${item.key}`}
+                            versions={versions}
+                            showAuthor
+                            copiedId={copiedId}
+                            onCopy={handleCopy}
+                            onCompare={(before, after) => setCompareTarget({ before, after })}
+                          />
+                        ))}
                       </div>
-                    );
-                  })}
+                    </section>
+                  ))}
                 </div>
-              )}
-
+              ))}
             </div>
           )}
 
@@ -2867,100 +2530,16 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
       </div>
 
       {/* ========================================================================= */}
-      {/* MODAL: BEFORE VS AFTER */}
+      {/* MODAL: PERBANDINGAN VERSI */}
       {/* ========================================================================= */}
-      {comparingPrompt && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
-            <div className="px-5 py-3.5 bg-[#141210] text-white flex items-center justify-between">
-              <div>
-                <span className="text-[10px] font-mono text-[#E5C158] uppercase tracking-wider">
-                  Evolusi Kompetensi: Before vs After
-                </span>
-                <h3 className="text-sm font-bold text-white mt-0.5">{comparingPrompt.title}</h3>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    const toDelete = comparingPrompt;
-                    setComparingPrompt(null);
-                    setPromptToDelete(toDelete);
-                  }}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-white/10 transition-colors"
-                  title="Hapus Prompt Ini"
-                >
-                  <Trash2 size={16} />
-                </button>
-                <button onClick={() => setComparingPrompt(null)} className="text-slate-400 hover:text-white">
-                  <X size={16} />
-                </button>
-              </div>
-            </div>
-
-            <div className="p-5 overflow-y-auto flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 bg-[#f5f6f9]">
-              <div className="bg-white rounded-2xl border border-slate-200 p-4 flex flex-col">
-                <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                  <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">
-                    Versi 1 (Before)
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-mono">{comparingPrompt.versions[0].date}</span>
-                </div>
-                <div className="text-[11px] font-bold text-slate-500 mb-2">
-                  Pola: {comparingPrompt.versions[0].frameworkUsed}
-                </div>
-                <div className="bg-slate-50 rounded-xl p-3.5 text-xs font-sans text-slate-800 whitespace-pre-line leading-relaxed flex-1 border border-slate-200/60">
-                  {comparingPrompt.versions[0].promptText}
-                </div>
-                {comparingPrompt.versions[0].notes && (
-                  <p className="text-[11px] text-slate-500 mt-2 italic">
-                    <strong>Catatan:</strong> {comparingPrompt.versions[0].notes}
-                  </p>
-                )}
-              </div>
-
-              {(() => {
-                const latest = comparingPrompt.versions[comparingPrompt.versions.length - 1];
-                return (
-                  <div className="bg-white rounded-2xl border-2 border-slate-900 p-4 flex flex-col shadow-sm">
-                    <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
-                      <span className="text-xs font-mono font-bold text-slate-900 uppercase tracking-wider">
-                        Versi {latest.version} (After)
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-mono">{latest.date}</span>
-                    </div>
-                    <div className="text-[11px] font-bold text-slate-800 mb-2">
-                      Pola: {latest.frameworkUsed}
-                    </div>
-                    <div className="bg-slate-50 rounded-xl p-3.5 text-xs font-sans text-slate-900 whitespace-pre-line leading-relaxed flex-1 border border-slate-200/60">
-                      {latest.promptText}
-                    </div>
-                    {latest.notes && (
-                      <p className="text-[11px] text-slate-700 mt-2 font-medium bg-slate-100 p-2.5 rounded-xl border border-slate-200/60">
-                        <strong>Perubahan Kunci:</strong> {latest.notes}
-                      </p>
-                    )}
-
-                  </div>
-                );
-              })()}
-            </div>
-
-            <div className="px-5 py-2.5 bg-white border-t border-slate-200 flex items-center justify-end">
-              <button
-                onClick={() => setComparingPrompt(null)}
-                className="px-4 py-1.5 rounded-xl bg-[#141210] hover:bg-slate-800 text-white text-xs font-bold"
-              >
-                Tutup
-              </button>
-            </div>
-          </div>
-        </div>
+      {compareTarget && (
+        <CompareModal before={compareTarget.before} after={compareTarget.after} onClose={() => setCompareTarget(null)} />
       )}
 
       {/* ========================================================================= */}
-      {/* MODAL: KONFIRMASI HAPUS PROMPT */}
+      {/* MODAL: KONFIRMASI HAPUS VERSI */}
       {/* ========================================================================= */}
-      {promptToDelete && (
+      {entryToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white rounded-2xl max-w-sm w-full p-5 border border-slate-200 shadow-2xl space-y-4">
             <div className="flex items-start gap-3.5">
@@ -2968,34 +2547,33 @@ export default function App({ onBack, initialMenu = 'beranda' }: { onBack?: () =
                 <Trash2 size={20} />
               </div>
               <div className="flex-1">
-                <h3 className="font-bold text-sm text-slate-900 leading-snug">Hapus Prompt Ini?</h3>
+                <h3 className="font-bold text-sm text-slate-900 leading-snug">Hapus versi ini?</h3>
                 <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                  Prompt akan dihapus permanen dari repositori jurnal dan daftar tag terkait.
+                  Versi ini hilang permanen dari jurnalmu dan dari Jurnal Batch. Versi lain tetap ada.
                 </p>
               </div>
             </div>
 
-            <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs space-y-1">
-              <div className="font-bold text-slate-800 leading-snug">{promptToDelete.title}</div>
-              <div className="text-[10px] font-mono text-slate-500">
-                #{promptToDelete.tag || promptToDelete.departmentTag || 'Umum'} • Versi {promptToDelete.currentVersion}
-              </div>
+            <div className="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-xs">
+              <div className="font-bold text-slate-800">{entryToDelete.materialTitle} · v{entryToDelete.version}</div>
             </div>
 
             <div className="flex items-center justify-end gap-2 pt-1 border-t border-slate-100">
               <button
                 type="button"
-                onClick={() => setPromptToDelete(null)}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                disabled={isDeleting}
+                onClick={() => setEntryToDelete(null)}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100"
               >
                 Batal
               </button>
               <button
                 type="button"
-                onClick={() => handleDeletePrompt(promptToDelete.id)}
-                className="px-4 py-1.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-colors shadow-sm flex items-center gap-1.5"
+                disabled={isDeleting}
+                onClick={handleDeleteEntry}
+                className="px-4 py-1.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-sm flex items-center gap-1.5 disabled:opacity-60"
               >
-                <Trash2 size={13} />
+                {isDeleting ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                 <span>Ya, Hapus</span>
               </button>
             </div>

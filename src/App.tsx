@@ -30,7 +30,8 @@ import {
   type User,
   type MemberRecord,
 } from './lib/membership';
-import { addMateri, deleteMateri, getMateriByModule, uploadMateriFile, type Materi } from './lib/materi';
+import { addMateri, deleteMateri, getMateriByModule, getMateriCatalog, uploadMateriFile, type Materi } from './lib/materi';
+import type { PromptMaterial } from './lib/promptJournal';
 import aifPromptingHtml from '../materi/Prompt day1/aif-prompting-level2-day1.html?raw';
 import aifReadingHtml from '../materi/Prompt day1/aif-reading-level2-day1.html?raw';
 import aifPkmHtml from '../materi/Prompt day2/aif-pkm-level2-day2.html?raw';
@@ -796,6 +797,19 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
   const [promptStudioInitialMenu, setPromptStudioInitialMenu] = useState('beranda');
 
+  // Prompt Journal entries are tied to Prompt module materials (built-in plus uploaded).
+  const toPromptMaterials = (remote: Materi[]): PromptMaterial[] =>
+    buildArtifactList('02', defaultModuleMaterials['02'], remote).map(item => ({ key: item.id, title: item.title }));
+  const [promptMaterials, setPromptMaterials] = useState<PromptMaterial[]>(() => toPromptMaterials([]));
+  useEffect(() => {
+    if (activeTab !== 'prompts') return;
+    let cancelled = false;
+    getMateriCatalog(['02'])
+      .then(remote => { if (!cancelled) setPromptMaterials(toPromptMaterials(remote)); })
+      .catch(error => console.error('Materi Prompt belum dapat dimuat:', error));
+    return () => { cancelled = true; };
+  }, [activeTab]);
+
   const openPromptDatabase = (menu = 'beranda') => {
     if (!canOpenPromptDatabase) return;
     localStorage.setItem('appToken', 'iwdemy123');
@@ -1419,7 +1433,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
           </>
         ) : activeTab === 'prompts' ? (
           canOpenPromptDatabase
-            ? <PromptDatabaseView initialMenu={promptStudioInitialMenu} onBack={() => { setActiveTab('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+            ? <PromptDatabaseView initialMenu={promptStudioInitialMenu} materials={promptMaterials} onBack={() => { setActiveTab('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
             : <div className="p-12 text-center font-body text-light-md">Akses Prompt Studio tidak tersedia untuk akun ini.</div>
         ) : activeTab === 'admin' ? (
           <AdminView />
