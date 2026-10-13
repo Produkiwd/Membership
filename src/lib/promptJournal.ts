@@ -1,6 +1,8 @@
-export type FormulaKey = 'a' | 'c' | 't' | 'i' | 'o' | 'n' | 's';
+export type FormulaKey = 'a' | 'c' | 't' | 'i' | 'o' | 'n' | 's' | 'b';
 export type FormulaFields = Partial<Record<FormulaKey, string>>;
-export type Framework = 'ACTIONS' | 'ACT';
+export type Framework = 'ACTIONS' | 'ACT' | 'FREE';
+
+export const FRAMEWORK_LABELS: Record<Framework, string> = { ACTIONS: 'A.C.T.I.O.N.S.', ACT: 'ACT', FREE: 'Bebas' };
 export type PromptMaterial = { key: string; title: string };
 
 export type JournalEntry = {
@@ -20,6 +22,7 @@ export type JournalEntry = {
 };
 
 // `hint` is a guiding question shown under each field: it steers thinking without giving an answer to copy.
+// `act` marks the three parts of the quick ACT formula. The free-form box ('b') is used only by the Bebas option.
 export const FORMULA_PARTS: { key: FormulaKey; letter: string; label: string; heading: string; hint: string; act: boolean }[] = [
   { key: 'a', letter: 'A', label: 'Peran & Audiens', heading: 'Peran & Audiens', act: true,
     hint: 'Siapa AI saat menjawab, dan untuk siapa hasilnya ditulis?' },
@@ -35,9 +38,12 @@ export const FORMULA_PARTS: { key: FormulaKey; letter: string; label: string; he
     hint: 'Apa yang tidak boleh dilakukan AI? Pikirkan nada bicara, asumsi tanpa data, atau batas jumlah kata.' },
   { key: 's', letter: 'S', label: 'Urutan Langkah', heading: 'Urutan Langkah', act: false,
     hint: 'Langkah berpikir apa yang perlu AI ikuti sebelum memberi jawaban akhir?' },
+  { key: 'b', letter: '', label: 'Prompt Bebas', heading: '', act: false,
+    hint: 'Tulis prompt dalam bentuk apa pun: paragraf, daftar, tag XML, atau template Anda sendiri.' },
 ];
 
-export const partsFor = (framework: Framework) => FORMULA_PARTS.filter(part => framework === 'ACTIONS' || part.act);
+export const partsFor = (framework: Framework) => FORMULA_PARTS.filter(part =>
+  framework === 'FREE' ? part.key === 'b' : part.key !== 'b' && (framework === 'ACTIONS' || part.act));
 
 // Keeps only the fields of the chosen framework that have text.
 export function cleanFields(fields: FormulaFields, framework: Framework): FormulaFields {
@@ -51,6 +57,7 @@ export function cleanFields(fields: FormulaFields, framework: Framework): Formul
 
 export function compilePrompt(fields: FormulaFields, framework: Framework): string {
   const clean = cleanFields(fields, framework);
+  if (framework === 'FREE') return clean.b || '';
   return partsFor(framework)
     .filter(part => clean[part.key])
     .map(part => `[${part.heading}]\n${clean[part.key]}`)

@@ -9,6 +9,14 @@ test('compilePrompt keeps only filled fields of the chosen framework, without pl
   assert.equal(compilePrompt({}, 'ACTIONS'), '');
 });
 
+test('free-form prompts keep the text as written and ignore formula fields', () => {
+  const prompt = '<task>\nRingkas laporan\n</task>';
+  const fields = { a: 'Analis', b: `  ${prompt}  ` };
+  assert.equal(compilePrompt(fields, 'FREE'), prompt);
+  assert.deepEqual(cleanFields(fields, 'FREE'), { b: prompt });
+  assert.deepEqual(cleanFields(fields, 'ACTIONS'), { a: 'Analis' });
+});
+
 test('diffWords marks removed and added words and rebuilds both texts', () => {
   const parts = diffWords('Ringkas laporan ini', 'Ringkas laporan jadi 5 poin');
   const rebuild = (skip: string) => parts.filter(p => p.type !== skip).map(p => p.text).join('');

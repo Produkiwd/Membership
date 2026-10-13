@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 const ids = { a: '00000000-0000-0000-0000-00000000000a', b: '00000000-0000-0000-0000-00000000000b', c: '00000000-0000-0000-0000-00000000000c', d: '00000000-0000-0000-0000-00000000000d' };
 const db = await createMembershipDb();
 await db.exec(await readFile(new URL('../supabase/migrations/20261012090000_prompt_journal.sql', import.meta.url), 'utf8'));
+await db.exec(await readFile(new URL('../supabase/migrations/20261013020000_prompt_journal_free_form.sql', import.meta.url), 'utf8'));
 const value = async (sql, params = []) => (await db.query(sql, params)).rows[0]?.value;
 const as = uid => db.query("select set_config('test.uid',$1,false)", [uid]);
 await db.query('insert into auth.users(id,email) values($1,$2)', [admin, 'admin@example.test']);
@@ -37,6 +38,12 @@ await check('Each save becomes the next version for that member and material', a
 await check('Empty formulas and unknown materials are rejected', async () => {
   await assert.rejects(save({ a: ' ', t: '' }), /minimal satu kolom/);
   await assert.rejects(save({ t: 'x' }, null, 'bebas'), /check constraint/);
+});
+await check('Free-form prompts are saved as written; unknown frameworks are rejected', async () => {
+  const free = await value('select public.prompt_journal_save($1,$2,$3,$4::jsonb,$5,$6) value', [KEY, 'AIF Prompting', 'FREE', JSON.stringify({ b: '<task>Ringkas</task>' }), '<task>Ringkas</task>', null]);
+  assert.equal(free.framework, 'FREE'); assert.deepEqual(free.fields, { b: '<task>Ringkas</task>' });
+  await db.query('select public.prompt_journal_delete($1)', [free.id]);
+  await assert.rejects(value('select public.prompt_journal_save($1,$2,$3,$4::jsonb,$5,$6) value', [KEY, 'AIF Prompting', 'OTHER', JSON.stringify({ b: 'x' }), 'x', null]), /check constraint/);
 });
 await check('Batchmates see each other, other batches stay hidden', async () => {
   await as(ids.b); await save({ t: 'Versi B' });

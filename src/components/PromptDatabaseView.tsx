@@ -15,7 +15,7 @@ import {
 export interface Prompt { id: string; title: string; description: string; content: string; category: string; }
 import { EntranceLoading } from './EntranceLoading';
 
-import { compilePrompt, diffWords, FORMULA_PARTS, groupJourneys, partsFor, type FormulaKey, type Framework, type JournalEntry, type PromptMaterial } from '../lib/promptJournal';
+import { compilePrompt, diffWords, FORMULA_PARTS, FRAMEWORK_LABELS, groupJourneys, partsFor, type FormulaKey, type Framework, type JournalEntry, type PromptMaterial } from '../lib/promptJournal';
 import { deleteJournalEntry, listJournal, saveJournalEntry } from '../lib/promptJournalApi';
 
 // ============================================================================
@@ -532,7 +532,7 @@ const exercisePromptsData: { title: string; desc: string; prompt: string }[] = [
   }
 ];
 
-const EMPTY_FIELDS: Record<FormulaKey, string> = { a: '', c: '', t: '', i: '', o: '', n: '', s: '' };
+const EMPTY_FIELDS: Record<FormulaKey, string> = { a: '', c: '', t: '', i: '', o: '', n: '', s: '', b: '' };
 
 const formatDate = (value: string) => new Date(value).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 
@@ -642,7 +642,7 @@ const JourneyCard: React.FC<JourneyCardProps> = ({ versions, showAuthor, copiedI
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded-md text-xs font-mono font-bold bg-slate-900 text-white">v{entry.version}</span>
-                  <span className="text-xs text-slate-500">{formatDate(entry.createdAt)} · {entry.framework === 'ACTIONS' ? 'A.C.T.I.O.N.S.' : 'ACT'}</span>
+                  <span className="text-xs text-slate-500">{formatDate(entry.createdAt)} · {FRAMEWORK_LABELS[entry.framework] || entry.framework}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {previous && (
@@ -736,7 +736,7 @@ function CompareModal({ before, after, onClose }: { before: JournalEntry; after:
             return (
               <div key={part.key} className={`rounded-xl border p-3 ${oldText === newText ? 'border-slate-200 bg-slate-50/60' : 'border-amber-200 bg-white'}`}>
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-xs font-bold text-slate-800"><span className="text-[#966A0E]">{part.letter}</span> · {part.label}</span>
+                  <span className="text-xs font-bold text-slate-800">{part.letter && <span className="text-[#966A0E]">{part.letter} · </span>}{part.label}</span>
                   <span className="text-[11px] font-mono text-slate-400">{oldText === newText ? 'tetap' : !oldText ? 'baru' : !newText ? 'dihapus' : 'diubah'}</span>
                 </div>
                 <DiffText before={oldText} after={newText} />
@@ -1302,7 +1302,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         Prompt Formula Studio
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                        Pilih materi, susun prompt dengan 7 kolom A.C.T.I.O.N.S. atau 3 kolom ACT, lalu simpan sebagai versi baru.
+                        Pilih materi, susun prompt dengan A.C.T.I.O.N.S., ACT, atau bentuk bebas, lalu simpan sebagai versi baru.
                       </p>
                     </div>
                     <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
@@ -1550,32 +1550,32 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                 </div>
 
                 <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl w-fit">
-                  {(['ACTIONS', 'ACT'] as Framework[]).map(type => (
+                  {(['ACTIONS', 'ACT', 'FREE'] as Framework[]).map(type => (
                     <button
                       key={type}
                       type="button"
                       onClick={() => setBuilderType(type)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${builderType === type ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'}`}
                     >
-                      {type === 'ACTIONS' ? 'A.C.T.I.O.N.S. (Lengkap)' : 'ACT (Cepat)'}
+                      {type === 'ACTIONS' ? 'A.C.T.I.O.N.S. (Lengkap)' : type === 'ACT' ? 'ACT (Cepat)' : 'Bebas'}
                     </button>
                   ))}
                 </div>
                 <p className="text-xs text-slate-500 -mt-2">
-                  ACT untuk tugas cepat dan sederhana. A.C.T.I.O.N.S. untuk dokumen penting yang hasilnya perlu presisi.
+                  ACT untuk tugas cepat dan sederhana. A.C.T.I.O.N.S. untuk dokumen penting yang hasilnya perlu presisi. Bebas untuk prompt dengan bentuk Anda sendiri.
                 </p>
 
                 <div className="space-y-3">
                   {partsFor(builderType).map(part => (
                     <div key={part.key}>
                       <label htmlFor={`field-${part.key}`} className="block text-xs font-bold text-slate-800">
-                        <span className="text-[#966A0E]">{part.letter} ·</span> {part.label}
+                        {part.letter && <span className="text-[#966A0E]">{part.letter} · </span>}{part.label}
                       </label>
                       <p id={`hint-${part.key}`} className="text-xs text-slate-500 mt-0.5 mb-1.5">{part.hint}</p>
                       <textarea
                         id={`field-${part.key}`}
                         aria-describedby={`hint-${part.key}`}
-                        rows={2}
+                        rows={builderType === 'FREE' ? 12 : 2}
                         value={actionData[part.key]}
                         onChange={(e) => setActionData({ ...actionData, [part.key]: e.target.value })}
                         className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-slate-400"
