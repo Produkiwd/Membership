@@ -1304,7 +1304,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         Prompt Formula Studio
                       </h3>
                       <p className="text-xs text-slate-500 leading-relaxed mb-4">
-                        Pilih materi, susun prompt dengan A.C.T.I.O.N.S., ACT, atau bentuk bebas, lalu simpan sebagai versi baru.
+                        Pilih materi, susun prompt dengan 7 kolom A.C.T.I.O.N.S. atau 3 kolom ACT, lalu simpan sebagai versi baru.
                       </p>
                     </div>
                     <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 mt-auto group-hover:text-slate-950 group-hover:gap-2 transition-all">
@@ -1552,7 +1552,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                 </div>
 
                 <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl w-fit">
-                  {(['ACTIONS', 'ACT', 'FREE'] as Framework[]).map(type => (
+                  {(['ACTIONS', 'ACT'] as Framework[]).map(type => (
                     <button
                       key={type}
                       type="button"
@@ -1564,7 +1564,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                   ))}
                 </div>
                 <p className="text-xs text-slate-500 -mt-2">
-                  ACT untuk tugas cepat dan sederhana. A.C.T.I.O.N.S. untuk dokumen penting yang hasilnya perlu presisi. Bebas untuk prompt dengan bentuk Anda sendiri.
+                  ACT untuk tugas cepat dan sederhana. A.C.T.I.O.N.S. untuk dokumen penting yang hasilnya perlu presisi.
                 </p>
 
                 <div className="space-y-3">
