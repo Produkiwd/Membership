@@ -1,4 +1,5 @@
-export type LearningArtifact = { id: string; title: string; content?: string; url?: string; images?: string[] };
+// `load` fetches large built-in HTML on demand so it stays out of the main bundle.
+export type LearningArtifact = { id: string; title: string; content?: string; url?: string; images?: string[]; load?: () => Promise<string> };
 export type RemoteArtifact = { id: string; title: string; url: string; content?: string };
 
 export function buildArtifactList(moduleId: string, sections: any[], remote: RemoteArtifact[]): LearningArtifact[] {
@@ -12,7 +13,7 @@ export function buildArtifactList(moduleId: string, sections: any[], remote: Rem
     .map(item => ({ ...item, id: `${moduleId}:builtin:${item.title}`, ...(item.title === 'Materi Visual' && visuals.length ? { images: visuals } : {}) }));
   const extra = remote.filter(item => !reserved.has(item.title) && !/^Materi Visual \d+$/.test(item.title))
     .map(item => ({ id: `${moduleId}:remote:${item.id}`, title: item.title, ...(item.content ? { content: item.content } : { url: item.url }) }));
-  return [...builtIn, ...extra].filter(item => item.content || item.url || item.images?.length);
+  return [...builtIn, ...extra].filter(item => item.content || item.url || item.load || item.images?.length);
 }
 
 export function artifactStorageKey(userId: string) { return `sinau.artifact-progress.v1:${userId}`; }

@@ -32,10 +32,6 @@ import {
 } from './lib/membership';
 import { addMateri, deleteMateri, getMateriByModule, getMateriCatalog, uploadMateriFile, type Materi } from './lib/materi';
 import type { PromptMaterial } from './lib/promptJournal';
-import aifPromptingHtml from '../materi/Prompt day1/aif-prompting-level2-day1.html?raw';
-import aifReadingHtml from '../materi/Prompt day1/aif-reading-level2-day1.html?raw';
-import aifPkmHtml from '../materi/Prompt day2/aif-pkm-level2-day2.html?raw';
-import aifWritingHtml from '../materi/Prompt day2/aif-writing-level2-day2.html?raw';
 import level3Day1Html from './Level 3/Level 3 day 1.html?raw';
 import level3Day1_1Html from './Level 3/Level 3 day 1.1.html?raw';
 import twcHtml1 from '../ThinkingWithClaude/setup.html?raw';
@@ -92,10 +88,20 @@ function Button({ children, variant = 'primary', className, ...props }: ButtonHT
   );
 }
 
+const lazyHtml = (loader: () => Promise<{ default: string }>) => () => loader().then(module => module.default);
+
 const defaultModuleMaterials: Record<string, any[]> = {
   // Strategize is managed in Supabase; preserve the old source files for recovery.
   '01': [],
-  '02': [{ title: "Materi AI First Level 2", htmls: [{ title: "AIF Prompting", content: aifPromptingHtml }, { title: "AIF Reading", content: aifReadingHtml }, { title: "Multimodal AI App", url: "https://multimodal-ai-level-2-849022455337.us-west1.run.app" }, { title: "AIF PKM", content: aifPkmHtml }, { title: "AIF Writing", content: aifWritingHtml }] }],
+  // Prompt follows the AI First Day 1 run-down. Files are several MB each, so they load on open.
+  '02': [{ title: "Materi AI First Day 1", htmls: [
+    { title: "Context Setting: AI Hari Ini", load: lazyHtml(() => import('../materi/Prompt/00-context-setting.html?raw')) },
+    { title: "M1: Ngobrol dengan AI", load: lazyHtml(() => import('../materi/Prompt/01-ngobrol-dengan-ai.html?raw')) },
+    { title: "M2: Grounded Thinking & Learning", load: lazyHtml(() => import('../materi/Prompt/02-grounded-thinking-and-learning.html?raw')) },
+    { title: "M3: Personal Knowledge Management", load: lazyHtml(() => import('../materi/Prompt/03-personal-knowledge-management.html?raw')) },
+    { title: "M4: Writing Companion", load: lazyHtml(() => import('../materi/Prompt/04-writing-companion.html?raw')) },
+    { title: "M5: AI Creative Partner", load: lazyHtml(() => import('../materi/Prompt/05-ai-creative-partner.html?raw')) },
+  ] }],
   '03': [{ day: "Day 1", title: "Materi Level 3 Day 1", htmls: [{ title: "AI Skills Manual", content: level3Day1Html }, { title: "CIS Prompting", content: level3Day1_1Html }] }],
   '04': [{ day: "Materi", title: "Thinking with Claude", htmls: [{ title: "Thinking w/ Claude AI", content: twcHtml2 }, { title: "Setup Claude", content: twcHtml1 }] }],
   '05': [{ day: "Day 1", title: "Materi Day 1" }, { day: "Day 2", title: "Materi Day 2" }],
@@ -476,7 +482,18 @@ function MateriView() {
   const [isLoading, setIsLoading] = useState(false);
   const [materiError, setMateriError] = useState('');
   const [previewBuiltin, setPreviewBuiltin] = useState<string | null>(null);
-  const builtinMaterials = buildArtifactList(selectedModule, defaultModuleMaterials[selectedModule] || [], []);
+  const [loadedPreviews, setLoadedPreviews] = useState<Record<string, string>>({});
+  const builtinMaterials = buildArtifactList(selectedModule, defaultModuleMaterials[selectedModule] || [], [])
+    .map(material => loadedPreviews[material.id] ? { ...material, content: loadedPreviews[material.id] } : material);
+  const togglePreview = (material: LearningArtifact) => {
+    if (previewBuiltin === material.id) return setPreviewBuiltin(null);
+    setPreviewBuiltin(material.id);
+    if (material.load && !material.content) {
+      material.load()
+        .then(content => setLoadedPreviews(current => ({ ...current, [material.id]: content })))
+        .catch(error => console.error('Pratinjau materi belum dapat dimuat:', error));
+    }
+  };
 
   const MODULES = [
     { id: '01', name: 'Strategize' },
@@ -671,11 +688,14 @@ function MateriView() {
                   {material.url ? (
                     <a href={material.url} target="_blank" rel="noopener noreferrer" className="font-body text-sm text-light-md hover:underline">Lihat materi</a>
                   ) : (
-                    <button type="button" onClick={() => setPreviewBuiltin(current => current === material.id ? null : material.id)} aria-expanded={previewBuiltin === material.id} className="font-body text-sm text-light-md hover:underline">
+                    <button type="button" onClick={() => togglePreview(material)} aria-expanded={previewBuiltin === material.id} className="font-body text-sm text-light-md hover:underline">
                       {previewBuiltin === material.id ? 'Tutup pratinjau' : 'Lihat materi'}
                     </button>
                   )}
                 </div>
+                {previewBuiltin === material.id && material.load && !material.content && (
+                  <p role="status" className="font-body text-xs text-light-md mt-4">Memuat pratinjau…</p>
+                )}
                 {previewBuiltin === material.id && material.content && (
                   <iframe srcDoc={material.content} onLoad={keepEmbeddedHashNavigationInsideFrame} title={material.title} className="w-full h-[65vh] border border-border-light-subtle rounded-lg mt-4 bg-white" />
                 )}
@@ -791,6 +811,29 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
   const canAccessModule = (moduleId: string) => {
     return allowedPortals.includes('aif') && canAccessAifModule(sinadAccess.tier, moduleId, accessConfig);
+  };
+
+  const [openingMaterial, setOpeningMaterial] = useState<string | null>(null);
+  const [materialOpenFailed, setMaterialOpenFailed] = useState(false);
+  const openMaterial = async (mat: any) => {
+    if (!selectedModule || !canAccessModule(selectedModule.id) || openingMaterial) return;
+    setMaterialOpenFailed(false);
+    if (!mat.load || mat.content) {
+      artifactProgress.recordOpen(mat.id);
+      setSelectedHtmlData({ activeIndex: 0, htmls: [mat] });
+      return;
+    }
+    setOpeningMaterial(mat.id);
+    try {
+      const content = await mat.load();
+      artifactProgress.recordOpen(mat.id);
+      setSelectedHtmlData({ activeIndex: 0, htmls: [{ ...mat, content }] });
+    } catch (error) {
+      console.error('Materi belum dapat dibuka:', error);
+      setMaterialOpenFailed(true);
+    } finally {
+      setOpeningMaterial(null);
+    }
   };
 
   const canOpenPromptDatabase = !isLoadingPortals && !profileError && canAccessPromptStudio(sinadAccess.tier, accessConfig);
@@ -1229,18 +1272,25 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                 <p role="status" className="font-body text-sm text-gold mb-4">Sebagian materi belum dapat dimuat. Kembali ke modul, lalu coba buka lagi.</p>
               )}
 
+              {materialOpenFailed && (
+                <p role="status" className="font-body text-sm text-gold mb-4">Materi belum dapat dibuka. Periksa koneksi, lalu coba lagi.</p>
+              )}
               <p className="font-body text-sm text-dark-md mb-4">Pilih materi yang ingin kamu pelajari.</p>
               <div className="space-y-3 mb-8 overflow-y-auto min-h-0">
                 {selectedModule.materials.map((mat: any, idx: number) => (
                   <button
                     type="button"
                     key={idx} 
-                    onClick={() => { if (!canAccessModule(selectedModule.id)) return; artifactProgress.recordOpen(mat.id); setSelectedHtmlData({ activeIndex: 0, htmls: [mat] }); }}
-                    className="w-full text-left p-4 border border-border-dark-subtle/30 rounded-xl bg-bg-dark flex justify-between items-center gap-3 group hover:border-gold/30 focus-visible:outline-2 focus-visible:outline-[#00AACC] transition-all cursor-pointer"
+                    onClick={() => openMaterial(mat)}
+                    disabled={openingMaterial !== null}
+                    aria-busy={openingMaterial === mat.id}
+                    className="w-full text-left p-4 border border-border-dark-subtle/30 rounded-xl bg-bg-dark flex justify-between items-center gap-3 group hover:border-gold/30 focus-visible:outline-2 focus-visible:outline-[#00AACC] transition-all cursor-pointer disabled:cursor-wait"
                   >
                     <div>
                       <div className="font-sans font-medium text-dark-hi">{mat.title}</div>
-                      {artifactProgress.opened.includes(mat.id) && <p className="font-body text-xs text-gold mt-1">Pernah dibuka</p>}
+                      {openingMaterial === mat.id
+                        ? <p role="status" className="font-body text-xs text-gold mt-1">Membuka materi…</p>
+                        : artifactProgress.opened.includes(mat.id) && <p className="font-body text-xs text-gold mt-1">Pernah dibuka</p>}
                     </div>
                     <ChevronRight className="w-5 h-5 text-dark-md group-hover:text-gold-muted transition-colors" />
                   </button>
