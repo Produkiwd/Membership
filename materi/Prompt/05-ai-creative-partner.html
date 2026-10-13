@@ -1145,15 +1145,17 @@ window.DETAILS = {
   // ---------- pembuka ----------
   const intro = $('#intro'), vid = $('#introVideo');
   function closeIntro() { vid.pause(); intro.hidden = true; deck.hidden = false; if (cur < 0) show(0, 1); else { const s = slides[cur]; s.classList.remove('shown'); void s.offsetWidth; s.classList.add('in'); } }
-  function play() { $('#introStart').hidden = true; $('#introControls').hidden = false; const p = vid.play(); if (p) p.catch(() => { $('#introError').hidden = false; }); }
+  const soundLabel = () => { $('#soundBtn').textContent = vid.muted ? 'Nyalakan suara' : 'Matikan suara'; $('#soundBtn').setAttribute('aria-pressed', !vid.muted); };
+  // suara langsung menyala: tombol Mulai adalah klik pengguna, jadi browser mengizinkan audio
+  function play() { $('#introStart').hidden = true; $('#introControls').hidden = false; vid.muted = false; soundLabel(); const p = vid.play(); if (p) p.catch(() => { vid.muted = true; soundLabel(); vid.play().catch(() => { $('#introError').hidden = false; }); }); }
   $('#playIntro').onclick = play;
   $('#skipNow').onclick = closeIntro; $('#skipBtn').onclick = closeIntro; $('#errSkip').onclick = closeIntro;
   $('#replayBtn').onclick = () => { vid.currentTime = 0; play(); };
-  $('#soundBtn').onclick = () => { vid.muted = !vid.muted; $('#soundBtn').textContent = vid.muted ? 'Nyalakan suara' : 'Matikan suara'; $('#soundBtn').setAttribute('aria-pressed', !vid.muted); };
+  $('#soundBtn').onclick = () => { vid.muted = !vid.muted; soundLabel(); };
   vid.addEventListener('ended', closeIntro);
   $('source', vid).addEventListener('error', () => { $('#introError').hidden = false; });
   document.addEventListener('keydown', e => { if (!intro.hidden && e.key === 'Escape') closeIntro(); if (!intro.hidden && e.key === ' ' && !$('#introControls').hidden) { e.preventDefault(); vid.paused ? vid.play() : vid.pause(); } });
-  $('#reIntro').onclick = () => { $('#setDlg').close(); vid.muted = true; $('#soundBtn').textContent = 'Nyalakan suara'; deck.hidden = true; intro.hidden = false; vid.currentTime = 0; $('#introControls').hidden = true; $('#introStart').hidden = false; };
+  $('#reIntro').onclick = () => { $('#setDlg').close(); deck.hidden = true; intro.hidden = false; vid.currentTime = 0; $('#introControls').hidden = true; $('#introStart').hidden = false; };
   if (reduce.matches) closeIntro();
 })();
 
