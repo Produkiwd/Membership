@@ -674,6 +674,7 @@ const JourneyCard: React.FC<JourneyCardProps> = ({ versions, showAuthor, copiedI
               <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs text-slate-700 leading-relaxed whitespace-pre-wrap max-h-56 overflow-y-auto">
                 {entry.promptText}
               </div>
+              <SendToAI text={entry.promptText} />
             </li>
           );
         })}
