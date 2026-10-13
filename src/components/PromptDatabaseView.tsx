@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 export interface Prompt { id: string; title: string; description: string; content: string; category: string; }
 import { EntranceLoading } from './EntranceLoading';
+import { SendToAI } from './SendToAI';
 
 import { compilePrompt, diffWords, FORMULA_PARTS, FRAMEWORK_LABELS, groupJourneys, partsFor, type FormulaKey, type Framework, type JournalEntry, type PromptMaterial } from '../lib/promptJournal';
 import { deleteJournalEntry, listJournal, saveJournalEntry } from '../lib/promptJournalApi';
@@ -1619,6 +1620,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                     {builderLatest ? `Simpan sebagai v${builderLatest.version + 1}` : 'Simpan ke Jurnal'}
                   </button>
                 </div>
+                <SendToAI text={builderIsEmpty ? '' : compiledPreview} />
               </form>
             </div>
           )}
@@ -1758,6 +1760,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                           {copiedId === tech.id ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
                           {copiedId === tech.id ? 'Formula Tersalin!' : 'Salin Contoh Formula'}
                         </button>
+                        <SendToAI text={tech.example} className="mt-2" />
                       </div>
                     ))}
                   </div>
@@ -1877,6 +1880,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         {copiedId === 'sys-prompt' ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
                         {copiedId === 'sys-prompt' ? 'Tersalin!' : 'Salin Instruksi Sistem'}
                       </button>
+                      <SendToAI text={brutalMethodData.systemLevelBonus.prompt} className="mt-2" />
                     </div>
 
                   </div>
@@ -1926,6 +1930,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                             {copiedId === `jeff-tpl-${i}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
                             {copiedId === `jeff-tpl-${i}` ? 'Template Tersalin!' : 'Salin Template'}
                           </button>
+                          <SendToAI text={tpl.prompt} className="mt-2" />
                         </div>
                       ))}
                     </div>
@@ -2154,7 +2159,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                             "{mode.samplePrompt}"
                           </div>
 
-                          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                          <div className="flex flex-col items-end gap-2 shrink-0 self-end sm:self-center">
                             <button
                               onClick={() => handleCopy(mode.samplePrompt, `mode-${mode.num}`)}
                               className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1.5 transition-colors whitespace-nowrap"
@@ -2162,6 +2167,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                               {copiedId === `mode-${mode.num}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
                               {copiedId === `mode-${mode.num}` ? 'Prompt Tersalin!' : 'Salin Prompt Mode'}
                             </button>
+                            <SendToAI text={mode.samplePrompt} />
                           </div>
                         </div>
 
@@ -2211,6 +2217,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                           {copiedId === `learn-${idx}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
                           {copiedId === `learn-${idx}` ? 'Formula Tersalin!' : 'Salin Template'}
                         </button>
+                        <SendToAI text={item.prompt} className="mt-2" />
                       </div>
                     ))}
                   </div>
@@ -2254,6 +2261,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                           {copiedId === `book-${idx}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
                           {copiedId === `book-${idx}` ? 'Formula Tersalin!' : 'Salin Template'}
                         </button>
+                        <SendToAI text={item.prompt} className="mt-2" />
                       </div>
                     ))}
                   </div>
@@ -2282,6 +2290,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                         {copiedId === `exercise-${idx}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
                         {copiedId === `exercise-${idx}` ? 'Prompt Tersalin!' : 'Salin Prompt'}
                       </button>
+                      <SendToAI text={item.prompt} className="mt-2" />
                     </div>
                   ))}
                 </div>
@@ -2361,6 +2370,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                           {copiedId === `raw-${p.id}` ? <Check size={11} /> : <Copy size={11} />}
                           {copiedId === `raw-${p.id}` ? 'Tersalin' : 'Salin'}
                         </button>
+                        <SendToAI text={p.content} className="mt-2" />
                       </div>
                     ))}
                   </div>
