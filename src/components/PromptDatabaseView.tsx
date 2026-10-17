@@ -16,6 +16,7 @@ export interface Prompt { id: string; title: string; description: string; conten
 import { EntranceLoading } from './EntranceLoading';
 import { SendToAI } from './SendToAI';
 import { EVERYDAY_PROMPT_GROUPS } from '../lib/everydayPrompts';
+const EVERYDAY_PROMPT_COUNT = EVERYDAY_PROMPT_GROUPS.reduce((sum, g) => sum + g.prompts.length, 0);
 
 import { compilePrompt, diffWords, FORMULA_PARTS, FRAMEWORK_LABELS, groupJourneys, partsFor, type FormulaKey, type Framework, type JournalEntry, type PromptMaterial } from '../lib/promptJournal';
 import { deleteJournalEntry, listJournal, saveJournalEntry } from '../lib/promptJournalApi';
@@ -1452,7 +1453,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                       Prompt Sehari-hari
                     </h4>
                     <p className="text-xs text-slate-500">
-                      30 prompt untuk percakapan apa pun: supaya AI tidak mengarang, jadi devil's advocate, memeriksa ulang jawabannya, dan lainnya.
+                      {EVERYDAY_PROMPT_COUNT} prompt untuk percakapan apa pun: supaya AI tidak mengarang, jadi devil's advocate, memeriksa ulang jawabannya, dan lainnya.
                     </p>
                   </div>
                 </div>
@@ -2346,7 +2347,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                 <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500">Siap Pakai</span>
                 <h2 className="text-xl font-bold text-slate-900 mt-1">Prompt Sehari-hari</h2>
                 <p className="text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
-                  Prompt pendek untuk ditempel di percakapan apa pun dengan ChatGPT, Claude, atau Gemini. Ganti bagian dalam [kurung siku] dengan isi Anda.
+                  Prompt pendek untuk ditempel di percakapan apa pun dengan ChatGPT, Claude, atau Gemini. Ganti bagian dalam [kurung siku] dengan isi Anda. Prompt yang merujuk ke jawaban AI sebelumnya ditempel di percakapan yang sedang berjalan.
                 </p>
               </div>
 
@@ -2386,7 +2387,9 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                           {copiedId === `everyday-${item.id}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
                           {copiedId === `everyday-${item.id}` ? 'Prompt Tersalin!' : 'Salin Prompt'}
                         </button>
-                        <SendToAI text={item.prompt} className="mt-2" />
+                        {item.followUp
+                          ? <p className="mt-2 text-[11px] font-semibold text-slate-500">Tempel di percakapan yang sedang berjalan.</p>
+                          : <SendToAI text={item.prompt} className="mt-2" />}
                       </div>
                     ))}
                   </div>

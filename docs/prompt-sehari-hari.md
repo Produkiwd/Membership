@@ -19,6 +19,8 @@ Cara pakai:
 2. Ganti bagian dalam [kurung siku] dengan isi Anda.
 3. Tempel ke percakapan yang sedang berjalan, atau buka percakapan baru.
 
+Prompt yang bertanda **Dipakai di: percakapan yang sedang berjalan** merujuk ke jawaban AI sebelumnya. Prompt ini hanya berguna kalau ditempel di percakapan yang sudah berjalan.
+
 Total 30 prompt dalam 6 kelompok.
 
 ---
@@ -45,6 +47,7 @@ Pertanyaan saya: [pertanyaan]
 
 ### A3. Pisahkan fakta, dugaan, dan pendapat
 **Kapan dipakai:** saat membaca jawaban yang terdengar meyakinkan dan Anda ingin tahu mana yang bisa dipegang.
+**Dipakai di:** percakapan yang sedang berjalan
 
 ```
 Tulis ulang jawabanmu barusan dan beri label di setiap poin:
@@ -56,6 +59,7 @@ Untuk setiap FAKTA, sebutkan dari mana saya bisa memeriksanya.
 
 ### A4. Daftar hal yang perlu dicek
 **Kapan dipakai:** sebelum jawaban AI dipakai untuk laporan, presentasi, atau keputusan.
+**Dipakai di:** percakapan yang sedang berjalan
 
 ```
 Dari jawabanmu barusan, buat daftar semua klaim yang harus saya periksa sendiri sebelum saya pakai: angka, nama, tanggal, kutipan, aturan, dan referensi. Urutkan dari yang paling berisiko kalau ternyata salah. Untuk masing-masing, sarankan cara tercepat memeriksanya.
@@ -63,6 +67,7 @@ Dari jawabanmu barusan, buat daftar semua klaim yang harus saya periksa sendiri 
 
 ### A5. Uji jawaban dengan pertanyaan balik
 **Kapan dipakai:** saat jawaban penting dan Anda ingin AI memeriksa dirinya sendiri sebelum Anda percaya.
+**Dipakai di:** percakapan yang sedang berjalan
 
 ```
 Sebelum saya memakai jawabanmu, lakukan ini:
@@ -73,6 +78,7 @@ Sebelum saya memakai jawabanmu, lakukan ini:
 
 ### A6. Beri tingkat keyakinan
 **Kapan dipakai:** saat AI memberi beberapa poin atau rekomendasi dan Anda perlu tahu mana yang kuat.
+**Dipakai di:** percakapan yang sedang berjalan
 
 ```
 Untuk setiap poin di jawabanmu, beri tingkat keyakinan: tinggi, sedang, atau rendah. Jelaskan dalam satu kalimat kenapa kamu memberi tingkat itu. Kalau keyakinanmu rendah, katakan informasi apa yang kamu butuhkan supaya lebih yakin.
@@ -152,6 +158,7 @@ Permintaan saya: [permintaan]
 
 ### C2. Periksa ulang hasilmu
 **Kapan dipakai:** setelah AI menghasilkan tulisan, analisis, atau rencana.
+**Dipakai di:** percakapan yang sedang berjalan
 
 ```
 Baca ulang hasilmu barusan seolah kamu editor yang teliti. Cari kesalahan logika, angka yang tidak konsisten, bagian yang tidak menjawab permintaan saya, dan kalimat yang membingungkan. Sebutkan temuanmu dulu, lalu tulis versi yang sudah diperbaiki.
@@ -170,6 +177,7 @@ Untuk setiap skor di bawah 4, jelaskan apa yang kurang dan beri contoh perbaikan
 
 ### C4. Apa yang belum dibahas
 **Kapan dipakai:** saat jawaban terasa rapi tapi Anda curiga ada yang terlewat.
+**Dipakai di:** percakapan yang sedang berjalan
 
 ```
 Dari topik ini, apa saja yang belum kamu bahas tapi penting untuk saya ketahui? Pikirkan risiko, pengecualian, pihak yang terdampak, dan hal yang biasanya dilupakan orang. Sebutkan 5 hal teratas dan jelaskan kenapa masing-masing penting.
@@ -294,6 +302,7 @@ Kalau ada yang tidak jelas, tanya saya dulu. Kalau kamu tidak tahu, bilang tidak
 
 ### F2. Ringkas untuk percakapan baru
 **Kapan dipakai:** saat percakapan sudah terlalu panjang dan AI mulai lupa hal yang sudah dibahas.
+**Dipakai di:** percakapan yang sedang berjalan
 
 ```
 Buat ringkasan dari percakapan kita yang bisa saya tempel ke percakapan baru supaya kita bisa lanjut tanpa mengulang. Isinya: tujuan, keputusan yang sudah diambil, fakta penting, hal yang sudah dicoba dan tidak berhasil, dan langkah berikutnya. Tulis dalam format yang langsung bisa ditempel.
@@ -301,6 +310,7 @@ Buat ringkasan dari percakapan kita yang bisa saya tempel ke percakapan baru sup
 
 ### F3. Kembali ke tujuan
 **Kapan dipakai:** saat percakapan mulai melebar ke mana-mana.
+**Dipakai di:** percakapan yang sedang berjalan
 
 ```
 Berhenti sebentar. Ingatkan saya apa tujuan awal percakapan ini, apa yang sudah kita capai, dan apa yang masih kurang. Lalu sarankan langkah berikutnya yang paling dekat ke tujuan itu.
