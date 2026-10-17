@@ -15,6 +15,7 @@ import {
 export interface Prompt { id: string; title: string; description: string; content: string; category: string; }
 import { EntranceLoading } from './EntranceLoading';
 import { SendToAI } from './SendToAI';
+import { EVERYDAY_PROMPT_GROUPS } from '../lib/everydayPrompts';
 
 import { compilePrompt, diffWords, FORMULA_PARTS, FRAMEWORK_LABELS, groupJourneys, partsFor, type FormulaKey, type Framework, type JournalEntry, type PromptMaterial } from '../lib/promptJournal';
 import { deleteJournalEntry, listJournal, saveJournalEntry } from '../lib/promptJournalApi';
@@ -1131,6 +1132,18 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
             <span>Reading & Smart Learning</span>
           </button>
 
+          <button
+            onClick={() => handleNavigate('everyday')}
+            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              activeMenu === 'everyday'
+                ? 'bg-[#E5C158] text-slate-950 shadow-md shadow-[#E5C158]/20'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Lightbulb size={15} />
+            <span>Prompt Sehari-hari</span>
+          </button>
+
           <div className="pt-3 border-t border-[#24201C]/60 my-2">
             <button
               onClick={() => handleNavigate('vault')}
@@ -1193,6 +1206,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                  activeMenu === 'batch' ? 'Jurnal Batch' : 
                  activeMenu === 'techniques' ? 'Prompting Techniques' : 
                  activeMenu === 'reading-learning' ? 'Reading & Smart Learning' : 
+                 activeMenu === 'everyday' ? 'Prompt Sehari-hari' : 
                  'Basic Prompt Library (1.000+)'}
               </span>
             </div>
@@ -1423,6 +1437,30 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
 
                 </div>
               </section>
+
+              {/* Card for Prompt Sehari-hari */}
+              <div 
+                onClick={() => handleNavigate('everyday')}
+                className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-400 transition-all cursor-pointer flex items-center justify-between gap-4 group"
+              >
+                <div className="flex items-center gap-3.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#E5C158]/20 text-slate-800 flex items-center justify-center font-bold">
+                    <Lightbulb size={18} />
+                  </div>
+                  <div>
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-slate-950 transition-colors">
+                      Prompt Sehari-hari
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      30 prompt untuk percakapan apa pun: supaya AI tidak mengarang, jadi devil's advocate, memeriksa ulang jawabannya, dan lainnya.
+                    </p>
+                  </div>
+                </div>
+                <div className="text-xs font-semibold text-slate-700 flex items-center gap-1.5 shrink-0 group-hover:text-slate-950 group-hover:gap-2 transition-all">
+                  <span>Buka Prompt</span>
+                  <ArrowRight size={13} />
+                </div>
+              </div>
 
               {/* Bottom Card for 1,000+ Basic Prompt Vault */}
               <div 
@@ -1749,7 +1787,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                           </div>
 
                           {/* Example Prompt Box */}
-                          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-sans text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+                          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-sans text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed">
                             {tech.example}
                           </div>
                         </div>
@@ -1919,7 +1957,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                             </div>
                             <p className="text-xs text-slate-600 mb-3 leading-relaxed">{tpl.desc}</p>
                             
-                            <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-sans text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+                            <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 text-xs font-sans text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed">
                               {tpl.prompt}
                             </div>
                           </div>
@@ -2302,6 +2340,61 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
           {/* ===================================================================== */}
           {/* VIEW: 1.000+ BASIC VAULT */}
           {/* ===================================================================== */}
+          {activeMenu === 'everyday' && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div>
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500">Siap Pakai</span>
+                <h2 className="text-xl font-bold text-slate-900 mt-1">Prompt Sehari-hari</h2>
+                <p className="text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
+                  Prompt pendek untuk ditempel di percakapan apa pun dengan ChatGPT, Claude, atau Gemini. Ganti bagian dalam [kurung siku] dengan isi Anda.
+                </p>
+              </div>
+
+              {EVERYDAY_PROMPT_GROUPS.map(group => (
+                <section key={group.id} className="space-y-3">
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">{group.id}. {group.title}</h3>
+                    <p className="text-xs text-slate-600 mt-0.5 max-w-2xl leading-relaxed">{group.desc}</p>
+                    {group.id === 'B' && (
+                      <button
+                        onClick={() => { handleNavigate('techniques'); setActiveTechniqueSubTab('brutal'); }}
+                        className="mt-1.5 text-xs font-semibold text-[#A8862C] hover:text-slate-950 inline-flex items-center gap-1"
+                      >
+                        Untuk kritik mendalam atas dokumen penting, lihat The Brutal Method <ArrowRight size={12} />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {group.prompts.map(item => (
+                      <div key={item.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm hover:border-slate-300 transition-all">
+                        <div>
+                          <span className="text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/60">
+                            {item.id}
+                          </span>
+                          <h4 className="font-bold text-sm text-slate-900 mt-1.5 mb-1">{item.title}</h4>
+                          <p className="text-xs text-slate-600 mb-3 leading-relaxed">Kapan dipakai: {item.when}</p>
+                          <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 text-xs font-sans text-slate-700 mb-3 whitespace-pre-wrap leading-relaxed">
+                            {item.prompt}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => handleCopy(item.prompt, `everyday-${item.id}`)}
+                          className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                        >
+                          {copiedId === `everyday-${item.id}` ? <Check size={12} className="text-slate-900" /> : <Copy size={12} />}
+                          {copiedId === `everyday-${item.id}` ? 'Prompt Tersalin!' : 'Salin Prompt'}
+                        </button>
+                        <SendToAI text={item.prompt} className="mt-2" />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          )}
+
           {activeMenu === 'vault' && (
             <div className="space-y-5 animate-in fade-in duration-300">
               
