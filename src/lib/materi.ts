@@ -8,6 +8,7 @@ export type Materi = {
   section?: string | null;
   stored_url?: string;
   content?: string;
+  load?: () => Promise<string>;
   created_at: string;
 };
 
@@ -33,17 +34,16 @@ const resolveMaterialUrl = async (materi: Materi): Promise<Materi> => {
   if (error) throw error;
 
   if (/\.html?$/i.test(storagePath)) {
-    const { data: file, error: downloadError } = await supabase.storage
-      .from(MATERIAL_BUCKET)
-      .download(storagePath);
+    // Download when opened, not when the module opens: some materials are ~9 MB.
+    const load = async () => {
+      const { data: file, error: downloadError } = await supabase.storage
+        .from(MATERIAL_BUCKET)
+        .download(storagePath);
 
-    if (downloadError) throw downloadError;
-    return {
-      ...materi,
-      stored_url: materi.url,
-      url: data.signedUrl,
-      content: await file.text(),
+      if (downloadError) throw downloadError;
+      return file.text();
     };
+    return { ...materi, stored_url: materi.url, url: data.signedUrl, load };
   }
 
   return { ...materi, stored_url: materi.url, url: data.signedUrl };
