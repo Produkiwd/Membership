@@ -10,12 +10,13 @@ import {
   Target, Shield, TrendingUp, Share2, 
   Plus, RefreshCw, Eye, Award, BookmarkCheck, 
   FileEdit, Menu, Home, CheckCircle2, SlidersHorizontal,
-  Lightbulb, Brain, Compass, MessageSquare, AlertTriangle, Trash2
+  Lightbulb, Brain, Compass, MessageSquare, AlertTriangle, Trash2, Puzzle, Download, ExternalLink
 } from 'lucide-react';
 export interface Prompt { id: string; title: string; description: string; content: string; category: string; }
 import { EntranceLoading } from './EntranceLoading';
 import { SendToAI } from './SendToAI';
 import { EVERYDAY_PROMPT_GROUPS } from '../lib/everydayPrompts';
+import { SKILLS, SKILL_TARGETS } from '../lib/skills';
 const EVERYDAY_PROMPT_COUNT = EVERYDAY_PROMPT_GROUPS.reduce((sum, g) => sum + g.prompts.length, 0);
 
 import { compilePrompt, diffWords, FORMULA_PARTS, FRAMEWORK_LABELS, groupJourneys, partsFor, type FormulaKey, type Framework, type JournalEntry, type PromptMaterial } from '../lib/promptJournal';
@@ -1145,6 +1146,18 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
             <span>Prompt Sehari-hari</span>
           </button>
 
+          <button
+            onClick={() => handleNavigate('skills')}
+            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              activeMenu === 'skills'
+                ? 'bg-[#E5C158] text-slate-950 shadow-md shadow-[#E5C158]/20'
+                : 'text-slate-300 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Puzzle size={15} />
+            <span>Plugin & Skills</span>
+          </button>
+
           <div className="pt-3 border-t border-[#24201C]/60 my-2">
             <button
               onClick={() => handleNavigate('vault')}
@@ -1208,6 +1221,7 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                  activeMenu === 'techniques' ? 'Prompting Techniques' : 
                  activeMenu === 'reading-learning' ? 'Reading & Smart Learning' : 
                  activeMenu === 'everyday' ? 'Prompt Sehari-hari' : 
+                 activeMenu === 'skills' ? 'Plugin & Skills' : 
                  'Basic Prompt Library (1.000+)'}
               </span>
             </div>
@@ -2395,6 +2409,68 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
                   </div>
                 </section>
               ))}
+            </div>
+          )}
+
+          {activeMenu === 'skills' && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div>
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-500">Pasang Sekali, Pakai Terus</span>
+                <h2 className="text-xl font-bold text-slate-900 mt-1">Plugin & Skills</h2>
+                <p className="text-sm text-slate-600 mt-1 max-w-2xl leading-relaxed">
+                  Skill adalah instruksi siap pakai yang dipasang di AI Anda. Setelah terpasang, AI akan memakainya sendiri saat tugasnya cocok, jadi Anda tidak perlu menempel prompt yang sama berulang kali. Unduh file skill di bawah, lalu unggah ke ChatGPT, Claude, atau Gemini.
+                </p>
+              </div>
+
+              <section className="space-y-3">
+                <h3 className="text-sm font-bold text-slate-900">Skill yang tersedia</h3>
+                {SKILLS.length === 0 ? (
+                  <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-6 text-sm text-slate-600">
+                    Skill sedang disiapkan tim. Halaman ini akan terisi begitu file skill siap diunduh.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {SKILLS.map(skill => (
+                      <div key={skill.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm">
+                        <div>
+                          <h4 className="font-bold text-sm text-slate-900 mb-1">{skill.title}</h4>
+                          <p className="text-xs text-slate-600 mb-4 leading-relaxed">{skill.desc}</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <a href={`/skills/${skill.id}/SKILL.md`} download="SKILL.md" className="flex-1 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1.5">
+                            <Download size={12} /> Unduh SKILL.md
+                          </a>
+                          {skill.zip && (
+                            <a href={`/skills/${skill.id}.zip`} download className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1.5">
+                              <Download size={12} /> Unduh ZIP
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              <section className="space-y-3">
+                <h3 className="text-sm font-bold text-slate-900">Cara memasang</h3>
+                <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
+                  Satu file SKILL.md bisa dipakai di ketiga AI. ZIP hanya disediakan untuk skill yang punya file pendukung. Pemasangan dilakukan sekali di akun AI Anda masing-masing.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {SKILL_TARGETS.map(target => (
+                    <div key={target.label} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm">
+                      <div>
+                        <h4 className="font-bold text-sm text-slate-900 mb-1.5">{target.label}</h4>
+                        <p className="text-xs text-slate-600 mb-4 leading-relaxed">{target.steps}</p>
+                      </div>
+                      <a href={target.url} target="_blank" rel="noopener noreferrer" className="w-full py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1.5">
+                        Buka {target.label} <ExternalLink size={12} />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
           )}
 
