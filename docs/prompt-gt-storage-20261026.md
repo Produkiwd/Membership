@@ -128,6 +128,23 @@ SQL 1 sampai 3 bisa saya jalankan lewat Supabase MCP setelah Anda mengotorisasin
 - **Push ke `main` ikut menayangkan 2 commit Prompt Sehari-hari tanggal 17 Okt yang belum di-push**, yaitu `f561783` dan `35b40bc`. Commit `bc015c0` (GT terbaru di repo, yang menjadi cadangan) juga ikut.
 - **Cara unggah:** 3a atau 3b.
 
+## Hasil 26 Okt 2026
+
+**Langkah 2 selesai.** Kode di commit `8a37b37`. `npm run lint` lulus, `npm run build` lulus, dan `node --test tests/artifact-progress.test.ts` lulus 3/3. Belum di-push.
+
+**SQL 1 menemukan 4 baris dengan judul yang sama dengan materi bawaan.** Saat ini keempatnya tersembunyi:
+
+| Modul | Judul | Path Storage |
+|---|---|---|
+| 03 | AI Skills Manual | `create/f3c8f3f0-…-Level-3-day-1.html` |
+| 03 | CIS Prompting | `create/2c50fa09-…-Level-3-day-1.1.html` |
+| 04 | Thinking w/ Claude AI | `think/1018ab59-…-thinking.html` |
+| 04 | Setup Claude | `think/c40fb513-…-setup.html` |
+
+Isinya identik dengan file di repo: eTag (MD5) di Storage sama persis dengan MD5 versi yang di-commit, dan ukurannya juga sama. Setelah kode baru tayang, keempat materi ini akan diambil dari Storage, tapi **isi yang dilihat peserta tidak berubah**. Posisi dan ID progresnya juga tetap.
+
+Modul 02 belum punya baris database sama sekali. Di Storage ada file GT lama (`prompt/bc6fcc13-…-02_Grounded_Thinking_and_Learning_v6-claude_WEB.html`, 7,58 MB) tanpa baris database. File itu tidak dipakai, dan dibiarkan apa adanya.
+
 ## Ke depan
 
 Kalau GT diganti lagi, cukup unggah file baru ke path bertanggal yang baru, lalu ubah `url` di baris yang sama. Tidak perlu deploy.
