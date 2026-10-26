@@ -16,7 +16,9 @@ export interface Prompt { id: string; title: string; description: string; conten
 import { EntranceLoading } from './EntranceLoading';
 import { SendToAI } from './SendToAI';
 import { EVERYDAY_PROMPT_GROUPS } from '../lib/everydayPrompts';
-import { SKILLS, SKILL_TARGETS } from '../lib/skills';
+import { SKILL_TARGETS, isZipSkill, type SkillItem } from '../lib/skills';
+import { downloadSkillUrl, listSkills, uploadSkill } from '../lib/skillsApi';
+import { deleteMateri } from '../lib/materi';
 const EVERYDAY_PROMPT_COUNT = EVERYDAY_PROMPT_GROUPS.reduce((sum, g) => sum + g.prompts.length, 0);
 
 import { compilePrompt, diffWords, FORMULA_PARTS, FRAMEWORK_LABELS, groupJourneys, partsFor, type FormulaKey, type Framework, type JournalEntry, type PromptMaterial } from '../lib/promptJournal';
@@ -754,7 +756,7 @@ function CompareModal({ before, after, onClose }: { before: JournalEntry; after:
   );
 }
 
-export default function App({ onBack, initialMenu = 'beranda', materials = [] }: { onBack?: () => void; initialMenu?: string; materials?: PromptMaterial[] }) {
+export default function App({ onBack, initialMenu = 'beranda', materials = [], isAdmin = false }: { onBack?: () => void; initialMenu?: string; materials?: PromptMaterial[]; isAdmin?: boolean }) {
   // Navigation State (WJG Style)
   // 'beranda' | 'my-journal' | 'prompt-studio' | 'batch' | 'techniques' | 'reading-learning' | 'vault'
   const [activeMenu, setActiveMenu] = useState<string>(() => {
@@ -790,6 +792,56 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
   const [isDeleting, setIsDeleting] = useState(false);
   const [compareTarget, setCompareTarget] = useState<{ before: JournalEntry; after: JournalEntry } | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [skills, setSkills] = useState<SkillItem[] | null>(null);
+  const [skillError, setSkillError] = useState<string | null>(null);
+  const [skillForm, setSkillForm] = useState({ title: '', description: '' });
+  const [skillFile, setSkillFile] = useState<File | null>(null);
+  const [skillBusy, setSkillBusy] = useState(false);
+  const [skillToDelete, setSkillToDelete] = useState<string | null>(null);
+
+  const loadSkills = () => listSkills().then(setSkills).catch(err => { setSkills([]); setSkillError(err.message || 'Gagal memuat skill.'); });
+
+  useEffect(() => {
+    if (activeMenu === 'skills' && skills === null) loadSkills();
+  }, [activeMenu, skills]);
+
+  const handleSkillUpload = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!skillFile || !skillForm.title.trim()) return;
+    const form = e.currentTarget;
+    setSkillBusy(true);
+    setSkillError(null);
+    try {
+      await uploadSkill(skillFile, skillForm.title.trim(), skillForm.description.trim());
+      setSkillForm({ title: '', description: '' });
+      setSkillFile(null);
+      form.reset();
+      await loadSkills();
+    } catch (err: any) {
+      setSkillError(err.message || 'Unggah gagal.');
+    } finally {
+      setSkillBusy(false);
+    }
+  };
+
+  const handleSkillDownload = async (skill: SkillItem) => {
+    try {
+      window.location.href = await downloadSkillUrl(skill);
+    } catch (err: any) {
+      setSkillError(err.message || 'Unduhan gagal.');
+    }
+  };
+
+  const handleSkillDelete = async (skill: SkillItem) => {
+    if (skillToDelete !== skill.id) return setSkillToDelete(skill.id);
+    setSkillToDelete(null);
+    try {
+      await deleteMateri(skill);
+      await loadSkills();
+    } catch (err: any) {
+      setSkillError(err.message || 'Gagal menghapus skill.');
+    }
+  };
 
   const loadJournal = React.useCallback(async () => {
     setJournalStatus('loading');
@@ -2424,31 +2476,55 @@ export default function App({ onBack, initialMenu = 'beranda', materials = [] }:
 
               <section className="space-y-3">
                 <h3 className="text-sm font-bold text-slate-900">Skill yang tersedia</h3>
-                {SKILLS.length === 0 ? (
+                {skillError && <p role="alert" className="text-xs font-semibold text-red-600">{skillError}</p>}
+                {skills === null ? (
+                  <div className="flex items-center gap-2 text-xs text-slate-500"><Loader2 size={14} className="animate-spin" /> Memuat skill...</div>
+                ) : skills.length === 0 ? (
                   <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-6 text-sm text-slate-600">
                     Skill sedang disiapkan tim. Halaman ini akan terisi begitu file skill siap diunduh.
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {SKILLS.map(skill => (
+                    {skills.map(skill => (
                       <div key={skill.id} className="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col justify-between shadow-sm">
                         <div>
                           <h4 className="font-bold text-sm text-slate-900 mb-1">{skill.title}</h4>
-                          <p className="text-xs text-slate-600 mb-4 leading-relaxed">{skill.desc}</p>
+                          {skill.description && <p className="text-xs text-slate-600 mb-4 leading-relaxed">{skill.description}</p>}
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          <a href={`/skills/${skill.id}/SKILL.md`} download="SKILL.md" className="flex-1 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1.5">
-                            <Download size={12} /> Unduh SKILL.md
-                          </a>
-                          {skill.zip && (
-                            <a href={`/skills/${skill.id}.zip`} download className="flex-1 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold flex items-center justify-center gap-1.5">
-                              <Download size={12} /> Unduh ZIP
-                            </a>
+                          <button onClick={() => handleSkillDownload(skill)} className="flex-1 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1.5">
+                            <Download size={12} /> {isZipSkill(skill.url) ? 'Unduh ZIP' : 'Unduh SKILL.md'}
+                          </button>
+                          {isAdmin && (
+                            <button onClick={() => handleSkillDelete(skill)} className="px-3 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-700 text-xs font-bold flex items-center gap-1.5">
+                              <Trash2 size={12} /> {skillToDelete === skill.id ? 'Yakin hapus?' : 'Hapus'}
+                            </button>
                           )}
                         </div>
                       </div>
                     ))}
                   </div>
+                )}
+
+                {isAdmin && (
+                  <form onSubmit={handleSkillUpload} className="bg-white rounded-2xl border border-slate-200 p-5 space-y-3 shadow-sm">
+                    <h4 className="font-bold text-sm text-slate-900">Unggah skill (khusus admin)</h4>
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Judul
+                      <input required value={skillForm.title} onChange={e => setSkillForm({ ...skillForm, title: e.target.value })} className="mt-1 w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-normal focus:outline-none focus:border-[#C9A23E]" />
+                    </label>
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Deskripsi singkat untuk peserta
+                      <textarea maxLength={500} rows={2} value={skillForm.description} onChange={e => setSkillForm({ ...skillForm, description: e.target.value })} className="mt-1 w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-normal focus:outline-none focus:border-[#C9A23E]" />
+                    </label>
+                    <label className="block text-xs font-semibold text-slate-700">
+                      File SKILL.md, .zip, atau .skill
+                      <input required type="file" accept=".md,.zip,.skill" onChange={e => setSkillFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-xs font-normal" />
+                    </label>
+                    <button type="submit" disabled={skillBusy} className="px-4 py-2 rounded-xl bg-[#E5C158] hover:bg-[#d4b04a] text-slate-950 text-xs font-bold disabled:opacity-60 flex items-center gap-1.5">
+                      {skillBusy && <Loader2 size={12} className="animate-spin" />} Unggah
+                    </button>
+                  </form>
                 )}
               </section>
 

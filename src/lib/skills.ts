@@ -1,8 +1,17 @@
-// Each skill lives in public/skills/<id>/SKILL.md; <id> must be kebab-case and match the `name` in its frontmatter.
-// Add public/skills/<id>.zip and set zip: true only when the skill has supporting files beyond SKILL.md.
-export type SkillItem = { id: string; title: string; desc: string; zip?: boolean };
+export type SkillItem = { id: string; module_id: string; title: string; description: string | null; url: string; created_at: string };
 
-export const SKILLS: SkillItem[] = [];
+export const isZipSkill = (path: string) => /\.(zip|skill)$/i.test(path);
+
+// A single-file skill must carry name and description in its YAML frontmatter, or Claude, ChatGPT and Gemini reject it.
+export function checkSkillMarkdown(text: string): string | null {
+  const front = text.replace(/^﻿/, '').match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!front) return 'File SKILL.md harus diawali blok --- berisi name dan description.';
+  const name = front[1].match(/^name:\s*(.+)$/m)?.[1].trim();
+  if (!name) return 'Bagian name belum diisi di SKILL.md.';
+  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(name)) return 'name di SKILL.md harus huruf kecil dengan tanda hubung, misalnya tutor-deep-mastery.';
+  if (!front[1].match(/^description:\s*\S/m)) return 'Bagian description belum diisi di SKILL.md.';
+  return null;
+}
 
 // Upload pages and accepted formats checked in each app on 26 Oct 2026.
 export const SKILL_TARGETS = [

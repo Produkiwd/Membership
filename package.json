@@ -12,7 +12,7 @@
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
     "test:member-access": "tsx --test src/lib/access.test.ts src/lib/memberAccessConfig.test.ts src/lib/dailySession.test.ts tests/member-provision.test.ts && node tests/member-access-db.mjs",
-    "test:prompt-journal": "tsx --test src/lib/promptJournal.test.ts src/lib/aiLaunch.test.ts && node tests/prompt-journal-db.mjs"
+    "test:prompt-journal": "tsx --test src/lib/promptJournal.test.ts src/lib/aiLaunch.test.ts src/lib/skills.test.ts && node tests/prompt-journal-db.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

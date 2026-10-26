@@ -1483,7 +1483,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
           </>
         ) : activeTab === 'prompts' ? (
           canOpenPromptDatabase
-            ? <PromptDatabaseView initialMenu={promptStudioInitialMenu} materials={promptMaterials} onBack={() => { setActiveTab('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+            ? <PromptDatabaseView initialMenu={promptStudioInitialMenu} materials={promptMaterials} isAdmin={isAdmin} onBack={() => { setActiveTab('dashboard'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
             : <div className="p-12 text-center font-body text-light-md">Akses Prompt Studio tidak tersedia untuk akun ini.</div>
         ) : activeTab === 'admin' ? (
           <AdminView />
