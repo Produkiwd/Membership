@@ -7,14 +7,14 @@ import GroupBatchPicker from './components/GroupBatchPicker';
 import LocalNewMemberTier from './components/LocalNewMemberTier';
 import type { LocalAccessConfig } from './components/MemberAccessPreview';
 import LocalMemberAccessRow, { LocalMemberListPreview } from './components/LocalMemberAccessRow';
-import { Monitor, BookOpen, Calendar, ChevronRight, ChevronLeft, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2, ExternalLink } from 'lucide-react';
+import { Monitor, BookOpen, Calendar, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2, ExternalLink } from 'lucide-react';
 import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent, type ChangeEvent, type SyntheticEvent } from 'react';
 import { cn } from './lib/utils';
 import { filterMembers } from './lib/memberSearch';
 import { memberExpiryTime, memberState, memberStatusLabel } from './lib/memberStatus';
 import LoginVideoBackground from './components/LoginVideoBackground';
 import { useArtifactProgress } from './lib/useArtifactProgress';
-import { buildArtifactList, type LearningArtifact } from './lib/artifactProgress';
+import { buildArtifactList } from './lib/artifactProgress';
 import { AI_OS_GROUP, AI_OS_TIER, canAccessAifModule, canAccessPromptStudio } from './lib/access';
 import {
   createPendingMember,
@@ -30,13 +30,8 @@ import {
   type User,
   type MemberRecord,
 } from './lib/membership';
-import { addMateri, deleteMateri, getMateriByModule, getMateriCatalog, uploadMateriFile, type Materi } from './lib/materi';
+import { addMateri, deleteMateri, getMateriByModule, getMateriCatalog, saveMateriOrder, uploadMateriFile, type Materi } from './lib/materi';
 import type { PromptMaterial } from './lib/promptJournal';
-import level3Day1Html from './Level 3/Level 3 day 1.html?raw';
-import level3Day1_1Html from './Level 3/Level 3 day 1.1.html?raw';
-import twcHtml1 from '../ThinkingWithClaude/setup.html?raw';
-import twcHtml2 from '../ThinkingWithClaude/thinking.html?raw';
-import aiKnowledgeOperatingSystemHtml from '../materi/ACT/AI_Knowledge_Operating_System_v0.html?raw';
 import SinadPortal from './components/SinadPortal';
 import PromptDatabaseView from './components/PromptDatabaseView';
 import KnowledgeArtifactPortal, { isKnowledgeArtifactId } from './components/KnowledgeArtifactPortal';
@@ -88,26 +83,8 @@ function Button({ children, variant = 'primary', className, ...props }: ButtonHT
   );
 }
 
-const lazyHtml = (loader: () => Promise<{ default: string }>) => () => loader().then(module => module.default);
-
-const defaultModuleMaterials: Record<string, any[]> = {
-  // Strategize is managed in Supabase; preserve the old source files for recovery.
-  '01': [],
-  // Prompt follows the AI First Day 1 run-down. Files are several MB each, so they load on open.
-  '02': [{ title: "Materi AI First Day 1", htmls: [
-    { title: "Context Setting: AI Hari Ini", load: lazyHtml(() => import('../materi/Prompt/00-context-setting.html?raw')) },
-    { title: "M1: Ngobrol dengan AI", load: lazyHtml(() => import('../materi/Prompt/01-ngobrol-dengan-ai.html?raw')) },
-    { title: "M2: Grounded Thinking & Learning", load: lazyHtml(() => import('../materi/Prompt/02-grounded-thinking-and-learning.html?raw')) },
-    { title: "M3: Personal Knowledge Management", load: lazyHtml(() => import('../materi/Prompt/03-personal-knowledge-management.html?raw')) },
-    { title: "M4: Writing Companion", load: lazyHtml(() => import('../materi/Prompt/04-writing-companion.html?raw')) },
-    { title: "M5: AI Creative Partner", load: lazyHtml(() => import('../materi/Prompt/05-ai-creative-partner.html?raw')) },
-  ] }],
-  '03': [{ day: "Day 1", title: "Materi Level 3 Day 1", htmls: [{ title: "AI Skills Manual", content: level3Day1Html }, { title: "CIS Prompting", content: level3Day1_1Html }] }],
-  '04': [{ day: "Materi", title: "Thinking with Claude", htmls: [{ title: "Thinking w/ Claude AI", content: twcHtml2 }, { title: "Setup Claude", content: twcHtml1 }] }],
-  '05': [{ day: "Day 1", title: "Materi Day 1" }, { day: "Day 2", title: "Materi Day 2" }],
-  '06': [{ title: "AI Knowledge Operating System", htmls: [{ title: "AI Knowledge Operating System", content: aiKnowledgeOperatingSystemHtml }] }],
-  '07': [],
-};
+// All module materials live in Supabase module_materials, ordered by sort_order. The old repo copies
+// under materi/, src/Level 3 and ThinkingWithClaude stay only as a recovery source.
 
 const moduleDescriptions: Record<string, string> = {
   '01': 'Tentukan arah penggunaan AI',
@@ -481,16 +458,14 @@ function MateriView() {
   const [materiList, setMateriList] = useState<Materi[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [materiError, setMateriError] = useState('');
-  const [previewBuiltin, setPreviewBuiltin] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const [loadedPreviews, setLoadedPreviews] = useState<Record<string, string>>({});
-  const builtinMaterials = buildArtifactList(selectedModule, defaultModuleMaterials[selectedModule] || [], [])
-    .map(material => loadedPreviews[material.id] ? { ...material, content: loadedPreviews[material.id] } : material);
-  const togglePreview = (material: LearningArtifact) => {
-    if (previewBuiltin === material.id) return setPreviewBuiltin(null);
-    setPreviewBuiltin(material.id);
-    if (material.load && !material.content) {
-      material.load()
-        .then(content => setLoadedPreviews(current => ({ ...current, [material.id]: content })))
+  const togglePreview = (materi: Materi) => {
+    if (previewId === materi.id) return setPreviewId(null);
+    setPreviewId(materi.id);
+    if (materi.load && !loadedPreviews[materi.id]) {
+      materi.load()
+        .then(content => setLoadedPreviews(current => ({ ...current, [materi.id]: content })))
         .catch(error => console.error('Pratinjau materi belum dapat dimuat:', error));
     }
   };
@@ -575,6 +550,7 @@ function MateriView() {
   };
 
   const handleDeleteMateri = async (materi: Materi) => {
+    if (!window.confirm(`Hapus "${materi.title}"? Materi dan filenya hilang permanen dan tidak bisa dikembalikan.`)) return;
     setIsLoading(true);
     setMateriError('');
     try {
@@ -582,6 +558,25 @@ function MateriView() {
       setMateriList((current) => current.filter((item) => item.id !== materi.id));
     } catch {
       setMateriError('Materi gagal dihapus dari Supabase.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleMoveMateri = async (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= materiList.length) return;
+    const reordered = [...materiList];
+    [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
+    const previous = materiList;
+    setMateriList(reordered);
+    setIsLoading(true);
+    setMateriError('');
+    try {
+      await saveMateriOrder(reordered);
+    } catch {
+      setMateriList(previous);
+      setMateriError('Urutan materi gagal disimpan ke Supabase.');
     } finally {
       setIsLoading(false);
     }
@@ -618,7 +613,7 @@ function MateriView() {
           </div>
           <select 
             value={selectedModule}
-            onChange={(e) => { setSelectedModule(e.target.value); setPreviewBuiltin(null); }}
+            onChange={(e) => { setSelectedModule(e.target.value); setPreviewId(null); }}
             className="w-full sm:w-auto px-4 py-2 border border-border-light-subtle rounded text-light-hi focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted bg-white min-w-[200px]"
           >
             {MODULES.map(m => (
@@ -675,44 +670,44 @@ function MateriView() {
         {isLoading && materiList.length === 0 && (
           <p className="mt-8 font-body text-sm text-light-md">Memuat materi dari Supabase...</p>
         )}
-        {(builtinMaterials.length > 0 || materiList.length > 0) && (
+        {materiList.length > 0 && (
           <div className="mt-8 space-y-3">
-            <h4 className="font-sans font-bold text-sm text-light-hi tracking-eyebrow uppercase mb-4 border-b border-border-light-subtle pb-2">Daftar Materi</h4>
-            {builtinMaterials.map(material => (
-              <div key={material.id} className="p-4 border border-border-light-subtle rounded-lg bg-bg-light">
+            <h4 className="font-sans font-bold text-sm text-light-hi tracking-eyebrow uppercase mb-4 border-b border-border-light-subtle pb-2">Daftar Materi (urutan tampil ke member)</h4>
+            {materiList.map((m, index) => (
+              <div key={m.id} className="p-4 border border-border-light-subtle rounded-lg bg-bg-light">
                 <div className="flex justify-between items-center gap-4">
-                  <div>
-                    <div className="font-sans font-bold text-light-hi text-sm">{material.title}</div>
-                    <p className="font-body text-xs text-light-md mt-1">Materi bawaan situs</p>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="font-mono text-xs text-light-lo w-6 text-right shrink-0">{index + 1}</span>
+                    <div className="min-w-0">
+                      <div className="font-sans font-bold text-light-hi text-sm">{m.title}</div>
+                      <div className="font-mono text-[10px] text-light-lo truncate max-w-xs sm:max-w-md">{m.stored_url?.startsWith('storage:') ? 'File Supabase Storage' : m.url}</div>
+                    </div>
                   </div>
-                  {material.url ? (
-                    <a href={material.url} target="_blank" rel="noopener noreferrer" className="font-body text-sm text-light-md hover:underline">Lihat materi</a>
-                  ) : (
-                    <button type="button" onClick={() => togglePreview(material)} aria-expanded={previewBuiltin === material.id} className="font-body text-sm text-light-md hover:underline">
-                      {previewBuiltin === material.id ? 'Tutup pratinjau' : 'Lihat materi'}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {m.load ? (
+                      <button type="button" onClick={() => togglePreview(m)} aria-expanded={previewId === m.id} className="font-body text-sm text-light-md hover:underline px-2">
+                        {previewId === m.id ? 'Tutup pratinjau' : 'Lihat materi'}
+                      </button>
+                    ) : (
+                      <a href={m.url} target="_blank" rel="noopener noreferrer" className="font-body text-sm text-light-md hover:underline px-2">Lihat materi</a>
+                    )}
+                    <button type="button" onClick={() => handleMoveMateri(index, -1)} disabled={isLoading || index === 0} className="text-light-md hover:text-light-hi p-2 disabled:opacity-30" aria-label={`Naikkan ${m.title}`}>
+                      <ChevronUp className="w-4 h-4" />
                     </button>
-                  )}
+                    <button type="button" onClick={() => handleMoveMateri(index, 1)} disabled={isLoading || index === materiList.length - 1} className="text-light-md hover:text-light-hi p-2 disabled:opacity-30" aria-label={`Turunkan ${m.title}`}>
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                    <button type="button" onClick={() => handleDeleteMateri(m)} disabled={isLoading} className="text-red-500 hover:text-red-700 transition-colors p-2 disabled:opacity-50" aria-label={`Hapus ${m.title}`}>
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-                {previewBuiltin === material.id && material.load && !material.content && (
+                {previewId === m.id && m.load && !loadedPreviews[m.id] && (
                   <p role="status" className="font-body text-xs text-light-md mt-4">Memuat pratinjau…</p>
                 )}
-                {previewBuiltin === material.id && material.content && (
-                  <iframe srcDoc={material.content} onLoad={keepEmbeddedHashNavigationInsideFrame} title={material.title} className="w-full h-[65vh] border border-border-light-subtle rounded-lg mt-4 bg-white" />
+                {previewId === m.id && loadedPreviews[m.id] && (
+                  <iframe srcDoc={loadedPreviews[m.id]} onLoad={keepEmbeddedHashNavigationInsideFrame} title={m.title} className="w-full h-[65vh] border border-border-light-subtle rounded-lg mt-4 bg-white" />
                 )}
-                {previewBuiltin === material.id && material.images?.map((image, index) => (
-                  <img key={image} src={image} alt={`${material.title} ${index + 1}`} className="max-w-full rounded-lg mt-4" />
-                ))}
-              </div>
-            ))}
-            {materiList.map((m) => (
-              <div key={m.id} className="flex justify-between items-center p-4 border border-border-light-subtle rounded-lg bg-bg-light">
-                 <div>
-                    <div className="font-sans font-bold text-light-hi text-sm">{m.title}</div>
-                    <div className="font-mono text-[10px] text-light-lo truncate max-w-xs sm:max-w-md">{m.stored_url?.startsWith('storage:') ? 'File Supabase Storage' : m.url}</div>
-                 </div>
-                 <button onClick={() => handleDeleteMateri(m)} disabled={isLoading} className="text-red-500 hover:text-red-700 transition-colors p-2 disabled:opacity-50" aria-label={`Hapus ${m.title}`}>
-                    <Trash2 className="w-4 h-4" />
-                 </button>
               </div>
             ))}
           </div>
@@ -755,7 +750,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [iframeModalUrl, setIframeModalUrl] = useState<{url: string, title: string} | null>(null);
 
-  const handleModuleClick = async (moduleId: string, defaultTitle: string, defaultSubtitle: string, defaultMaterials: any[]) => {
+  const handleModuleClick = async (moduleId: string, defaultTitle: string, defaultSubtitle: string) => {
     if (loadingModule || !allowedPortals.includes('aif') || !canAccessAifModule(sinadAccess.tier, moduleId, accessConfig)) return;
     setLoadingModule(moduleId);
     let materialLoadFailed = false;
@@ -767,7 +762,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
       console.error('Materi Supabase belum dapat dimuat:', error);
     }
 
-    const finalMaterials = buildArtifactList(moduleId, defaultMaterials, materials);
+    const finalMaterials = buildArtifactList(moduleId, materials);
 
     setSelectedModule({
       id: moduleId,
@@ -840,9 +835,9 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
 
   const [promptStudioInitialMenu, setPromptStudioInitialMenu] = useState('beranda');
 
-  // Prompt Journal entries are tied to Prompt module materials (built-in plus uploaded).
+  // Prompt Journal entries are tied to Prompt module materials.
   const toPromptMaterials = (remote: Materi[]): PromptMaterial[] =>
-    buildArtifactList('02', defaultModuleMaterials['02'], remote).map(item => ({ key: item.id, title: item.title }));
+    buildArtifactList('02', remote).map(item => ({ key: item.id, title: item.title }));
   const [promptMaterials, setPromptMaterials] = useState<PromptMaterial[]>(() => toPromptMaterials([]));
   useEffect(() => {
     if (activeTab !== 'prompts') return;
@@ -1148,7 +1143,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               disabled={!canAccessModule('01') || loadingModule !== null}
               aria-label={'Strategize' + (canAccessModule('01') ? '' : ' — akses terkunci')}
               className="relative text-left border border-[#001E3C]/10 bg-[#FCB528] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
-              onClick={() => handleModuleClick("01", "Strategize", "Awareness Session", defaultModuleMaterials['01'])}
+              onClick={() => handleModuleClick("01", "Strategize", "Awareness Session")}
             >
               <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF</span>
               <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Strategize</h3>
@@ -1159,7 +1154,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               disabled={!canAccessModule('02') || loadingModule !== null}
               aria-label={'Prompt' + (canAccessModule('02') ? '' : ' — akses terkunci')}
               className="relative text-left border border-[#001E3C]/10 bg-[#FCB528] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
-              onClick={() => handleModuleClick("02", "Prompt", "Chat Mastery", defaultModuleMaterials['02'])}
+              onClick={() => handleModuleClick("02", "Prompt", "Chat Mastery")}
             >
               <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF</span>
               <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Prompt</h3>
@@ -1170,7 +1165,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               disabled={!canAccessModule('03') || loadingModule !== null}
               aria-label={'Create' + (canAccessModule('03') ? '' : ' — akses terkunci')}
               className="relative text-left border border-[#001E3C]/10 bg-[#FCB528] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
-              onClick={() => handleModuleClick("03", "Create", "Output Creation", defaultModuleMaterials['03'])}
+              onClick={() => handleModuleClick("03", "Create", "Output Creation")}
             >
               <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF</span>
               <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Create</h3>
@@ -1181,7 +1176,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               disabled={!canAccessModule('04') || loadingModule !== null}
               aria-label={'Think' + (canAccessModule('04') ? '' : ' — akses terkunci')}
               className="relative text-left border border-[#001E3C]/10 bg-[#FCB528] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
-              onClick={() => handleModuleClick("04", "Think", "One Day Intensive", defaultModuleMaterials['04'])}
+              onClick={() => handleModuleClick("04", "Think", "One Day Intensive")}
             >
               <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF</span>
               <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Think</h3>
@@ -1192,7 +1187,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               disabled={!canAccessModule('05') || loadingModule !== null}
               aria-label={'Build' + (canAccessModule('05') ? '' : ' — akses terkunci')}
               className="relative text-left border border-[#001E3C]/10 bg-[#FCB528] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
-              onClick={() => handleModuleClick("05", "Build", "NoCode AI Build", defaultModuleMaterials['05'])}
+              onClick={() => handleModuleClick("05", "Build", "NoCode AI Build")}
             >
               <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF</span>
               <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Build</h3>
@@ -1203,7 +1198,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               disabled={!canAccessModule('06') || loadingModule !== null}
               aria-label={'Act' + (canAccessModule('06') ? '' : ' — akses terkunci')}
               className="relative text-left border border-[#001E3C]/10 bg-[#FCB528] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
-              onClick={() => handleModuleClick("06", "Act", "Action & Transformation", defaultModuleMaterials['06'])}
+              onClick={() => handleModuleClick("06", "Act", "Action & Transformation")}
             >
               <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF</span>
               <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Act</h3>
@@ -1214,7 +1209,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               disabled={!canAccessModule('08') || loadingModule !== null}
               aria-label={'Thinking With Claude' + (canAccessModule('08') ? '' : ' — akses terkunci')}
               className="relative text-left border border-[#001E3C]/10 bg-[#00AACC] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
-              onClick={() => handleModuleClick("08", "Thinking With Claude", "One Day Intensive", defaultModuleMaterials['04'])}
+              onClick={() => handleModuleClick("08", "Thinking With Claude", "One Day Intensive")}
             >
               <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF How To</span>
               <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Thinking With Claude</h3>
@@ -1225,7 +1220,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               disabled={!canAccessModule('07') || loadingModule !== null}
               aria-label={'AI Operating System' + (canAccessModule('07') ? '' : ' — akses terkunci')}
               className="relative text-left border border-[#001E3C]/10 bg-[#00AACC] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
-              onClick={() => handleModuleClick("07", "AI Operating System", "AI Operating System", defaultModuleMaterials['07'])}
+              onClick={() => handleModuleClick("07", "AI Operating System", "AI Operating System")}
             >
               <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF How To</span>
               <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">AI Operating System</h3>
@@ -1236,7 +1231,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               disabled={!canAccessModule('09') || loadingModule !== null}
               aria-label={'Selling Idea With AI' + (canAccessModule('09') ? '' : ' — akses terkunci')}
               className="relative text-left border border-[#001E3C]/10 bg-[#00AACC] min-h-[180px] md:min-h-[200px] px-7 md:px-9 pt-20 pb-8 md:pb-9 rounded-xl shadow-card flex flex-col items-start justify-end hover:border-[#001E3C]/40 hover:shadow-lg transition-all focus-visible:outline-2 focus-visible:outline-[#00AACC] disabled:opacity-60 disabled:cursor-not-allowed"
-              onClick={() => handleModuleClick("09", "Selling Idea With AI", "", [])}
+              onClick={() => handleModuleClick("09", "Selling Idea With AI", "")}
             >
               <span className="absolute top-5 right-5 md:top-6 md:right-6 font-sans text-sm font-bold text-[#F7F9FC] bg-[#001E3C] border border-[#001E3C] px-3.5 py-1.5 rounded-full tracking-wide">AIF How To</span>
               <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Selling Idea With AI</h3>

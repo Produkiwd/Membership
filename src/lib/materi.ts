@@ -6,6 +6,8 @@ export type Materi = {
   title: string;
   url: string;
   section?: string | null;
+  sort_order?: number | null;
+  legacy_key?: string | null;
   stored_url?: string;
   content?: string;
   load?: () => Promise<string>;
@@ -54,6 +56,7 @@ export const getMateriByModule = async (moduleId: string): Promise<Materi[]> => 
     .from('module_materials')
     .select('*')
     .eq('module_id', moduleId)
+    .order('sort_order', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: true });
     
   if (error) {
@@ -66,15 +69,20 @@ export const getMateriByModule = async (moduleId: string): Promise<Materi[]> => 
 // Fetch only catalog metadata for the progress denominator, without downloading files.
 export const getMateriCatalog = async (moduleIds: string[]): Promise<Materi[]> => {
   const { data, error } = await supabase.from('module_materials')
-    .select('id,module_id,title,url,section,created_at').in('module_id', moduleIds).order('created_at', { ascending: true });
+    .select('id,module_id,title,url,section,sort_order,legacy_key,created_at').in('module_id', moduleIds)
+    .order('sort_order', { ascending: true, nullsFirst: false }).order('created_at', { ascending: true });
   if (error) throw error;
   return data || [];
 };
 
 export const addMateri = async (moduleId: string, title: string, url: string, section?: string | null): Promise<Materi | null> => {
+  const { data: last, error: lastError } = await supabase.from('module_materials')
+    .select('sort_order').eq('module_id', moduleId).not('sort_order', 'is', null)
+    .order('sort_order', { ascending: false }).limit(1).maybeSingle();
+  if (lastError) throw lastError;
   const { data, error } = await supabase
     .from('module_materials')
-    .insert([{ module_id: moduleId, title, url, section: section || null }])
+    .insert([{ module_id: moduleId, title, url, section: section || null, sort_order: (last?.sort_order ?? 0) + 1 }])
     .select()
     .single();
     
@@ -98,15 +106,18 @@ export const uploadMateriFile = async (moduleId: string, file: File): Promise<st
 };
 
 export const deleteMateri = async (materi: Materi): Promise<void> => {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('module_materials')
     .delete()
-    .eq('id', materi.id);
+    .eq('id', materi.id)
+    .select('id');
     
   if (error) {
     console.error('Error deleting material:', error);
     throw error;
   }
+  // RLS turns a forbidden delete into zero rows without an error.
+  if (!data?.length) throw new Error('Materi tidak terhapus. Pastikan akun ini admin.');
 
   const storedUrl = materi.stored_url || materi.url;
   if (storedUrl.startsWith('storage:')) {
@@ -116,4 +127,12 @@ export const deleteMateri = async (materi: Materi): Promise<void> => {
       .remove([storagePath]);
     if (storageError) console.error('Error deleting material file:', storageError);
   }
+};
+
+// Saves the whole module order as 1..n, which also repairs gaps left by deletes and rows without sort_order.
+export const saveMateriOrder = async (ordered: Materi[]): Promise<void> => {
+  const results = await Promise.all(ordered.map((materi, index) =>
+    supabase.from('module_materials').update({ sort_order: index + 1 }).eq('id', materi.id).select('id')));
+  const failed = results.find(result => result.error || !result.data?.length);
+  if (failed) throw failed.error || new Error('Urutan tidak tersimpan. Pastikan akun ini admin.');
 };
