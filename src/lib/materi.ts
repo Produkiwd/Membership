@@ -26,6 +26,22 @@ const MATERIAL_FOLDERS: Record<string, string> = {
   '07': 'ai-os',
 };
 
+const downloadMaterialHtml = async (storagePath: string): Promise<string> => {
+  const { data, error } = await supabase.storage.from(MATERIAL_BUCKET).download(storagePath);
+  if (error) throw error;
+  return data.text();
+};
+
+export const loadModuleMaterialHtml = async (moduleId: string, title: string): Promise<string> => {
+  const { data, error } = await supabase.from('module_materials').select('url')
+    .eq('module_id', moduleId).eq('title', title).single();
+  if (error) throw error;
+  if (!data.url.startsWith('storage:') || !/\.html?$/i.test(data.url)) {
+    throw new Error('Sumber materi bukan file HTML di Supabase Storage.');
+  }
+  return downloadMaterialHtml(data.url.slice('storage:'.length));
+};
+
 const resolveMaterialUrl = async (materi: Materi): Promise<Materi> => {
   if (!materi.url.startsWith('storage:')) return materi;
 
@@ -38,14 +54,7 @@ const resolveMaterialUrl = async (materi: Materi): Promise<Materi> => {
 
   if (/\.html?$/i.test(storagePath)) {
     // Download when opened, not when the module opens: some materials are ~9 MB.
-    const load = async () => {
-      const { data: file, error: downloadError } = await supabase.storage
-        .from(MATERIAL_BUCKET)
-        .download(storagePath);
-
-      if (downloadError) throw downloadError;
-      return file.text();
-    };
+    const load = () => downloadMaterialHtml(storagePath);
     return { ...materi, stored_url: materi.url, url: data.signedUrl, load };
   }
 

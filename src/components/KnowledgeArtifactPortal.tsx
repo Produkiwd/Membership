@@ -17,6 +17,15 @@ const artifacts = [
 
 type ArtifactId = (typeof artifacts)[number]['id'];
 
+export const KNOWLEDGE_ARTIFACT_SANDBOX = 'allow-scripts allow-forms allow-popups allow-downloads';
+
+export const loadKnowledgeArtifactHtml = async (id: ArtifactId): Promise<string> => {
+  const artifact = artifacts.find(item => item.id === id)!;
+  const { data, error } = await supabase.storage.from('knowledge-artifacts').download(artifact.file);
+  if (error) throw error;
+  return data.text();
+};
+
 const activityBridge = `<script>(()=>{let last=0;const ping=()=>{const now=Date.now();if(now-last<5000)return;last=now;window.parent.postMessage({type:'sinau-member-artifact-activity'},'*')};['pointermove','pointerdown','keydown','wheel','scroll','touchstart'].forEach(type=>window.addEventListener(type,ping,{capture:true,passive:true}))})()</script>`;
 
 export const isKnowledgeArtifactId = (id: string | null): id is ArtifactId =>
@@ -50,13 +59,7 @@ export default function KnowledgeArtifactPortal({ initialId }: { initialId: Arti
     let active = true;
     setPrivatePreviewHtml(null);
     setPreviewError(false);
-    supabase.storage.from('knowledge-artifacts').download(selected.file).then(async ({ data, error }) => {
-      if (!active) return;
-      if (error || !data) {
-        setPreviewError(true);
-        return;
-      }
-      const html = await data.text();
+    loadKnowledgeArtifactHtml(selected.id).then((html) => {
       if (!active) return;
       const bridgedHtml = /<\/body>/i.test(html)
         ? html.replace(/<\/body>/i, `${activityBridge}</body>`)
@@ -66,7 +69,7 @@ export default function KnowledgeArtifactPortal({ initialId }: { initialId: Arti
       if (active) setPreviewError(true);
     });
     return () => { active = false; };
-  }, [access, selected.file]);
+  }, [access, selected.id]);
 
   useEffect(() => {
     const handleArtifactActivity = (event: MessageEvent) => {
@@ -154,7 +157,7 @@ export default function KnowledgeArtifactPortal({ initialId }: { initialId: Arti
                     <button type="button" onClick={() => setFullScreen((value) => !value)} className="inline-flex items-center gap-1 rounded-full border border-[#fcb528]/40 px-3 py-1.5 text-[10px] font-bold uppercase text-[#fcb528]">{fullScreen ? <Minimize2 size={14} /> : <Maximize2 size={14} />}{fullScreen ? 'Kembali' : 'Layar penuh'}</button>
                   </div>
                 </div>
-                {privatePreviewHtml ? <iframe ref={iframeRef} key={selected.id} srcDoc={privatePreviewHtml} title={selected.title} className={`block w-full border-0 bg-white ${fullScreen ? 'min-h-0 flex-1' : 'h-[min(70vh,680px)]'}`} sandbox="allow-scripts allow-forms allow-popups allow-downloads" /> : <div className="p-8 text-center text-sm text-white/70">{previewError ? 'Materi privat belum tersedia atau akses ditolak. Silakan hubungi pengelola.' : 'Menyiapkan materi privat…'}</div>}
+                {privatePreviewHtml ? <iframe ref={iframeRef} key={selected.id} srcDoc={privatePreviewHtml} title={selected.title} className={`block w-full border-0 bg-white ${fullScreen ? 'min-h-0 flex-1' : 'h-[min(70vh,680px)]'}`} sandbox={KNOWLEDGE_ARTIFACT_SANDBOX} /> : <div className="p-8 text-center text-sm text-white/70">{previewError ? 'Materi privat belum tersedia atau akses ditolak. Silakan hubungi pengelola.' : 'Menyiapkan materi privat…'}</div>}
               </section>
             </div>
           </>

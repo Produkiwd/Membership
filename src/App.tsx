@@ -14,7 +14,7 @@ import { filterMembers } from './lib/memberSearch';
 import { memberExpiryTime, memberState, memberStatusLabel } from './lib/memberStatus';
 import LoginVideoBackground from './components/LoginVideoBackground';
 import { useArtifactProgress } from './lib/useArtifactProgress';
-import { buildArtifactList } from './lib/artifactProgress';
+import { buildArtifactList, type LearningArtifact } from './lib/artifactProgress';
 import { AI_OS_GROUP, AI_OS_TIER, canAccessAifModule, canAccessPromptStudio, INTERNAL_PRESENTATION_MODULES, isInternalPresentationModule } from './lib/access';
 import {
   createPendingMember,
@@ -30,11 +30,35 @@ import {
   type User,
   type MemberRecord,
 } from './lib/membership';
-import { addMateri, deleteMateri, getMateriByModule, getMateriCatalog, saveMateriOrder, uploadMateriFile, type Materi } from './lib/materi';
+import { addMateri, deleteMateri, getMateriByModule, getMateriCatalog, loadModuleMaterialHtml, saveMateriOrder, uploadMateriFile, type Materi } from './lib/materi';
 import type { PromptMaterial } from './lib/promptJournal';
 import SinadPortal from './components/SinadPortal';
 import PromptDatabaseView from './components/PromptDatabaseView';
-import KnowledgeArtifactPortal, { isKnowledgeArtifactId } from './components/KnowledgeArtifactPortal';
+import KnowledgeArtifactPortal, { isKnowledgeArtifactId, KNOWLEDGE_ARTIFACT_SANDBOX, loadKnowledgeArtifactHtml } from './components/KnowledgeArtifactPortal';
+
+const internalFolderOneSources: (LearningArtifact & { sandbox?: string })[] = [
+  {
+    id: 'internal-1:builtin:chinese-open-llms',
+    title: 'Kebangkitan Open LLM Cina',
+    url: 'https://sinau.tech/Artifact/chinese-open-llms.html',
+  },
+  {
+    id: 'internal-1:builtin:api-token-guide',
+    title: 'LLM API, Token & Pricing Guide',
+    load: () => loadKnowledgeArtifactHtml('api-token-guide'),
+    sandbox: KNOWLEDGE_ARTIFACT_SANDBOX,
+  },
+  {
+    id: 'internal-1:builtin:7-ways-to-access-llms',
+    title: '7 Ways to Access LLMs',
+    url: 'https://sinau.tech/Artifact/7-ways-to-access-llms.html',
+  },
+  {
+    id: 'internal-1:builtin:responsible-ai-untuk-pemimpin',
+    title: 'Responsible AI untuk Pemimpin',
+    load: () => loadModuleMaterialHtml('01', '04 Responsible AI'),
+  },
+];
 
 function keepEmbeddedHashNavigationInsideFrame(event: SyntheticEvent<HTMLIFrameElement>) {
   const document = event.currentTarget.contentDocument;
@@ -753,7 +777,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
   const [isAdmin, setIsAdmin] = useState(userEmail === 'stephen.tssgroup@gmail.com');
   const [selectedModule, setSelectedModule] = useState<any>(null);
   const [loadingModule, setLoadingModule] = useState<string | null>(null);
-  const [selectedHtmlData, setSelectedHtmlData] = useState<{ activeIndex: number; htmls: { title: string; content?: string; url?: string; images?: string[] }[] } | null>(null);
+  const [selectedHtmlData, setSelectedHtmlData] = useState<{ activeIndex: number; htmls: (Pick<LearningArtifact, 'title' | 'content' | 'url'> & { images?: string[]; sandbox?: string })[] } | null>(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -775,7 +799,8 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
       console.error('Materi Supabase belum dapat dimuat:', error);
     }
 
-    const finalMaterials = buildArtifactList(moduleId, materials);
+    const uploadedMaterials = buildArtifactList(moduleId, materials);
+    const finalMaterials = moduleId === 'internal-1' ? [...internalFolderOneSources, ...uploadedMaterials] : uploadedMaterials;
 
     setSelectedModule({
       id: moduleId,
@@ -1402,7 +1427,8 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
                 ) : (
                   <iframe
                     srcDoc={selectedHtmlData.htmls[selectedHtmlData.activeIndex].content}
-                    onLoad={keepEmbeddedHashNavigationInsideFrame}
+                    sandbox={selectedHtmlData.htmls[selectedHtmlData.activeIndex].sandbox}
+                    onLoad={selectedHtmlData.htmls[selectedHtmlData.activeIndex].sandbox ? undefined : keepEmbeddedHashNavigationInsideFrame}
                     className="w-full h-full min-h-[70vh] border-0"
                     title="Materi"
                   />
