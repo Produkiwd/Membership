@@ -74,7 +74,7 @@ try {
   `);
   const migrate = async (name) => db.exec(await readFile(new URL('../supabase/migrations/' + name, import.meta.url), 'utf8'));
   await migrate('20261026120000_module_material_order.sql');
-  await migrate('20261125031835_internal_folder_one_material_order.sql');
+  await migrate('20261125033453_internal_folder_one_material_order.sql');
 
   const readFolderOne = async () => (await db.query(`
     select id, url, sort_order from public.module_materials
