@@ -1,12 +1,12 @@
-export type LearningArtifact = { id: string; title: string; content?: string; url?: string; load?: () => Promise<string> };
-export type RemoteArtifact = { id: string; title: string; url: string; content?: string; load?: () => Promise<string>; legacy_key?: string | null };
+export type LearningArtifact = { id: string; title: string; content?: string; url?: string; load?: () => Promise<string>; sandbox?: string };
+export type RemoteArtifact = { id: string; title: string; url: string; content?: string; load?: () => Promise<string>; sandbox?: string; legacy_key?: string | null };
 
 const remoteSource = (item: RemoteArtifact) => item.content ? { content: item.content } : item.load ? { load: item.load } : { url: item.url };
 
 // Every material comes from module_materials, already sorted. Rows moved from the old built-in list keep
 // their old id through legacy_key, so opened progress and Prompt Journal links survive the move.
 export function buildArtifactList(moduleId: string, remote: RemoteArtifact[]): LearningArtifact[] {
-  return remote.map(item => ({ id: `${moduleId}:${item.legacy_key ? `builtin:${item.legacy_key}` : `remote:${item.id}`}`, title: item.title, ...remoteSource(item) }));
+  return remote.map(item => ({ id: `${moduleId}:${item.legacy_key ? `builtin:${item.legacy_key}` : `remote:${item.id}`}`, title: item.title, ...remoteSource(item), ...(item.sandbox ? { sandbox: item.sandbox } : {}) }));
 }
 
 export function artifactStorageKey(userId: string) { return `sinau.artifact-progress.v1:${userId}`; }

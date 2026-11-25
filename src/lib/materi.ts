@@ -12,8 +12,12 @@ export type Materi = {
   stored_url?: string;
   content?: string;
   load?: () => Promise<string>;
+  sandbox?: string;
   created_at: string;
 };
+
+export const isFolderOneReference = (materi: Materi) =>
+  materi.module_id === 'internal-1' && (materi.stored_url ?? materi.url).startsWith('reference:');
 
 const MATERIAL_BUCKET = 'module-materials';
 const MATERIAL_FOLDERS: Record<string, string> = {
@@ -67,7 +71,8 @@ export const getMateriByModule = async (moduleId: string): Promise<Materi[]> => 
     .select('*')
     .eq('module_id', moduleId)
     .order('sort_order', { ascending: true, nullsFirst: false })
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: true })
+    .order('id', { ascending: true });
     
   if (error) {
     console.error('Error fetching materials:', error);
@@ -140,7 +145,16 @@ export const deleteMateri = async (materi: Materi): Promise<void> => {
 };
 
 // Saves the whole module order as 1..n, which also repairs gaps left by deletes and rows without sort_order.
-export const saveMateriOrder = async (ordered: Materi[]): Promise<void> => {
+export const saveMateriOrder = async (ordered: Materi[], previous: Materi[]): Promise<void> => {
+  if (ordered.some(isFolderOneReference)) {
+    const { error } = await supabase.rpc('save_internal_folder_one_material_order', {
+      p_previous_ids: previous.map(item => item.id),
+      p_ordered_ids: ordered.map(item => item.id),
+    });
+    if (error) throw error;
+    return;
+  }
+
   const results = await Promise.all(ordered.map((materi, index) =>
     supabase.from('module_materials').update({ sort_order: index + 1 }).eq('id', materi.id).select('id')));
   const failed = results.find(result => result.error || !result.data?.length);

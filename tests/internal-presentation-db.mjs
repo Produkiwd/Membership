@@ -64,6 +64,53 @@ try {
   assert.equal((await db.query("select name from storage.objects where name like 'internal-%/new-upload.html'")).rows.length, 3);
   await assert.rejects(db.query("insert into storage.objects(bucket_id,name) values ('module-materials','internal-1/member-upload.html')"), /row-level security/);
   console.log('PASS: Internal admin can upload and register files in every folder. Internal member can read them and cannot upload.');
+
+  await db.exec(`
+    reset role;
+    alter table public.module_materials add column title text, add column created_at timestamptz default now();
+    grant update, delete on public.module_materials to authenticated;
+    create policy delete_material_row on public.module_materials for delete to authenticated
+      using (public.membership_is_admin());
+  `);
+  const migrate = async (name) => db.exec(await readFile(new URL('../supabase/migrations/' + name, import.meta.url), 'utf8'));
+  await migrate('20261026120000_module_material_order.sql');
+  await migrate('20261125031835_internal_folder_one_material_order.sql');
+
+  const readFolderOne = async () => (await db.query(`
+    select id, url, sort_order from public.module_materials
+    where module_id = 'internal-1' order by sort_order, created_at, id
+  `)).rows;
+  const saveOrder = (beforeIds, orderedIds) => db.query(
+    'select public.save_internal_folder_one_material_order($1::uuid[], $2::uuid[])',
+    [beforeIds, orderedIds],
+  );
+  const initial = await readFolderOne();
+  assert.equal(initial.length, 6);
+  assert.deepEqual(initial.map(row => row.sort_order), [1, 2, 3, 4, 5, 6]);
+  assert.ok(initial.slice(0, 4).every(row => row.url.startsWith('reference:')));
+  assert.ok(initial.slice(4).every(row => row.url.startsWith('storage:internal-1/')));
+  await assert.rejects(db.query("insert into public.module_materials(module_id,url,legacy_key) values ('internal-2','reference:api-token-guide','api-token-guide')"), /internal_presentation_material_private_path/);
+  await assert.rejects(db.query("insert into public.module_materials(module_id,url,legacy_key) values ('internal-1','reference:api-token-guide','api-token-guide')"), /module_materials_internal_folder_one_reference/);
+
+  const ids = initial.map(row => row.id);
+  const reordered = [ids[5], ids[0], ids[4], ...ids.slice(1, 4)];
+  await db.exec('set role authenticated');
+  await db.query("select set_config('test.uid',$1,false)", [internal]);
+  assert.equal((await readFolderOne()).length, 6);
+  await assert.rejects(saveOrder(ids, reordered), /Hanya admin tier Internal/);
+  await db.query("select set_config('test.uid',$1,false)", [regular]);
+  assert.equal((await readFolderOne()).length, 0);
+  await assert.rejects(saveOrder(ids, reordered), /Hanya admin tier Internal/);
+  await db.query("select set_config('test.uid',$1,false)", [admin]);
+  await assert.rejects(saveOrder(ids, [...ids.slice(1), ids[1]]), /tepat satu kali/);
+  assert.deepEqual(await readFolderOne(), initial);
+  await saveOrder(ids, reordered);
+  assert.deepEqual((await readFolderOne()).map(row => row.id), reordered);
+  await assert.rejects(saveOrder(ids, ids), /Daftar materi sudah berubah/);
+  assert.deepEqual((await readFolderOne()).map(row => row.id), reordered);
+  const protectedRefs = await db.query("delete from public.module_materials where url = 'reference:api-token-guide' returning id");
+  assert.equal(protectedRefs.rows.length, 0);
+  console.log('PASS: Internal admin reorders references and uploads atomically. Invalid/stale orders and other users cannot change the order.');
 } finally {
   await db.close();
 }

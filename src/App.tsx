@@ -30,35 +30,56 @@ import {
   type User,
   type MemberRecord,
 } from './lib/membership';
-import { addMateri, deleteMateri, getMateriByModule, getMateriCatalog, loadModuleMaterialHtml, saveMateriOrder, uploadMateriFile, type Materi } from './lib/materi';
+import { addMateri, deleteMateri, getMateriByModule, getMateriCatalog, isFolderOneReference, loadModuleMaterialHtml, saveMateriOrder, uploadMateriFile, type Materi } from './lib/materi';
 import type { PromptMaterial } from './lib/promptJournal';
 import SinadPortal from './components/SinadPortal';
 import PromptDatabaseView from './components/PromptDatabaseView';
 import KnowledgeArtifactPortal, { isKnowledgeArtifactId, KNOWLEDGE_ARTIFACT_SANDBOX, loadKnowledgeArtifactHtml } from './components/KnowledgeArtifactPortal';
 
-const internalFolderOneSources: (LearningArtifact & { sandbox?: string })[] = [
+const internalFolderOneSources: (Omit<LearningArtifact, 'id'> & { key: string })[] = [
   {
-    id: 'internal-1:builtin:chinese-open-llms',
+    key: 'chinese-open-llms',
     title: 'Kebangkitan Open LLM Cina',
     url: 'https://sinau.tech/Artifact/chinese-open-llms.html',
   },
   {
-    id: 'internal-1:builtin:api-token-guide',
+    key: 'api-token-guide',
     title: 'LLM API, Token & Pricing Guide',
     load: () => loadKnowledgeArtifactHtml('api-token-guide'),
     sandbox: KNOWLEDGE_ARTIFACT_SANDBOX,
   },
   {
-    id: 'internal-1:builtin:7-ways-to-access-llms',
+    key: '7-ways-to-access-llms',
     title: '7 Ways to Access LLMs',
     url: 'https://sinau.tech/Artifact/7-ways-to-access-llms.html',
   },
   {
-    id: 'internal-1:builtin:responsible-ai-untuk-pemimpin',
+    key: 'responsible-ai-untuk-pemimpin',
     title: 'Responsible AI untuk Pemimpin',
     load: () => loadModuleMaterialHtml('01', '04 Responsible AI'),
   },
 ];
+
+// Older deployments have these references in code until the order migration creates rows for them.
+function getInitialFolderOneReferences(): LearningArtifact[] {
+  return internalFolderOneSources.map(({ key, ...source }) => ({ id: 'internal-1:builtin:' + key, ...source }));
+}
+
+async function getPortalMaterials(moduleId: string): Promise<Materi[]> {
+  const materials = await getMateriByModule(moduleId);
+  return materials.map((materi) => {
+    if (!isFolderOneReference(materi)) return materi;
+    const source = internalFolderOneSources.find(item => 'reference:' + item.key === materi.url);
+    if (!source) return materi;
+    return {
+      ...materi,
+      stored_url: materi.url,
+      url: source.url ?? '',
+      load: source.load,
+      sandbox: source.sandbox,
+    };
+  });
+}
 
 function keepEmbeddedHashNavigationInsideFrame(event: SyntheticEvent<HTMLIFrameElement>) {
   const document = event.currentTarget.contentDocument;
@@ -519,7 +540,7 @@ function MateriView({ canManageInternal }: { canManageInternal: boolean }) {
     setMateriError('');
     const loadAndMigrateMaterials = async () => {
       try {
-        let items = await getMateriByModule(selectedModule);
+        let items = await getPortalMaterials(selectedModule);
         const migrationKey = `materi_supabase_migrated_${selectedModule}`;
         if (!internalModule && !localStorage.getItem(migrationKey)) {
           const legacyItems: { title: string; url: string }[] = [];
@@ -539,7 +560,7 @@ function MateriView({ canManageInternal }: { canManageInternal: boolean }) {
             }
           }
           localStorage.setItem(migrationKey, 'true');
-          if (legacyItems.length > 0) items = await getMateriByModule(selectedModule);
+          if (legacyItems.length > 0) items = await getPortalMaterials(selectedModule);
         }
         if (!cancelled) setMateriList(items);
       } catch {
@@ -574,7 +595,7 @@ function MateriView({ canManageInternal }: { canManageInternal: boolean }) {
         ? await uploadMateriFile(selectedModule, materiFile)
         : materiLink.trim();
       await addMateri(selectedModule, materiTitle.trim(), materialUrl);
-      setMateriList(await getMateriByModule(selectedModule));
+      setMateriList(await getPortalMaterials(selectedModule));
       setMateriTitle('');
       setMateriLink('');
       setMateriFile(null);
@@ -610,7 +631,7 @@ function MateriView({ canManageInternal }: { canManageInternal: boolean }) {
     setIsLoading(true);
     setMateriError('');
     try {
-      await saveMateriOrder(reordered);
+      await saveMateriOrder(reordered, previous);
     } catch {
       setMateriList(previous);
       setMateriError('Urutan materi gagal disimpan ke Supabase.');
@@ -650,6 +671,7 @@ function MateriView({ canManageInternal }: { canManageInternal: boolean }) {
           </div>
           <select 
             value={selectedModule}
+            disabled={isLoading}
             onChange={(e) => { setSelectedModule(e.target.value); setPreviewId(null); }}
             className="w-full sm:w-auto px-4 py-2 border border-border-light-subtle rounded text-light-hi focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted bg-white min-w-[200px]"
           >
@@ -717,7 +739,7 @@ function MateriView({ canManageInternal }: { canManageInternal: boolean }) {
                     <span className="font-mono text-xs text-light-lo w-6 text-right shrink-0">{index + 1}</span>
                     <div className="min-w-0">
                       <div className="font-sans font-bold text-light-hi text-sm">{m.title}</div>
-                      <div className="font-mono text-[10px] text-light-lo truncate max-w-xs sm:max-w-md">{m.stored_url?.startsWith('storage:') ? 'File Supabase Storage' : m.url}</div>
+                      <div className="font-mono text-[10px] text-light-lo truncate max-w-xs sm:max-w-md">{isFolderOneReference(m) ? 'Referensi materi' : m.stored_url?.startsWith('storage:') ? 'File Supabase Storage' : m.url}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
@@ -734,16 +756,18 @@ function MateriView({ canManageInternal }: { canManageInternal: boolean }) {
                     <button type="button" onClick={() => handleMoveMateri(index, 1)} disabled={isLoading || index === materiList.length - 1} className="text-light-md hover:text-light-hi p-2 disabled:opacity-30" aria-label={`Turunkan ${m.title}`}>
                       <ChevronDown className="w-4 h-4" />
                     </button>
-                    <button type="button" onClick={() => handleDeleteMateri(m)} disabled={isLoading} className="text-red-500 hover:text-red-700 transition-colors p-2 disabled:opacity-50" aria-label={`Hapus ${m.title}`}>
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {!isFolderOneReference(m) && (
+                      <button type="button" onClick={() => handleDeleteMateri(m)} disabled={isLoading} className="text-red-500 hover:text-red-700 transition-colors p-2 disabled:opacity-50" aria-label={`Hapus ${m.title}`}>
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
                 {previewId === m.id && m.load && !loadedPreviews[m.id] && (
                   <p role="status" className="font-body text-xs text-light-md mt-4">Memuat pratinjau…</p>
                 )}
                 {previewId === m.id && loadedPreviews[m.id] && (
-                  <iframe srcDoc={loadedPreviews[m.id]} onLoad={keepEmbeddedHashNavigationInsideFrame} title={m.title} className="w-full h-[65vh] border border-border-light-subtle rounded-lg mt-4 bg-white" />
+                  <iframe srcDoc={loadedPreviews[m.id]} onLoad={keepEmbeddedHashNavigationInsideFrame} title={m.title} sandbox={m.sandbox} className="w-full h-[65vh] border border-border-light-subtle rounded-lg mt-4 bg-white" />
                 )}
               </div>
             ))}
@@ -793,14 +817,16 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
     let materialLoadFailed = false;
     let materials: Materi[] = [];
     try {
-      materials = await getMateriByModule(moduleId === '08' ? '04' : moduleId);
+      materials = await getPortalMaterials(moduleId === '08' ? '04' : moduleId);
     } catch (error) {
       materialLoadFailed = true;
       console.error('Materi Supabase belum dapat dimuat:', error);
     }
 
-    const uploadedMaterials = buildArtifactList(moduleId, materials);
-    const finalMaterials = moduleId === 'internal-1' ? [...internalFolderOneSources, ...uploadedMaterials] : uploadedMaterials;
+    const finalMaterials = buildArtifactList(moduleId, materials);
+    if (moduleId === 'internal-1' && !materials.some(isFolderOneReference)) {
+      finalMaterials.unshift(...getInitialFolderOneReferences());
+    }
 
     setSelectedModule({
       id: moduleId,
