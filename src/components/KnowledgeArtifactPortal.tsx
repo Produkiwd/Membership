@@ -19,11 +19,33 @@ type ArtifactId = (typeof artifacts)[number]['id'];
 
 export const KNOWLEDGE_ARTIFACT_SANDBOX = 'allow-scripts allow-forms allow-popups allow-downloads';
 
+const appendArtifactScript = (html: string, script: string) =>
+  /<\/body>/i.test(html) ? html.replace(/<\/body>/i, closingTag => script + closingTag) : html + script;
+
+// In a srcdoc iframe, a bare fragment can resolve to the enclosing portal URL.
+const pricingGuideNavigation = `<script>
+document.addEventListener('click', (event) => {
+  if (event.defaultPrevented || !(event.target instanceof Element)) return;
+  const link = event.target.closest('a[href^="#"]');
+  const hash = link?.getAttribute('href');
+  if (!hash || hash === '#') return;
+
+  const target = document.getElementById(hash.slice(1));
+  if (!target) return;
+
+  event.preventDefault();
+  const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+  const margin = parseFloat(getComputedStyle(target).scrollMarginTop) || 0;
+  window.scrollTo({ top: window.scrollY + target.getBoundingClientRect().top - padding - margin });
+});
+</script>`;
+
 export const loadKnowledgeArtifactHtml = async (id: ArtifactId): Promise<string> => {
   const artifact = artifacts.find(item => item.id === id)!;
   const { data, error } = await supabase.storage.from('knowledge-artifacts').download(artifact.file);
   if (error) throw error;
-  return data.text();
+  const html = await data.text();
+  return id === 'api-token-guide' ? appendArtifactScript(html, pricingGuideNavigation) : html;
 };
 
 const activityBridge = `<script>(()=>{let last=0;const ping=()=>{const now=Date.now();if(now-last<5000)return;last=now;window.parent.postMessage({type:'sinau-member-artifact-activity'},'*')};['pointermove','pointerdown','keydown','wheel','scroll','touchstart'].forEach(type=>window.addEventListener(type,ping,{capture:true,passive:true}))})()</script>`;
@@ -61,10 +83,7 @@ export default function KnowledgeArtifactPortal({ initialId }: { initialId: Arti
     setPreviewError(false);
     loadKnowledgeArtifactHtml(selected.id).then((html) => {
       if (!active) return;
-      const bridgedHtml = /<\/body>/i.test(html)
-        ? html.replace(/<\/body>/i, `${activityBridge}</body>`)
-        : `${html}${activityBridge}`;
-      setPrivatePreviewHtml(bridgedHtml);
+      setPrivatePreviewHtml(appendArtifactScript(html, activityBridge));
     }).catch(() => {
       if (active) setPreviewError(true);
     });
