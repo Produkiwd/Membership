@@ -7,7 +7,7 @@ import GroupBatchPicker from './components/GroupBatchPicker';
 import LocalNewMemberTier from './components/LocalNewMemberTier';
 import type { LocalAccessConfig } from './components/MemberAccessPreview';
 import LocalMemberAccessRow, { LocalMemberListPreview } from './components/LocalMemberAccessRow';
-import { Monitor, BookOpen, Calendar, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, FileText, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2, ExternalLink } from 'lucide-react';
+import { Monitor, BookOpen, Calendar, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, FileText, Folder, Lock, LogOut, Video, Key, Maximize, Minimize, Eye, EyeOff, X, Trash2, ExternalLink } from 'lucide-react';
 import { useState, useEffect, type ReactNode, type ButtonHTMLAttributes, type FormEvent, type ChangeEvent, type SyntheticEvent } from 'react';
 import { cn } from './lib/utils';
 import { filterMembers } from './lib/memberSearch';
@@ -15,7 +15,7 @@ import { memberExpiryTime, memberState, memberStatusLabel } from './lib/memberSt
 import LoginVideoBackground from './components/LoginVideoBackground';
 import { useArtifactProgress } from './lib/useArtifactProgress';
 import { buildArtifactList } from './lib/artifactProgress';
-import { AI_OS_GROUP, AI_OS_TIER, canAccessAifModule, canAccessPromptStudio } from './lib/access';
+import { AI_OS_GROUP, AI_OS_TIER, canAccessAifModule, canAccessPromptStudio, INTERNAL_PRESENTATION_MODULES, isInternalPresentationModule } from './lib/access';
 import {
   createPendingMember,
   getCurrentUser,
@@ -450,7 +450,7 @@ function MemberRow({ mb, now, isUpdating, handleUpdate, handleSendPasswordReset,
   );
 }
 
-function MateriView() {
+function MateriView({ canManageInternal }: { canManageInternal: boolean }) {
   const [selectedModule, setSelectedModule] = useState('04');
   const [materiTitle, setMateriTitle] = useState('');
   const [materiLink, setMateriLink] = useState('');
@@ -460,6 +460,7 @@ function MateriView() {
   const [materiError, setMateriError] = useState('');
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [loadedPreviews, setLoadedPreviews] = useState<Record<string, string>>({});
+  const internalModule = isInternalPresentationModule(selectedModule);
   const togglePreview = (materi: Materi) => {
     if (previewId === materi.id) return setPreviewId(null);
     setPreviewId(materi.id);
@@ -478,9 +479,17 @@ function MateriView() {
     { id: '05', name: 'Build' },
     { id: '06', name: 'Act' },
     { id: '07', name: 'AI Operating System' },
+    ...(canManageInternal ? INTERNAL_PRESENTATION_MODULES.map(({ id, name }) => ({ id, name: `Internal · ${name}` })) : []),
   ];
 
   useEffect(() => {
+    if (internalModule && !canManageInternal) {
+      setSelectedModule('04');
+      setMateriList([]);
+      setLoadedPreviews({});
+      setPreviewId(null);
+      return;
+    }
     let cancelled = false;
     setIsLoading(true);
     setMateriError('');
@@ -488,7 +497,7 @@ function MateriView() {
       try {
         let items = await getMateriByModule(selectedModule);
         const migrationKey = `materi_supabase_migrated_${selectedModule}`;
-        if (!localStorage.getItem(migrationKey)) {
+        if (!internalModule && !localStorage.getItem(migrationKey)) {
           const legacyItems: { title: string; url: string }[] = [];
           const stored = localStorage.getItem(`materi_module_${selectedModule}`);
           if (stored) legacyItems.push(...JSON.parse(stored));
@@ -522,10 +531,14 @@ function MateriView() {
     return () => {
       cancelled = true;
     };
-  }, [selectedModule]);
+  }, [selectedModule, internalModule, canManageInternal]);
 
   const handleSaveMateri = async (e: FormEvent) => {
     e.preventDefault();
+    if (internalModule && (!canManageInternal || !materiFile)) {
+      setMateriError('Unggah file materi untuk folder Internal.');
+      return;
+    }
     if (!materiTitle || (!materiLink && !materiFile)) {
       alert("Judul dan link atau file materi harus diisi.");
       return;
@@ -617,7 +630,7 @@ function MateriView() {
             className="w-full sm:w-auto px-4 py-2 border border-border-light-subtle rounded text-light-hi focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted bg-white min-w-[200px]"
           >
             {MODULES.map(m => (
-              <option key={m.id} value={m.id}>{m.id} - {m.name}</option>
+              <option key={m.id} value={m.id}>{isInternalPresentationModule(m.id) ? m.name : `${m.id} - ${m.name}`}</option>
             ))}
           </select>
         </div>
@@ -640,7 +653,7 @@ function MateriView() {
               />
             </div>
           </div>
-          <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
+          {!internalModule && <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
             <div className="flex-1 w-full min-w-[200px]">
               <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Link Materi</label>
               <input 
@@ -651,7 +664,7 @@ function MateriView() {
                 className="w-full px-4 py-3 border border-border-light-subtle rounded text-light-hi placeholder:text-light-lo focus:outline-none focus:border-gold-muted focus:ring-1 focus:ring-gold-muted transition-all"
               />
             </div>
-          </div>
+          </div>}
           <div className="flex gap-4 items-end flex-wrap sm:flex-nowrap">
              <div className="flex-1 w-full min-w-[200px]">
                 <label className="font-body text-xs font-bold text-light-md tracking-eyebrow uppercase block mb-2">Upload File Materi</label>
@@ -1237,6 +1250,24 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
               <h3 className="font-sans font-bold text-2xl md:text-3xl leading-tight text-[#001E3C]">Selling Idea With AI</h3>
             </button>
           </div>
+          {canAccessModule(INTERNAL_PRESENTATION_MODULES[0].id) && (
+            <section aria-label="Materi Internal" className="mt-6">
+              <div className="grid grid-cols-3 gap-3 sm:gap-6">
+                {INTERNAL_PRESENTATION_MODULES.map(({ id, name, color }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`flex min-h-[72px] items-center gap-2 rounded-xl border border-black/10 px-3 font-sans text-xl font-bold shadow-card transition-shadow hover:shadow-lg focus-visible:outline-2 focus-visible:outline-[#005287] disabled:opacity-60 sm:min-h-[88px] sm:gap-3 sm:px-5 ${color}`}
+                    disabled={loadingModule !== null}
+                    onClick={() => handleModuleClick(id, name, '')}
+                  >
+                    <Folder className="h-5 w-5 shrink-0" aria-hidden="true" />
+                    {name}
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
 
         <section aria-label="Portal dan jadwal">
@@ -1483,7 +1514,7 @@ function DashboardView({ user, forcePasswordReset = false }: { user: User, force
         ) : activeTab === 'admin' ? (
           <AdminView />
         ) : (
-          <MateriView />
+          <MateriView canManageInternal={canAccessModule(INTERNAL_PRESENTATION_MODULES[0].id)} />
         )}
       </div>
     </div>

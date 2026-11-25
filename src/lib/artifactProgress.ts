@@ -13,7 +13,7 @@ export function artifactStorageKey(userId: string) { return `sinau.artifact-prog
 export function parseOpenedArtifacts(value: string | null): string[] {
   try {
     const parsed: unknown = JSON.parse(value || '[]');
-    return Array.isArray(parsed) ? [...new Set(parsed.filter((id): id is string => typeof id === 'string' && /^(0[1-7]):(builtin|remote):.+$/.test(id)))] : [];
+    return Array.isArray(parsed) ? [...new Set(parsed.filter((id): id is string => typeof id === 'string' && /^(?:0[1-7]|internal-[1-3]):(builtin|remote):.+$/.test(id)))] : [];
   } catch { return []; }
 }
 export function artifactStats(artifacts: LearningArtifact[], opened: string[]) {

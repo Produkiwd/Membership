@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { isInternalPresentationModule } from './access';
 
 export type Materi = {
   id: string;
@@ -95,7 +96,7 @@ export const addMateri = async (moduleId: string, title: string, url: string, se
 
 export const uploadMateriFile = async (moduleId: string, file: File): Promise<string> => {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-');
-  const moduleFolder = MATERIAL_FOLDERS[moduleId] || `module-${moduleId}`;
+  const moduleFolder = isInternalPresentationModule(moduleId) ? moduleId : MATERIAL_FOLDERS[moduleId] || `module-${moduleId}`;
   const storagePath = `${moduleFolder}/${crypto.randomUUID()}-${safeName}`;
   const { error } = await supabase.storage
     .from(MATERIAL_BUCKET)
